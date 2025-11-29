@@ -58,6 +58,8 @@ const RegisterScreen = ({ navigation }) => {
                 <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => navigation.goBack()}
+                    accessibilityLabel="Back Button"
+                    testID="register-back-button"
                 >
                     <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
                 </TouchableOpacity>
@@ -83,6 +85,8 @@ const RegisterScreen = ({ navigation }) => {
                                         value={username}
                                         onChangeText={setUsername}
                                         autoCapitalize="none"
+                                        accessibilityLabel="Username Input"
+                                        testID="register-username-input"
                                     />
                                 </View>
                             </View>
@@ -100,6 +104,8 @@ const RegisterScreen = ({ navigation }) => {
                                         onChangeText={setEmail}
                                         autoCapitalize="none"
                                         keyboardType="email-address"
+                                        accessibilityLabel="Email Input"
+                                        testID="register-email-input"
                                     />
                                 </View>
                             </View>
@@ -116,8 +122,10 @@ const RegisterScreen = ({ navigation }) => {
                                         value={password}
                                         onChangeText={setPassword}
                                         secureTextEntry={!showPassword}
+                                        accessibilityLabel="Password Input"
+                                        testID="register-password-input"
                                     />
-                                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} accessibilityLabel="Toggle Password Visibility" testID="register-toggle-password">
                                         <Ionicons
                                             name={showPassword ? "eye-off-outline" : "eye-outline"}
                                             size={20}
@@ -139,8 +147,10 @@ const RegisterScreen = ({ navigation }) => {
                                         value={confirmPassword}
                                         onChangeText={setConfirmPassword}
                                         secureTextEntry={!showConfirmPassword}
+                                        accessibilityLabel="Confirm Password Input"
+                                        testID="register-confirm-password-input"
                                     />
-                                    <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                                    <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} accessibilityLabel="Toggle Confirm Password Visibility" testID="register-toggle-confirm-password">
                                         <Ionicons
                                             name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
                                             size={20}
@@ -154,6 +164,8 @@ const RegisterScreen = ({ navigation }) => {
                             <TouchableOpacity
                                 style={styles.rememberMeContainer}
                                 onPress={() => setRememberMe(!rememberMe)}
+                                accessibilityLabel="Remember Me Checkbox"
+                                testID="register-remember-me"
                             >
                                 <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
                                     {rememberMe && (
@@ -164,7 +176,7 @@ const RegisterScreen = ({ navigation }) => {
                             </TouchableOpacity>
 
                             {/* Register Button */}
-                            <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
+                            <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading} accessibilityLabel="Create Account Button" testID="register-submit-button">
                                 <LinearGradient
                                     colors={COLORS.gradients.primary}
                                     start={{ x: 0, y: 0 }}
@@ -190,7 +202,7 @@ const RegisterScreen = ({ navigation }) => {
                             </Text>
 
                             {/* Login Link */}
-                            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                            <TouchableOpacity onPress={() => navigation.navigate('Login')} accessibilityLabel="Sign In Link" testID="register-login-link">
                                 <Text style={styles.linkText}>
                                     Already have an account? <Text style={styles.linkAccent}>Sign In</Text>
                                 </Text>

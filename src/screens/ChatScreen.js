@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -108,13 +109,24 @@ const ChatScreen = () => {
             value={newMessage}
             onChangeText={setNewMessage}
             multiline
+            accessibilityLabel="Message Input"
+            testID="chat-message-input"
           />
           <TouchableOpacity
-            style={[styles.sendButton, (!newMessage.trim() || sending) && styles.sendButtonDisabled]}
             onPress={handleSend}
             disabled={!newMessage.trim() || sending}
+            style={{ borderRadius: 20, overflow: 'hidden' }}
+            accessibilityLabel="Send Message"
+            testID="chat-send-button"
           >
-            <Ionicons name="send" size={20} color="#fff" />
+            <LinearGradient
+              colors={(!newMessage.trim() || sending) ? ['#475569', '#475569'] : ['#00d4ff', '#2979ff']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.sendButton}
+            >
+              <Ionicons name="send" size={20} color="#fff" />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -212,13 +224,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#38bdf8',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  sendButtonDisabled: {
-    backgroundColor: '#475569',
-    opacity: 0.5,
   },
 });
 

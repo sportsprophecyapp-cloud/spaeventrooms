@@ -4,7 +4,11 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SPORTS } from '../constants/theme';
 
-const SportCategoryTabs = ({ selectedSport, onSelectSport }) => {
+import { useNavigation } from '@react-navigation/native';
+
+const SportCategoryTabs = () => {
+    const navigation = useNavigation();
+
     const getSportIcon = (sportId) => {
         const iconMap = {
             all: 'apps',
@@ -18,6 +22,10 @@ const SportCategoryTabs = ({ selectedSport, onSelectSport }) => {
         return iconMap[sportId] || 'trophy';
     };
 
+    const handlePress = (sport) => {
+        navigation.navigate('Sport', { sportId: sport.id, sportName: sport.name });
+    };
+
     return (
         <View style={styles.container}>
             <ScrollView
@@ -25,41 +33,27 @@ const SportCategoryTabs = ({ selectedSport, onSelectSport }) => {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {SPORTS.map((sport) => {
-                    const isSelected = selectedSport === sport.id;
-                    return (
-                        <TouchableOpacity
-                            key={sport.id}
-                            onPress={() => onSelectSport(sport.id)}
-                            style={styles.tabButton}
+                {SPORTS.map((sport) => (
+                    <TouchableOpacity
+                        key={sport.id}
+                        onPress={() => handlePress(sport)}
+                        style={styles.tabButton}
+                        accessibilityLabel={`Sport Tab: ${sport.name}`}
+                        testID={`sport-tab-${sport.id}`}
+                    >
+                        <LinearGradient
+                            colors={['rgba(30, 41, 59, 0.8)', 'rgba(30, 41, 59, 0.4)']}
+                            style={styles.tabInactive}
                         >
-                            {isSelected ? (
-                                <LinearGradient
-                                    colors={COLORS.gradients.primary}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 0 }}
-                                    style={styles.tabGradient}
-                                >
-                                    <Ionicons
-                                        name={getSportIcon(sport.id)}
-                                        size={18}
-                                        color={COLORS.text.inverse}
-                                    />
-                                    <Text style={styles.tabTextSelected}>{sport.name}</Text>
-                                </LinearGradient>
-                            ) : (
-                                <View style={styles.tabInactive}>
-                                    <Ionicons
-                                        name={getSportIcon(sport.id)}
-                                        size={18}
-                                        color={COLORS.text.secondary}
-                                    />
-                                    <Text style={styles.tabText}>{sport.name}</Text>
-                                </View>
-                            )}
-                        </TouchableOpacity>
-                    );
-                })}
+                            <Ionicons
+                                name={getSportIcon(sport.id)}
+                                size={18}
+                                color={COLORS.text.secondary}
+                            />
+                            <Text style={styles.tabText}>{sport.name}</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                ))}
             </ScrollView>
         </View>
     );

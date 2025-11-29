@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 
@@ -40,7 +41,7 @@ const WeeklyDrawScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} accessibilityLabel="Back Button" testID="weekly-draw-back-button">
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Weekly Draw</Text>
@@ -75,15 +76,27 @@ const WeeklyDrawScreen = ({ navigation }) => {
                     </View>
 
                     <TouchableOpacity
-                        style={[styles.enterButton, (loading || user?.crowns < 1) && styles.disabledButton]}
                         onPress={handleEnterDraw}
                         disabled={loading || user?.crowns < 1}
+                        style={{ borderRadius: 12, overflow: 'hidden' }}
+                        accessibilityLabel="Enter Draw"
+                        testID="weekly-draw-enter-button"
                     >
-                        {loading ? (
-                            <ActivityIndicator color="#0f172a" />
-                        ) : (
-                            <Text style={styles.enterButtonText}>Enter Draw</Text>
-                        )}
+                        <LinearGradient
+                            colors={(loading || user?.crowns < 1) ? ['#334155', '#334155'] : ['#00d4ff', '#2979ff']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={[styles.enterButton, (loading || user?.crowns < 1) && styles.disabledButton]}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <>
+                                    <Text style={styles.enterButtonText}>Enter Draw</Text>
+                                    <Ionicons name="arrow-forward" size={20} color="#fff" />
+                                </>
+                            )}
+                        </LinearGradient>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -186,17 +199,18 @@ const styles = StyleSheet.create({
         color: '#ef4444',
     },
     enterButton: {
-        backgroundColor: '#38bdf8',
         padding: 16,
         borderRadius: 12,
         alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 8,
     },
     disabledButton: {
-        backgroundColor: '#1e293b',
         opacity: 0.5,
     },
     enterButtonText: {
-        color: '#0f172a',
+        color: '#fff',
         fontWeight: 'bold',
         fontSize: 18,
     },

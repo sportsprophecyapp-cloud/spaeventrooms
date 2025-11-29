@@ -70,6 +70,8 @@ const MoreScreen = ({ navigation }) => {
                                     navigation.navigate('WeeklyDraw');
                                 }
                             }}
+                            accessibilityLabel={`Menu: ${item.label}`}
+                            testID={`more-menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                         >
                             <View style={styles.menuIcon}>
                                 <Ionicons name={item.icon} size={24} color="#94a3b8" />
@@ -79,7 +81,7 @@ const MoreScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     ))}
 
-                    <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+                    <TouchableOpacity style={styles.menuItem} onPress={handleLogout} accessibilityLabel="Logout Button" testID="more-logout-button">
                         <View style={styles.menuIcon}>
                             <Ionicons name="log-out-outline" size={24} color="#ef4444" />
                         </View>

@@ -45,6 +45,8 @@ const LoginScreen = ({ navigation }) => {
                 <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => navigation.goBack()}
+                    accessibilityLabel="Back Button"
+                    testID="login-back-button"
                 >
                     <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
                 </TouchableOpacity>
@@ -67,6 +69,8 @@ const LoginScreen = ({ navigation }) => {
                                     onChangeText={setEmail}
                                     autoCapitalize="none"
                                     keyboardType="email-address"
+                                    accessibilityLabel="Email Input"
+                                    testID="login-email-input"
                                 />
                             </View>
                         </View>
@@ -83,8 +87,10 @@ const LoginScreen = ({ navigation }) => {
                                     value={password}
                                     onChangeText={setPassword}
                                     secureTextEntry={!showPassword}
+                                    accessibilityLabel="Password Input"
+                                    testID="login-password-input"
                                 />
-                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} accessibilityLabel="Toggle Password Visibility" testID="login-toggle-password">
                                     <Ionicons
                                         name={showPassword ? "eye-off-outline" : "eye-outline"}
                                         size={20}
@@ -99,6 +105,8 @@ const LoginScreen = ({ navigation }) => {
                             <TouchableOpacity
                                 style={styles.rememberMeContainer}
                                 onPress={() => setRememberMe(!rememberMe)}
+                                accessibilityLabel="Remember Me Checkbox"
+                                testID="login-remember-me"
                             >
                                 <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
                                     {rememberMe && (
@@ -108,13 +116,13 @@ const LoginScreen = ({ navigation }) => {
                                 <Text style={styles.rememberMeText}>Remember me</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity>
+                            <TouchableOpacity accessibilityLabel="Forgot Password Button" testID="login-forgot-password">
                                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Login Button */}
-                        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+                        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading} accessibilityLabel="Sign In Button" testID="login-submit-button">
                             <LinearGradient
                                 colors={COLORS.gradients.primary}
                                 start={{ x: 0, y: 0 }}
@@ -133,7 +141,7 @@ const LoginScreen = ({ navigation }) => {
                         </TouchableOpacity>
 
                         {/* Sign Up Link */}
-                        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                        <TouchableOpacity onPress={() => navigation.navigate('Register')} accessibilityLabel="Sign Up Link" testID="login-signup-link">
                             <Text style={styles.linkText}>
                                 Don't have an account? <Text style={styles.linkAccent}>Sign Up</Text>
                             </Text>

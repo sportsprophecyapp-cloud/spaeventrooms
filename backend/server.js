@@ -75,7 +75,7 @@ const Chat = mongoose.model('Chat', ChatSchema);
 
 // --- Constants ---
 const API_KEY = process.env.THE_ODDS_API_KEY;
-const CACHE_DURATION = 60 * 60 * 1000; // 60 minutes cache
+const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours cache (4x per day)
 let lastFetch = 0;
 
 const SPORTS = [

@@ -69,6 +69,8 @@ const LandingScreen = ({ navigation }) => {
                             <TouchableOpacity
                                 style={styles.primaryButton}
                                 onPress={() => navigation.navigate('Register')}
+                                accessibilityLabel="Sign Up Free Button"
+                                testID="landing-signup-button"
                             >
                                 <LinearGradient
                                     colors={COLORS.gradients.primary}
@@ -84,6 +86,8 @@ const LandingScreen = ({ navigation }) => {
                             <TouchableOpacity
                                 style={styles.secondaryButton}
                                 onPress={() => navigation.navigate('Login')}
+                                accessibilityLabel="Login Button"
+                                testID="landing-login-button"
                             >
                                 <Text style={styles.secondaryButtonText}>LOGIN</Text>
                             </TouchableOpacity>

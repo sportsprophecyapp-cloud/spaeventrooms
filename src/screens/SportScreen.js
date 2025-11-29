@@ -1,13 +1,141 @@
-import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import GameCard from '../components/GameCard';
+import PredictionModal from '../components/PredictionModal';
+import { apiService } from '../services/api';
+import { COLORS, TYPOGRAPHY, SPACING } from '../constants/theme';
 
 const SportScreen = () => {
+    const route = useRoute();
+    const navigation = useNavigation();
+    const { sportId, sportName } = route.params || { sportId: 'all', sportName: 'All Games' };
+
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const fetchEvents = async () => {
+        try {
+            const data = await apiService.getEvents();
+            setEvents(data || []);
+        } catch (error) {
+            console.error('Failed to fetch events', error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        fetchEvents();
+    };
+
+    const handleGamePress = (event) => {
+        setSelectedEvent(event);
+        setModalVisible(true);
+    };
+
+    // Helper to check if event matches selected sport
+    const matchesSport = (event, selectedSportId) => {
+        if (selectedSportId === 'all') return true;
+
+        const sport = event.sport?.toLowerCase() || '';
+        const league = event.league?.toLowerCase() || '';
+        const id = selectedSportId.toLowerCase();
+
+        // Direct match
+        if (sport === id || league === id) return true;
+
+        // Mappings
+        switch (id) {
+            case 'nba':
+                return sport === 'basketball' || league === 'nba';
+            case 'nfl':
+                return sport === 'football' || league === 'nfl';
+            case 'nhl':
+                return sport === 'hockey' || league === 'nhl';
+            case 'mlb':
+                return sport === 'baseball' || league === 'mlb';
+            case 'soccer':
+                return sport === 'soccer';
+            case 'mma':
+                return sport === 'mma' || sport === 'ufc';
+            default:
+                return false;
+        }
+    };
+
+    // Filter events by selected sport
+    const filteredEvents = events.filter(event => matchesSport(event, sportId));
+
+    // Get upcoming events in next 24 hours
+    const now = new Date();
+    const futureWindow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    const upcomingEvents = filteredEvents.filter(event => {
+        const eventDate = new Date(event.commence_time || event.startTime);
+        return eventDate >= now && eventDate <= futureWindow;
+    });
+
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                <Text style={styles.text}>Sport Screen</Text>
-                <Text style={styles.subText}>Filter by sport coming soon...</Text>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} accessibilityLabel="Back Button" testID="sport-back-button">
+                    <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>{sportName}</Text>
+                <View style={{ width: 24 }} />
             </View>
+
+            <ScrollView
+                contentContainerStyle={styles.content}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent.cyan} />
+                }
+            >
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Upcoming Games (Next 24 Hours)</Text>
+                    <Text style={styles.gameCount}>{upcomingEvents.length} games</Text>
+                </View>
+
+                {loading ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={COLORS.accent.cyan} />
+                        <Text style={styles.loadingText}>Loading games...</Text>
+                    </View>
+                ) : upcomingEvents.length > 0 ? (
+                    upcomingEvents.map(event => (
+                        <GameCard
+                            key={event.id}
+                            game={event}
+                            onPress={() => handleGamePress(event)}
+                        />
+                    ))
+                ) : (
+                    <View style={styles.emptyState}>
+                        <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
+                        <Text style={styles.emptyText}>No upcoming games found</Text>
+                        <Text style={styles.emptySubtext}>
+                            Check back later for new matches
+                        </Text>
+                    </View>
+                )}
+            </ScrollView>
+
+            <PredictionModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                event={selectedEvent}
+            />
         </SafeAreaView>
     );
 };
@@ -15,21 +143,68 @@ const SportScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0f172a',
+        backgroundColor: COLORS.background.primary,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: SPACING.lg,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.border.tertiary,
+        backgroundColor: COLORS.background.secondary,
+    },
+    backButton: {
+        padding: SPACING.xs,
+    },
+    headerTitle: {
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
     },
     content: {
-        flex: 1,
+        padding: SPACING.base,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        justifyContent: 'center',
+        marginBottom: SPACING.base,
     },
-    text: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: 'bold',
+    sectionTitle: {
+        fontSize: TYPOGRAPHY.sizes.lg,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
     },
-    subText: {
-        color: '#94a3b8',
-        marginTop: 10,
+    gameCount: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.secondary,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    loadingContainer: {
+        alignItems: 'center',
+        paddingVertical: SPACING.xxxl,
+    },
+    loadingText: {
+        color: COLORS.text.secondary,
+        marginTop: SPACING.md,
+        fontSize: TYPOGRAPHY.sizes.sm,
+    },
+    emptyState: {
+        alignItems: 'center',
+        paddingVertical: SPACING.xxxl,
+    },
+    emptyText: {
+        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+        marginTop: SPACING.base,
+    },
+    emptySubtext: {
+        color: COLORS.text.tertiary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        marginTop: SPACING.xs,
+        textAlign: 'center',
     },
 });
 

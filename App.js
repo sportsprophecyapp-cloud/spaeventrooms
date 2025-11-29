@@ -10,6 +10,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import LeaderboardScreen from './src/screens/LeaderboardScreen';
 import WeeklyDrawScreen from './src/screens/WeeklyDrawScreen';
+import SportScreen from './src/screens/SportScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +33,7 @@ const AppNavigator = () => {
           <Stack.Screen name="Main" component={MainTabNavigator} />
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
           <Stack.Screen name="WeeklyDraw" component={WeeklyDrawScreen} />
+          <Stack.Screen name="Sport" component={SportScreen} />
         </>
       ) : (
         <>

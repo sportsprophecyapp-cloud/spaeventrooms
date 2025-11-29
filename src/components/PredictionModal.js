@@ -63,7 +63,7 @@ const PredictionModal = ({ visible, onClose, event }) => {
                     {/* Header */}
                     <View style={styles.header}>
                         <Text style={styles.title}>Make Prediction</Text>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                        <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityLabel="Close Modal" testID="prediction-modal-close">
                             <Ionicons name="close" size={28} color={COLORS.text.secondary} />
                         </TouchableOpacity>
                     </View>
@@ -96,6 +96,8 @@ const PredictionModal = ({ visible, onClose, event }) => {
                             <TouchableOpacity
                                 style={styles.winnerButton}
                                 onPress={() => setSelectedWinner(event.homeTeam)}
+                                accessibilityLabel={`Select ${event.homeTeam} as Winner`}
+                                testID="prediction-select-home"
                             >
                                 <LinearGradient
                                     colors={selectedWinner === event.homeTeam ? COLORS.gradients.primary : ['#2C2C2C', '#2C2C2C']}
@@ -118,6 +120,8 @@ const PredictionModal = ({ visible, onClose, event }) => {
                             <TouchableOpacity
                                 style={styles.winnerButton}
                                 onPress={() => setSelectedWinner(event.awayTeam)}
+                                accessibilityLabel={`Select ${event.awayTeam} as Winner`}
+                                testID="prediction-select-away"
                             >
                                 <LinearGradient
                                     colors={selectedWinner === event.awayTeam ? COLORS.gradients.primary : ['#2C2C2C', '#2C2C2C']}
@@ -151,6 +155,8 @@ const PredictionModal = ({ visible, onClose, event }) => {
                                     placeholder="0"
                                     placeholderTextColor={COLORS.text.muted}
                                     maxLength={3}
+                                    accessibilityLabel={`Score Input for ${event.homeTeam}`}
+                                    testID="prediction-score-home"
                                 />
                             </View>
 
@@ -168,6 +174,8 @@ const PredictionModal = ({ visible, onClose, event }) => {
                                     placeholder="0"
                                     placeholderTextColor={COLORS.text.muted}
                                     maxLength={3}
+                                    accessibilityLabel={`Score Input for ${event.awayTeam}`}
+                                    testID="prediction-score-away"
                                 />
                             </View>
                         </View>
@@ -177,6 +185,8 @@ const PredictionModal = ({ visible, onClose, event }) => {
                             style={styles.submitButton}
                             onPress={handleSubmit}
                             disabled={loading || !selectedWinner}
+                            accessibilityLabel="Submit Prediction"
+                            testID="prediction-submit-button"
                         >
                             <LinearGradient
                                 colors={!selectedWinner ? COLORS.gradients.disabled : COLORS.gradients.primary}

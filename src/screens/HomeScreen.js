@@ -66,11 +66,11 @@ const HomeScreen = ({ navigation }) => {
                     <Text style={styles.headerSubtitle}>PROPHECY</Text>
                 </View>
                 <View style={styles.headerIcons}>
-                    <View style={styles.tokenBadge}>
+                    <View style={styles.tokenBadge} accessibilityLabel="Wallet Balance" testID="home-wallet-badge">
                         <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
                         <Text style={styles.tokenText}>{user?.tokens || 100}</Text>
                     </View>
-                    <TouchableOpacity style={styles.iconButton}>
+                    <TouchableOpacity style={styles.iconButton} accessibilityLabel="Notifications Button" testID="home-notifications-button">
                         <Ionicons name="notifications-outline" size={24} color={COLORS.text.primary} />
                         <View style={styles.notificationDot} />
                     </TouchableOpacity>
@@ -78,10 +78,7 @@ const HomeScreen = ({ navigation }) => {
             </View>
 
             {/* Sport Category Tabs */}
-            <SportCategoryTabs
-                selectedSport={selectedSport}
-                onSelectSport={setSelectedSport}
-            />
+            <SportCategoryTabs />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
@@ -90,8 +87,10 @@ const HomeScreen = ({ navigation }) => {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent.cyan} />
                 }
             >
-                {/* Announcements Section */}
+                {/* Announcements Section - Expanded */}
                 <View style={styles.announcementSection}>
+                    <Text style={styles.sectionTitle}>📢 Announcements</Text>
+
                     <LinearGradient
                         colors={[COLORS.accent.purple, COLORS.accent.purpleLight]}
                         start={{ x: 0, y: 0 }}
@@ -109,20 +108,58 @@ const HomeScreen = ({ navigation }) => {
                         </View>
                         <Ionicons name="chevron-forward" size={20} color={COLORS.text.primary} />
                     </LinearGradient>
+
+                    <LinearGradient
+                        colors={['#0284c7', '#0ea5e9']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={[styles.announcementCard, { marginTop: SPACING.md }]}
+                    >
+                        <View style={styles.announcementIcon}>
+                            <Ionicons name="trophy" size={24} color={COLORS.text.primary} />
+                        </View>
+                        <View style={styles.announcementContent}>
+                            <Text style={styles.announcementTitle}>🏆 New Season Starting!</Text>
+                            <Text style={styles.announcementText}>
+                                NBA and NHL seasons kick off this week. Get your predictions in!
+                            </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={COLORS.text.primary} />
+                    </LinearGradient>
+
+                    <LinearGradient
+                        colors={['#059669', '#10b981']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={[styles.announcementCard, { marginTop: SPACING.md }]}
+                    >
+                        <View style={styles.announcementIcon}>
+                            <Ionicons name="gift" size={24} color={COLORS.text.primary} />
+                        </View>
+                        <View style={styles.announcementContent}>
+                            <Text style={styles.announcementTitle}>🎁 Double Tokens Weekend!</Text>
+                            <Text style={styles.announcementText}>
+                                Earn 2x tokens on all correct predictions this weekend!
+                            </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={COLORS.text.primary} />
+                    </LinearGradient>
                 </View>
 
-                {/* Sponsor Ad Banner */}
+                {/* Sponsor Section - Expanded */}
                 <View style={styles.sponsorSection}>
+                    <Text style={styles.sectionTitle}>🤝 Our Sponsors</Text>
+
                     <LinearGradient
                         colors={COLORS.gradients.dark}
                         style={styles.sponsorBanner}
                     >
-                        <Text style={styles.sponsorLabel}>SPONSORED</Text>
+                        <Text style={styles.sponsorLabel}>FEATURED SPONSOR</Text>
                         <Text style={styles.sponsorTitle}>QUANTUM SPORTS GEAR</Text>
                         <Text style={styles.sponsorDescription}>
-                            Get 20% off premium sports equipment
+                            Get 20% off premium sports equipment with code PROPHECY20
                         </Text>
-                        <TouchableOpacity style={styles.sponsorButton}>
+                        <TouchableOpacity style={styles.sponsorButton} accessibilityLabel="Shop Sponsor: Quantum Sports Gear" testID="home-sponsor-quantum">
                             <LinearGradient
                                 colors={COLORS.gradients.lime}
                                 start={{ x: 0, y: 0 }}
@@ -130,44 +167,100 @@ const HomeScreen = ({ navigation }) => {
                                 style={styles.sponsorButtonGradient}
                             >
                                 <Text style={styles.sponsorButtonText}>SHOP NOW</Text>
+                                <Ionicons name="arrow-forward" size={16} color={COLORS.text.inverse} />
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </LinearGradient>
+
+                    <LinearGradient
+                        colors={['#1e293b', '#334155']}
+                        style={[styles.sponsorBanner, { marginTop: SPACING.md }]}
+                    >
+                        <Text style={styles.sponsorLabel}>PARTNER</Text>
+                        <Text style={styles.sponsorTitle}>ELITE BETTING ACADEMY</Text>
+                        <Text style={styles.sponsorDescription}>
+                            Learn pro betting strategies. Free course for new members!
+                        </Text>
+                        <TouchableOpacity style={styles.sponsorButton} accessibilityLabel="Learn More: Elite Betting Academy" testID="home-sponsor-academy">
+                            <LinearGradient
+                                colors={COLORS.gradients.primary}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.sponsorButtonGradient}
+                            >
+                                <Text style={styles.sponsorButtonText}>LEARN MORE</Text>
+                                <Ionicons name="arrow-forward" size={16} color={COLORS.text.primary} />
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </LinearGradient>
+
+                    <LinearGradient
+                        colors={['#1e293b', '#334155']}
+                        style={[styles.sponsorBanner, { marginTop: SPACING.md }]}
+                    >
+                        <Text style={styles.sponsorLabel}>SPONSOR</Text>
+                        <Text style={styles.sponsorTitle}>SPORTS STREAM PRO</Text>
+                        <Text style={styles.sponsorDescription}>
+                            Watch all games live in HD. 30-day free trial available!
+                        </Text>
+                        <TouchableOpacity style={styles.sponsorButton} accessibilityLabel="Start Trial: Sports Stream Pro" testID="home-sponsor-stream">
+                            <LinearGradient
+                                colors={['#dc2626', '#ef4444']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.sponsorButtonGradient}
+                            >
+                                <Text style={styles.sponsorButtonText}>START FREE TRIAL</Text>
+                                <Ionicons name="arrow-forward" size={16} color={COLORS.text.primary} />
                             </LinearGradient>
                         </TouchableOpacity>
                     </LinearGradient>
                 </View>
 
-                {/* Games Section */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>
-                            {selectedSport === 'all' ? 'All Games' : selectedSport.toUpperCase()} - Next 48 Hours
-                        </Text>
-                        <Text style={styles.gameCount}>{upcomingEvents.length} games</Text>
-                    </View>
+                {/* Quick Access Section */}
+                <View style={styles.quickAccessSection}>
+                    <Text style={styles.sectionTitle}>⚡ Quick Access</Text>
+                    <View style={styles.quickAccessGrid}>
+                        <TouchableOpacity style={styles.quickAccessCard} accessibilityLabel="Quick Access: View Games" testID="home-quick-access-games">
+                            <LinearGradient
+                                colors={['rgba(0, 212, 255, 0.2)', 'rgba(0, 212, 255, 0.05)']}
+                                style={styles.quickAccessGradient}
+                            >
+                                <Ionicons name="calendar" size={32} color={COLORS.accent.cyan} />
+                                <Text style={styles.quickAccessText}>View Games</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
 
-                    {loading ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color={COLORS.accent.cyan} />
-                            <Text style={styles.loadingText}>Loading games...</Text>
-                        </View>
-                    ) : upcomingEvents.length > 0 ? (
-                        upcomingEvents.map(event => (
-                            <GameCard
-                                key={event.id}
-                                game={event}
-                                onPress={() => handleGamePress(event)}
-                            />
-                        ))
-                    ) : (
-                        <View style={styles.emptyState}>
-                            <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
-                            <Text style={styles.emptyText}>No games in the next 48 hours</Text>
-                            <Text style={styles.emptySubtext}>
-                                {selectedSport === 'all'
-                                    ? 'Check back later for upcoming matches'
-                                    : `Try selecting a different sport`}
-                            </Text>
-                        </View>
-                    )}
+                        <TouchableOpacity style={styles.quickAccessCard} accessibilityLabel="Quick Access: Leaderboard" testID="home-quick-access-leaderboard">
+                            <LinearGradient
+                                colors={['rgba(139, 92, 246, 0.2)', 'rgba(139, 92, 246, 0.05)']}
+                                style={styles.quickAccessGradient}
+                            >
+                                <Ionicons name="trophy" size={32} color={COLORS.accent.purple} />
+                                <Text style={styles.quickAccessText}>Leaderboard</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.quickAccessCard} accessibilityLabel="Quick Access: Weekly Draw" testID="home-quick-access-draw">
+                            <LinearGradient
+                                colors={['rgba(195, 255, 0, 0.2)', 'rgba(195, 255, 0, 0.05)']}
+                                style={styles.quickAccessGradient}
+                            >
+                                <Ionicons name="gift" size={32} color={COLORS.accent.lime} />
+                                <Text style={styles.quickAccessText}>Weekly Draw</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.quickAccessCard} accessibilityLabel="Quick Access: Chat" testID="home-quick-access-chat">
+                            <LinearGradient
+                                colors={['rgba(251, 191, 36, 0.2)', 'rgba(251, 191, 36, 0.05)']}
+                                style={styles.quickAccessGradient}
+                            >
+                                <Ionicons name="chatbubbles" size={32} color="#fbbf24" />
+                                <Text style={styles.quickAccessText}>Chat</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
             </ScrollView>
@@ -246,7 +339,7 @@ const styles = StyleSheet.create({
         padding: SPACING.base,
     },
     announcementSection: {
-        marginBottom: SPACING.base,
+        marginBottom: SPACING.xl,
     },
     announcementCard: {
         flexDirection: 'row',
@@ -279,7 +372,7 @@ const styles = StyleSheet.create({
         opacity: 0.9,
     },
     sponsorSection: {
-        marginBottom: SPACING.lg,
+        marginBottom: SPACING.xl,
     },
     sponsorBanner: {
         padding: SPACING.lg,
@@ -315,12 +408,45 @@ const styles = StyleSheet.create({
     sponsorButtonGradient: {
         paddingVertical: SPACING.md,
         alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: SPACING.xs,
     },
     sponsorButtonText: {
         color: COLORS.text.inverse,
         fontSize: TYPOGRAPHY.sizes.sm,
         fontWeight: TYPOGRAPHY.weights.black,
         letterSpacing: 1,
+    },
+    quickAccessSection: {
+        marginBottom: SPACING.xl,
+    },
+    quickAccessGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: SPACING.md,
+        marginTop: SPACING.md,
+    },
+    quickAccessCard: {
+        width: '48%',
+        borderRadius: BORDER_RADIUS.lg,
+        overflow: 'hidden',
+    },
+    quickAccessGradient: {
+        padding: SPACING.lg,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 120,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: BORDER_RADIUS.lg,
+    },
+    quickAccessText: {
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        marginTop: SPACING.sm,
+        textAlign: 'center',
     },
     section: {
         marginBottom: SPACING.xl,
@@ -335,6 +461,7 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.sizes.lg,
         fontWeight: TYPOGRAPHY.weights.bold,
         color: COLORS.text.primary,
+        marginBottom: SPACING.md,
     },
     gameCount: {
         fontSize: TYPOGRAPHY.sizes.sm,

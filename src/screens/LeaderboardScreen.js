@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, FlatList, Image } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const LeaderboardScreen = ({ navigation }) => {
     // Mock data for now, or fetch from API if available
@@ -12,36 +13,51 @@ const LeaderboardScreen = ({ navigation }) => {
         { id: '5', rank: 5, username: 'PredictionPro', crowns: 65, tokens: 2500 },
     ];
 
-    const renderItem = ({ item }) => (
-        <View style={styles.itemContainer}>
-            <View style={styles.rankContainer}>
-                {item.rank <= 3 ? (
-                    <MaterialCommunityIcons
-                        name="crown"
-                        size={24}
-                        color={item.rank === 1 ? '#fbbf24' : item.rank === 2 ? '#94a3b8' : '#b45309'}
-                    />
-                ) : (
-                    <Text style={styles.rankText}>{item.rank}</Text>
-                )}
-            </View>
+    const renderItem = ({ item }) => {
+        const isTopThree = item.rank <= 3;
+        const ItemWrapper = isTopThree ? LinearGradient : View;
+        const wrapperProps = isTopThree ? {
+            colors: item.rank === 1
+                ? ['rgba(251, 191, 36, 0.15)', 'rgba(251, 191, 36, 0.05)']
+                : item.rank === 2
+                    ? ['rgba(148, 163, 184, 0.15)', 'rgba(148, 163, 184, 0.05)']
+                    : ['rgba(180, 83, 9, 0.15)', 'rgba(180, 83, 9, 0.05)'],
+            start: { x: 0, y: 0 },
+            end: { x: 1, y: 0 },
+            style: [styles.itemContainer, isTopThree && styles.topThreeItem]
+        } : { style: styles.itemContainer };
 
-            <View style={styles.userContainer}>
-                <Text style={styles.username}>{item.username}</Text>
-                <Text style={styles.tokens}>{item.tokens} Tokens</Text>
-            </View>
+        return (
+            <ItemWrapper {...wrapperProps}>
+                <View style={styles.rankContainer}>
+                    {item.rank <= 3 ? (
+                        <MaterialCommunityIcons
+                            name="crown"
+                            size={28}
+                            color={item.rank === 1 ? '#fbbf24' : item.rank === 2 ? '#94a3b8' : '#b45309'}
+                        />
+                    ) : (
+                        <Text style={styles.rankText}>{item.rank}</Text>
+                    )}
+                </View>
 
-            <View style={styles.scoreContainer}>
-                <Text style={styles.score}>{item.crowns}</Text>
-                <MaterialCommunityIcons name="crown" size={16} color="#38bdf8" />
-            </View>
-        </View>
-    );
+                <View style={styles.userContainer}>
+                    <Text style={styles.username}>{item.username}</Text>
+                    <Text style={styles.tokens}>{item.tokens} Tokens</Text>
+                </View>
+
+                <View style={styles.scoreContainer}>
+                    <Text style={styles.score}>{item.crowns}</Text>
+                    <MaterialCommunityIcons name="crown" size={16} color="#38bdf8" />
+                </View>
+            </ItemWrapper>
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} accessibilityLabel="Back Button" testID="leaderboard-back-button">
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Leaderboard</Text>
@@ -91,6 +107,10 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.05)',
+    },
+    topThreeItem: {
+        borderWidth: 2,
+        borderColor: 'rgba(56, 189, 248, 0.3)',
     },
     rankContainer: {
         width: 40,

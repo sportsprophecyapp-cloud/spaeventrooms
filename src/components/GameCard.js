@@ -44,7 +44,12 @@ const GameCard = ({ game, onPress }) => {
     const isLive = game.status === 'live';
 
     return (
-        <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+        <TouchableOpacity
+            onPress={onPress}
+            activeOpacity={0.8}
+            accessibilityLabel={`Game: ${game.homeTeam} vs ${game.awayTeam}`}
+            testID={`game-card-${game.id}`}
+        >
             <LinearGradient
                 colors={COLORS.gradients.dark}
                 style={styles.card}
@@ -85,7 +90,12 @@ const GameCard = ({ game, onPress }) => {
                 </View>
 
                 {/* Action Button */}
-                <TouchableOpacity style={styles.predictButton} onPress={onPress}>
+                <TouchableOpacity
+                    style={styles.predictButton}
+                    onPress={onPress}
+                    accessibilityLabel={`Make Prediction for ${game.homeTeam} vs ${game.awayTeam}`}
+                    testID={`game-predict-button-${game.id}`}
+                >
                     <LinearGradient
                         colors={COLORS.gradients.primary}
                         start={{ x: 0, y: 0 }}
