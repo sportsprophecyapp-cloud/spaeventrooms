@@ -6,22 +6,34 @@ import { useAuth } from '../context/AuthContext';
 const MoreScreen = ({ navigation }) => {
     const { user, logout } = useAuth();
 
+    console.log('DEBUG: MoreScreen user role:', user?.role);
+    console.log('DEBUG: MoreScreen user email:', user?.email);
+
     const handleLogout = () => {
-        Alert.alert(
-            "Logout",
-            "Are you sure you want to logout?",
-            [
-                { text: "Cancel", style: "cancel" },
-                { text: "Logout", style: "destructive", onPress: logout }
-            ]
-        );
+        // Use window.confirm for web compatibility
+        if (typeof window !== 'undefined' && window.confirm) {
+            if (window.confirm('Are you sure you want to logout?')) {
+                logout();
+            }
+        } else {
+            Alert.alert(
+                "Logout",
+                "Are you sure you want to logout?",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Logout", style: "destructive", onPress: logout }
+                ]
+            );
+        }
     };
 
     const menuItems = [
+        { icon: 'help-circle-outline', label: 'How to Play', badge: null },
         { icon: 'trophy-outline', label: 'Leaderboard', badge: null },
-        { icon: 'gift-outline', label: 'Weekly Draw', badge: 'New' },
+        { icon: 'gift-outline', label: 'Prize Draws', badge: 'New' },
         { icon: 'settings-outline', label: 'Settings', badge: null },
         { icon: 'help-circle-outline', label: 'Help & Support', badge: null },
+        { icon: 'megaphone-outline', label: 'Advertise with Us', badge: 'Beta' },
     ];
 
     return (
@@ -64,10 +76,16 @@ const MoreScreen = ({ navigation }) => {
                             key={index}
                             style={styles.menuItem}
                             onPress={() => {
-                                if (item.label === 'Leaderboard') {
+                                if (item.label === 'How to Play') {
+                                    navigation.navigate('HowToPlay');
+                                } else if (item.label === 'Leaderboard') {
                                     navigation.navigate('Leaderboard');
-                                } else if (item.label === 'Weekly Draw') {
+                                } else if (item.label === 'Prize Draws') {
                                     navigation.navigate('WeeklyDraw');
+                                } else if (item.label === 'Help & Support') {
+                                    navigation.navigate('HelpSupport');
+                                } else if (item.label === 'Advertise with Us') {
+                                    navigation.navigate('Sponsor');
                                 }
                             }}
                             accessibilityLabel={`Menu: ${item.label}`}
@@ -80,6 +98,22 @@ const MoreScreen = ({ navigation }) => {
                             <Ionicons name="chevron-forward" size={20} color="#475569" />
                         </TouchableOpacity>
                     ))}
+
+                    {/* Admin Panel - Only visible to admins */}
+                    {user?.role === 'admin' && (
+                        <TouchableOpacity
+                            style={[styles.menuItem, styles.adminMenuItem]}
+                            onPress={() => navigation.navigate('Admin')}
+                            accessibilityLabel="Menu: Admin Panel"
+                            testID="more-menu-admin"
+                        >
+                            <View style={styles.menuIcon}>
+                                <Ionicons name="shield-checkmark" size={24} color="#fbbf24" />
+                            </View>
+                            <Text style={[styles.menuLabel, { color: '#fbbf24' }]}>Admin Panel</Text>
+                            <Ionicons name="chevron-forward" size={20} color="#fbbf24" />
+                        </TouchableOpacity>
+                    )}
 
                     <TouchableOpacity style={styles.menuItem} onPress={handleLogout} accessibilityLabel="Logout Button" testID="more-logout-button">
                         <View style={styles.menuIcon}>
@@ -189,6 +223,10 @@ const styles = StyleSheet.create({
         flex: 1,
         color: '#fff',
         fontSize: 16,
+    },
+    adminMenuItem: {
+        backgroundColor: 'rgba(251, 191, 36, 0.05)',
+        borderColor: 'rgba(251, 191, 36, 0.2)',
     },
 });
 

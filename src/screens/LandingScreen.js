@@ -39,11 +39,22 @@ const LandingScreen = ({ navigation }) => {
                             <Text style={styles.sponsorTagline}>Powering the Future of Predictions</Text>
                         </LinearGradient>
 
+                        {/* Beta Announcement Banner */}
+                        <LinearGradient
+                            colors={['#10b981', '#059669']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.betaBanner}
+                        >
+                            <Ionicons name="rocket" size={20} color={COLORS.text.primary} />
+                            <Text style={styles.betaText}>🎉 Open now for Beta Version!</Text>
+                        </LinearGradient>
+
                         <Text style={styles.heroTitle}>
                             PREDICT. <Text style={styles.textCyan}>COMPETE.</Text> WIN.
                         </Text>
                         <Text style={styles.heroSubtitle}>
-                            Make predictions on your favorite sports and win real prizes
+                            100% Free! Make predictions on your favorite sports and win prizes from our sponsors
                         </Text>
 
                         {/* Stats Row */}
@@ -55,7 +66,7 @@ const LandingScreen = ({ navigation }) => {
                             <View style={styles.statDivider} />
                             <View style={styles.statItem}>
                                 <Text style={styles.statNumber}>$100K+</Text>
-                                <Text style={styles.statLabel}>Prizes Won</Text>
+                                <Text style={styles.statLabel}>Prizes Awarded</Text>
                             </View>
                             <View style={styles.statDivider} />
                             <View style={styles.statItem}>
@@ -91,6 +102,16 @@ const LandingScreen = ({ navigation }) => {
                             >
                                 <Text style={styles.secondaryButtonText}>LOGIN</Text>
                             </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.howToPlayButton}
+                                onPress={() => navigation.navigate('HowToPlay')}
+                                accessibilityLabel="How to Play Button"
+                                testID="landing-howtoplay-button"
+                            >
+                                <Ionicons name="help-circle-outline" size={20} color={COLORS.accent.cyan} />
+                                <Text style={styles.howToPlayText}>How to Play</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
 
@@ -103,7 +124,7 @@ const LandingScreen = ({ navigation }) => {
                                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(0, 212, 255, 0.15)' }]}>
                                     <Ionicons name="trophy" size={32} color={COLORS.accent.cyan} />
                                 </View>
-                                <Text style={styles.featureTitle}>Win Real Prizes</Text>
+                                <Text style={styles.featureTitle}>Win Sponsor Prizes</Text>
                                 <Text style={styles.featureDesc}>Daily, weekly & seasonal rewards</Text>
                             </View>
 
@@ -112,7 +133,7 @@ const LandingScreen = ({ navigation }) => {
                                     <Ionicons name="flash" size={32} color={COLORS.accent.purple} />
                                 </View>
                                 <Text style={styles.featureTitle}>100% Free</Text>
-                                <Text style={styles.featureDesc}>No deposits, no gambling</Text>
+                                <Text style={styles.featureDesc}>No deposits, no gambling, no risk</Text>
                             </View>
                         </View>
 
@@ -251,6 +272,25 @@ const styles = StyleSheet.create({
         color: COLORS.text.primary,
         opacity: 0.9,
     },
+    betaBanner: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: SPACING.md,
+        paddingHorizontal: SPACING.lg,
+        borderRadius: BORDER_RADIUS.md,
+        marginTop: SPACING.lg,
+        marginBottom: SPACING.lg,
+        gap: SPACING.sm,
+        ...SHADOWS.md,
+    },
+    betaText: {
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+        letterSpacing: 0.5,
+    },
     heroTitle: {
         fontSize: TYPOGRAPHY.sizes.display,
         fontWeight: TYPOGRAPHY.weights.black,
@@ -337,6 +377,18 @@ const styles = StyleSheet.create({
         fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.md,
         letterSpacing: 1,
+    },
+    howToPlayButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.xs,
+        paddingVertical: SPACING.md,
+    },
+    howToPlayText: {
+        color: COLORS.accent.cyan,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.semibold,
     },
     featuresSection: {
         paddingHorizontal: SPACING.lg,

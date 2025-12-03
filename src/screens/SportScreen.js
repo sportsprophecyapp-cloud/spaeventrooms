@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import GameCard from '../components/GameCard';
 import PredictionModal from '../components/PredictionModal';
 import { apiService } from '../services/api';
-import { COLORS, TYPOGRAPHY, SPACING } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../constants/theme';
 
 const SportScreen = () => {
     const route = useRoute();
     const navigation = useNavigation();
+    const { user } = useAuth();
     const { sportId, sportName } = route.params || { sportId: 'all', sportName: 'All Games' };
 
     const [events, setEvents] = useState([]);
@@ -20,8 +23,19 @@ const SportScreen = () => {
 
     const fetchEvents = async () => {
         try {
-            const data = await apiService.getEvents();
-            setEvents(data || []);
+            const [eventsData, predictionsData] = await Promise.all([
+                apiService.getEvents(),
+                user ? apiService.getUserPredictions(user.uuid) : Promise.resolve([])
+            ]);
+
+            // Mark events that user has already predicted on
+            const predictedEventIds = new Set(predictionsData.map(p => p.eventId));
+            const eventsWithStatus = (eventsData || []).map(event => ({
+                ...event,
+                hasPredicted: predictedEventIds.has(event.id)
+            }));
+
+            setEvents(eventsWithStatus);
         } catch (error) {
             console.error('Failed to fetch events', error);
         } finally {
@@ -32,7 +46,7 @@ const SportScreen = () => {
 
     useEffect(() => {
         fetchEvents();
-    }, []);
+    }, [user]);
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -42,6 +56,10 @@ const SportScreen = () => {
     const handleGamePress = (event) => {
         setSelectedEvent(event);
         setModalVisible(true);
+    };
+
+    const handleSponsorPress = () => {
+        Linking.openURL('mailto:Contact@sportsprophecyapp.com?subject=Sponsorship Inquiry');
     };
 
     // Helper to check if event matches selected sport
@@ -96,6 +114,30 @@ const SportScreen = () => {
                 <View style={{ width: 24 }} />
             </View>
 
+            {/* Fixed Sponsor Banner */}
+            <TouchableOpacity onPress={handleSponsorPress} activeOpacity={0.9}>
+                <LinearGradient
+                    colors={['#1e293b', '#0f172a']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.sponsorBanner}
+                >
+                    <View style={styles.sponsorIconContainer}>
+                        <Ionicons name="megaphone-outline" size={24} color={COLORS.accent.cyan} />
+                    </View>
+                    <View style={styles.sponsorContent}>
+                        <Text style={styles.sponsorTitle}>YOUR PRODUCT HERE</Text>
+                        <Text style={styles.sponsorText}>
+                            Use Discount Code <Text style={styles.codeHighlight}>Prophecy15</Text>
+                        </Text>
+                    </View>
+                    <View style={styles.sponsorAction}>
+                        <Text style={styles.contactText}>Contact Us</Text>
+                        <Ionicons name="chevron-forward" size={16} color={COLORS.text.secondary} />
+                    </View>
+                </LinearGradient>
+            </TouchableOpacity>
+
             <ScrollView
                 contentContainerStyle={styles.content}
                 refreshControl={
@@ -135,6 +177,7 @@ const SportScreen = () => {
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 event={selectedEvent}
+                onPredictionSuccess={fetchEvents}
             />
         </SafeAreaView>
     );
@@ -162,6 +205,48 @@ const styles = StyleSheet.create({
         fontWeight: TYPOGRAPHY.weights.bold,
         color: COLORS.text.primary,
     },
+    sponsorBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: SPACING.md,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.border.tertiary,
+    },
+    sponsorIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: BORDER_RADIUS.full,
+        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: SPACING.md,
+    },
+    sponsorContent: {
+        flex: 1,
+    },
+    sponsorTitle: {
+        color: COLORS.text.primary,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        marginBottom: 2,
+    },
+    sponsorText: {
+        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.xs,
+    },
+    codeHighlight: {
+        color: COLORS.accent.cyan,
+        fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    sponsorAction: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    contactText: {
+        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.xs,
+    },
     content: {
         padding: SPACING.base,
     },
@@ -170,6 +255,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: SPACING.base,
+        marginTop: SPACING.sm,
     },
     sectionTitle: {
         fontSize: TYPOGRAPHY.sizes.lg,

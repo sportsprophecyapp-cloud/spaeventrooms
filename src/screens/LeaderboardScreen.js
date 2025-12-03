@@ -1,17 +1,34 @@
-import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { apiService } from '../services/api';
 
 const LeaderboardScreen = ({ navigation }) => {
-    // Mock data for now, or fetch from API if available
-    const leaderboardData = [
-        { id: '1', rank: 1, username: 'CryptoKing', crowns: 150, tokens: 5000 },
-        { id: '2', rank: 2, username: 'SportsGuru', crowns: 120, tokens: 4200 },
-        { id: '3', rank: 3, username: 'BetMaster', crowns: 95, tokens: 3800 },
-        { id: '4', rank: 4, username: 'LuckyStrike', crowns: 80, tokens: 3100 },
-        { id: '5', rank: 5, username: 'PredictionPro', crowns: 65, tokens: 2500 },
-    ];
+    const [leaderboardData, setLeaderboardData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(() => {
+        fetchLeaderboard();
+    }, []);
+
+    const fetchLeaderboard = async () => {
+        try {
+            const data = await apiService.getLeaderboard();
+            setLeaderboardData(data.leaderboard || []);
+        } catch (error) {
+            console.error('Failed to fetch leaderboard:', error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        fetchLeaderboard();
+    };
 
     const renderItem = ({ item }) => {
         const isTopThree = item.rank <= 3;
@@ -54,6 +71,24 @@ const LeaderboardScreen = ({ navigation }) => {
         );
     };
 
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Leaderboard</Text>
+                    <View style={{ width: 24 }} />
+                </View>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#38bdf8" />
+                    <Text style={styles.loadingText}>Loading leaderboard...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -64,12 +99,23 @@ const LeaderboardScreen = ({ navigation }) => {
                 <View style={{ width: 24 }} />
             </View>
 
-            <FlatList
-                data={leaderboardData}
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-                contentContainerStyle={styles.listContent}
-            />
+            {leaderboardData.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Ionicons name="trophy-outline" size={64} color="#64748b" />
+                    <Text style={styles.emptyText}>No players yet!</Text>
+                    <Text style={styles.emptySubtext}>Be the first to make predictions</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={leaderboardData}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={styles.listContent}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#38bdf8" />
+                    }
+                />
+            )}
         </SafeAreaView>
     );
 };
@@ -148,6 +194,33 @@ const styles = StyleSheet.create({
         color: '#38bdf8',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        color: '#94a3b8',
+        marginTop: 15,
+        fontSize: 14,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 40,
+    },
+    emptyText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 20,
+    },
+    emptySubtext: {
+        color: '#64748b',
+        fontSize: 14,
+        marginTop: 8,
     },
 });
 

@@ -11,7 +11,15 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import LeaderboardScreen from './src/screens/LeaderboardScreen';
 import WeeklyDrawScreen from './src/screens/WeeklyDrawScreen';
 import SportScreen from './src/screens/SportScreen';
+import HowToPlayScreen from './src/screens/HowToPlayScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import HelpSupportScreen from './src/screens/HelpSupportScreen';
+import SponsorScreen from './src/screens/SponsorScreen';
+import ReportScreen from './src/screens/ReportScreen';
+import AdminScreen from './src/screens/AdminScreen';
+import LeagueScreen from './src/screens/LeagueScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,12 +42,20 @@ const AppNavigator = () => {
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
           <Stack.Screen name="WeeklyDraw" component={WeeklyDrawScreen} />
           <Stack.Screen name="Sport" component={SportScreen} />
+          <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+          <Stack.Screen name="Sponsor" component={SponsorScreen} />
+          <Stack.Screen name="Report" component={ReportScreen} />
+          <Stack.Screen name="Admin" component={AdminScreen} />
+          <Stack.Screen name="League" component={LeagueScreen} />
         </>
       ) : (
         <>
           <Stack.Screen name="Landing" component={LandingScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
         </>
       )}
     </Stack.Navigator>
@@ -49,11 +65,13 @@ const AppNavigator = () => {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
-      </AuthProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+        </AuthProvider>
+      </ErrorBoundary>
       <StatusBar style="light" />
     </SafeAreaProvider>
   );

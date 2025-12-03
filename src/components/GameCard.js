@@ -63,7 +63,7 @@ const GameCard = ({ game, onPress }) => {
                 )}
 
                 {/* Date/Time */}
-                <Text style={styles.dateText}>{formatDate(game.commence_time)}</Text>
+                <Text style={styles.dateText}>{formatDate(game.commence_time || game.startTime)}</Text>
 
                 {/* Teams */}
                 <View style={styles.matchupContainer}>
@@ -92,18 +92,25 @@ const GameCard = ({ game, onPress }) => {
                 {/* Action Button */}
                 <TouchableOpacity
                     style={styles.predictButton}
-                    onPress={onPress}
-                    accessibilityLabel={`Make Prediction for ${game.homeTeam} vs ${game.awayTeam}`}
+                    onPress={game.hasPredicted ? null : onPress}
+                    disabled={game.hasPredicted}
+                    accessibilityLabel={game.hasPredicted ? `Prediction already made for ${game.homeTeam} vs ${game.awayTeam}` : `Make Prediction for ${game.homeTeam} vs ${game.awayTeam}`}
                     testID={`game-predict-button-${game.id}`}
                 >
                     <LinearGradient
-                        colors={COLORS.gradients.primary}
+                        colors={game.hasPredicted ? [COLORS.status.success, COLORS.status.success] : COLORS.gradients.primary}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
                         style={styles.predictGradient}
                     >
-                        <Text style={styles.predictText}>MAKE PREDICTION</Text>
-                        <Ionicons name="arrow-forward" size={16} color={COLORS.text.inverse} />
+                        <Text style={styles.predictText}>
+                            {game.hasPredicted ? 'PREDICTED' : 'MAKE PREDICTION'}
+                        </Text>
+                        <Ionicons
+                            name={game.hasPredicted ? "checkmark-circle" : "arrow-forward"}
+                            size={16}
+                            color={COLORS.text.inverse}
+                        />
                     </LinearGradient>
                 </TouchableOpacity>
             </LinearGradient>

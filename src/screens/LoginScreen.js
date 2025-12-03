@@ -11,11 +11,13 @@ const LoginScreen = ({ navigation }) => {
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const { login } = useAuth();
 
     const handleLogin = async () => {
+        setError('');
         if (!email || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+            setError('Please fill in all fields');
             return;
         }
 
@@ -25,13 +27,23 @@ const LoginScreen = ({ navigation }) => {
             if (success) {
                 // Navigation is handled by App.js based on user state
             } else {
-                Alert.alert('Error', 'Invalid credentials');
+                setError('Invalid credentials');
             }
         } catch (error) {
-            Alert.alert('Error', error.message || 'Login failed');
+            setError(error.message || 'Login failed');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEmailChange = (text) => {
+        setEmail(text);
+        if (error) setError('');
+    };
+
+    const handlePasswordChange = (text) => {
+        setPassword(text);
+        if (error) setError('');
     };
 
     return (
@@ -56,17 +68,25 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.subtitle}>Sign in to continue predicting</Text>
 
                     <View style={styles.form}>
+                        {/* Error Message */}
+                        {error ? (
+                            <View style={styles.errorContainer}>
+                                <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
+                                <Text style={styles.errorText}>{error}</Text>
+                            </View>
+                        ) : null}
+
                         {/* Email Input */}
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Email</Text>
-                            <View style={styles.inputWrapper}>
+                            <View style={[styles.inputWrapper, error && styles.inputError]}>
                                 <Ionicons name="mail-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Enter your email"
                                     placeholderTextColor={COLORS.text.muted}
                                     value={email}
-                                    onChangeText={setEmail}
+                                    onChangeText={handleEmailChange}
                                     autoCapitalize="none"
                                     keyboardType="email-address"
                                     accessibilityLabel="Email Input"
@@ -78,14 +98,14 @@ const LoginScreen = ({ navigation }) => {
                         {/* Password Input */}
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Password</Text>
-                            <View style={styles.inputWrapper}>
+                            <View style={[styles.inputWrapper, error && styles.inputError]}>
                                 <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
                                 <TextInput
                                     style={[styles.input, { flex: 1 }]}
                                     placeholder="Enter your password"
                                     placeholderTextColor={COLORS.text.muted}
                                     value={password}
-                                    onChangeText={setPassword}
+                                    onChangeText={handlePasswordChange}
                                     secureTextEntry={!showPassword}
                                     accessibilityLabel="Password Input"
                                     testID="login-password-input"
@@ -288,6 +308,25 @@ const styles = StyleSheet.create({
     linkAccent: {
         color: COLORS.accent.cyan,
         fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 69, 58, 0.1)',
+        padding: SPACING.md,
+        borderRadius: BORDER_RADIUS.md,
+        marginBottom: SPACING.lg,
+        borderWidth: 1,
+        borderColor: COLORS.status.error,
+    },
+    errorText: {
+        color: COLORS.status.error,
+        marginLeft: SPACING.sm,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        flex: 1,
+    },
+    inputError: {
+        borderColor: COLORS.status.error,
     },
 });
 

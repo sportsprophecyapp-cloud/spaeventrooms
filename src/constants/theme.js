@@ -45,6 +45,13 @@ export const COLORS = {
         warning: '#f59e0b',      // Orange
         info: '#3b82f6',         // Blue
     },
+    // Alias for status (fix for potential typos/legacy code causing crashes)
+    state: {
+        success: '#10b981',      // Green
+        error: '#ef4444',        // Red
+        warning: '#f59e0b',      // Orange
+        info: '#3b82f6',         // Blue
+    },
 
     // Gradient Combinations
     gradients: {

@@ -1,0 +1,750 @@
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
+import { apiService } from '../services/api';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+
+const ProfileScreen = () => {
+    const navigation = useNavigation();
+    const { user, refreshUser } = useAuth();
+    const [predictions, setPredictions] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // ID Name Change State
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [newIdName, setNewIdName] = useState('');
+    const [updatingName, setUpdatingName] = useState(false);
+
+    useEffect(() => {
+        fetchUserData();
+    }, [user]);
+
+    const fetchUserData = async () => {
+        if (!user) return;
+        console.log('DEBUG: ProfileScreen user:', JSON.stringify(user, null, 2));
+
+        try {
+            setLoading(true);
+            const userPredictions = await apiService.getUserPredictions(user.uuid);
+            setPredictions(userPredictions || []);
+
+            // Create notifications for resolved predictions
+            const wonPredictions = (userPredictions || []).filter(p => p.resolved && p.won);
+            const notifs = wonPredictions.map(p => ({
+                id: p.id,
+                type: 'win',
+                message: `You won your prediction on ${p.eventName || 'a game'}!`,
+                reward: p.exactScore ? '+4 tokens, +2 crowns' : '+3 tokens, +1 crown',
+                timestamp: p.resolvedAt || p.timestamp,
+                read: false
+            }));
+            setNotifications(notifs);
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchUserData();
+        await refreshUser();
+        setRefreshing(false);
+    };
+
+    const handleUpdateIdName = async () => {
+        if (!newIdName || newIdName.length < 3) {
+            Alert.alert('Invalid Name', 'ID Name must be at least 3 characters long.');
+            return;
+        }
+
+        if (user.tokens < 20) {
+            Alert.alert('Insufficient Tokens', 'You need 20 tokens to change your ID Name.');
+            return;
+        }
+
+        try {
+            setUpdatingName(true);
+            await apiService.changeIdName(user.uuid, newIdName);
+            await refreshUser();
+            setShowEditModal(false);
+            setNewIdName('');
+            Alert.alert('Success', 'Your ID Name has been updated!');
+        } catch (error) {
+            Alert.alert('Error', error.error || 'Failed to update ID Name');
+        } finally {
+            setUpdatingName(false);
+        }
+    };
+
+    const totalPredictions = predictions.length;
+    const wonPredictions = predictions.filter(p => p.resolved && p.won).length;
+    const winRate = totalPredictions > 0 ? Math.round((wonPredictions / totalPredictions) * 100) : 0;
+
+    return (
+        <SafeAreaView style={styles.container}>
+            {/* Header */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Profile</Text>
+                <View style={{ width: 24 }} />
+            </View>
+
+            <ScrollView
+                contentContainerStyle={styles.content}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent.cyan} />
+                }
+            >
+                {/* User Info Card */}
+                <LinearGradient
+                    colors={COLORS.gradients.primary}
+                    style={styles.userCard}
+                >
+                    <View style={styles.avatarContainer}>
+                        <Text style={styles.avatarText}>{user?.idName?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || 'U'}</Text>
+                    </View>
+
+                    <View style={styles.nameContainer}>
+                        <Text style={styles.username}>{user?.idName || user?.username || 'Guest'}</Text>
+                        <TouchableOpacity
+                            style={styles.editButton}
+                            onPress={() => {
+                                setNewIdName(user?.idName || user?.username || '');
+                                setShowEditModal(true);
+                            }}
+                        >
+                            <Ionicons name="pencil" size={16} color={COLORS.text.inverse} />
+                        </TouchableOpacity>
+                    </View>
+
+                    <Text style={styles.email}>{user?.email || ''}</Text>
+                </LinearGradient>
+
+                {/* Stats Grid */}
+                <View style={styles.statsGrid}>
+                    <View style={styles.statBox}>
+                        <Ionicons name="wallet-outline" size={24} color={COLORS.accent.lime} />
+                        <Text style={styles.statValue}>{user?.tokens || 0}</Text>
+                        <Text style={styles.statLabel}>Tokens</Text>
+                    </View>
+                    <View style={styles.statBox}>
+                        <Ionicons name="trophy" size={24} color="#FFD700" />
+                        <Text style={styles.statValue}>{user?.crowns || 0}</Text>
+                        <Text style={styles.statLabel}>Crowns</Text>
+                    </View>
+                    <View style={styles.statBox}>
+                        <Ionicons name="checkmark-circle" size={24} color={COLORS.status.success} />
+                        <Text style={styles.statValue}>{wonPredictions}</Text>
+                        <Text style={styles.statLabel}>Wins</Text>
+                    </View>
+                    <View style={styles.statBox}>
+                        <Ionicons name="percent" size={24} color={COLORS.accent.cyan} />
+                        <Text style={styles.statValue}>{winRate}%</Text>
+                        <Text style={styles.statLabel}>Win Rate</Text>
+                    </View>
+                </View>
+
+                {/* Badges Section */}
+                {(user?.badges?.length > 0 || user?.role === 'admin') && (
+                    <View style={styles.badgesSection}>
+                        <Text style={styles.sectionTitle}>🏆 Badges</Text>
+                        <View style={styles.badgesContainer}>
+                            {/* Fallback for Admin Badge if not in array but role is admin */}
+                            {user?.role === 'admin' && !user?.badges?.includes('👑 Admin') && (
+                                <View style={styles.badgeItem}>
+                                    <Text style={styles.badgeText}>👑 Admin</Text>
+                                </View>
+                            )}
+
+                            {user?.badges?.map((badge, index) => (
+                                <View key={index} style={styles.badgeItem}>
+                                    <Text style={styles.badgeText}>{badge}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                )}
+
+                {/* Referral Section */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>🎁 Refer Friends & Earn</Text>
+                    <LinearGradient
+                        colors={COLORS.gradients.primary}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.referralCard}
+                    >
+                        <View style={styles.referralHeader}>
+                            <Ionicons name="gift" size={32} color={COLORS.text.inverse} />
+                            <Text style={styles.referralTitle}>Your Referral Code</Text>
+                        </View>
+                        <View style={styles.referralCodeContainer}>
+                            <Text style={styles.referralCode}>{user?.referralCode || 'LOADING'}</Text>
+                            <TouchableOpacity
+                                style={styles.copyButton}
+                                onPress={() => {
+                                    if (user?.referralCode) {
+                                        // Copy to clipboard functionality would go here
+                                        Alert.alert('Copied!', `Referral code ${user.referralCode} copied to clipboard`);
+                                    }
+                                }}
+                            >
+                                <Ionicons name="copy-outline" size={20} color={COLORS.text.inverse} />
+                                <Text style={styles.copyButtonText}>Copy</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.referralStats}>
+                            <View style={styles.referralStatItem}>
+                                <Text style={styles.referralStatValue}>{user?.referralCount || 0}</Text>
+                                <Text style={styles.referralStatLabel}>Friends Referred</Text>
+                            </View>
+                            <View style={styles.referralDivider} />
+                            <View style={styles.referralStatItem}>
+                                <Text style={styles.referralStatValue}>5 👑</Text>
+                                <Text style={styles.referralStatLabel}>Per Referral</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.referralInfo}>
+                            Share your code with friends! You both get 5 crowns when they sign up.
+                        </Text>
+                    </LinearGradient>
+                </View>
+
+                {/* Notifications Section */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="notifications" size={20} color={COLORS.accent.cyan} />
+                        <Text style={styles.sectionTitle}>Notifications</Text>
+                        {notifications.length > 0 && (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>{notifications.length}</Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {notifications.length === 0 ? (
+                        <View style={styles.emptyState}>
+                            <Ionicons name="notifications-off-outline" size={48} color={COLORS.text.tertiary} />
+                            <Text style={styles.emptyText}>No notifications yet</Text>
+                            <Text style={styles.emptySubtext}>Win predictions to get notified!</Text>
+                        </View>
+                    ) : (
+                        notifications.map((notif) => (
+                            <View key={notif.id} style={styles.notificationCard}>
+                                <View style={styles.notifIcon}>
+                                    <Ionicons name="trophy" size={24} color="#FFD700" />
+                                </View>
+                                <View style={styles.notifContent}>
+                                    <Text style={styles.notifMessage}>{notif.message}</Text>
+                                    <Text style={styles.notifReward}>{notif.reward}</Text>
+                                    <Text style={styles.notifTime}>
+                                        {new Date(notif.timestamp).toLocaleDateString()}
+                                    </Text>
+                                </View>
+                                <Ionicons name="checkmark-circle" size={20} color={COLORS.status.success} />
+                            </View>
+                        ))
+                    )}
+                </View>
+
+                {/* Recent Predictions */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="list" size={20} color={COLORS.accent.cyan} />
+                        <Text style={styles.sectionTitle}>Recent Predictions</Text>
+                    </View>
+
+                    {predictions.length === 0 ? (
+                        <View style={styles.emptyState}>
+                            <Ionicons name="football-outline" size={48} color={COLORS.text.tertiary} />
+                            <Text style={styles.emptyText}>No predictions yet</Text>
+                            <Text style={styles.emptySubtext}>Start making predictions to see them here!</Text>
+                        </View>
+                    ) : (
+                        predictions.slice(0, 5).map((pred) => (
+                            <View key={pred.id} style={styles.predictionCard}>
+                                <View style={styles.predContent}>
+                                    <Text style={styles.predTeam}>{pred.predictedWinner}</Text>
+                                    <Text style={styles.predEvent}>{pred.eventId}</Text>
+                                    <Text style={styles.predDate}>
+                                        {new Date(pred.timestamp).toLocaleDateString()}
+                                    </Text>
+                                </View>
+                                <View style={styles.predStatus}>
+                                    {pred.resolved ? (
+                                        pred.won ? (
+                                            <View style={styles.statusBadge}>
+                                                <Ionicons name="checkmark-circle" size={16} color={COLORS.status.success} />
+                                                <Text style={[styles.statusText, { color: COLORS.status.success }]}>Won</Text>
+                                            </View>
+                                        ) : (
+                                            <View style={styles.statusBadge}>
+                                                <Ionicons name="close-circle" size={16} color={COLORS.status.error} />
+                                                <Text style={[styles.statusText, { color: COLORS.status.error }]}>Lost</Text>
+                                            </View>
+                                        )
+                                    ) : (
+                                        <View style={styles.statusBadge}>
+                                            <Ionicons name="time" size={16} color={COLORS.text.tertiary} />
+                                            <Text style={[styles.statusText, { color: COLORS.text.tertiary }]}>Pending</Text>
+                                        </View>
+                                    )}
+                                </View>
+                            </View>
+                        ))
+                    )}
+                </View>
+            </ScrollView>
+
+            {/* Edit ID Name Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showEditModal}
+                onRequestClose={() => setShowEditModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Change ID Name</Text>
+                            <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                                <Ionicons name="close" size={24} color={COLORS.text.secondary} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text style={styles.modalDescription}>
+                            Choose a new unique ID Name. This will be displayed on the leaderboard and in chat.
+                        </Text>
+
+                        <View style={styles.costBadge}>
+                            <Text style={styles.costText}>Cost: 20 Tokens</Text>
+                            <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
+                        </View>
+
+                        <TextInput
+                            style={styles.input}
+                            value={newIdName}
+                            onChangeText={setNewIdName}
+                            placeholder="Enter new ID Name"
+                            placeholderTextColor={COLORS.text.tertiary}
+                            autoCapitalize="none"
+                            maxLength={20}
+                        />
+
+                        <TouchableOpacity
+                            style={[styles.saveButton, (updatingName || !newIdName || newIdName.length < 3) && styles.disabledButton]}
+                            onPress={handleUpdateIdName}
+                            disabled={updatingName || !newIdName || newIdName.length < 3}
+                        >
+                            {updatingName ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <Text style={styles.saveButtonText}>Save Changes</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background.primary,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: SPACING.lg,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.border.tertiary,
+        backgroundColor: COLORS.background.secondary,
+    },
+    backButton: {
+        padding: SPACING.xs,
+    },
+    headerTitle: {
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+    },
+    content: {
+        padding: SPACING.base,
+    },
+    userCard: {
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.xl,
+        alignItems: 'center',
+        marginBottom: SPACING.lg,
+        ...SHADOWS.cyan,
+    },
+    avatarContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: BORDER_RADIUS.full,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: SPACING.md,
+    },
+    avatarText: {
+        fontSize: TYPOGRAPHY.sizes.xxxl,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.text.inverse,
+    },
+    nameContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.sm,
+        marginBottom: SPACING.xs,
+    },
+    username: {
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.inverse,
+    },
+    editButton: {
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        padding: 6,
+        borderRadius: BORDER_RADIUS.full,
+    },
+    email: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.inverse,
+        opacity: 0.8,
+    },
+    statsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: SPACING.md,
+        marginBottom: SPACING.lg,
+    },
+    statBox: {
+        flex: 1,
+        minWidth: '45%',
+        backgroundColor: COLORS.background.card,
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.lg,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+    },
+    statValue: {
+        fontSize: TYPOGRAPHY.sizes.xxl,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.text.primary,
+        marginTop: SPACING.sm,
+    },
+    statLabel: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.text.secondary,
+        marginTop: SPACING.xs,
+    },
+    section: {
+        marginBottom: SPACING.xl,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.sm,
+        marginBottom: SPACING.md,
+    },
+    sectionTitle: {
+        fontSize: TYPOGRAPHY.sizes.lg,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+    },
+    badge: {
+        backgroundColor: COLORS.status.error,
+        borderRadius: BORDER_RADIUS.full,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 2,
+        marginLeft: SPACING.xs,
+    },
+    badgeText: {
+        color: COLORS.text.inverse,
+        fontSize: TYPOGRAPHY.sizes.xs,
+        fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    emptyState: {
+        alignItems: 'center',
+        padding: SPACING.xxxl,
+    },
+    emptyText: {
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+        color: COLORS.text.secondary,
+        marginTop: SPACING.md,
+    },
+    emptySubtext: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.tertiary,
+        marginTop: SPACING.xs,
+    },
+    notificationCard: {
+        flexDirection: 'row',
+        backgroundColor: COLORS.background.card,
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.base,
+        marginBottom: SPACING.sm,
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+        alignItems: 'center',
+    },
+    notifIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: BORDER_RADIUS.md,
+        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: SPACING.md,
+    },
+    notifContent: {
+        flex: 1,
+    },
+    notifMessage: {
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+        color: COLORS.text.primary,
+        marginBottom: SPACING.xs,
+    },
+    notifReward: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.accent.lime,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        marginBottom: SPACING.xs,
+    },
+    notifTime: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.text.tertiary,
+    },
+    predictionCard: {
+        flexDirection: 'row',
+        backgroundColor: COLORS.background.card,
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.base,
+        marginBottom: SPACING.sm,
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+        alignItems: 'center',
+    },
+    predContent: {
+        flex: 1,
+    },
+    predTeam: {
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+        marginBottom: SPACING.xs,
+    },
+    predEvent: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.secondary,
+        marginBottom: SPACING.xs,
+    },
+    predDate: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.text.tertiary,
+    },
+    predStatus: {
+        marginLeft: SPACING.md,
+    },
+    statusBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.xs,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: SPACING.xs,
+        borderRadius: BORDER_RADIUS.sm,
+        backgroundColor: COLORS.background.primary,
+    },
+    statusText: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    referralCard: {
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.xl,
+        marginTop: SPACING.md,
+        ...SHADOWS.cyan,
+    },
+    referralHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.md,
+        marginBottom: SPACING.lg,
+    },
+    referralTitle: {
+        fontSize: TYPOGRAPHY.sizes.lg,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.inverse,
+    },
+    referralCodeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: BORDER_RADIUS.md,
+        padding: SPACING.base,
+        marginBottom: SPACING.lg,
+    },
+    referralCode: {
+        fontSize: TYPOGRAPHY.sizes.xxxl,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.text.inverse,
+        letterSpacing: 4,
+    },
+    copyButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.xs,
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        paddingHorizontal: SPACING.base,
+        paddingVertical: SPACING.sm,
+        borderRadius: BORDER_RADIUS.md,
+    },
+    copyButtonText: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.inverse,
+    },
+    referralStats: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        marginBottom: SPACING.base,
+    },
+    referralStatItem: {
+        alignItems: 'center',
+    },
+    referralStatValue: {
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.text.inverse,
+        marginBottom: SPACING.xs,
+    },
+    referralStatLabel: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.text.inverse,
+        opacity: 0.9,
+    },
+    referralDivider: {
+        width: 1,
+        height: 40,
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    badgesSection: {
+        marginBottom: SPACING.lg,
+    },
+    badgesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: SPACING.sm,
+    },
+    badgeItem: {
+        backgroundColor: 'rgba(56, 189, 248, 0.15)',
+        paddingHorizontal: SPACING.base,
+        paddingVertical: SPACING.sm,
+        borderRadius: BORDER_RADIUS.lg,
+        borderWidth: 1,
+        borderColor: 'rgba(56, 189, 248, 0.3)',
+    },
+    badgeText: {
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    referralInfo: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.inverse,
+        textAlign: 'center',
+        opacity: 0.9,
+        lineHeight: 20,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        justifyContent: 'center',
+        padding: SPACING.lg,
+    },
+    modalContent: {
+        backgroundColor: COLORS.background.card,
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.xl,
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: SPACING.md,
+    },
+    modalTitle: {
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+    },
+    modalDescription: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.secondary,
+        marginBottom: SPACING.lg,
+        lineHeight: 20,
+    },
+    costBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.xs,
+        backgroundColor: 'rgba(132, 204, 22, 0.1)',
+        paddingHorizontal: SPACING.md,
+        paddingVertical: SPACING.sm,
+        borderRadius: BORDER_RADIUS.md,
+        alignSelf: 'flex-start',
+        marginBottom: SPACING.lg,
+        borderWidth: 1,
+        borderColor: 'rgba(132, 204, 22, 0.3)',
+    },
+    costText: {
+        color: COLORS.accent.lime,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.sm,
+    },
+    input: {
+        backgroundColor: COLORS.background.primary,
+        borderRadius: BORDER_RADIUS.md,
+        padding: SPACING.md,
+        color: COLORS.text.primary,
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+        marginBottom: SPACING.xl,
+    },
+    saveButton: {
+        backgroundColor: COLORS.accent.cyan,
+        padding: SPACING.md,
+        borderRadius: BORDER_RADIUS.md,
+        alignItems: 'center',
+    },
+    disabledButton: {
+        opacity: 0.5,
+    },
+    saveButtonText: {
+        color: '#000',
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.base,
+    },
+});
+
+export default ProfileScreen;

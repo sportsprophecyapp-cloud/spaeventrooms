@@ -13,38 +13,45 @@ const RegisterScreen = ({ navigation }) => {
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [referralCode, setReferralCode] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const { register } = useAuth();
 
     const handleRegister = async () => {
+        setError('');
         if (!username || !email || !password || !confirmPassword) {
-            Alert.alert('Error', 'Please fill in all fields');
+            setError('Please fill in all fields');
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Error', 'Passwords do not match');
+            setError('Passwords do not match');
             return;
         }
 
         if (password.length < 6) {
-            Alert.alert('Error', 'Password must be at least 6 characters');
+            setError('Password must be at least 6 characters');
             return;
         }
 
         setLoading(true);
         try {
-            const success = await register(email, password, username);
+            const success = await register(email, password, username, referralCode);
             if (success) {
                 // Navigation is handled by App.js based on user state
             } else {
-                Alert.alert('Error', 'Registration failed');
+                setError('Registration failed');
             }
         } catch (error) {
-            Alert.alert('Error', error.message || 'Registration failed');
+            setError(error.message || 'Registration failed');
         } finally {
             setLoading(false);
         }
+    };
+
+    const clearError = () => {
+        if (error) setError('');
     };
 
     return (
@@ -73,17 +80,25 @@ const RegisterScreen = ({ navigation }) => {
                         <Text style={styles.subtitle}>Join thousands of sports fans</Text>
 
                         <View style={styles.form}>
+                            {/* Error Message */}
+                            {error ? (
+                                <View style={styles.errorContainer}>
+                                    <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
+                                    <Text style={styles.errorText}>{error}</Text>
+                                </View>
+                            ) : null}
+
                             {/* Username Input */}
                             <View style={styles.inputContainer}>
                                 <Text style={styles.label}>Username</Text>
-                                <View style={styles.inputWrapper}>
+                                <View style={[styles.inputWrapper, error && styles.inputError]}>
                                     <Ionicons name="person-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Choose a username"
                                         placeholderTextColor={COLORS.text.muted}
                                         value={username}
-                                        onChangeText={setUsername}
+                                        onChangeText={(text) => { setUsername(text); clearError(); }}
                                         autoCapitalize="none"
                                         accessibilityLabel="Username Input"
                                         testID="register-username-input"
@@ -94,14 +109,14 @@ const RegisterScreen = ({ navigation }) => {
                             {/* Email Input */}
                             <View style={styles.inputContainer}>
                                 <Text style={styles.label}>Email</Text>
-                                <View style={styles.inputWrapper}>
+                                <View style={[styles.inputWrapper, error && styles.inputError]}>
                                     <Ionicons name="mail-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Enter your email"
                                         placeholderTextColor={COLORS.text.muted}
                                         value={email}
-                                        onChangeText={setEmail}
+                                        onChangeText={(text) => { setEmail(text); clearError(); }}
                                         autoCapitalize="none"
                                         keyboardType="email-address"
                                         accessibilityLabel="Email Input"
@@ -113,14 +128,14 @@ const RegisterScreen = ({ navigation }) => {
                             {/* Password Input */}
                             <View style={styles.inputContainer}>
                                 <Text style={styles.label}>Password</Text>
-                                <View style={styles.inputWrapper}>
+                                <View style={[styles.inputWrapper, error && styles.inputError]}>
                                     <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
                                     <TextInput
                                         style={[styles.input, { flex: 1 }]}
                                         placeholder="Create a password"
                                         placeholderTextColor={COLORS.text.muted}
                                         value={password}
-                                        onChangeText={setPassword}
+                                        onChangeText={(text) => { setPassword(text); clearError(); }}
                                         secureTextEntry={!showPassword}
                                         accessibilityLabel="Password Input"
                                         testID="register-password-input"
@@ -138,14 +153,14 @@ const RegisterScreen = ({ navigation }) => {
                             {/* Confirm Password Input */}
                             <View style={styles.inputContainer}>
                                 <Text style={styles.label}>Confirm Password</Text>
-                                <View style={styles.inputWrapper}>
+                                <View style={[styles.inputWrapper, error && styles.inputError]}>
                                     <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
                                     <TextInput
                                         style={[styles.input, { flex: 1 }]}
                                         placeholder="Confirm your password"
                                         placeholderTextColor={COLORS.text.muted}
                                         value={confirmPassword}
-                                        onChangeText={setConfirmPassword}
+                                        onChangeText={(text) => { setConfirmPassword(text); clearError(); }}
                                         secureTextEntry={!showConfirmPassword}
                                         accessibilityLabel="Confirm Password Input"
                                         testID="register-confirm-password-input"
@@ -157,6 +172,25 @@ const RegisterScreen = ({ navigation }) => {
                                             color={COLORS.text.tertiary}
                                         />
                                     </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            {/* Referral Code (Optional) */}
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Referral Code (Optional)</Text>
+                                <View style={styles.inputWrapper}>
+                                    <Ionicons name="gift-outline" size={20} color={COLORS.text.tertiary} />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter friend's referral code"
+                                        placeholderTextColor={COLORS.text.muted}
+                                        value={referralCode}
+                                        onChangeText={(text) => setReferralCode(text.toUpperCase())}
+                                        autoCapitalize="characters"
+                                        maxLength={6}
+                                        accessibilityLabel="Referral Code Input"
+                                        testID="register-referral-code-input"
+                                    />
                                 </View>
                             </View>
 
@@ -354,6 +388,25 @@ const styles = StyleSheet.create({
     linkAccent: {
         color: COLORS.accent.cyan,
         fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 69, 58, 0.1)',
+        padding: SPACING.md,
+        borderRadius: BORDER_RADIUS.md,
+        marginBottom: SPACING.lg,
+        borderWidth: 1,
+        borderColor: COLORS.status.error,
+    },
+    errorText: {
+        color: COLORS.status.error,
+        marginLeft: SPACING.sm,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        flex: 1,
+    },
+    inputError: {
+        borderColor: COLORS.status.error,
     },
 });
 
