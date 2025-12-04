@@ -483,6 +483,32 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString(), nodeVersion: process.version });
 });
 
+// Public stats for landing page (no auth required)
+app.get('/api/public/stats', async (req, res) => {
+    try {
+        await dbConnect();
+
+        const [userCount, predictionCount] = await Promise.all([
+            User.countDocuments({}),
+            Prediction.countDocuments({})
+        ]);
+
+        res.json({
+            users: userCount,
+            predictions: predictionCount,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Stats error:', error);
+        // Return fallback stats if DB fails
+        res.json({
+            users: 1000,
+            predictions: 5000,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 app.post('/api/login', async (req, res) => {
     try {
         await dbConnect();
@@ -495,7 +521,7 @@ app.post('/api/login', async (req, res) => {
                 username: email.split('@')[0],
                 idName: email.split('@')[0],
                 email: email,
-                tokens: 50,
+                tokens: 60,  // 60 starter tokens
                 crowns: 5,
                 isRegistered: true,
                 badges: []
@@ -562,7 +588,15 @@ app.post('/api/register', async (req, res) => {
         // Check if referred by someone
         let referrer = null;
         if (referralCode) {
-            referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+            // Special case: "LOADING" refers to the admin account (for YouTube video)
+            if (referralCode.toUpperCase() === 'LOADING') {
+                referrer = await User.findOne({ email: 'sportsprophecyapp@gmail.com' });
+                if (!referrer) {
+                    console.warn('⚠️ Admin account not found for LOADING code');
+                }
+            } else {
+                referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+            }
         }
 
         // Create new user with bonus tokens if referred
@@ -574,7 +608,7 @@ app.post('/api/register', async (req, res) => {
             username: username || email.split('@')[0],
             idName: username || email.split('@')[0],
             email: email,
-            tokens: 50 + bonusTokens,
+            tokens: 60 + bonusTokens,  // 60 starter tokens (50 base + 10 bonus)
             crowns: 5 + bonusCrowns,
             referralCode: newReferralCode,
             referredBy: referrer ? referrer.uuid : null,

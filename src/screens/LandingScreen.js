@@ -7,6 +7,30 @@ import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constant
 const { width } = Dimensions.get('window');
 
 const LandingScreen = ({ navigation }) => {
+    const [stats, setStats] = React.useState({ users: 0, predictions: 0 });
+
+    React.useEffect(() => {
+        // Fetch real stats from backend
+        fetch('https://sports-prophecy-backend.vercel.app/api/public/stats')
+            .then(res => res.json())
+            .then(data => {
+                setStats({
+                    users: data.users || 1000,
+                    predictions: data.predictions || 5000
+                });
+            })
+            .catch(err => {
+                console.log('Failed to fetch stats, using defaults');
+            });
+    }, []);
+
+    // Format numbers for display (e.g., 1234 -> 1.2K)
+    const formatNumber = (num) => {
+        if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M+`;
+        if (num >= 1000) return `${(num / 1000).toFixed(1)}K+`;
+        return `${num}+`;
+    };
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
@@ -54,13 +78,13 @@ const LandingScreen = ({ navigation }) => {
                             PREDICT. <Text style={styles.textCyan}>COMPETE.</Text> WIN.
                         </Text>
                         <Text style={styles.heroSubtitle}>
-                            100% Free! Make predictions on your favorite sports and win prizes from our sponsors
+                            100% Free! Sign up and get 60 tokens to start making predictions on your favorite sports
                         </Text>
 
                         {/* Stats Row */}
                         <View style={styles.statsRow}>
                             <View style={styles.statItem}>
-                                <Text style={styles.statNumber}>50K+</Text>
+                                <Text style={styles.statNumber}>{formatNumber(stats.users)}</Text>
                                 <Text style={styles.statLabel}>Active Users</Text>
                             </View>
                             <View style={styles.statDivider} />
@@ -70,7 +94,7 @@ const LandingScreen = ({ navigation }) => {
                             </View>
                             <View style={styles.statDivider} />
                             <View style={styles.statItem}>
-                                <Text style={styles.statNumber}>1M+</Text>
+                                <Text style={styles.statNumber}>{formatNumber(stats.predictions)}</Text>
                                 <Text style={styles.statLabel}>Predictions</Text>
                             </View>
                         </View>
@@ -101,6 +125,16 @@ const LandingScreen = ({ navigation }) => {
                                 testID="landing-login-button"
                             >
                                 <Text style={styles.secondaryButtonText}>LOGIN</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.browseButton}
+                                onPress={() => navigation.navigate('Main')}
+                                accessibilityLabel="Browse Without Login Button"
+                                testID="landing-browse-button"
+                            >
+                                <Ionicons name="eye-outline" size={20} color={COLORS.text.secondary} />
+                                <Text style={styles.browseButtonText}>Browse Without Login</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -389,6 +423,20 @@ const styles = StyleSheet.create({
         color: COLORS.accent.cyan,
         fontSize: TYPOGRAPHY.sizes.sm,
         fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    browseButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.xs,
+        paddingVertical: SPACING.md,
+        borderRadius: BORDER_RADIUS.md,
+        backgroundColor: 'transparent',
+    },
+    browseButtonText: {
+        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.medium,
     },
     featuresSection: {
         paddingHorizontal: SPACING.lg,
