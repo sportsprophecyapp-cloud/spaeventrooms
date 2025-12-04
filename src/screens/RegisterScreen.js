@@ -187,7 +187,7 @@ const RegisterScreen = ({ navigation }) => {
                                         value={referralCode}
                                         onChangeText={(text) => setReferralCode(text.toUpperCase())}
                                         autoCapitalize="characters"
-                                        maxLength={6}
+                                        maxLength={10}
                                         accessibilityLabel="Referral Code Input"
                                         testID="register-referral-code-input"
                                     />
