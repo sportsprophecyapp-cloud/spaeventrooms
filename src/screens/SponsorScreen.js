@@ -55,13 +55,12 @@ const SponsorScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const price = selectedDuration === 'week' ? 25 : 75;
             const response = await apiService.createSponsorCheckout({
                 sponsorName,
                 bannerUrl: bannerImage,
                 linkUrl,
-                duration: selectedDuration,
-                price
+                duration: '30days',
+                price: 25
             });
 
             if (response.checkoutUrl) {
@@ -110,26 +109,16 @@ const SponsorScreen = ({ navigation }) => {
 
             <View style={styles.pricingContainer}>
                 <TouchableOpacity
-                    style={[styles.pricingCard, selectedDuration === 'week' && styles.selectedCard]}
-                    onPress={() => setSelectedDuration('week')}
-                >
-                    <Text style={styles.priceTitle}>Weekly</Text>
-                    <Text style={styles.priceAmount}>$25</Text>
-                    <Text style={styles.priceSub}>per week</Text>
-                    {selectedDuration === 'week' && <Ionicons name="checkmark-circle" size={24} color={COLORS.accent.cyan} style={styles.checkIcon} />}
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.pricingCard, selectedDuration === 'month' && styles.selectedCard]}
-                    onPress={() => setSelectedDuration('month')}
+                    style={[styles.pricingCard, styles.selectedCard, { flex: 1 }]}
+                    activeOpacity={1}
                 >
                     <View style={styles.badge}>
                         <Text style={styles.badgeText}>BEST VALUE</Text>
                     </View>
-                    <Text style={styles.priceTitle}>Monthly</Text>
-                    <Text style={styles.priceAmount}>$75</Text>
-                    <Text style={styles.priceSub}>per month</Text>
-                    {selectedDuration === 'month' && <Ionicons name="checkmark-circle" size={24} color={COLORS.accent.cyan} style={styles.checkIcon} />}
+                    <Text style={styles.priceTitle}>30-Day Banner Ad</Text>
+                    <Text style={styles.priceAmount}>$25</Text>
+                    <Text style={styles.priceSub}>for 30 days</Text>
+                    <Ionicons name="checkmark-circle" size={24} color={COLORS.accent.cyan} style={styles.checkIcon} />
                 </TouchableOpacity>
             </View>
 
@@ -175,7 +164,7 @@ const SponsorScreen = ({ navigation }) => {
                     <ActivityIndicator color="#000" />
                 ) : (
                     <Text style={styles.payButtonText}>
-                        Pay ${selectedDuration === 'week' ? '25' : '75'} & Publish
+                        Pay $25 for 30 Days
                     </Text>
                 )}
             </TouchableOpacity>

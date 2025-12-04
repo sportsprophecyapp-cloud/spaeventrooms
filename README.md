@@ -1,5 +1,5 @@
-# Sports Prophecy App v2.3.1)
-> Last Updated: December 1, 2025  
+# Sports Prophecy App v2.4.0
+> Last Updated: December 3, 2025  
 **Developer Documentation**
 
 ## 📋 Table of Contents
@@ -124,6 +124,10 @@ THE_ODDS_API_KEY=your_api_key_here
 
 # Server Port (optional, defaults to 3001)
 PORT=3001
+
+# Stripe Configuration
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 ### Frontend
@@ -190,12 +194,43 @@ Deploy the frontend build to the `dist` project.
 - Two-step confirmation to prevent accidental entries
 
 ### Leaderboard & Chat
-- Global user rankings
-- Real-time community chat
+- **Correct Predictions Ranking**: Leaderboard sorted by skill (correct picks) rather than just tokens.
+- **Chat Rooms**: Public, League-specific, and Private (password-protected) chat rooms.
+- Real-time community chat.
+
+### Sponsorship System
+- **Main Page Ads**: Sponsors can purchase 30-day banner ads via Stripe ($25).
+- **Room Sponsorships**: Sponsors can exclusively sponsor specific chat rooms ($25/30 days).
+- **Prize Draw Ads**: Free ad slots for sponsors offering prizes.
+- **Automated Checkout**: Integrated Stripe Checkout for seamless payments.
 
 ---
 
-## 🆕 Recent Changes (v2.2.0)
+## 🆕 Recent Changes (v2.4.0)
+
+### December 3, 2025
+
+#### 1. Sponsorship System ✅
+**Feature**: Automated ad purchasing via Stripe.
+**Details**:
+- **Main Page Ads**: $25/30 days.
+- **Room Sponsorships**: Exclusive branding for chat rooms.
+- **Stripe Integration**: Secure checkout flow.
+
+#### 2. Correct Predictions Leaderboard ✅
+**Change**: Leaderboard now ranks by skill.
+**Details**:
+- **New Metric**: `correctPredictions` tracked in database.
+- **Grading Logic**: Server automatically grades games and updates stats.
+- **Profile**: User profile shows accurate "Wins" count.
+
+#### 3. Chat Rooms ✅
+**Feature**: Multiple chat rooms.
+**Details**:
+- **Types**: Public, League (NBA, NFL, etc.), Private.
+- **Persistence**: Rooms saved to database.
+
+### Previous Changes (v2.2.0)
 
 ### December 1, 2025
 
@@ -243,6 +278,7 @@ For questions or issues:
 ---
 
 **Version History:**
+- v2.4.0 (Dec 3, 2025): Sponsorships, Chat Rooms, Correct Predictions Leaderboard
 - v2.2.0 (Dec 1, 2025): On-demand loading, Referral system, Beta banners
 - v2.1.0 (Nov 30, 2025): Cron automation (deprecated), Deployment docs
 - v2.0.0 (Nov 29, 2025): Duplicate prevention, score validation

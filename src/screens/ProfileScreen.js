@@ -143,7 +143,7 @@ const ProfileScreen = () => {
                     </View>
                     <View style={styles.statBox}>
                         <Ionicons name="checkmark-circle" size={24} color={COLORS.status.success} />
-                        <Text style={styles.statValue}>{wonPredictions}</Text>
+                        <Text style={styles.statValue}>{user?.correctPredictions || 0}</Text>
                         <Text style={styles.statLabel}>Wins</Text>
                     </View>
                     <View style={styles.statBox}>
@@ -188,7 +188,9 @@ const ProfileScreen = () => {
                             <Text style={styles.referralTitle}>Your Referral Code</Text>
                         </View>
                         <View style={styles.referralCodeContainer}>
-                            <Text style={styles.referralCode}>{user?.referralCode || 'LOADING'}</Text>
+                            <Text style={styles.referralCode}>
+                                {user?.referralCode || 'N/A'}
+                            </Text>
                             <TouchableOpacity
                                 style={styles.copyButton}
                                 onPress={() => {

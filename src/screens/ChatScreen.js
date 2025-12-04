@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Modal, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as WebBrowser from 'expo-web-browser';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -199,6 +200,35 @@ const ChatScreen = () => {
     setMessages([]);
   };
 
+  // --- Room Sponsorship Logic ---
+  const [showSponsorModal, setShowSponsorModal] = useState(false);
+  const [sponsorName, setSponsorName] = useState('');
+  const [sponsorLink, setSponsorLink] = useState('');
+  const [sponsorBanner, setSponsorBanner] = useState('https://via.placeholder.com/600x200'); // Placeholder for now
+
+  const handleSponsorRoom = async () => {
+    if (!sponsorName || !sponsorLink) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    try {
+      const response = await apiService.createRoomSponsorCheckout({
+        roomId: currentRoom._id,
+        sponsorName,
+        linkUrl: sponsorLink,
+        bannerUrl: sponsorBanner
+      });
+
+      if (response.checkoutUrl) {
+        await WebBrowser.openBrowserAsync(response.checkoutUrl);
+        setShowSponsorModal(false);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to initiate sponsorship');
+    }
+  };
+
   // --- Renderers ---
 
   const renderRoomItem = ({ item }) => (
@@ -392,8 +422,19 @@ const ChatScreen = () => {
         <TouchableOpacity onPress={handleLeaveRoom} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{currentRoom ? currentRoom.name : 'Lobby'}</Text>
-        <View style={{ width: 24 }} />
+        <View>
+          <Text style={styles.headerTitle}>{currentRoom ? currentRoom.name : 'Lobby'}</Text>
+          {currentRoom && currentRoom.sponsor?.isActive && (
+            <Text style={{ color: '#34d399', fontSize: 10 }}>Sponsored by {currentRoom.sponsor.name}</Text>
+          )}
+        </View>
+        {currentRoom ? (
+          <TouchableOpacity onPress={() => setShowSponsorModal(true)} style={{ padding: 5 }}>
+            <Ionicons name="star-outline" size={24} color="#fbbf24" />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 24 }} />
+        )}
       </View>
 
       {loadingMessages ? (
@@ -438,6 +479,44 @@ const ChatScreen = () => {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Sponsor Room Modal */}
+      <Modal visible={showSponsorModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Sponsor This Room</Text>
+            <Text style={styles.modalSubtitle}>$25 for 30 Days</Text>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Sponsor Name"
+              placeholderTextColor="#64748b"
+              value={sponsorName}
+              onChangeText={setSponsorName}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Website Link"
+              placeholderTextColor="#64748b"
+              value={sponsorLink}
+              onChangeText={setSponsorLink}
+            />
+
+            <Text style={{ color: '#94a3b8', fontSize: 12, marginBottom: 10, textAlign: 'center' }}>
+              Banner upload coming soon. Using placeholder.
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={() => setShowSponsorModal(false)} style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSponsorRoom} style={styles.confirmButton}>
+                <Text style={styles.confirmButtonText}>Pay $25</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

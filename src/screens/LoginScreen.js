@@ -23,7 +23,7 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const success = await login(email, password);
+            const success = await login(email, password, rememberMe);
             if (success) {
                 // Navigation is handled by App.js based on user state
             } else {

@@ -11,12 +11,26 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
     const [homeScore, setHomeScore] = useState('');
     const [awayScore, setAwayScore] = useState('');
     const [loading, setLoading] = useState(false);
-    const [balance, setBalance] = useState({ tokens: 0, crowns: 0 });
+    const { user } = useAuth();
+    const [balance, setBalance] = useState({
+        tokens: user?.tokens || 0,
+        crowns: user?.crowns || 0
+    });
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
-    const { user } = useAuth();
 
-    // Fetch user balance when modal opens
+    // Update balance from context when user changes
+    useEffect(() => {
+        if (user) {
+            setBalance(prev => ({
+                ...prev,
+                tokens: user.tokens || prev.tokens,
+                crowns: user.crowns || prev.crowns
+            }));
+        }
+    }, [user]);
+
+    // Fetch latest balance when modal opens
     useEffect(() => {
         if (visible && user) {
             fetchBalance();
@@ -25,8 +39,14 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
 
     const fetchBalance = async () => {
         if (user?.uuid) {
-            const userBalance = await apiService.getUserBalance(user.uuid);
-            setBalance(userBalance);
+            try {
+                const userBalance = await apiService.getUserBalance(user.uuid);
+                if (userBalance && (userBalance.tokens !== undefined)) {
+                    setBalance(userBalance);
+                }
+            } catch (err) {
+                console.log('Failed to fetch latest balance, using context');
+            }
         }
     };
 

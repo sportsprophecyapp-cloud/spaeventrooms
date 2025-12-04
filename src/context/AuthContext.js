@@ -65,16 +65,20 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const login = async (email, password) => {
+    const login = async (email, password, remember = true) => {
         try {
             const data = await apiService.login(email, password);
             if (data.user) {
                 setUser(data.user);
-                await AsyncStorage.setItem('userData', JSON.stringify(data.user));
-                // If the backend returned a token, store it too
-                if (data.token) {
-                    await AsyncStorage.setItem('userToken', data.token);
+
+                if (remember) {
+                    await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+                    // If the backend returned a token, store it too
+                    if (data.token) {
+                        await AsyncStorage.setItem('userToken', data.token);
+                    }
                 }
+
                 // Check for daily reward
                 checkDailyReward(data.user.uuid);
                 return true;
@@ -86,14 +90,17 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (email, password, username, referralCode) => {
+    const register = async (email, password, username, referralCode, remember = true) => {
         try {
             const data = await apiService.register(email, password, username, referralCode);
             if (data.user) {
                 setUser(data.user);
-                await AsyncStorage.setItem('userData', JSON.stringify(data.user));
-                if (data.token) {
-                    await AsyncStorage.setItem('userToken', data.token);
+
+                if (remember) {
+                    await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+                    if (data.token) {
+                        await AsyncStorage.setItem('userToken', data.token);
+                    }
                 }
 
                 // Show referral bonus message if applicable

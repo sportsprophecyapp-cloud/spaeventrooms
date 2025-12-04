@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { getTeamLogo } from '../utils/teamLogos';
+import { Image } from 'react-native';
 
 const GameCard = ({ game, onPress }) => {
     const formatDate = (dateString) => {
@@ -70,7 +72,15 @@ const GameCard = ({ game, onPress }) => {
                     {/* Home Team */}
                     <View style={styles.teamSection}>
                         <View style={styles.teamLogoContainer}>
-                            <Text style={styles.teamLogoText}>{game.homeTeam?.charAt(0) || 'H'}</Text>
+                            {getTeamLogo(game.homeTeam) ? (
+                                <Image
+                                    source={{ uri: getTeamLogo(game.homeTeam) }}
+                                    style={styles.teamLogoImage}
+                                    resizeMode="contain"
+                                />
+                            ) : (
+                                <Text style={styles.teamLogoText}>{game.homeTeam?.charAt(0) || 'H'}</Text>
+                            )}
                         </View>
                         <Text style={styles.teamName} numberOfLines={2}>{game.homeTeam || 'Home Team'}</Text>
                     </View>
@@ -83,7 +93,15 @@ const GameCard = ({ game, onPress }) => {
                     {/* Away Team */}
                     <View style={styles.teamSection}>
                         <View style={styles.teamLogoContainer}>
-                            <Text style={styles.teamLogoText}>{game.awayTeam?.charAt(0) || 'A'}</Text>
+                            {getTeamLogo(game.awayTeam) ? (
+                                <Image
+                                    source={{ uri: getTeamLogo(game.awayTeam) }}
+                                    style={styles.teamLogoImage}
+                                    resizeMode="contain"
+                                />
+                            ) : (
+                                <Text style={styles.teamLogoText}>{game.awayTeam?.charAt(0) || 'A'}</Text>
+                            )}
                         </View>
                         <Text style={styles.teamName} numberOfLines={2}>{game.awayTeam || 'Away Team'}</Text>
                     </View>
@@ -175,6 +193,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: SPACING.sm,
+        overflow: 'hidden',
+    },
+    teamLogoImage: {
+        width: '80%',
+        height: '80%',
     },
     teamLogoText: {
         fontSize: TYPOGRAPHY.sizes.xl,

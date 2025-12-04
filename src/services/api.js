@@ -147,7 +147,7 @@ export const apiService = {
 
     getUserBalance: async (userId) => {
         try {
-            const response = await api.get(`/user/${userId}/balance`);
+            const response = await api.get(`/balance/${userId}`);
             return response.data;
         } catch (error) {
             console.error('Error fetching user balance:', error);
@@ -271,6 +271,71 @@ export const apiService = {
             throw error.response?.data || error;
         }
     },
+
+    createSponsorCheckout: async (sponsorData) => {
+        try {
+            const response = await api.post('/sponsors/checkout', sponsorData);
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    createRoomSponsorCheckout: async (sponsorData) => {
+        try {
+            const response = await api.post('/sponsors/room-checkout', sponsorData);
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    submitPrizeApplication: async (prizeData) => {
+        try {
+            const response = await api.post('/sponsors/prize-application', prizeData);
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    getActiveSponsors: async () => {
+        try {
+            const response = await api.get('/sponsors/active');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching active sponsors:', error);
+            return [];
+        }
+    },
+
+    getRooms: async () => {
+        try {
+            const response = await api.get('/chat/rooms');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching rooms:', error);
+            return [];
+        }
+    },
+
+    createRoom: async (roomData) => {
+        try {
+            const response = await api.post('/chat/rooms', roomData);
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    joinRoom: async (roomId, password) => {
+        try {
+            const response = await api.post('/chat/rooms/join', { roomId, password });
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error;
+        }
+    }
 };
 
 export default api;

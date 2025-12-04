@@ -37,7 +37,7 @@ const RegisterScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const success = await register(email, password, username, referralCode);
+            const success = await register(email, password, username, referralCode, rememberMe);
             if (success) {
                 // Navigation is handled by App.js based on user state
             } else {

@@ -5,7 +5,7 @@
     "rewrites": [
         {
             "source": "/api/:path*",
-            "destination": "https://sportsprophecy-backend-k6sdxljfp.vercel.app/api/:path*"
+            "destination": "https://sportsprophecy-backend-98imvj0fb.vercel.app/api/:path*"
         },
         {
             "source": "/(.*)",

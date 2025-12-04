@@ -60,12 +60,15 @@ const LeaderboardScreen = ({ navigation }) => {
 
                 <View style={styles.userContainer}>
                     <Text style={styles.username}>{item.username}</Text>
-                    <Text style={styles.tokens}>{item.tokens} Tokens</Text>
+                    <View style={styles.secondaryStats}>
+                        <MaterialCommunityIcons name="crown" size={14} color="#FFD700" />
+                        <Text style={styles.tokens}>{item.crowns} Crowns</Text>
+                    </View>
                 </View>
 
                 <View style={styles.scoreContainer}>
-                    <Text style={styles.score}>{item.crowns}</Text>
-                    <MaterialCommunityIcons name="crown" size={16} color="#38bdf8" />
+                    <Text style={styles.score}>{item.correctPredictions}</Text>
+                    <Ionicons name="checkmark-circle" size={16} color="#38bdf8" />
                 </View>
             </ItemWrapper>
         );
@@ -103,7 +106,7 @@ const LeaderboardScreen = ({ navigation }) => {
                 <View style={styles.emptyContainer}>
                     <Ionicons name="trophy-outline" size={64} color="#64748b" />
                     <Text style={styles.emptyText}>No players yet!</Text>
-                    <Text style={styles.emptySubtext}>Be the first to make predictions</Text>
+                    <Text style={styles.emptySubtext}>Be the first to win a prediction!</Text>
                 </View>
             ) : (
                 <FlatList
@@ -177,9 +180,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
+    secondaryStats: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 2,
+    },
     tokens: {
-        color: '#64748b',
+        color: '#94a3b8',
         fontSize: 12,
+        fontWeight: '500',
     },
     scoreContainer: {
         flexDirection: 'row',
