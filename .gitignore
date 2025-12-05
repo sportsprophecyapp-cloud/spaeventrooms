@@ -40,3 +40,6 @@ yarn-error.*
 /ios
 /android
 .vercel
+optimized_events.json
+temp_events.json
+token.json
