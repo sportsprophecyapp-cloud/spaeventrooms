@@ -191,15 +191,14 @@ try {
 const THE_ODDS_API_KEY = process.env.THE_ODDS_API_KEY;
 const API_KEY = THE_ODDS_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_change_in_production';
-const CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hour cache
-
+const CACHE_DURATION = 8 * 60 * 60 * 1000; // 8 hours cache
 const SPORTS = [
     'americanfootball_nfl',
     'basketball_nba',
-    'baseball_mlb',
+    // 'baseball_mlb', // Off-season
     'icehockey_nhl',
     'soccer_epl',
-    'soccer_usa_mls'
+    // 'soccer_usa_mls' // Season ending, saving API calls
 ];
 
 const SPORT_LABELS = {
