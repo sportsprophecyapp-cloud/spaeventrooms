@@ -12,7 +12,7 @@ const SportPill = ({ sport, onPress }) => {
     const getSportIcon = (sportId) => {
         const iconMap = {
             all: { name: 'apps', library: 'Ionicons' },
-            nhl: { name: 'hockey-stick', library: 'MaterialCommunityIcons' },
+            nhl: { name: 'hockey-sticks', library: 'MaterialCommunityIcons' },
             nfl: { name: 'football', library: 'Ionicons' },
             mlb: { name: 'baseball', library: 'MaterialCommunityIcons' },
             nba: { name: 'basketball', library: 'Ionicons' },

@@ -27,7 +27,25 @@ api.interceptors.request.use(
     }
 );
 
+let onUnauthorized = null;
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            if (onUnauthorized) {
+                onUnauthorized();
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 export const apiService = {
+    setUnauthorizedCallback: (callback) => {
+        onUnauthorized = callback;
+    },
+
     login: async (email, password) => {
         try {
             const response = await api.post('/login', { email, password });

@@ -16,7 +16,12 @@ const LeaderboardScreen = ({ navigation }) => {
     const fetchLeaderboard = async () => {
         try {
             const data = await apiService.getLeaderboard();
-            setLeaderboardData(data.leaderboard || []);
+            // API returns an array on success, but the error handler returns { leaderboard: [] }
+            if (Array.isArray(data)) {
+                setLeaderboardData(data);
+            } else {
+                setLeaderboardData(data.leaderboard || []);
+            }
         } catch (error) {
             console.error('Failed to fetch leaderboard:', error);
         } finally {

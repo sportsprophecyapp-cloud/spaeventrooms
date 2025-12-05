@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, ScrollView, Share, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { getTeamLogo } from '../utils/teamLogos';
 
 const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
     const [selectedWinner, setSelectedWinner] = useState(null);
@@ -114,21 +115,30 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
             setSuccess(true);
 
             // Close after delay
-            setTimeout(() => {
-                onClose();
-                if (onPredictionSuccess) onPredictionSuccess();
-                // Reset state
-                setSuccess(false);
-                setSelectedWinner(null);
-                setHomeScore('');
-                setAwayScore('');
-            }, 1500);
+            // setTimeout(() => {
+            //     onClose();
+            //     if (onPredictionSuccess) onPredictionSuccess();
+            //     // Reset state
+            //     setSuccess(false);
+            //     setSelectedWinner(null);
+            //     setHomeScore('');
+            //     setAwayScore('');
+            // }, 1500);
 
         } catch (error) {
             const errorMsg = error.response?.data?.error || 'Failed to submit prediction';
             setError(errorMsg);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleShare = async () => {
+        try {
+            const message = `I just bet on ${selectedWinner} to win! Can you beat my prediction? Play now on Sports Prophecy! #SportsProphecy`;
+            await Share.share({ message });
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -209,7 +219,15 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
                         <View style={styles.matchupCard}>
                             <View style={styles.teamContainer}>
                                 <View style={styles.logoContainer}>
-                                    <Text style={styles.logoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
+                                    {getTeamLogo(event.homeTeam) ? (
+                                        <Image
+                                            source={{ uri: getTeamLogo(event.homeTeam) }}
+                                            style={styles.logoImage}
+                                            resizeMode="contain"
+                                        />
+                                    ) : (
+                                        <Text style={styles.logoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
+                                    )}
                                 </View>
                                 <Text style={styles.teamName} numberOfLines={2}>{event.homeTeam || 'Home Team'}</Text>
                             </View>
@@ -220,7 +238,15 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
 
                             <View style={styles.teamContainer}>
                                 <View style={styles.logoContainer}>
-                                    <Text style={styles.logoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
+                                    {getTeamLogo(event.awayTeam) ? (
+                                        <Image
+                                            source={{ uri: getTeamLogo(event.awayTeam) }}
+                                            style={styles.logoImage}
+                                            resizeMode="contain"
+                                        />
+                                    ) : (
+                                        <Text style={styles.logoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
+                                    )}
                                 </View>
                                 <Text style={styles.teamName} numberOfLines={2}>{event.awayTeam || 'Away Team'}</Text>
                             </View>
@@ -242,7 +268,15 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
                                     style={styles.winnerGradient}
                                 >
                                     <View style={styles.miniLogo}>
-                                        <Text style={styles.miniLogoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
+                                        {getTeamLogo(event.homeTeam) ? (
+                                            <Image
+                                                source={{ uri: getTeamLogo(event.homeTeam) }}
+                                                style={styles.miniLogoImage}
+                                                resizeMode="contain"
+                                            />
+                                        ) : (
+                                            <Text style={styles.miniLogoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
+                                        )}
                                     </View>
                                     <Text style={[
                                         styles.winnerButtonText,
@@ -266,7 +300,15 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
                                     style={styles.winnerGradient}
                                 >
                                     <View style={styles.miniLogo}>
-                                        <Text style={styles.miniLogoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
+                                        {getTeamLogo(event.awayTeam) ? (
+                                            <Image
+                                                source={{ uri: getTeamLogo(event.awayTeam) }}
+                                                style={styles.miniLogoImage}
+                                                resizeMode="contain"
+                                            />
+                                        ) : (
+                                            <Text style={styles.miniLogoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
+                                        )}
                                     </View>
                                     <Text style={[
                                         styles.winnerButtonText,
@@ -355,6 +397,25 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
                                 )}
                             </LinearGradient>
                         </TouchableOpacity>
+
+                        {success && (
+                            <TouchableOpacity
+                                style={styles.shareButton}
+                                onPress={handleShare}
+                                accessibilityLabel="Share Prediction"
+                                testID="prediction-share-button"
+                            >
+                                <LinearGradient
+                                    colors={COLORS.gradients.secondary}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    style={styles.submitGradient}
+                                >
+                                    <Text style={styles.submitText}>SHARE PREDICTION</Text>
+                                    <Ionicons name="share-social" size={24} color={COLORS.text.inverse} />
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        )}
                     </ScrollView>
                 </View>
             </View>
@@ -420,6 +481,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: SPACING.sm,
+        overflow: 'hidden',
+    },
+    logoImage: {
+        width: '80%',
+        height: '80%',
     },
     logoText: {
         color: COLORS.accent.cyan,
@@ -471,6 +537,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.15)',
         justifyContent: 'center',
         alignItems: 'center',
+        overflow: 'hidden',
+    },
+    miniLogoImage: {
+        width: '70%',
+        height: '70%',
     },
     miniLogoText: {
         color: COLORS.text.primary,
@@ -659,6 +730,12 @@ const styles = StyleSheet.create({
     },
     submitButtonSuccess: {
         ...SHADOWS.none,
+    },
+    shareButton: {
+        borderRadius: BORDER_RADIUS.md,
+        overflow: 'hidden',
+        marginBottom: SPACING.lg,
+        ...SHADOWS.cyan,
     },
 });
 

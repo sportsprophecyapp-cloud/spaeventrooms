@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         loadUser();
+        apiService.setUnauthorizedCallback(logout);
     }, []);
 
     const checkDailyReward = async (userId) => {

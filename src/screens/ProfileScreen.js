@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -13,6 +13,7 @@ const ProfileScreen = () => {
     const [predictions, setPredictions] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
 
     // ID Name Change State
@@ -46,6 +47,7 @@ const ProfileScreen = () => {
             setNotifications(notifs);
         } catch (error) {
             console.error('Error fetching user data:', error);
+            setError('Failed to load profile data. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -53,9 +55,31 @@ const ProfileScreen = () => {
 
     const onRefresh = async () => {
         setRefreshing(true);
+        setError(null);
         await fetchUserData();
         await refreshUser();
         setRefreshing(false);
+    };
+
+    const handleSharePrediction = async (pred) => {
+        try {
+            const result = pred.won ? 'won' : 'lost';
+            const message = `I predicted ${pred.predictedWinner} would win and ${result}! #SportsProphecy`;
+            await Share.share({ message });
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Error', 'Failed to share prediction. Please try again.');
+        }
+    };
+
+    const handleShare = async () => {
+        try {
+            const result = await Share.share({
+                message: `Join me on Sports Prophecy and get 5 free crowns! Use my code ${user?.referralCode} at signup. Play here: https://www.sportsprophecyapp.com`,
+            });
+        } catch (error) {
+            Alert.alert(error.message);
+        }
     };
 
     const handleUpdateIdName = async () => {
@@ -104,207 +128,220 @@ const ProfileScreen = () => {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent.cyan} />
                 }
             >
-                {/* User Info Card */}
-                <LinearGradient
-                    colors={COLORS.gradients.primary}
-                    style={styles.userCard}
-                >
-                    <View style={styles.avatarContainer}>
-                        <Text style={styles.avatarText}>{user?.idName?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || 'U'}</Text>
-                    </View>
-
-                    <View style={styles.nameContainer}>
-                        <Text style={styles.username}>{user?.idName || user?.username || 'Guest'}</Text>
-                        <TouchableOpacity
-                            style={styles.editButton}
-                            onPress={() => {
-                                setNewIdName(user?.idName || user?.username || '');
-                                setShowEditModal(true);
-                            }}
-                        >
-                            <Ionicons name="pencil" size={16} color={COLORS.text.inverse} />
+                {error ? (
+                    <View style={styles.errorContainer}>
+                        <Ionicons name="alert-circle-outline" size={48} color={COLORS.status.error} />
+                        <Text style={styles.errorText}>{error}</Text>
+                        <TouchableOpacity onPress={onRefresh} style={styles.retryButton}>
+                            <Text style={styles.retryButtonText}>Retry</Text>
                         </TouchableOpacity>
                     </View>
-
-                    <Text style={styles.email}>{user?.email || ''}</Text>
-                </LinearGradient>
-
-                {/* Stats Grid */}
-                <View style={styles.statsGrid}>
-                    <View style={styles.statBox}>
-                        <Ionicons name="wallet-outline" size={24} color={COLORS.accent.lime} />
-                        <Text style={styles.statValue}>{user?.tokens || 0}</Text>
-                        <Text style={styles.statLabel}>Tokens</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <Ionicons name="trophy" size={24} color="#FFD700" />
-                        <Text style={styles.statValue}>{user?.crowns || 0}</Text>
-                        <Text style={styles.statLabel}>Crowns</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <Ionicons name="checkmark-circle" size={24} color={COLORS.status.success} />
-                        <Text style={styles.statValue}>{user?.correctPredictions || 0}</Text>
-                        <Text style={styles.statLabel}>Wins</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <Ionicons name="percent" size={24} color={COLORS.accent.cyan} />
-                        <Text style={styles.statValue}>{winRate}%</Text>
-                        <Text style={styles.statLabel}>Win Rate</Text>
-                    </View>
-                </View>
-
-                {/* Badges Section */}
-                {(user?.badges?.length > 0 || user?.role === 'admin') && (
-                    <View style={styles.badgesSection}>
-                        <Text style={styles.sectionTitle}>🏆 Badges</Text>
-                        <View style={styles.badgesContainer}>
-                            {/* Fallback for Admin Badge if not in array but role is admin */}
-                            {user?.role === 'admin' && !user?.badges?.includes('👑 Admin') && (
-                                <View style={styles.badgeItem}>
-                                    <Text style={styles.badgeText}>👑 Admin</Text>
-                                </View>
-                            )}
-
-                            {user?.badges?.map((badge, index) => (
-                                <View key={index} style={styles.badgeItem}>
-                                    <Text style={styles.badgeText}>{badge}</Text>
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-                )}
-
-                {/* Referral Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>🎁 Refer Friends & Earn</Text>
-                    <LinearGradient
-                        colors={COLORS.gradients.primary}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.referralCard}
-                    >
-                        <View style={styles.referralHeader}>
-                            <Ionicons name="gift" size={32} color={COLORS.text.inverse} />
-                            <Text style={styles.referralTitle}>Your Referral Code</Text>
-                        </View>
-                        <View style={styles.referralCodeContainer}>
-                            <Text style={styles.referralCode}>
-                                {user?.referralCode || 'N/A'}
-                            </Text>
-                            <TouchableOpacity
-                                style={styles.copyButton}
-                                onPress={() => {
-                                    if (user?.referralCode) {
-                                        // Copy to clipboard functionality would go here
-                                        Alert.alert('Copied!', `Referral code ${user.referralCode} copied to clipboard`);
-                                    }
-                                }}
-                            >
-                                <Ionicons name="copy-outline" size={20} color={COLORS.text.inverse} />
-                                <Text style={styles.copyButtonText}>Copy</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.referralStats}>
-                            <View style={styles.referralStatItem}>
-                                <Text style={styles.referralStatValue}>{user?.referralCount || 0}</Text>
-                                <Text style={styles.referralStatLabel}>Friends Referred</Text>
+                ) : (
+                    <>
+                        {/* User Info Card */}
+                        <LinearGradient
+                            colors={COLORS.gradients.primary}
+                            style={styles.userCard}
+                        >
+                            <View style={styles.avatarContainer}>
+                                <Text style={styles.avatarText}>{user?.idName?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || 'U'}</Text>
                             </View>
-                            <View style={styles.referralDivider} />
-                            <View style={styles.referralStatItem}>
-                                <Text style={styles.referralStatValue}>5 👑</Text>
-                                <Text style={styles.referralStatLabel}>Per Referral</Text>
+
+                            <View style={styles.nameContainer}>
+                                <Text style={styles.username}>{user?.idName || user?.username || 'Guest'}</Text>
+                                <TouchableOpacity
+                                    style={styles.editButton}
+                                    onPress={() => {
+                                        setNewIdName(user?.idName || user?.username || '');
+                                        setShowEditModal(true);
+                                    }}
+                                >
+                                    <Ionicons name="pencil" size={16} color={COLORS.text.inverse} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={styles.email}>{user?.email || ''}</Text>
+                        </LinearGradient>
+
+                        {/* Stats Grid */}
+                        <View style={styles.statsGrid}>
+                            <View style={styles.statBox}>
+                                <Ionicons name="wallet-outline" size={24} color={COLORS.accent.lime} />
+                                <Text style={styles.statValue}>{user?.tokens || 0}</Text>
+                                <Text style={styles.statLabel}>Tokens</Text>
+                            </View>
+                            <View style={styles.statBox}>
+                                <Ionicons name="trophy" size={24} color="#FFD700" />
+                                <Text style={styles.statValue}>{user?.crowns || 0}</Text>
+                                <Text style={styles.statLabel}>Crowns</Text>
+                            </View>
+                            <View style={styles.statBox}>
+                                <Ionicons name="checkmark-circle" size={24} color={COLORS.status.success} />
+                                <Text style={styles.statValue}>{user?.correctPredictions || 0}</Text>
+                                <Text style={styles.statLabel}>Wins</Text>
+                            </View>
+                            <View style={styles.statBox}>
+                                <Ionicons name="percent" size={24} color={COLORS.accent.cyan} />
+                                <Text style={styles.statValue}>{winRate}%</Text>
+                                <Text style={styles.statLabel}>Win Rate</Text>
                             </View>
                         </View>
-                        <Text style={styles.referralInfo}>
-                            Share your code with friends! You both get 5 crowns when they sign up.
-                        </Text>
-                    </LinearGradient>
-                </View>
 
-                {/* Notifications Section */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Ionicons name="notifications" size={20} color={COLORS.accent.cyan} />
-                        <Text style={styles.sectionTitle}>Notifications</Text>
-                        {notifications.length > 0 && (
-                            <View style={styles.badge}>
-                                <Text style={styles.badgeText}>{notifications.length}</Text>
-                            </View>
-                        )}
-                    </View>
-
-                    {notifications.length === 0 ? (
-                        <View style={styles.emptyState}>
-                            <Ionicons name="notifications-off-outline" size={48} color={COLORS.text.tertiary} />
-                            <Text style={styles.emptyText}>No notifications yet</Text>
-                            <Text style={styles.emptySubtext}>Win predictions to get notified!</Text>
-                        </View>
-                    ) : (
-                        notifications.map((notif) => (
-                            <View key={notif.id} style={styles.notificationCard}>
-                                <View style={styles.notifIcon}>
-                                    <Ionicons name="trophy" size={24} color="#FFD700" />
-                                </View>
-                                <View style={styles.notifContent}>
-                                    <Text style={styles.notifMessage}>{notif.message}</Text>
-                                    <Text style={styles.notifReward}>{notif.reward}</Text>
-                                    <Text style={styles.notifTime}>
-                                        {new Date(notif.timestamp).toLocaleDateString()}
-                                    </Text>
-                                </View>
-                                <Ionicons name="checkmark-circle" size={20} color={COLORS.status.success} />
-                            </View>
-                        ))
-                    )}
-                </View>
-
-                {/* Recent Predictions */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Ionicons name="list" size={20} color={COLORS.accent.cyan} />
-                        <Text style={styles.sectionTitle}>Recent Predictions</Text>
-                    </View>
-
-                    {predictions.length === 0 ? (
-                        <View style={styles.emptyState}>
-                            <Ionicons name="football-outline" size={48} color={COLORS.text.tertiary} />
-                            <Text style={styles.emptyText}>No predictions yet</Text>
-                            <Text style={styles.emptySubtext}>Start making predictions to see them here!</Text>
-                        </View>
-                    ) : (
-                        predictions.slice(0, 5).map((pred) => (
-                            <View key={pred.id} style={styles.predictionCard}>
-                                <View style={styles.predContent}>
-                                    <Text style={styles.predTeam}>{pred.predictedWinner}</Text>
-                                    <Text style={styles.predEvent}>{pred.eventId}</Text>
-                                    <Text style={styles.predDate}>
-                                        {new Date(pred.timestamp).toLocaleDateString()}
-                                    </Text>
-                                </View>
-                                <View style={styles.predStatus}>
-                                    {pred.resolved ? (
-                                        pred.won ? (
-                                            <View style={styles.statusBadge}>
-                                                <Ionicons name="checkmark-circle" size={16} color={COLORS.status.success} />
-                                                <Text style={[styles.statusText, { color: COLORS.status.success }]}>Won</Text>
-                                            </View>
-                                        ) : (
-                                            <View style={styles.statusBadge}>
-                                                <Ionicons name="close-circle" size={16} color={COLORS.status.error} />
-                                                <Text style={[styles.statusText, { color: COLORS.status.error }]}>Lost</Text>
-                                            </View>
-                                        )
-                                    ) : (
-                                        <View style={styles.statusBadge}>
-                                            <Ionicons name="time" size={16} color={COLORS.text.tertiary} />
-                                            <Text style={[styles.statusText, { color: COLORS.text.tertiary }]}>Pending</Text>
+                        {/* Badges Section */}
+                        {(user?.badges?.length > 0 || user?.role === 'admin') && (
+                            <View style={styles.badgesSection}>
+                                <Text style={styles.sectionTitle}>🏆 Badges</Text>
+                                <View style={styles.badgesContainer}>
+                                    {/* Fallback for Admin Badge if not in array but role is admin */}
+                                    {user?.role === 'admin' && !user?.badges?.includes('👑 Admin') && (
+                                        <View style={styles.badgeItem}>
+                                            <Text style={styles.badgeText}>👑 Admin</Text>
                                         </View>
                                     )}
+
+                                    {user?.badges?.map((badge, index) => (
+                                        <View key={index} style={styles.badgeItem}>
+                                            <Text style={styles.badgeText}>{badge}</Text>
+                                        </View>
+                                    ))}
                                 </View>
                             </View>
-                        ))
-                    )}
-                </View>
+                        )}
+
+                        {/* Referral Section */}
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>🎁 Refer Friends & Earn</Text>
+                            <LinearGradient
+                                colors={COLORS.gradients.primary}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.referralCard}
+                            >
+                                <View style={styles.referralHeader}>
+                                    <Ionicons name="gift" size={32} color={COLORS.text.inverse} />
+                                    <Text style={styles.referralTitle}>Your Referral Code</Text>
+                                </View>
+                                <View style={styles.referralCodeContainer}>
+                                    <Text style={styles.referralCode}>
+                                        {user?.referralCode || 'N/A'}
+                                    </Text>
+                                    <TouchableOpacity
+                                        style={styles.copyButton}
+                                        onPress={handleShare}
+                                    >
+                                        <Ionicons name="share-social-outline" size={20} color={COLORS.text.inverse} />
+                                        <Text style={styles.copyButtonText}>Share</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={styles.referralStats}>
+                                    <View style={styles.referralStatItem}>
+                                        <Text style={styles.referralStatValue}>{user?.referralCount || 0}</Text>
+                                        <Text style={styles.referralStatLabel}>Friends Referred</Text>
+                                    </View>
+                                    <View style={styles.referralDivider} />
+                                    <View style={styles.referralStatItem}>
+                                        <Text style={styles.referralStatValue}>5 👑</Text>
+                                        <Text style={styles.referralStatLabel}>Per Referral</Text>
+                                    </View>
+                                </View>
+                                <Text style={styles.referralInfo}>
+                                    Share your code with friends! You both get 5 crowns when they sign up.
+                                </Text>
+                            </LinearGradient>
+                        </View>
+
+                        {/* Notifications Section */}
+                        <View style={styles.section}>
+                            <View style={styles.sectionHeader}>
+                                <Ionicons name="notifications" size={20} color={COLORS.accent.cyan} />
+                                <Text style={styles.sectionTitle}>Notifications</Text>
+                                {notifications.length > 0 && (
+                                    <View style={styles.badge}>
+                                        <Text style={styles.badgeText}>{notifications.length}</Text>
+                                    </View>
+                                )}
+                            </View>
+
+                            {notifications.length === 0 ? (
+                                <View style={styles.emptyState}>
+                                    <Ionicons name="notifications-off-outline" size={48} color={COLORS.text.tertiary} />
+                                    <Text style={styles.emptyText}>No notifications yet</Text>
+                                    <Text style={styles.emptySubtext}>Win predictions to get notified!</Text>
+                                </View>
+                            ) : (
+                                notifications.map((notif) => (
+                                    <View key={notif.id} style={styles.notificationCard}>
+                                        <View style={styles.notifIcon}>
+                                            <Ionicons name="trophy" size={24} color="#FFD700" />
+                                        </View>
+                                        <View style={styles.notifContent}>
+                                            <Text style={styles.notifMessage}>{notif.message}</Text>
+                                            <Text style={styles.notifReward}>{notif.reward}</Text>
+                                            <Text style={styles.notifTime}>
+                                                {new Date(notif.timestamp).toLocaleDateString()}
+                                            </Text>
+                                        </View>
+                                        <Ionicons name="checkmark-circle" size={20} color={COLORS.status.success} />
+                                    </View>
+                                ))
+                            )}
+                        </View>
+
+                        {/* Recent Predictions */}
+                        <View style={styles.section}>
+                            <View style={styles.sectionHeader}>
+                                <Ionicons name="list" size={20} color={COLORS.accent.cyan} />
+                                <Text style={styles.sectionTitle}>Recent Predictions</Text>
+                            </View>
+
+                            {predictions.length === 0 ? (
+                                <View style={styles.emptyState}>
+                                    <Ionicons name="football-outline" size={48} color={COLORS.text.tertiary} />
+                                    <Text style={styles.emptyText}>No predictions yet</Text>
+                                    <Text style={styles.emptySubtext}>Start making predictions to see them here!</Text>
+                                </View>
+                            ) : (
+                                predictions.slice(0, 5).map((pred) => (
+                                    <View key={pred.id} style={styles.predictionCard}>
+                                        <View style={styles.predContent}>
+                                            <Text style={styles.predTeam}>{pred.predictedWinner}</Text>
+                                            <Text style={styles.predEvent}>{pred.eventId}</Text>
+                                            <Text style={styles.predDate}>
+                                                {new Date(pred.timestamp).toLocaleDateString()}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.predStatus}>
+                                            {pred.resolved ? (
+                                                pred.won ? (
+                                                    <View style={styles.statusBadge}>
+                                                        <Ionicons name="checkmark-circle" size={16} color={COLORS.status.success} />
+                                                        <Text style={[styles.statusText, { color: COLORS.status.success }]}>Won</Text>
+                                                    </View>
+                                                ) : (
+                                                    <View style={styles.statusBadge}>
+                                                        <Ionicons name="close-circle" size={16} color={COLORS.status.error} />
+                                                        <Text style={[styles.statusText, { color: COLORS.status.error }]}>Lost</Text>
+                                                    </View>
+                                                )
+                                            ) : (
+                                                <View style={styles.statusBadge}>
+                                                    <Ionicons name="time" size={16} color={COLORS.text.tertiary} />
+                                                    <Text style={[styles.statusText, { color: COLORS.text.tertiary }]}>Pending</Text>
+                                                </View>
+                                            )}
+                                        </View>
+                                        <TouchableOpacity
+                                            style={styles.shareHistoryButton}
+                                            onPress={() => handleSharePrediction(pred)}
+                                        >
+                                            <Ionicons name="share-social-outline" size={20} color={COLORS.text.secondary} />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))
+                            )}
+                        </View>
+                    </>
+                )}
             </ScrollView>
 
             {/* Edit ID Name Modal */}
@@ -744,6 +781,34 @@ const styles = StyleSheet.create({
     },
     saveButtonText: {
         color: '#000',
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.base,
+    },
+    shareHistoryButton: {
+        padding: SPACING.sm,
+        marginLeft: SPACING.sm,
+    },
+    errorContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: SPACING.xl,
+        marginTop: SPACING.xl,
+    },
+    errorText: {
+        color: COLORS.status.error,
+        fontSize: TYPOGRAPHY.sizes.md,
+        textAlign: 'center',
+        marginTop: SPACING.md,
+        marginBottom: SPACING.lg,
+    },
+    retryButton: {
+        backgroundColor: COLORS.accent.cyan,
+        paddingHorizontal: SPACING.xl,
+        paddingVertical: SPACING.md,
+        borderRadius: BORDER_RADIUS.md,
+    },
+    retryButtonText: {
+        color: COLORS.text.inverse,
         fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.base,
     },

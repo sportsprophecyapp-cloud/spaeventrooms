@@ -17,6 +17,7 @@ const ChatScreen = () => {
   const [rooms, setRooms] = useState([]);
   const [lobbyCount, setLobbyCount] = useState(0);
   const [loadingRooms, setLoadingRooms] = useState(false);
+  const [roomsError, setRoomsError] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [selectedRoomToJoin, setSelectedRoomToJoin] = useState(null);
@@ -53,6 +54,7 @@ const ChatScreen = () => {
       }
     } catch (error) {
       console.error('Failed to fetch rooms', error);
+      setRoomsError('Failed to load rooms. Please try again.');
     } finally {
       setLoadingRooms(false);
     }
@@ -319,6 +321,13 @@ const ChatScreen = () => {
 
         {loadingRooms ? (
           <ActivityIndicator size="large" color="#38bdf8" style={{ marginTop: 20 }} />
+        ) : roomsError ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{roomsError}</Text>
+            <TouchableOpacity onPress={fetchRooms} style={styles.retryButton}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <FlatList
             data={rooms}
@@ -770,6 +779,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     marginLeft: 4,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    marginTop: 20,
+  },
+  errorText: {
+    color: '#ef4444',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#38bdf8',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
