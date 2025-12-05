@@ -483,6 +483,8 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString(), nodeVersion: process.version });
 });
 
+
+
 // Public stats for landing page (no auth required)
 app.get('/api/public/stats', async (req, res) => {
     try {
@@ -826,9 +828,12 @@ app.get('/api/leaderboard', async (req, res) => {
             tokens: user.tokens,
             crowns: user.crowns,
             correctPredictions: user.correctPredictions || 0
+        }));
+        res.json(leaderboard);
+    } catch (error) {
         console.error('Leaderboard error:', error);
-            res.status(500).json({ error: error.message });
-        }
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Admin: Get API usage statistics
