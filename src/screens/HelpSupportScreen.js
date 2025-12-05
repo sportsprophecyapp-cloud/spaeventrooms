@@ -184,7 +184,7 @@ const HelpSupportScreen = () => {
                 {/* App Info */}
                 <View style={styles.appInfo}>
                     <Text style={styles.appName}>Sports Prophecy</Text>
-                    <Text style={styles.versionText}>Version 2.3.1</Text>
+                    <Text style={styles.versionText}>Version 2.4.0</Text>
                     <Text style={styles.appTagline}>100% Free Sports Predictions</Text>
                 </View>
             </ScrollView>
