@@ -191,7 +191,7 @@ try {
 const THE_ODDS_API_KEY = process.env.THE_ODDS_API_KEY;
 const API_KEY = THE_ODDS_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_change_in_production';
-const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours cache
+const CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hour cache
 
 const SPORTS = [
     'americanfootball_nfl',
