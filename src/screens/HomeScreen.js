@@ -117,6 +117,36 @@ const HomeScreen = ({ navigation }) => {
                 </View>
             </View>
 
+            {/* Guest - Create Account Banner - MOVED TO TOP */}
+            {user?.isGuest && (
+                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                    <LinearGradient
+                        colors={COLORS.gradients.primary}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.guestBanner}
+                    >
+                        <View style={styles.guestBannerContent}>
+                            <View style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: 24,
+                                backgroundColor: 'rgba(255,255,255,0.2)',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Ionicons name="person-add" size={28} color={COLORS.text.inverse} />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.guestBannerTitle}>CREATE ACCOUNT</Text>
+                                <Text style={styles.guestBannerText}>Save your progress & win real prizes!</Text>
+                            </View>
+                            <Ionicons name="arrow-forward-circle" size={40} color={COLORS.text.inverse} />
+                        </View>
+                    </LinearGradient>
+                </TouchableOpacity>
+            )}
+
             {/* LARGE Announcement Banner - NFL/NHL/NBA Open */}
             <LinearGradient
                 colors={['#dc2626', '#b91c1c', '#991b1b']}
@@ -151,27 +181,6 @@ const HomeScreen = ({ navigation }) => {
                     </Text>
                 </View>
             </LinearGradient>
-
-            {/* Guest - Create Account Banner */}
-            {user?.isGuest && (
-                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <LinearGradient
-                        colors={[COLORS.accent.purple, COLORS.accent.purpleDark]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.guestBanner}
-                    >
-                        <View style={styles.guestBannerContent}>
-                            <Ionicons name="person-add" size={24} color={COLORS.text.inverse} />
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.guestBannerTitle}>Create Account</Text>
-                                <Text style={styles.guestBannerText}>Save your progress & win real prizes!</Text>
-                            </View>
-                            <Ionicons name="arrow-forward-circle" size={32} color={COLORS.text.inverse} />
-                        </View>
-                    </LinearGradient>
-                </TouchableOpacity>
-            )}
 
             {/* Beta Testers Draw Banner */}
             <TouchableOpacity onPress={() => navigation.navigate('WeeklyDraw')}>
@@ -775,10 +784,12 @@ const styles = StyleSheet.create({
     },
     guestBanner: {
         marginHorizontal: SPACING.base,
-        marginBottom: SPACING.md,
-        borderRadius: BORDER_RADIUS.lg,
-        padding: SPACING.md,
-        ...SHADOWS.md,
+        marginVertical: SPACING.md, // Increased vertical margin
+        borderRadius: BORDER_RADIUS.xl, // Increased radius
+        padding: SPACING.lg, // Increased padding
+        ...SHADOWS.cyan, // Use cyan shadow
+        borderWidth: 2, // Add border
+        borderColor: COLORS.accent.lime, // Lime border for high visibility
     },
     guestBannerContent: {
         flexDirection: 'row',
@@ -786,14 +797,16 @@ const styles = StyleSheet.create({
         gap: SPACING.md,
     },
     guestBannerTitle: {
-        color: COLORS.text.inverse,
-        fontSize: TYPOGRAPHY.sizes.base,
+        color: COLORS.text.inverse, // Black text on bright background
+        fontSize: TYPOGRAPHY.sizes.xl, // Larger title
         fontWeight: TYPOGRAPHY.weights.black,
-        marginBottom: 2,
+        marginBottom: 4,
+        letterSpacing: 0.5,
     },
     guestBannerText: {
         color: COLORS.text.inverse,
         fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.bold,
         opacity: 0.9,
     },
 });
