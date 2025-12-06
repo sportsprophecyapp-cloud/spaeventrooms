@@ -4,9 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
 
 const HowToPlayScreen = () => {
     const navigation = useNavigation();
+    const { loginAsGuest } = useAuth();
 
     return (
         <SafeAreaView style={styles.container}>
@@ -219,7 +221,7 @@ const HowToPlayScreen = () => {
                 {/* Get Started Button */}
                 <TouchableOpacity
                     style={styles.startButton}
-                    onPress={() => navigation.navigate('Home')}
+                    onPress={loginAsGuest}
                 >
                     <LinearGradient
                         colors={COLORS.gradients.primary}

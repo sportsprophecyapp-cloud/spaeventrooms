@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, ScrollView, Share, Image } from 'react-native';
+import { StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiService } from '../services/api';
@@ -7,12 +7,12 @@ import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { getTeamLogo } from '../utils/teamLogos';
 
-const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
+const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadNextGame }) => {
     const [selectedWinner, setSelectedWinner] = useState(null);
     const [homeScore, setHomeScore] = useState('');
     const [awayScore, setAwayScore] = useState('');
     const [loading, setLoading] = useState(false);
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const [balance, setBalance] = useState({
         tokens: user?.tokens || 0,
         crowns: user?.crowns || 0
@@ -39,7 +39,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
     }, [visible, user]);
 
     const fetchBalance = async () => {
-        if (user?.uuid) {
+        if (user?.uuid && !user.isGuest) {
             try {
                 const userBalance = await apiService.getUserBalance(user.uuid);
                 if (userBalance && (userBalance.tokens !== undefined)) {
@@ -66,6 +66,18 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
     const hasEnoughTokens = balance.tokens >= PREDICTION_COST;
 
     const handleSubmit = async () => {
+        // if (user.isGuest) {
+        //     Alert.alert(
+        //         'Sign Up Required',
+        //         'You must create an account to make predictions and win prizes!',
+        //         [
+        //             { text: 'Cancel', style: 'cancel' },
+        //             { text: 'Sign Up', onPress: () => onClose() } // Ideally navigate to Register, but modal close + separate nav is simpler for now, or we can assume user knows how to logout/signup
+        //         ]
+        //     );
+        //     return;
+        // }
+
         if (!selectedWinner) {
             setError('Please select a winner');
             return;
@@ -98,7 +110,28 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
 
         setError(null);
         setLoading(true);
+
         try {
+            if (user.isGuest) {
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Deduct token locally
+                updateUser({ tokens: user.tokens - PREDICTION_COST });
+                setBalance(prev => ({ ...prev, tokens: prev.tokens - PREDICTION_COST }));
+
+                setSuccess(true);
+
+                setTimeout(() => {
+                    onClose();
+                    setSuccess(false);
+                    setSelectedWinner(null);
+                    setHomeScore('');
+                    setAwayScore('');
+                }, 1500);
+                return;
+            }
+
             const result = await apiService.submitPrediction({
                 userId: user.uuid,
                 eventId: event.id,
@@ -114,16 +147,33 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
 
             setSuccess(true);
 
-            // Close after delay
-            // setTimeout(() => {
-            //     onClose();
-            //     if (onPredictionSuccess) onPredictionSuccess();
-            //     // Reset state
-            //     setSuccess(false);
-            //     setSelectedWinner(null);
-            //     setHomeScore('');
-            //     setAwayScore('');
-            // }, 1500);
+            // Auto-load next game or close after delay
+            setTimeout(async () => {
+                // Refresh events first
+                if (onPredictionSuccess) onPredictionSuccess();
+
+                // Try to load next game
+                if (onLoadNextGame) {
+                    const nextEvent = await onLoadNextGame();
+                    if (nextEvent) {
+                        // Reset state for next game
+                        setSuccess(false);
+                        setSelectedWinner(null);
+                        setHomeScore('');
+                        setAwayScore('');
+                        setError(null);
+                        // Modal stays open with new event
+                        return;
+                    }
+                }
+
+                // No next game, close modal
+                onClose();
+                setSuccess(false);
+                setSelectedWinner(null);
+                setHomeScore('');
+                setAwayScore('');
+            }, 1500);
 
         } catch (error) {
             const errorMsg = error.response?.data?.error || 'Failed to submit prediction';
@@ -133,14 +183,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
         }
     };
 
-    const handleShare = async () => {
-        try {
-            const message = `I just bet on ${selectedWinner} to win! Can you beat my prediction? Play now on Sports Prophecy! #SportsProphecy`;
-            await Share.share({ message });
-        } catch (error) {
-            console.error(error);
-        }
-    };
+
 
     return (
         <Modal
@@ -398,24 +441,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess }) => {
                             </LinearGradient>
                         </TouchableOpacity>
 
-                        {success && (
-                            <TouchableOpacity
-                                style={styles.shareButton}
-                                onPress={handleShare}
-                                accessibilityLabel="Share Prediction"
-                                testID="prediction-share-button"
-                            >
-                                <LinearGradient
-                                    colors={COLORS.gradients.secondary}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 0 }}
-                                    style={styles.submitGradient}
-                                >
-                                    <Text style={styles.submitText}>SHARE PREDICTION</Text>
-                                    <Ionicons name="share-social" size={24} color={COLORS.text.inverse} />
-                                </LinearGradient>
-                            </TouchableOpacity>
-                        )}
+
                     </ScrollView>
                 </View>
             </View>
@@ -731,12 +757,7 @@ const styles = StyleSheet.create({
     submitButtonSuccess: {
         ...SHADOWS.none,
     },
-    shareButton: {
-        borderRadius: BORDER_RADIUS.md,
-        overflow: 'hidden',
-        marginBottom: SPACING.lg,
-        ...SHADOWS.cyan,
-    },
+
 });
 
 export default PredictionModal;

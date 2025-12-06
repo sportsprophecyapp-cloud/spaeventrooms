@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator, Share } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -61,16 +61,7 @@ const ProfileScreen = () => {
         setRefreshing(false);
     };
 
-    const handleSharePrediction = async (pred) => {
-        try {
-            const result = pred.won ? 'won' : 'lost';
-            const message = `I predicted ${pred.predictedWinner} would win and ${result}! #SportsProphecy`;
-            await Share.share({ message });
-        } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'Failed to share prediction. Please try again.');
-        }
-    };
+
 
     const handleShare = async () => {
         try {
@@ -330,12 +321,7 @@ const ProfileScreen = () => {
                                                 </View>
                                             )}
                                         </View>
-                                        <TouchableOpacity
-                                            style={styles.shareHistoryButton}
-                                            onPress={() => handleSharePrediction(pred)}
-                                        >
-                                            <Ionicons name="share-social-outline" size={20} color={COLORS.text.secondary} />
-                                        </TouchableOpacity>
+
                                     </View>
                                 ))
                             )}
@@ -784,10 +770,7 @@ const styles = StyleSheet.create({
         fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.base,
     },
-    shareHistoryButton: {
-        padding: SPACING.sm,
-        marginLeft: SPACING.sm,
-    },
+
     errorContainer: {
         alignItems: 'center',
         justifyContent: 'center',

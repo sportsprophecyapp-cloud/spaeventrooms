@@ -22,7 +22,7 @@ const HomeScreen = ({ navigation }) => {
         try {
             const [eventsData, predictionsData] = await Promise.all([
                 apiService.getEvents(),
-                user ? apiService.getUserPredictions(user.uuid) : Promise.resolve([])
+                (user && !user.isGuest) ? apiService.getUserPredictions(user.uuid) : Promise.resolve([])
             ]);
 
             // Mark events that user has already predicted on
@@ -67,6 +67,20 @@ const HomeScreen = ({ navigation }) => {
         const eventDate = new Date(event.commence_time || event.startTime);
         return eventDate >= now && eventDate <= fortyEightHoursLater;
     });
+
+    const getNextUnpredictedGame = async () => {
+        // Find the next game that hasn't been predicted on
+        const unpredictedGames = upcomingEvents.filter(event => !event.hasPredicted);
+
+        if (unpredictedGames.length > 0) {
+            const nextGame = unpredictedGames[0];
+            setSelectedEvent(nextGame);
+            return nextGame;
+        }
+
+        return null; // No more unpredicted games
+    };
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -131,6 +145,27 @@ const HomeScreen = ({ navigation }) => {
                     </Text>
                 </View>
             </LinearGradient>
+
+            {/* Guest - Create Account Banner */}
+            {user?.isGuest && (
+                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                    <LinearGradient
+                        colors={[COLORS.accent.purple, COLORS.accent.purpleDark]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.guestBanner}
+                    >
+                        <View style={styles.guestBannerContent}>
+                            <Ionicons name="person-add" size={24} color={COLORS.text.inverse} />
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.guestBannerTitle}>Create Account</Text>
+                                <Text style={styles.guestBannerText}>Save your progress & win real prizes!</Text>
+                            </View>
+                            <Ionicons name="arrow-forward-circle" size={32} color={COLORS.text.inverse} />
+                        </View>
+                    </LinearGradient>
+                </TouchableOpacity>
+            )}
 
             {/* Beta Testers Draw Banner */}
             <TouchableOpacity onPress={() => navigation.navigate('WeeklyDraw')}>
@@ -403,6 +438,7 @@ const HomeScreen = ({ navigation }) => {
                 onClose={() => setModalVisible(false)}
                 event={selectedEvent}
                 onPredictionSuccess={fetchEvents}
+                onLoadNextGame={getNextUnpredictedGame}
             />
         </SafeAreaView>
     );
@@ -730,6 +766,29 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.sizes.sm,
         marginTop: SPACING.xs,
         textAlign: 'center',
+    },
+    guestBanner: {
+        marginHorizontal: SPACING.base,
+        marginBottom: SPACING.md,
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.md,
+        ...SHADOWS.md,
+    },
+    guestBannerContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.md,
+    },
+    guestBannerTitle: {
+        color: COLORS.text.inverse,
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.black,
+        marginBottom: 2,
+    },
+    guestBannerText: {
+        color: COLORS.text.inverse,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        opacity: 0.9,
     },
 });
 

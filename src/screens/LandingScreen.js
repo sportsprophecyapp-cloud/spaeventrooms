@@ -3,10 +3,12 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Dimensions
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
 const LandingScreen = ({ navigation }) => {
+    const { loginAsGuest } = useAuth();
     const [stats, setStats] = React.useState({ users: 0, predictions: 0 });
 
     React.useEffect(() => {
@@ -128,13 +130,15 @@ const LandingScreen = ({ navigation }) => {
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={styles.browseButton}
-                                onPress={() => navigation.navigate('Main')}
-                                accessibilityLabel="Browse Without Login Button"
-                                testID="landing-browse-button"
+                                style={styles.secondaryButton}
+                                onPress={loginAsGuest}
+                                accessibilityLabel="Play Now Button"
+                                testID="landing-play-now-button"
                             >
-                                <Ionicons name="eye-outline" size={20} color={COLORS.text.secondary} />
-                                <Text style={styles.browseButtonText}>Browse Without Login</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.accent.lime }} />
+                                    <Text style={styles.secondaryButtonText}>PLAY NOW</Text>
+                                </View>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -424,20 +428,7 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.sizes.sm,
         fontWeight: TYPOGRAPHY.weights.semibold,
     },
-    browseButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: SPACING.xs,
-        paddingVertical: SPACING.md,
-        borderRadius: BORDER_RADIUS.md,
-        backgroundColor: 'transparent',
-    },
-    browseButtonText: {
-        color: COLORS.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        fontWeight: TYPOGRAPHY.weights.medium,
-    },
+
     featuresSection: {
         paddingHorizontal: SPACING.lg,
         marginBottom: SPACING.xxxl,

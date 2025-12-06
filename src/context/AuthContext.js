@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import storage from '../utils/storage';
 import { apiService } from '../services/api';
 
 const AuthContext = createContext();
@@ -24,17 +24,19 @@ export const AuthProvider = ({ children }) => {
             if (result.claimed) {
                 Alert.alert('Daily Reward', result.message);
                 // Update user state with new balance
-                setUser(prev => {
-                    if (!prev) return prev;
-                    const newUser = {
-                        ...prev,
-                        tokens: result.balance.tokens,
-                        crowns: result.balance.crowns
-                    };
-                    console.log('Updating user state with new balance:', newUser.tokens);
-                    AsyncStorage.setItem('userData', JSON.stringify(newUser));
-                    return newUser;
-                });
+                if (result.balance) {
+                    setUser(prev => {
+                        if (!prev) return prev;
+                        const newUser = {
+                            ...prev,
+                            tokens: result.balance.tokens,
+                            crowns: result.balance.crowns
+                        };
+                        console.log('Updating user state with new balance:', newUser.tokens);
+                        storage.setItem('userData', JSON.stringify(newUser));
+                        return newUser;
+                    });
+                }
             }
         } catch (error) {
             console.error('Error checking daily reward:', error);
@@ -44,14 +46,14 @@ export const AuthProvider = ({ children }) => {
 
     const loadUser = async () => {
         try {
-            const storedUser = await AsyncStorage.getItem('userData');
+            const storedUser = await storage.getItem('userData');
             if (storedUser) {
                 const parsedUser = JSON.parse(storedUser);
                 // Fetch fresh data from backend immediately
                 try {
                     const freshUser = await apiService.getUserProfile(parsedUser.uuid);
                     setUser(freshUser);
-                    await AsyncStorage.setItem('userData', JSON.stringify(freshUser));
+                    await storage.setItem('userData', JSON.stringify(freshUser));
                     checkDailyReward(freshUser.uuid);
                 } catch (err) {
                     console.warn('Failed to fetch fresh user data, using stored data', err);
@@ -73,10 +75,10 @@ export const AuthProvider = ({ children }) => {
                 setUser(data.user);
 
                 if (remember) {
-                    await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+                    await storage.setItem('userData', JSON.stringify(data.user));
                     // If the backend returned a token, store it too
                     if (data.token) {
-                        await AsyncStorage.setItem('userToken', data.token);
+                        await storage.setItem('userToken', data.token);
                     }
                 }
 
@@ -98,9 +100,9 @@ export const AuthProvider = ({ children }) => {
                 setUser(data.user);
 
                 if (remember) {
-                    await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+                    await storage.setItem('userData', JSON.stringify(data.user));
                     if (data.token) {
-                        await AsyncStorage.setItem('userToken', data.token);
+                        await storage.setItem('userToken', data.token);
                     }
                 }
 
@@ -126,8 +128,8 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await AsyncStorage.removeItem('userData');
-            await AsyncStorage.removeItem('userToken');
+            await storage.removeItem('userData');
+            await storage.removeItem('userToken');
             setUser(null);
         } catch (e) {
             console.error('Logout failed', e);
@@ -136,13 +138,13 @@ export const AuthProvider = ({ children }) => {
 
     const refreshUser = async () => {
         try {
-            const storedUser = await AsyncStorage.getItem('userData');
+            const storedUser = await storage.getItem('userData');
             if (storedUser) {
                 const parsedUser = JSON.parse(storedUser);
                 // Fetch fresh data
                 const freshUser = await apiService.getUserProfile(parsedUser.uuid);
                 setUser(freshUser);
-                await AsyncStorage.setItem('userData', JSON.stringify(freshUser));
+                await storage.setItem('userData', JSON.stringify(freshUser));
             }
         } catch (e) {
             console.error('Failed to refresh user', e);
@@ -153,14 +155,33 @@ export const AuthProvider = ({ children }) => {
         try {
             const newUser = { ...user, ...updates };
             setUser(newUser);
-            await AsyncStorage.setItem('userData', JSON.stringify(newUser));
+            await storage.setItem('userData', JSON.stringify(newUser));
         } catch (e) {
             console.error('Failed to update user locally', e);
         }
     };
 
+    const loginAsGuest = async () => {
+        try {
+            const guestUser = {
+                uuid: 'guest',
+                username: 'Guest',
+                isGuest: true,
+                tokens: 50,
+                crowns: 0
+            };
+            setUser(guestUser);
+            // We do NOT persist guest user to storage to keep it ephemeral
+            // unless requested otherwise.
+            return true;
+        } catch (error) {
+            console.error('Guest login failed', error);
+            return false;
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout, refreshUser, updateUser }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, logout, loginAsGuest, refreshUser, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

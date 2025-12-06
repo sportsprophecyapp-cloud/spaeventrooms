@@ -104,6 +104,20 @@ const SportScreen = () => {
         return eventDate >= now && eventDate <= futureWindow;
     });
 
+    const getNextUnpredictedGame = async () => {
+        // Find the next game that hasn't been predicted on
+        const unpredictedGames = upcomingEvents.filter(event => !event.hasPredicted);
+
+        if (unpredictedGames.length > 0) {
+            const nextGame = unpredictedGames[0];
+            setSelectedEvent(nextGame);
+            return nextGame;
+        }
+
+        return null; // No more unpredicted games
+    };
+
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -178,6 +192,7 @@ const SportScreen = () => {
                 onClose={() => setModalVisible(false)}
                 event={selectedEvent}
                 onPredictionSuccess={fetchEvents}
+                onLoadNextGame={getNextUnpredictedGame}
             />
         </SafeAreaView>
     );
