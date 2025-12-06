@@ -49,6 +49,9 @@ const AppNavigator = () => {
           <Stack.Screen name="Report" component={ReportScreen} />
           <Stack.Screen name="Admin" component={AdminScreen} />
           <Stack.Screen name="League" component={LeagueScreen} />
+          {/* Allow guests to access Register/Login to upgrade/switch account */}
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
         </>
       ) : (
         <>

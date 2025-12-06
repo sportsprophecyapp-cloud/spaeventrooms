@@ -39,7 +39,12 @@ const RegisterScreen = ({ navigation }) => {
         try {
             const success = await register(email, password, username, referralCode, rememberMe);
             if (success) {
-                // Navigation is handled by App.js based on user state
+                // For guests upgrading to registered, we need to manually navigate
+                // because App.js won't unmount the stack (since they were already "authenticated")
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Main' }],
+                });
             } else {
                 setError('Registration failed');
             }
