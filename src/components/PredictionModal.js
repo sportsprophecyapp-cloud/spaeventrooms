@@ -127,8 +127,9 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                 setSuccess(true);
 
                 setTimeout(async () => { // Async for consistency with main flow
-                    // Refresh events first
-                    if (onPredictionSuccess) onPredictionSuccess();
+                    // Do NOT call onPredictionSuccess for guests here.
+                    // The updateUser call triggers a user change, which triggers useEffect in parent screens to refresh events.
+                    // Calling it here explicitly causes a race condition with a stale user object.
 
                     // Try to load next game
                     if (onLoadNextGame) {
