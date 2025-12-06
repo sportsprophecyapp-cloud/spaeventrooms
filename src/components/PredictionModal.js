@@ -116,13 +116,34 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                 // Simulate network delay
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                // Deduct token locally
-                updateUser({ tokens: user.tokens - PREDICTION_COST });
+                // Deduct token locally and add to predicted games
+                const currentPredictedGames = user.predictedGames || [];
+                updateUser({
+                    tokens: user.tokens - PREDICTION_COST,
+                    predictedGames: [...currentPredictedGames, event.id]
+                });
                 setBalance(prev => ({ ...prev, tokens: prev.tokens - PREDICTION_COST }));
 
                 setSuccess(true);
 
-                setTimeout(() => {
+                setTimeout(async () => { // Async for consistency with main flow
+                    // Refresh events first
+                    if (onPredictionSuccess) onPredictionSuccess();
+
+                    // Try to load next game
+                    if (onLoadNextGame) {
+                        const nextEvent = await onLoadNextGame(event.id); // Pass current ID to ignore
+                        if (nextEvent) {
+                            // Reset state for next game
+                            setSuccess(false);
+                            setSelectedWinner(null);
+                            setHomeScore('');
+                            setAwayScore('');
+                            setError(null);
+                            return;
+                        }
+                    }
+
                     onClose();
                     setSuccess(false);
                     setSelectedWinner(null);
@@ -154,7 +175,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
 
                 // Try to load next game
                 if (onLoadNextGame) {
-                    const nextEvent = await onLoadNextGame();
+                    const nextEvent = await onLoadNextGame(event.id); // Pass current ID to ignore
                     if (nextEvent) {
                         // Reset state for next game
                         setSuccess(false);

@@ -168,7 +168,8 @@ export const AuthProvider = ({ children }) => {
                 username: 'Guest',
                 isGuest: true,
                 tokens: 50,
-                crowns: 0
+                crowns: 0,
+                predictedGames: []
             };
             setUser(guestUser);
             // We do NOT persist guest user to storage to keep it ephemeral
