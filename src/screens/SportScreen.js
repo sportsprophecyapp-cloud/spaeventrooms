@@ -29,10 +29,13 @@ const SportScreen = () => {
             ]);
 
             // Mark events that user has already predicted on
-            const predictedEventIds = new Set(predictionsData.map(p => p.eventId));
+            const backendPredictedIds = predictionsData.map(p => p.eventId);
+            const localPredictedIds = (user?.isGuest && user?.predictedGames) ? user.predictedGames : [];
+            const allPredictedIds = new Set([...backendPredictedIds, ...localPredictedIds]);
+
             const eventsWithStatus = (eventsData || []).map(event => ({
                 ...event,
-                hasPredicted: predictedEventIds.has(event.id)
+                hasPredicted: allPredictedIds.has(event.id)
             }));
 
             setEvents(eventsWithStatus);
@@ -104,9 +107,12 @@ const SportScreen = () => {
         return eventDate >= now && eventDate <= futureWindow;
     });
 
-    const getNextUnpredictedGame = async () => {
+    const getNextUnpredictedGame = async (ignoreId = null) => {
         // Find the next game that hasn't been predicted on
-        const unpredictedGames = upcomingEvents.filter(event => !event.hasPredicted);
+        // Also exclude the game we just predicted on (ignoreId) to allow for immediate UI updates
+        const unpredictedGames = upcomingEvents.filter(event =>
+            !event.hasPredicted && event.id !== ignoreId
+        );
 
         if (unpredictedGames.length > 0) {
             const nextGame = unpredictedGames[0];
