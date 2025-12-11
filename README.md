@@ -1,18 +1,20 @@
-# Sports Prophecy App v2.4.0
-> Last Updated: December 3, 2025  
+# Sports Prophecy App v2.7.0
+> Last Updated: December 9, 2025  
 **Developer Documentation**
 
 ## 📋 Table of Contents
 - [Overview](#overview)
+- [Project Status](#project-status)
+- [Backups](#backups)
 - [Project Structure](#project-structure)
 - [Setup Instructions](#setup-instructions)
 - [Environment Variables](#environment-variables)
 - [Deployment](#deployment)
 - [Features](#features)
 - [API Documentation](#api-documentation)
-- [Recent Changes (v2.2.0)](#recent-changes-v220)
+- [Recent Changes (v2.7.0)](#recent-changes-v270)
 - [Known Issues](#known-issues)
-- [Future Improvements](#future-improvements)
+- [Next Steps](#next-steps)
 
 ---
 
@@ -27,6 +29,76 @@ Sports Prophecy is a **100% free** React Native Expo web application that allows
 - **Backend**: Node.js, Express, MongoDB (Mongoose)
 - **Styling**: Custom theme system with dark mode and neon cyan accents
 - **External APIs**: The Odds API (for live sports data)
+- **Payment Processing**: Stripe (for sponsor ads and donations)
+
+---
+
+## 📊 Project Status
+
+### Current Version: v2.7.0 (December 9, 2025)
+
+**✅ Completed Features:**
+- ✅ Core prediction system (6 sports leagues)
+- ✅ User authentication with biometric login (FaceID/TouchID)
+- ✅ Token and crown reward system
+- ✅ Weekly prize draws
+- ✅ Leaderboard (ranked by correct predictions)
+- ✅ Chat rooms (public, league-specific, private)
+- ✅ Referral system
+- ✅ Sponsor ad system (main page, chat rooms, prize draws)
+- ✅ **Admin panel** for managing sponsors and prize draws
+- ✅ Guest mode with seamless conversion
+- ✅ Deployed to production (www.sportsprophecyapp.com)
+
+**🚧 Current Phase: Pre-Launch Testing**
+
+### Next Steps:
+1. **Stripe Integration Testing** - Fully test banner ads and prize draw sponsorships
+2. **App Store Preparation** - Prepare application for Google Play Store and Apple App Store submission
+3. **Final QA** - Comprehensive testing across all features
+4. **Launch** - Public release
+
+---
+
+## 💾 Backups
+
+**Backup Location:** `/Users/williamcommu/Desktop/backups/`
+
+All backups exclude `node_modules`, `.expo`, `dist`, and `.git` folders to keep file sizes manageable.
+
+### Creating a Backup
+
+Run from the project root (`/Users/williamcommu/Desktop/mobile/`):
+
+```bash
+# Create timestamped backup
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+mkdir -p ../backups
+tar -czf ../backups/sportsprophecy-backup-$TIMESTAMP.tar.gz \
+  --exclude='node_modules' \
+  --exclude='.expo' \
+  --exclude='dist' \
+  --exclude='.git' \
+  .
+echo "Backup created: ../backups/sportsprophecy-backup-$TIMESTAMP.tar.gz"
+```
+
+### Restoring from Backup
+
+```bash
+# Extract backup to a new location
+cd /Users/williamcommu/Desktop
+mkdir mobile-restored
+tar -xzf backups/sportsprophecy-backup-YYYYMMDD_HHMMSS.tar.gz -C mobile-restored/
+cd mobile-restored
+npm install  # Reinstall dependencies
+```
+
+### Latest Backup
+- **File:** `sportsprophecy-backup-20251209_184807.tar.gz`
+- **Date:** December 9, 2025 at 6:48 PM
+- **Version:** v2.7.0
+- **Location:** `/Users/williamcommu/Desktop/backups/`
 
 ---
 
@@ -131,12 +203,14 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 ### Frontend
-
 Set in your environment or `.env` file:
 
 ```env
 # Backend API URL
 EXPO_PUBLIC_API_URL=http://localhost:3001/api
+
+# Other Optional Variables (if applicable in future)
+# ENABLE_BETA_FEATURES=true
 ```
 
 ---
@@ -144,27 +218,45 @@ EXPO_PUBLIC_API_URL=http://localhost:3001/api
 ## 🚀 Deployment
 
 ### Backend Deployment
-Deploy the backend code to the `sportsprophecy-backend` project.
+Deploy the backend code to the `sportsprophecy-backend` project on Vercel.
 
-```bash
-cd backend
-npx vercel --prod
-```
+1.  **Navigate to backend directory:**
+    ```bash
+    cd backend
+    ```
 
-**Important**: Ensure `MONGODB_URI` and `THE_ODDS_API_KEY` are set in the Vercel project settings.
+2.  **Deploy to Production:**
+    ```bash
+    npx vercel --prod
+    ```
+
+3.  **Environment Variables (Vercel)**:
+    Ensure the following variables are set in the Vercel Project Settings for `sportsprophecy-backend`:
+    - `MONGODB_URI`: Your MongoDB connection string.
+    - `THE_ODDS_API_KEY`: Your API key for sports data.
+    - `STRIPE_SECRET_KEY`: Stripe Secret Key (Live).
+    - `STRIPE_WEBHOOK_SECRET`: Stripe Webhook Secret (Live).
 
 ### Frontend Deployment
-Deploy the frontend build to the `dist` project.
+Deploy the frontend build to the `dist` project on Vercel.
 
-1. **Update API URL**: Ensure `.env.production` points to the production backend.
-   ```env
-   EXPO_PUBLIC_API_URL=https://api.sportsprophecyapp.com/api
-   ```
+1.  **Prepare Production Build:**
+    The build command is handled by Vercel, but ensure your `package.json` has:
+    ```json
+    "build": "npx expo export -p web"
+    ```
 
-2. **Deploy**:
-   ```bash
-   npx vercel --prod
-   ```
+2.  **Environment Variables (Vercel)**:
+    Ensure the following variable is set in the Vercel Project Settings for `dist` (Frontend):
+    - `EXPO_PUBLIC_API_URL`: `https://api.sportsprophecyapp.com/api`
+
+3.  **Deploy to Production:**
+    Run from the root `mobile/` directory:
+    ```bash
+    npx vercel --prod
+    ```
+    *Note: When asked, link to the existing `dist` project.*
+
 
 ---
 
@@ -206,7 +298,104 @@ Deploy the frontend build to the `dist` project.
 
 ---
 
-## 🆕 Recent Changes (v2.4.0)
+## 🆕 Recent Changes (v2.7.0)
+
+### December 9, 2025
+
+#### 1. Admin Sponsor Management System ✅
+**Feature**: Complete admin control over prize draw advertisements.
+**Details**:
+- **Pending Approvals**: View and manage sponsor applications with 1-week or 1-month approval options
+- **Active Ads Management**: New "Active Prize Draws" section to view and remove live ads
+- **Deactivate Feature**: Remove ads from Prize Draws page (for testing, conflicts, non-payment)
+- **Delete Feature**: Permanently remove sponsor records
+- **Banner Display**: Approved sponsor banners now display on Prize Draws page
+- **Prize Details**: Show sponsor-submitted prize descriptions and values ($)
+
+#### 2. Prize Draw Enhancements ✅
+**Change**: Dynamic prize draw system with sponsor integration.
+**Details**:
+- **Removed Beta Testers Draw**: Cleared default draw to make room for real sponsor ads
+- **Banner Images**: Sponsor banner images display prominently on prize cards
+- **Prize Information**: Shows prize description and monetary value from sponsor applications
+- **Placeholder Slots**: Always shows 2 "Sponsor This Draw" slots for potential advertisers
+
+#### 3. Admin Panel Improvements ✅
+**Feature**: Enhanced admin interface for sponsor management.
+**Details**:
+- **Missing Endpoints**: Added `/api/admin/moderators`, `/api/admin/set-role`, `/api/admin/ban-user`
+- **Active Sponsors Endpoint**: New `/api/admin/sponsors/active` to fetch live ads
+- **Deactivate Endpoint**: New `/api/admin/sponsors/:id/deactivate` to remove ads
+- **Web Compatibility**: Platform-specific alerts for web and native (window.confirm/Alert.alert)
+
+#### 4. Bug Fixes ✅
+**Fixes**: Resolved critical admin panel errors.
+**Details**:
+- **404 Errors**: Fixed missing admin endpoints causing panel crashes
+- **MongoDB Errors**: Resolved duplicate key constraint on sponsor approval
+- **Approval Flow**: Fixed sponsor approval to work with duration selection (1 week/1 month)
+
+### Previous Changes (v2.6.0)
+
+#### 1. Biometric Authentication (FaceID/TouchID) ✅
+**Feature**: Simplified login using device biometrics.
+**Details**:
+- **Secure Storage**: Credentials securely stored using `expo-secure-store`.
+- **Smart Prompt**: App intelligently asks to enable biometrics only after a successful login/signup.
+- **One-Tap Login**: "Login with FaceID" button dynamically appears for enrolled users.
+
+#### 2. Enhanced Sponsor Integration ✅
+**Change**: Connected Announcements to Sponsor system.
+**Details**:
+- **Direct Navigation**: "Advertise Here" button in Announcements now links directly to the `SponsorScreen` for purchasing ads.
+- **Improved CTA**: Clearer calls to action for potential advertisers.
+
+### Previous Changes (v2.6.0)
+
+#### 1. Deployment Handoff & Documentation Update ✅
+**Change**: Comprehensive documentation update and version bump.
+**Details**:
+- **Version bumped to 2.6.0**: Synchronized versions across `package.json` and `app.json`.
+- **Documentation**: Updated `README.md` with detailed frontend and backend deployment steps and environment variable requirements for developer handoff.
+- **Backup**: Created full source code backup.
+
+### Previous Changes (v2.5.0)
+
+### December 5, 2025
+
+#### 1. Critical Login & Navigation Fixes ✅
+**Change**: Fixed stuck login screen and persistence issues.
+**Details**:
+- **Navigation Logic**: Implemented centralized auth listener in `App.js` to force redirection to Main screen upon successful login.
+- **Remember Me Fix**: Corrected storage mechanism mismatch between Frontend and API Service. Login now persists correctly whether 'Remember Me' is checked or not.
+- **Speed Optimization**: Reduced next-game load delay from 1.5s to 0.5s for faster user flow.
+
+#### 2. UI/Asset Fixes ✅
+**Change**: Fixed missing asset icons.
+**Details**:
+- **Soccer Icon**: Replaced missing Ionicons asset with MaterialCommunityIcons for 'Soccer' pill tab.
+
+### Previous Changes (v2.4.9)
+
+### December 5, 2025
+
+#### 1. Guest Mode Experience Overhaul ✅
+**Feature**: Seamless guest predictions and conversion.
+**Details**:
+- **Prediction Locking**: Guests can now fetch, predict, and lock games just like registered users.
+- **Auto-Loading**: After a prediction, the next game automatically loads for rapid play.
+- **Create Account Banner**: High-visibility "Create Account" banner added to Home Screen logic.
+- **Navigation Fix**: Guests can now access Register/Login screens without being forced to logout first.
+- **Bug Fix**: Resolved race conditions in prediction modal for guest users.
+
+#### 2. UI/UX Refinements ✅
+**Change**: Improved visibility and navigation.
+**Details**:
+- **Home Screen**: Reorganized banners for better hierarchy.
+- **Sport Screen**: Applied prediction locking/auto-load logic to individual sport tabs.
+- **Game Card**: Fixes for "PREDICTED" status display.
+
+### Previous Changes (v2.4.0)
 
 ### December 3, 2025
 
@@ -230,31 +419,6 @@ Deploy the frontend build to the `dist` project.
 - **Types**: Public, League (NBA, NFL, etc.), Private.
 - **Persistence**: Rooms saved to database.
 
-### Previous Changes (v2.2.0)
-
-### December 1, 2025
-
-#### 1. On-Demand Game Loading (Optimization) ✅
-**Change**: Switched from unreliable Cron jobs to smart on-demand caching.
-**Details**:
-- `/api/events` checks MongoDB for fresh data (< 60 mins old).
-- If data is stale, it automatically fetches fresh data from The Odds API.
-- **Benefit**: Ensures users always see up-to-date games without manual refreshes or cron failures.
-
-#### 2. Referral System ✅
-**Feature**: Complete referral system to grow the user base.
-**Details**:
-- Users get a unique 6-character referral code.
-- New users can enter a code during registration.
-- **Reward**: Both users get **5 Crowns** instantly.
-- **Profile**: Added referral section to copy/share code and view stats.
-
-#### 3. Beta Announcement ✅
-**Feature**: Added "Beta Version" banners.
-**Details**:
-- Green gradient banners on Landing and Home screens.
-- Informs users that the app is in open beta.
-
 ---
 
 ## ⚠️ Known Issues
@@ -268,6 +432,71 @@ Deploy the frontend build to the `dist` project.
 
 ---
 
+## 🎯 Next Steps
+
+### Phase 1: Stripe Integration Testing (Current Priority)
+
+**Objective**: Fully test and validate all Stripe payment flows.
+
+#### Tasks:
+1. **Banner Ad Purchases**
+   - [ ] Test $25/30-day main page banner purchase flow
+   - [ ] Verify Stripe checkout redirects correctly
+   - [ ] Confirm banner appears on home page after payment
+   - [ ] Test banner expiration after 30 days
+
+2. **Chat Room Sponsorships**
+   - [ ] Test $25/30-day room sponsorship purchase
+   - [ ] Verify room branding updates correctly
+   - [ ] Test exclusive sponsor features
+
+3. **Prize Draw Sponsorships**
+   - [ ] Test prize draw application submission
+   - [ ] Verify admin approval flow (1 week / 1 month)
+   - [ ] Confirm banner and prize details display correctly
+   - [ ] Test ad removal/deactivation
+
+4. **Stripe Webhook Testing**
+   - [ ] Verify webhook receives payment confirmations
+   - [ ] Test failed payment handling
+   - [ ] Validate refund scenarios
+
+### Phase 2: App Store Preparation
+
+**Objective**: Prepare application for Google Play Store and Apple App Store submission.
+
+#### Tasks:
+1. **App Configuration**
+   - [ ] Update app icons and splash screens for all sizes
+   - [ ] Configure app permissions and privacy policies
+   - [ ] Set up app signing certificates
+   - [ ] Create app store screenshots and promotional materials
+
+2. **Build Generation**
+   - [ ] Generate Android APK/AAB using EAS Build
+   - [ ] Generate iOS IPA using EAS Build
+   - [ ] Test builds on physical devices
+
+3. **Store Listings**
+   - [ ] Write app descriptions for both stores
+   - [ ] Prepare privacy policy and terms of service
+   - [ ] Set up app store developer accounts
+   - [ ] Submit for review
+
+### Phase 3: Final QA & Launch
+
+**Objective**: Comprehensive testing and public release.
+
+#### Tasks:
+- [ ] Cross-browser testing (Chrome, Safari, Firefox, Edge)
+- [ ] Mobile responsiveness testing
+- [ ] Load testing with multiple concurrent users
+- [ ] Security audit
+- [ ] Final bug fixes
+- [ ] Public launch announcement
+
+---
+
 ## 📞 Support
 
 For questions or issues:
@@ -278,8 +507,13 @@ For questions or issues:
 ---
 
 **Version History:**
+- v2.7.0 (Dec 9, 2025): Admin Sponsor Management, Prize Draw Enhancements, Active Ads Control, Bug Fixes
+- v2.6.0 (Dec 9, 2025): Biometric Auth, Sponsor Integration, Handoff preparation
+- v2.5.0 (Dec 5, 2025): Login Navigation Fix, Remember Me Persistence Fix, Soccer Icon Fix
+- v2.4.9 (Dec 5, 2025): Guest Mode Overhaul, Auto-Load predictions, Register Access
 - v2.4.0 (Dec 3, 2025): Sponsorships, Chat Rooms, Correct Predictions Leaderboard
 - v2.2.0 (Dec 1, 2025): On-demand loading, Referral system, Beta banners
 - v2.1.0 (Nov 30, 2025): Cron automation (deprecated), Deployment docs
 - v2.0.0 (Nov 29, 2025): Duplicate prevention, score validation
 - v1.0.0 (Nov 28, 2025): Initial release with core features
+

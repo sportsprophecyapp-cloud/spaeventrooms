@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import GameCard from '../components/GameCard';
 import PredictionModal from '../components/PredictionModal';
+import SponsorBanner from '../components/SponsorBanner';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -61,9 +62,7 @@ const SportScreen = () => {
         setModalVisible(true);
     };
 
-    const handleSponsorPress = () => {
-        Linking.openURL('mailto:Contact@sportsprophecyapp.com?subject=Sponsorship Inquiry');
-    };
+
 
     // Helper to check if event matches selected sport
     const matchesSport = (event, selectedSportId) => {
@@ -102,10 +101,21 @@ const SportScreen = () => {
     const now = new Date();
     const futureWindow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-    const upcomingEvents = filteredEvents.filter(event => {
-        const eventDate = new Date(event.commence_time || event.startTime);
-        return eventDate >= now && eventDate <= futureWindow;
-    });
+    const upcomingEvents = filteredEvents
+        .filter(event => {
+            const eventDate = new Date(event.commence_time || event.startTime);
+            return eventDate >= now && eventDate <= futureWindow;
+        })
+        .sort((a, b) => {
+            // Priority 1: Predicted games go to the bottom
+            if (a.hasPredicted && !b.hasPredicted) return 1;
+            if (!a.hasPredicted && b.hasPredicted) return -1;
+
+            // Priority 2: Sort by time (ascending)
+            const dateA = new Date(a.commence_time || a.startTime);
+            const dateB = new Date(b.commence_time || b.startTime);
+            return dateA - dateB;
+        });
 
     const getNextUnpredictedGame = async (ignoreId = null) => {
         // Find the next game that hasn't been predicted on
@@ -135,28 +145,7 @@ const SportScreen = () => {
             </View>
 
             {/* Fixed Sponsor Banner */}
-            <TouchableOpacity onPress={handleSponsorPress} activeOpacity={0.9}>
-                <LinearGradient
-                    colors={['#1e293b', '#0f172a']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.sponsorBanner}
-                >
-                    <View style={styles.sponsorIconContainer}>
-                        <Ionicons name="megaphone-outline" size={24} color={COLORS.accent.cyan} />
-                    </View>
-                    <View style={styles.sponsorContent}>
-                        <Text style={styles.sponsorTitle}>YOUR PRODUCT HERE</Text>
-                        <Text style={styles.sponsorText}>
-                            Use Discount Code <Text style={styles.codeHighlight}>Prophecy15</Text>
-                        </Text>
-                    </View>
-                    <View style={styles.sponsorAction}>
-                        <Text style={styles.contactText}>Contact Us</Text>
-                        <Ionicons name="chevron-forward" size={16} color={COLORS.text.secondary} />
-                    </View>
-                </LinearGradient>
-            </TouchableOpacity>
+            <SponsorBanner style={styles.sponsorBannerContainer} />
 
             <ScrollView
                 contentContainerStyle={styles.content}
@@ -184,11 +173,27 @@ const SportScreen = () => {
                     ))
                 ) : (
                     <View style={styles.emptyState}>
-                        <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
-                        <Text style={styles.emptyText}>No upcoming games found</Text>
-                        <Text style={styles.emptySubtext}>
-                            Check back later for new matches
-                        </Text>
+                        {/* Show "Coming Soon" for disabled sports */}
+                        {['mlb', 'soccer', 'mma'].includes(sportId.toLowerCase()) ? (
+                            <>
+                                <Ionicons name="time-outline" size={48} color={COLORS.accent.cyan} />
+                                <Text style={styles.comingSoonText}>Coming Soon</Text>
+                                <Text style={styles.emptySubtext}>
+                                    {sportName} predictions will be available soon!
+                                </Text>
+                                <Text style={styles.emptySubtext}>
+                                    Try NFL, NBA, or NHL in the meantime.
+                                </Text>
+                            </>
+                        ) : (
+                            <>
+                                <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
+                                <Text style={styles.emptyText}>No upcoming games found</Text>
+                                <Text style={styles.emptySubtext}>
+                                    Check back later for new matches
+                                </Text>
+                            </>
+                        )}
                     </View>
                 )}
             </ScrollView>
@@ -226,43 +231,14 @@ const styles = StyleSheet.create({
         fontWeight: TYPOGRAPHY.weights.bold,
         color: COLORS.text.primary,
     },
-    sponsorBanner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: SPACING.md,
+    sponsorBannerContainer: {
         borderBottomWidth: 1,
         borderBottomColor: COLORS.border.tertiary,
-    },
-    sponsorIconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: BORDER_RADIUS.full,
-        backgroundColor: 'rgba(6, 182, 212, 0.1)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: SPACING.md,
-    },
-    sponsorContent: {
-        flex: 1,
-    },
-    sponsorTitle: {
-        color: COLORS.text.primary,
-        fontWeight: TYPOGRAPHY.weights.bold,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        marginBottom: 2,
-    },
-    sponsorText: {
-        color: COLORS.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.xs,
-    },
-    codeHighlight: {
-        color: COLORS.accent.cyan,
-        fontWeight: TYPOGRAPHY.weights.bold,
-    },
-    sponsorAction: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
+        width: '100%',
+        borderRadius: 0, // Reset radius for full width bar look
+        borderWidth: 0,
+        marginVertical: 0,
+        backgroundColor: COLORS.background.secondary,
     },
     contactText: {
         color: COLORS.text.secondary,
@@ -305,6 +281,12 @@ const styles = StyleSheet.create({
         color: COLORS.text.secondary,
         fontSize: TYPOGRAPHY.sizes.md,
         fontWeight: TYPOGRAPHY.weights.semibold,
+        marginTop: SPACING.base,
+    },
+    comingSoonText: {
+        color: COLORS.accent.cyan,
+        fontSize: TYPOGRAPHY.sizes.lg,
+        fontWeight: TYPOGRAPHY.weights.bold,
         marginTop: SPACING.base,
     },
     emptySubtext: {

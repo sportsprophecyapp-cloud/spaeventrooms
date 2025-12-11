@@ -4,7 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as WebBrowser from 'expo-web-browser';
 import { apiService } from '../services/api';
+
 import { useAuth } from '../context/AuthContext';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 const ChatScreen = () => {
   const { user } = useAuth();
@@ -37,6 +39,13 @@ const ChatScreen = () => {
   const [sending, setSending] = useState(false);
   const flatListRef = useRef(null);
 
+  // Sponsor Ad State
+  const [activeSponsors, setActiveSponsors] = useState([]);
+  const [showCustomAdModal, setShowCustomAdModal] = useState(false);
+  const [customAdBanner, setCustomAdBanner] = useState('');
+  const [customAdLink, setCustomAdLink] = useState('');
+  const [customAdEnabled, setCustomAdEnabled] = useState(false);
+
   // --- Lobby Logic ---
 
   const fetchRooms = async () => {
@@ -67,6 +76,59 @@ const ChatScreen = () => {
       return () => clearInterval(interval);
     }
   }, [view]);
+
+  // Fetch Active Sponsors
+  const fetchSponsors = async () => {
+    try {
+      const data = await apiService.getActiveSponsors();
+      setActiveSponsors(data);
+    } catch (error) {
+      console.error('Failed to fetch sponsors', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSponsors();
+  }, []);
+
+  // Load custom ad data when entering a private room
+  useEffect(() => {
+    if (currentRoom && currentRoom.type === 'private' && currentRoom.customAd) {
+      setCustomAdBanner(currentRoom.customAd.bannerUrl || '');
+      setCustomAdLink(currentRoom.customAd.linkUrl || '');
+      setCustomAdEnabled(currentRoom.customAd.enabled || false);
+    }
+  }, [currentRoom]);
+
+  // Handle Custom Ad Update
+  const handleUpdateCustomAd = async () => {
+    if (!currentRoom) return;
+
+    try {
+      await apiService.updateRoomCustomAd(currentRoom._id, {
+        bannerUrl: customAdBanner,
+        linkUrl: customAdLink,
+        enabled: customAdEnabled
+      });
+
+      if (Platform.OS === 'web') {
+        window.alert('Custom ad updated successfully!');
+      } else {
+        Alert.alert('Success', 'Custom ad updated successfully!');
+      }
+
+      setShowCustomAdModal(false);
+      // Refresh room data
+      fetchRooms();
+    } catch (error) {
+      const errorMsg = error.error || 'Failed to update custom ad';
+      if (Platform.OS === 'web') {
+        window.alert(errorMsg);
+      } else {
+        Alert.alert('Error', errorMsg);
+      }
+    }
+  };
 
   const handleCreateRoom = async () => {
     console.log('Attempting to create room:', { newRoomName, newRoomType, user });
@@ -246,13 +308,13 @@ const ChatScreen = () => {
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={styles.countBadge}>
-          <Ionicons name="person" size={10} color="#fff" />
+          <Ionicons name="person" size={10} color={COLORS.text.primary} />
           <Text style={styles.countText}>{item.userCount || 0}</Text>
         </View>
         <Ionicons
           name={item.type === 'private' ? "lock-closed" : "chevron-forward"}
           size={20}
-          color={item.type === 'private' ? "#f59e0b" : "#94a3b8"}
+          color={item.type === 'private' ? COLORS.status.warning : COLORS.text.tertiary}
           style={{ marginLeft: 10 }}
         />
       </View>
@@ -299,7 +361,7 @@ const ChatScreen = () => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Chat Rooms</Text>
           <TouchableOpacity onPress={() => setShowCreateModal(true)} style={styles.createButton}>
-            <Ionicons name="add" size={24} color="#fff" />
+            <Ionicons name="add" size={24} color={COLORS.text.primary} />
           </TouchableOpacity>
         </View>
 
@@ -313,14 +375,14 @@ const ChatScreen = () => {
             <Text style={styles.roomMeta}>Main Public Chat</Text>
           </View>
           <View style={styles.countBadge}>
-            <Ionicons name="person" size={10} color="#fff" />
+            <Ionicons name="person" size={10} color={COLORS.text.primary} />
             <Text style={styles.countText}>{lobbyCount}</Text>
           </View>
-          <Ionicons name="people" size={20} color="#38bdf8" style={{ marginLeft: 10 }} />
+          <Ionicons name="people" size={20} color={COLORS.accent.cyan} style={{ marginLeft: 10 }} />
         </TouchableOpacity>
 
         {loadingRooms ? (
-          <ActivityIndicator size="large" color="#38bdf8" style={{ marginTop: 20 }} />
+          <ActivityIndicator size="large" color={COLORS.accent.cyan} style={{ marginTop: 20 }} />
         ) : roomsError ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{roomsError}</Text>
@@ -349,7 +411,7 @@ const ChatScreen = () => {
               <TextInput
                 style={styles.modalInput}
                 placeholder="Room Name"
-                placeholderTextColor="#64748b"
+                placeholderTextColor={COLORS.text.tertiary}
                 value={newRoomName}
                 onChangeText={setNewRoomName}
               />
@@ -373,7 +435,7 @@ const ChatScreen = () => {
                 <TextInput
                   style={styles.modalInput}
                   placeholder="Set Password"
-                  placeholderTextColor="#64748b"
+                  placeholderTextColor={COLORS.text.tertiary}
                   value={newRoomPassword}
                   onChangeText={setNewRoomPassword}
                   secureTextEntry
@@ -402,7 +464,7 @@ const ChatScreen = () => {
               <TextInput
                 style={styles.modalInput}
                 placeholder="Password"
-                placeholderTextColor="#64748b"
+                placeholderTextColor={COLORS.text.tertiary}
                 value={joinPassword}
                 onChangeText={setJoinPassword}
                 secureTextEntry
@@ -429,26 +491,72 @@ const ChatScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleLeaveRoom} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
         </TouchableOpacity>
         <View>
           <Text style={styles.headerTitle}>{currentRoom ? currentRoom.name : 'Lobby'}</Text>
           {currentRoom && currentRoom.sponsor?.isActive && (
-            <Text style={{ color: '#34d399', fontSize: 10 }}>Sponsored by {currentRoom.sponsor.name}</Text>
+            <Text style={{ color: COLORS.status.success, fontSize: 10 }}>Sponsored by {currentRoom.sponsor.name}</Text>
           )}
         </View>
         {currentRoom ? (
           <TouchableOpacity onPress={() => setShowSponsorModal(true)} style={{ padding: 5 }}>
-            <Ionicons name="star-outline" size={24} color="#fbbf24" />
+            <Ionicons name="star-outline" size={24} color={COLORS.status.warning} />
           </TouchableOpacity>
         ) : (
           <View style={{ width: 24 }} />
         )}
       </View>
 
+      {/* Sponsor Ads Section */}
+      <View style={styles.adsContainer}>
+        {/* Main Sponsor Ad (all rooms) */}
+        {activeSponsors.length > 0 && activeSponsors[0] && (
+          <TouchableOpacity
+            onPress={() => activeSponsors[0].linkUrl && WebBrowser.openBrowserAsync(activeSponsors[0].linkUrl)}
+            style={styles.sponsorAdCard}
+          >
+            <LinearGradient
+              colors={['#1e293b', '#334155']}
+              style={styles.sponsorAdGradient}
+            >
+              <Text style={styles.sponsorAdLabel}>SPONSORED</Text>
+              <Text style={styles.sponsorAdName}>{activeSponsors[0].sponsorName}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        {/* Custom Ad (private rooms only) */}
+        {currentRoom && currentRoom.type === 'private' && currentRoom.customAd?.enabled && (
+          <TouchableOpacity
+            onPress={() => currentRoom.customAd.linkUrl && WebBrowser.openBrowserAsync(currentRoom.customAd.linkUrl)}
+            style={[styles.sponsorAdCard, { marginTop: 8 }]}
+          >
+            <LinearGradient
+              colors={['#065f46', '#064e3b']}
+              style={styles.sponsorAdGradient}
+            >
+              <Text style={styles.sponsorAdLabel}>ROOM AD</Text>
+              <Text style={styles.sponsorAdName}>Custom Advertisement</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        {/* Manage Custom Ad Button (private room creator only) */}
+        {currentRoom && currentRoom.type === 'private' && currentRoom.createdBy === user?.uuid && (
+          <TouchableOpacity
+            onPress={() => setShowCustomAdModal(true)}
+            style={styles.manageAdButton}
+          >
+            <Ionicons name="settings-outline" size={14} color={COLORS.accent.cyan} />
+            <Text style={styles.manageAdText}>Manage Room Ad</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       {loadingMessages ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#38bdf8" />
+          <ActivityIndicator size="large" color={COLORS.accent.cyan} />
         </View>
       ) : (
         <FlatList
@@ -467,7 +575,7 @@ const ChatScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Type a message..."
-            placeholderTextColor="#64748b"
+            placeholderTextColor={COLORS.text.tertiary}
             value={newMessage}
             onChangeText={setNewMessage}
             multiline
@@ -483,7 +591,7 @@ const ChatScreen = () => {
               end={{ x: 1, y: 0 }}
               style={styles.sendButton}
             >
-              <Ionicons name="send" size={20} color="#fff" />
+              <Ionicons name="send" size={20} color={COLORS.text.inverse} />
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -499,19 +607,20 @@ const ChatScreen = () => {
             <TextInput
               style={styles.modalInput}
               placeholder="Sponsor Name"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={COLORS.text.tertiary}
               value={sponsorName}
               onChangeText={setSponsorName}
             />
             <TextInput
               style={styles.modalInput}
               placeholder="Website Link"
-              placeholderTextColor="#64748b"
+              placeholderTextColor={COLORS.text.tertiary}
               value={sponsorLink}
               onChangeText={setSponsorLink}
             />
 
-            <Text style={{ color: '#94a3b8', fontSize: 12, marginBottom: 10, textAlign: 'center' }}>
+
+            <Text style={{ color: COLORS.text.secondary, fontSize: 12, marginBottom: 10, textAlign: 'center' }}>
               Banner upload coming soon. Using placeholder.
             </Text>
 
@@ -526,6 +635,50 @@ const ChatScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Custom Ad Management Modal (Private Room Creator Only) */}
+      <Modal visible={showCustomAdModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Manage Room Ad</Text>
+            <Text style={styles.modalSubtitle}>Free Custom Ad for Your Private Room</Text>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Banner Image URL"
+              placeholderTextColor={COLORS.text.tertiary}
+              value={customAdBanner}
+              onChangeText={setCustomAdBanner}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Click Destination URL"
+              placeholderTextColor={COLORS.text.tertiary}
+              value={customAdLink}
+              onChangeText={setCustomAdLink}
+            />
+
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Enable Custom Ad</Text>
+              <TouchableOpacity
+                onPress={() => setCustomAdEnabled(!customAdEnabled)}
+                style={[styles.toggle, customAdEnabled && styles.toggleActive]}
+              >
+                <View style={[styles.toggleThumb, customAdEnabled && styles.toggleThumbActive]} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={() => setShowCustomAdModal(false)} style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleUpdateCustomAd} style={styles.confirmButton}>
+                <Text style={styles.confirmButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -533,20 +686,20 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: COLORS.background.primary,
   },
   header: {
     flexDirection: 'row',
-    padding: 15,
+    padding: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    borderBottomColor: COLORS.border.tertiary,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: TYPOGRAPHY.sizes.lg,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    color: COLORS.text.primary,
   },
   createButton: {
     padding: 5,
@@ -555,7 +708,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   listContent: {
-    padding: 15,
+    padding: SPACING.md,
     paddingBottom: 20,
   },
   // Room Card Styles
@@ -563,34 +716,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#1e293b',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
+    backgroundColor: COLORS.background.card,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: COLORS.border.tertiary,
   },
   generalCard: {
-    margin: 15,
-    marginBottom: 5,
-    borderColor: '#38bdf8',
+    margin: SPACING.md,
+    marginBottom: SPACING.xs,
+    borderColor: COLORS.accent.cyan,
     borderWidth: 1,
   },
   roomInfo: {
     flex: 1,
   },
   roomName: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: TYPOGRAPHY.weights.bold,
     marginBottom: 4,
   },
   roomMeta: {
-    color: '#94a3b8',
-    fontSize: 12,
+    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.sizes.xs,
   },
   emptyText: {
-    color: '#64748b',
+    color: COLORS.text.tertiary,
     textAlign: 'center',
     marginTop: 20,
   },
@@ -602,40 +755,40 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#1e293b',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: COLORS.background.card,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: COLORS.border.tertiary,
   },
   modalTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.sizes.xl,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    marginBottom: SPACING.lg,
     textAlign: 'center',
   },
   modalSubtitle: {
-    color: '#94a3b8',
-    fontSize: 14,
+    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.sizes.sm,
     textAlign: 'center',
     marginTop: -15,
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   modalInput: {
-    backgroundColor: '#0f172a',
-    color: '#fff',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
+    backgroundColor: COLORS.background.primary,
+    color: COLORS.text.primary,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: COLORS.border.tertiary,
   },
   typeSelector: {
     flexDirection: 'row',
-    marginBottom: 15,
-    backgroundColor: '#0f172a',
-    borderRadius: 8,
+    marginBottom: SPACING.md,
+    backgroundColor: COLORS.background.primary,
+    borderRadius: BORDER_RADIUS.sm,
     padding: 4,
   },
   typeOption: {
@@ -645,14 +798,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   typeOptionActive: {
-    backgroundColor: '#38bdf8',
+    backgroundColor: COLORS.accent.cyan,
   },
   typeText: {
-    color: '#94a3b8',
-    fontWeight: 'bold',
+    color: COLORS.text.secondary,
+    fontWeight: TYPOGRAPHY.weights.bold,
   },
   typeTextActive: {
-    color: '#fff',
+    color: COLORS.text.inverse,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -661,27 +814,27 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    padding: 12,
+    padding: SPACING.md,
     marginRight: 10,
-    backgroundColor: '#334155',
-    borderRadius: 8,
+    backgroundColor: COLORS.background.surface,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
   },
   confirmButton: {
     flex: 1,
-    padding: 12,
+    padding: SPACING.md,
     marginLeft: 10,
-    backgroundColor: '#38bdf8',
-    borderRadius: 8,
+    backgroundColor: COLORS.accent.cyan,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: COLORS.text.primary,
+    fontWeight: TYPOGRAPHY.weights.bold,
   },
   confirmButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: COLORS.text.inverse,
+    fontWeight: TYPOGRAPHY.weights.bold,
   },
   // Chat Styles (Reused)
   loadingContainer: {
@@ -707,11 +860,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   mySenderName: {
-    color: '#38bdf8',
+    color: COLORS.accent.cyan,
     marginRight: 5,
   },
   theirSenderName: {
-    color: '#94a3b8',
+    color: COLORS.text.secondary,
     marginLeft: 5,
   },
   bubble: {
@@ -719,34 +872,34 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   myBubble: {
-    backgroundColor: '#0284c7',
+    backgroundColor: COLORS.accent.blue,
     borderTopRightRadius: 4,
   },
   theirBubble: {
-    backgroundColor: '#1e293b',
+    backgroundColor: COLORS.background.surface,
     borderTopLeftRadius: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: COLORS.border.tertiary,
   },
   messageText: {
-    color: '#fff',
+    color: COLORS.text.primary,
     fontSize: 14,
   },
   inputContainer: {
     flexDirection: 'row',
     padding: 10,
-    backgroundColor: '#1e293b',
+    backgroundColor: COLORS.background.card,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
+    borderTopColor: COLORS.border.tertiary,
     alignItems: 'center',
   },
   input: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    backgroundColor: COLORS.background.primary,
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
-    color: '#fff',
+    color: COLORS.text.primary,
     maxHeight: 100,
     marginRight: 10,
   },
@@ -767,17 +920,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   countBadge: {
-    backgroundColor: '#334155',
-    borderRadius: 12,
-    paddingHorizontal: 8,
+    backgroundColor: COLORS.background.surface,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     flexDirection: 'row',
     alignItems: 'center',
   },
   countText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: TYPOGRAPHY.weights.bold,
     marginLeft: 4,
   },
   errorContainer: {
@@ -787,19 +940,92 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   errorText: {
-    color: '#ef4444',
+    color: COLORS.status.error,
     marginBottom: 10,
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#38bdf8',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.accent.cyan,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
   },
   retryButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  // Sponsor Ad Styles
+  adsContainer: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
+  },
+  sponsorAdCard: {
+    borderRadius: BORDER_RADIUS.md,
+    overflow: 'hidden',
+    ...SHADOWS.sm,
+  },
+  sponsorAdGradient: {
+    padding: SPACING.md,
+    alignItems: 'center',
+  },
+  sponsorAdLabel: {
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.text.tertiary,
+    fontWeight: TYPOGRAPHY.weights.bold,
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  sponsorAdName: {
+    fontSize: TYPOGRAPHY.sizes.sm,
+    color: COLORS.text.primary,
+    fontWeight: TYPOGRAPHY.weights.bold,
+  },
+  manageAdButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.xs,
+    marginTop: SPACING.xs,
+    gap: 6,
+  },
+  manageAdText: {
+    fontSize: TYPOGRAPHY.sizes.xs,
+    color: COLORS.accent.cyan,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+  },
+  // Toggle Switch Styles
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  toggleLabel: {
+    fontSize: TYPOGRAPHY.sizes.base,
+    color: COLORS.text.primary,
+    fontWeight: TYPOGRAPHY.weights.semibold,
+  },
+  toggle: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.background.surface,
+    padding: 2,
+    justifyContent: 'center',
+  },
+  toggleActive: {
+    backgroundColor: COLORS.accent.cyan,
+  },
+  toggleThumb: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.text.tertiary,
+  },
+  toggleThumbActive: {
+    backgroundColor: COLORS.text.inverse,
+    alignSelf: 'flex-end',
   },
 });
 

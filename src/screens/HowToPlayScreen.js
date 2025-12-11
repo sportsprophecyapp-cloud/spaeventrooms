@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -9,6 +9,19 @@ import { useAuth } from '../context/AuthContext';
 const HowToPlayScreen = () => {
     const navigation = useNavigation();
     const { loginAsGuest } = useAuth();
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const handleStartPlaying = async () => {
+        setIsLoading(true);
+        try {
+            await loginAsGuest();
+            // Navigation to Main screen will happen automatically via App.js useEffect
+        } catch (error) {
+            console.error('Failed to start playing:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -22,22 +35,6 @@ const HowToPlayScreen = () => {
             </View>
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Video Tutorial Section */}
-                <View style={styles.videoSection}>
-                    <Text style={styles.sectionTitle}>📹 Video Tutorial</Text>
-                    <LinearGradient
-                        colors={COLORS.gradients.dark}
-                        style={styles.videoPlaceholder}
-                    >
-                        <Ionicons name="play-circle" size={64} color={COLORS.accent.cyan} />
-                        <Text style={styles.videoText}>Tutorial Video</Text>
-                        <Text style={styles.videoSubtext}>Watch the complete walkthrough</Text>
-                    </LinearGradient>
-                    <Text style={styles.videoNote}>
-                        💡 Tip: Record your screen while following these steps to create your own tutorial!
-                    </Text>
-                </View>
-
                 {/* Getting Started */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>🚀 Getting Started</Text>
@@ -221,7 +218,8 @@ const HowToPlayScreen = () => {
                 {/* Get Started Button */}
                 <TouchableOpacity
                     style={styles.startButton}
-                    onPress={loginAsGuest}
+                    onPress={handleStartPlaying}
+                    disabled={isLoading}
                 >
                     <LinearGradient
                         colors={COLORS.gradients.primary}
@@ -229,8 +227,14 @@ const HowToPlayScreen = () => {
                         end={{ x: 1, y: 0 }}
                         style={styles.startGradient}
                     >
-                        <Text style={styles.startText}>START PLAYING</Text>
-                        <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color={COLORS.text.inverse} />
+                        ) : (
+                            <>
+                                <Text style={styles.startText}>START PLAYING</Text>
+                                <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />
+                            </>
+                        )}
                     </LinearGradient>
                 </TouchableOpacity>
             </ScrollView>
@@ -272,33 +276,15 @@ const styles = StyleSheet.create({
         color: COLORS.text.primary,
         marginBottom: SPACING.md,
     },
-    videoPlaceholder: {
-        height: 200,
+    video: {
+        width: 280,
+        height: 158, // 16:9 ratio of 280
+        alignSelf: 'center',
         borderRadius: BORDER_RADIUS.lg,
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: '#000',
         marginBottom: SPACING.sm,
-        borderWidth: 2,
-        borderColor: COLORS.accent.cyan,
-        borderStyle: 'dashed',
     },
-    videoText: {
-        color: COLORS.text.primary,
-        fontSize: TYPOGRAPHY.sizes.lg,
-        fontWeight: TYPOGRAPHY.weights.bold,
-        marginTop: SPACING.sm,
-    },
-    videoSubtext: {
-        color: COLORS.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        marginTop: SPACING.xs,
-    },
-    videoNote: {
-        color: COLORS.text.tertiary,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        fontStyle: 'italic',
-        textAlign: 'center',
-    },
+
     section: {
         marginBottom: SPACING.xl,
     },

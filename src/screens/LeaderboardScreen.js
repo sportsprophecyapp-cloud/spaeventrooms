@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import SponsorBanner from '../components/SponsorBanner';
 import { apiService } from '../services/api';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../constants/theme';
 
 const LeaderboardScreen = ({ navigation }) => {
     const [leaderboardData, setLeaderboardData] = useState([]);
@@ -107,6 +109,8 @@ const LeaderboardScreen = ({ navigation }) => {
                 <View style={{ width: 24 }} />
             </View>
 
+            <SponsorBanner style={styles.sponsorBanner} />
+
             {leaderboardData.length === 0 ? (
                 <View style={styles.emptyContainer}>
                     <Ionicons name="trophy-outline" size={64} color="#64748b" />
@@ -120,7 +124,7 @@ const LeaderboardScreen = ({ navigation }) => {
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.listContent}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#38bdf8" />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent.cyan} />
                     }
                 />
             )}
@@ -131,40 +135,40 @@ const LeaderboardScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0f172a',
+        backgroundColor: COLORS.background.primary,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 20,
+        padding: SPACING.lg,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.05)',
+        borderBottomColor: COLORS.border.tertiary,
     },
     backButton: {
-        padding: 5,
+        padding: SPACING.xs,
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
     },
     listContent: {
-        padding: 20,
+        padding: SPACING.lg,
     },
     itemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(30, 41, 59, 0.5)',
-        padding: 15,
-        borderRadius: 12,
-        marginBottom: 10,
+        backgroundColor: COLORS.background.card,
+        padding: SPACING.base,
+        borderRadius: BORDER_RADIUS.md,
+        marginBottom: SPACING.sm,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: COLORS.border.secondary,
     },
     topThreeItem: {
         borderWidth: 2,
-        borderColor: 'rgba(56, 189, 248, 0.3)',
+        borderColor: COLORS.accent.cyan,
     },
     rankContainer: {
         width: 40,
@@ -172,18 +176,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     rankText: {
-        color: '#94a3b8',
-        fontWeight: 'bold',
-        fontSize: 16,
+        color: COLORS.text.secondary,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.md,
     },
     userContainer: {
         flex: 1,
-        marginLeft: 10,
+        marginLeft: SPACING.md,
     },
     username: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
+        color: COLORS.text.primary,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.base,
     },
     secondaryStats: {
         flexDirection: 'row',
@@ -192,23 +196,23 @@ const styles = StyleSheet.create({
         marginTop: 2,
     },
     tokens: {
-        color: '#94a3b8',
-        fontSize: 12,
-        fontWeight: '500',
+        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.medium,
     },
     scoreContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
         backgroundColor: 'rgba(56, 189, 248, 0.1)',
-        paddingHorizontal: 10,
+        paddingHorizontal: SPACING.md,
         paddingVertical: 5,
-        borderRadius: 12,
+        borderRadius: BORDER_RADIUS.md,
     },
     score: {
-        color: '#38bdf8',
-        fontWeight: 'bold',
-        fontSize: 16,
+        color: COLORS.accent.cyan,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.base,
     },
     loadingContainer: {
         flex: 1,
@@ -216,26 +220,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     loadingText: {
-        color: '#94a3b8',
-        marginTop: 15,
-        fontSize: 14,
+        color: COLORS.text.secondary,
+        marginTop: SPACING.base,
+        fontSize: TYPOGRAPHY.sizes.sm,
     },
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 40,
+        padding: SPACING.xxxl,
     },
     emptyText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 20,
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.lg,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        marginTop: SPACING.lg,
     },
     emptySubtext: {
-        color: '#64748b',
-        fontSize: 14,
-        marginTop: 8,
+        color: COLORS.text.tertiary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        marginTop: SPACING.sm,
+    },
+    sponsorBanner: {
+        marginTop: SPACING.md,
+        marginBottom: SPACING.xs,
+        marginHorizontal: SPACING.lg,
     },
 });
 

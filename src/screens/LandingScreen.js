@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Dimensions, SafeAreaView, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Dimensions, SafeAreaView, StatusBar, ImageBackground } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { apiService } from '../services/api';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,9 +13,8 @@ const LandingScreen = ({ navigation }) => {
     const [stats, setStats] = React.useState({ users: 0, predictions: 0 });
 
     React.useEffect(() => {
-        // Fetch real stats from backend
-        fetch('https://sports-prophecy-backend.vercel.app/api/public/stats')
-            .then(res => res.json())
+        // Fetch real stats from backend using apiService (avoid CORS by using configured base URL)
+        apiService.getPublicStats()
             .then(data => {
                 setStats({
                     users: data.users || 1000,
@@ -22,7 +22,7 @@ const LandingScreen = ({ navigation }) => {
                 });
             })
             .catch(err => {
-                console.log('Failed to fetch stats, using defaults');
+                console.log('Failed to fetch stats, using defaults', err);
             });
     }, []);
 
@@ -36,10 +36,16 @@ const LandingScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
-            <LinearGradient
-                colors={[COLORS.background.primary, COLORS.background.secondary, COLORS.background.primary]}
+            <ImageBackground
+                source={require('../../assets/landing_bg.jpg')}
                 style={styles.background}
-            />
+                resizeMode="cover"
+            >
+                <LinearGradient
+                    colors={['rgba(10, 22, 40, 0.85)', 'rgba(10, 22, 40, 0.95)']}
+                    style={styles.gradientOverlay}
+                />
+            </ImageBackground>
 
             <SafeAreaView style={styles.safeArea}>
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -51,36 +57,26 @@ const LandingScreen = ({ navigation }) => {
                         </View>
                     </View>
 
-                    {/* Hero Section with Main Sponsor */}
+                    {/* Hero Section */}
                     <View style={styles.heroSection}>
-                        {/* Main Sponsor Banner */}
-                        <LinearGradient
-                            colors={[COLORS.accent.purple, COLORS.accent.purpleLight]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.sponsorBanner}
-                        >
-                            <Text style={styles.sponsorLabel}>MAIN SPONSOR</Text>
-                            <Text style={styles.sponsorName}>QUANTUM SPORTS</Text>
-                            <Text style={styles.sponsorTagline}>Powering the Future of Predictions</Text>
-                        </LinearGradient>
 
-                        {/* Beta Announcement Banner */}
-                        <LinearGradient
-                            colors={['#10b981', '#059669']}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.betaBanner}
-                        >
-                            <Ionicons name="rocket" size={20} color={COLORS.text.primary} />
-                            <Text style={styles.betaText}>🎉 Open now for Beta Version!</Text>
-                        </LinearGradient>
+                        <View style={styles.taglineContainer}>
+                            <Text style={styles.topTagline}>FREE & ENTERTAINING</Text>
+                        </View>
 
-                        <Text style={styles.heroTitle}>
-                            PREDICT. <Text style={styles.textCyan}>COMPETE.</Text> WIN.
+                        <Text style={styles.heroTitleMain}>
+                            Sports Prophecy
                         </Text>
+
+                        <View style={styles.forecastContainer}>
+                            <Ionicons name="cash-outline" size={28} color={COLORS.accent.gold} style={{ marginRight: 8 }} />
+                            <Text style={styles.forecastText}>FORECAST</Text>
+                            <Ionicons name="trophy" size={28} color={COLORS.accent.gold} style={{ marginLeft: 8 }} />
+                        </View>
+                        <Text style={styles.forecastSubtext}>GAME OUTCOMES</Text>
+
                         <Text style={styles.heroSubtitle}>
-                            100% Free! Sign up and get 60 tokens to start making predictions on your favorite sports
+                            EARN TOKENS & CROWNS | SPONSOR PRIZE DRAWS
                         </Text>
 
                         {/* Stats Row */}
@@ -92,9 +88,8 @@ const LandingScreen = ({ navigation }) => {
                             <View style={styles.statDivider} />
                             <View style={styles.statItem}>
                                 <Text style={styles.statNumber}>$100K+</Text>
-                                <Text style={styles.statLabel}>Prizes Awarded</Text>
+                                <Text style={styles.statLabel}>Prizes</Text>
                             </View>
-                            <View style={styles.statDivider} />
                             <View style={styles.statItem}>
                                 <Text style={styles.statNumber}>{formatNumber(stats.predictions)}</Text>
                                 <Text style={styles.statLabel}>Predictions</Text>
@@ -110,12 +105,12 @@ const LandingScreen = ({ navigation }) => {
                                 testID="landing-signup-button"
                             >
                                 <LinearGradient
-                                    colors={COLORS.gradients.primary}
+                                    colors={COLORS.gradients.gold}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
                                     style={styles.gradientButton}
                                 >
-                                    <Text style={styles.primaryButtonText}>SIGN UP FREE</Text>
+                                    <Text style={[styles.primaryButtonText, { color: COLORS.text.inverse }]}>SIGN UP FREE</Text>
                                     <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />
                                 </LinearGradient>
                             </TouchableOpacity>
@@ -139,16 +134,6 @@ const LandingScreen = ({ navigation }) => {
                                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.accent.lime }} />
                                     <Text style={styles.secondaryButtonText}>PLAY NOW</Text>
                                 </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.howToPlayButton}
-                                onPress={() => navigation.navigate('HowToPlay')}
-                                accessibilityLabel="How to Play Button"
-                                testID="landing-howtoplay-button"
-                            >
-                                <Ionicons name="help-circle-outline" size={20} color={COLORS.accent.cyan} />
-                                <Text style={styles.howToPlayText}>How to Play</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -231,7 +216,15 @@ const LandingScreen = ({ navigation }) => {
 
                     {/* Footer */}
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>Privacy Policy  •  Terms of Service</Text>
+                        <View style={styles.footerLinks}>
+                            <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
+                                <Text style={styles.footerLink}>Privacy Policy</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.footerText}>  •  </Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('TermsOfService')}>
+                                <Text style={styles.footerLink}>Terms of Service</Text>
+                            </TouchableOpacity>
+                        </View>
                         <Text style={styles.copyright}>© 2025 SportsProphecy. All rights reserved.</Text>
                     </View>
 
@@ -248,10 +241,17 @@ const styles = StyleSheet.create({
     },
     background: {
         position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+    },
+    gradientOverlay: {
+        position: 'absolute',
+        top: 0,
         left: 0,
         right: 0,
-        top: 0,
-        height: '100%',
+        bottom: 0,
     },
     safeArea: {
         flex: 1,
@@ -282,71 +282,63 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: SPACING.xxxl,
     },
-    sponsorBanner: {
-        width: '100%',
-        paddingVertical: SPACING.xl,
-        paddingHorizontal: SPACING.lg,
-        borderRadius: BORDER_RADIUS.lg,
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-        ...SHADOWS.lg,
+    taglineContainer: {
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        paddingHorizontal: SPACING.md,
+        paddingVertical: SPACING.xs,
+        borderRadius: BORDER_RADIUS.sm,
+        marginBottom: SPACING.sm,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
     },
-    sponsorLabel: {
-        fontSize: TYPOGRAPHY.sizes.xs,
+    topTagline: {
+        fontSize: TYPOGRAPHY.sizes.sm,
         fontWeight: TYPOGRAPHY.weights.bold,
         color: COLORS.text.primary,
         letterSpacing: 2,
-        marginBottom: SPACING.xs,
-        opacity: 0.8,
+        textTransform: 'uppercase',
     },
-    sponsorName: {
-        fontSize: TYPOGRAPHY.sizes.xxxl,
+    heroTitleMain: {
+        fontSize: width < 380 ? 40 : 56,
         fontWeight: TYPOGRAPHY.weights.black,
-        color: COLORS.text.primary,
-        marginBottom: SPACING.xs,
+        color: COLORS.accent.gold,
+        textAlign: 'center',
+        marginBottom: SPACING.sm,
+        lineHeight: width < 380 ? 44 : 60,
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 0, height: 4 },
+        textShadowRadius: 10,
     },
-    sponsorTagline: {
-        fontSize: TYPOGRAPHY.sizes.sm,
-        color: COLORS.text.primary,
-        opacity: 0.9,
-    },
-    betaBanner: {
-        width: '100%',
+    forecastContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: SPACING.md,
-        paddingHorizontal: SPACING.lg,
-        borderRadius: BORDER_RADIUS.md,
-        marginTop: SPACING.lg,
-        marginBottom: SPACING.lg,
-        gap: SPACING.sm,
-        ...SHADOWS.md,
+        marginBottom: 0,
     },
-    betaText: {
-        fontSize: TYPOGRAPHY.sizes.base,
-        fontWeight: TYPOGRAPHY.weights.bold,
-        color: COLORS.text.primary,
-        letterSpacing: 0.5,
-    },
-    heroTitle: {
-        fontSize: TYPOGRAPHY.sizes.display,
+    forecastText: {
+        fontSize: TYPOGRAPHY.sizes.xxl,
         fontWeight: TYPOGRAPHY.weights.black,
         color: COLORS.text.primary,
-        textAlign: 'center',
-        marginBottom: SPACING.md,
-        lineHeight: 48,
+        fontStyle: 'italic',
+        letterSpacing: 1,
     },
-    textCyan: {
-        color: COLORS.accent.cyan,
+    forecastSubtext: {
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.text.primary,
+        fontStyle: 'italic',
+        marginBottom: SPACING.md,
+        letterSpacing: 1,
     },
     heroSubtitle: {
-        fontSize: TYPOGRAPHY.sizes.md,
-        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.accent.gold,
         textAlign: 'center',
         marginBottom: SPACING.xl,
         paddingHorizontal: SPACING.md,
-        lineHeight: 24,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
     },
     statsRow: {
         flexDirection: 'row',
@@ -392,7 +384,7 @@ const styles = StyleSheet.create({
         borderRadius: BORDER_RADIUS.md,
         backgroundColor: 'transparent',
         borderWidth: 2,
-        borderColor: COLORS.accent.cyan,
+        borderColor: COLORS.accent.gold,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -411,7 +403,7 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
     },
     secondaryButtonText: {
-        color: COLORS.accent.cyan,
+        color: COLORS.accent.gold,
         fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.md,
         letterSpacing: 1,
@@ -526,6 +518,16 @@ const styles = StyleSheet.create({
         color: COLORS.text.tertiary,
         fontSize: TYPOGRAPHY.sizes.sm,
         marginBottom: SPACING.xs,
+    },
+    footerLinks: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.xs,
+    },
+    footerLink: {
+        color: COLORS.accent.cyan,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.semibold,
     },
     copyright: {
         color: COLORS.text.muted,

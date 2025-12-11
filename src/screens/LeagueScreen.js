@@ -205,7 +205,7 @@ const LeagueScreen = () => {
                 onPress={handleCreateLeague}
                 disabled={creating}
             >
-                {creating ? <ActivityIndicator color="#000" /> : <Text style={styles.actionButtonText}>Create League</Text>}
+                {creating ? <ActivityIndicator color={COLORS.text.inverse} /> : <Text style={styles.actionButtonText}>Create League</Text>}
             </TouchableOpacity>
         </ScrollView>
     );
@@ -233,7 +233,7 @@ const LeagueScreen = () => {
                 onPress={handleJoinLeague}
                 disabled={joining}
             >
-                {joining ? <ActivityIndicator color="#000" /> : <Text style={styles.actionButtonText}>Join League</Text>}
+                {joining ? <ActivityIndicator color={COLORS.text.inverse} /> : <Text style={styles.actionButtonText}>Join League</Text>}
             </TouchableOpacity>
         </ScrollView>
     );
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
         borderRadius: BORDER_RADIUS.md,
     },
     ctaButtonText: {
-        color: '#000',
+        color: COLORS.text.inverse,
         fontWeight: TYPOGRAPHY.weights.bold,
     },
     leagueCard: {
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     actionButtonText: {
-        color: '#000',
+        color: COLORS.text.inverse,
         fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.lg,
     },

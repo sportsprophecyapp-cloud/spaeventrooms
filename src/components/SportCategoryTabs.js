@@ -16,7 +16,7 @@ const SportPill = ({ sport, onPress }) => {
             nfl: { name: 'football', library: 'Ionicons' },
             mlb: { name: 'baseball', library: 'MaterialCommunityIcons' },
             nba: { name: 'basketball', library: 'Ionicons' },
-            soccer: { name: 'soccer', library: 'Ionicons' },
+            soccer: { name: 'soccer', library: 'MaterialCommunityIcons' },
             mma: { name: 'hand-right-outline', library: 'Ionicons' },
         };
         return iconMap[sportId] || { name: 'trophy', library: 'Ionicons' };
@@ -85,11 +85,7 @@ const SportCategoryTabs = () => {
 
     return (
         <View style={styles.container}>
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}
-            >
+            <View style={styles.pillsContainer}>
                 {SPORTS.map((sport) => (
                     <SportPill
                         key={sport.id}
@@ -97,7 +93,7 @@ const SportCategoryTabs = () => {
                         onPress={() => handlePress(sport)}
                     />
                 ))}
-            </ScrollView>
+            </View>
         </View>
     );
 };
@@ -108,11 +104,16 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background.secondary,
         borderBottomWidth: 1,
         borderBottomColor: COLORS.border.tertiary,
+        maxWidth: '100%',
+        overflow: 'hidden',
     },
-    scrollContent: {
+    pillsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
         paddingHorizontal: SPACING.base,
         paddingVertical: SPACING.md,
-        gap: SPACING.md,
+        gap: SPACING.sm,
+        justifyContent: 'center',
     },
     tabButton: {
         borderRadius: BORDER_RADIUS.full,

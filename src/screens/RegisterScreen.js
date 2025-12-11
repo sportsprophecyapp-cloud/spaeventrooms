@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { BiometricService } from '../services/biometrics';
 
 const RegisterScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
@@ -16,7 +17,7 @@ const RegisterScreen = ({ navigation }) => {
     const [referralCode, setReferralCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { register } = useAuth();
+    const { register, user } = useAuth();
 
     const handleRegister = async () => {
         setError('');
@@ -39,17 +40,40 @@ const RegisterScreen = ({ navigation }) => {
         try {
             const success = await register(email, password, username, referralCode, rememberMe);
             if (success) {
-                // For guests upgrading to registered, we need to manually navigate
-                // because App.js won't unmount the stack (since they were already "authenticated")
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Main' }],
-                });
+                // Force navigation to Main with a slight delay
+                // Check for biometric support
+                const { hasHardware, isEnrolled } = await BiometricService.checkBiometricSupport();
+                if (hasHardware && isEnrolled) {
+                    Alert.alert(
+                        'Enable Biometrics?',
+                        'Would you like to enable FaceID/TouchID for faster login next time?',
+                        [
+                            {
+                                text: 'No Thanks',
+                                onPress: () => navigation.navigate('Main'),
+                                style: 'cancel'
+                            },
+                            {
+                                text: 'Yes, Enable',
+                                onPress: async () => {
+                                    await BiometricService.saveCredentials(email, password);
+                                    Alert.alert('Success', 'Biometric login enabled!');
+                                    navigation.navigate('Main');
+                                }
+                            }
+                        ]
+                    );
+                } else {
+                    setTimeout(() => {
+                        navigation.navigate('Main');
+                    }, 100);
+                }
             } else {
                 setError('Registration failed');
             }
         } catch (error) {
-            setError(error.message || 'Registration failed');
+            console.error('Registration error:', error);
+            setError(error.error || error.message || 'Registration failed');
         } finally {
             setLoading(false);
         }
@@ -236,8 +260,19 @@ const RegisterScreen = ({ navigation }) => {
                             {/* Terms */}
                             <Text style={styles.termsText}>
                                 By signing up, you agree to our{' '}
-                                <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
-                                <Text style={styles.termsLink}>Privacy Policy</Text>
+                                <Text
+                                    style={styles.termsLink}
+                                    onPress={() => navigation.navigate('TermsOfService')}
+                                >
+                                    Terms of Service
+                                </Text>
+                                {' '}and{' '}
+                                <Text
+                                    style={styles.termsLink}
+                                    onPress={() => navigation.navigate('PrivacyPolicy')}
+                                >
+                                    Privacy Policy
+                                </Text>
                             </Text>
 
                             {/* Login Link */}
@@ -249,8 +284,8 @@ const RegisterScreen = ({ navigation }) => {
                         </View>
                     </View>
                 </ScrollView>
-            </SafeAreaView>
-        </View>
+            </SafeAreaView >
+        </View >
     );
 };
 

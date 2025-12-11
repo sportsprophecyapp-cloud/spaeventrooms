@@ -1,25 +1,31 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
-    "version": "2.4.8",
+    "name": "SportsProphecyApp",
+    "slug": "sportsprophecyapp",
+    "version": "2.7.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0a1628"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sportsprophecy.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSFaceIDUsageDescription": "Allow Sports Prophecy to use FaceID for quick and secure login."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0a1628"
       },
+      "package": "com.sportsprophecy.app",
       "edgeToEdgeEnabled": true
     },
     "web": {
@@ -27,7 +33,14 @@
     },
     "plugins": [
       "expo-font",
-      "expo-web-browser"
-    ]
+      "expo-web-browser",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "312cf339-c044-409d-a4d4-59d32d2cc67a"
+      }
+    },
+    "owner": "sportsprophecy"
   }
 }

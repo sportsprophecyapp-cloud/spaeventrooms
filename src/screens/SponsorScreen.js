@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, TextInput, Image, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, TextInput, Image, Alert, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -33,14 +33,14 @@ const SponsorScreen = ({ navigation }) => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [3, 1],
+            aspect: [16, 5],
             quality: 1,
         });
 
         if (!result.canceled) {
             const manipResult = await ImageManipulator.manipulateAsync(
                 result.assets[0].uri,
-                [{ resize: { width: 800 } }],
+                [{ resize: { width: 800 } }], // 800x250 approx
                 { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
             );
             setBannerImage(`data:image/jpeg;base64,${manipResult.base64}`);
@@ -48,13 +48,19 @@ const SponsorScreen = ({ navigation }) => {
     };
 
     const handlePaidSubmit = async () => {
+        console.log('handlePaidSubmit_clicked');
         if (!sponsorName || !linkUrl || !bannerImage) {
-            Alert.alert('Missing Information', 'Please fill in all fields and upload a banner image.');
+            if (Platform.OS === 'web') {
+                window.alert('Missing Information: Please fill in all fields and upload a banner image.');
+            } else {
+                Alert.alert('Missing Information', 'Please fill in all fields and upload a banner image.');
+            }
             return;
         }
 
         setLoading(true);
         try {
+            console.log('Initiating sponsor checkout...');
             const response = await apiService.createSponsorCheckout({
                 sponsorName,
                 bannerUrl: bannerImage,
@@ -63,27 +69,42 @@ const SponsorScreen = ({ navigation }) => {
                 price: 25
             });
 
+            console.log('Checkout response:', response);
+
             if (response.checkoutUrl) {
-                await WebBrowser.openBrowserAsync(response.checkoutUrl);
-                navigation.goBack();
-                Alert.alert('Success', 'Redirecting to payment... Your ad will be live once payment is confirmed!');
+                if (Platform.OS === 'web') {
+                    window.location.href = response.checkoutUrl;
+                } else {
+                    await WebBrowser.openBrowserAsync(response.checkoutUrl);
+                    navigation.goBack();
+                    Alert.alert('Success', 'Redirecting to payment... Your ad will be live once payment is confirmed!');
+                }
+            } else {
+                throw new Error('No checkout URL received from server');
             }
         } catch (error) {
             console.error('Payment Error:', error);
-            Alert.alert('Error', 'Failed to initiate payment. Please try again.');
+            const errorMessage = error.response?.data?.message || error.message || JSON.stringify(error);
+            Alert.alert('Payment Failed', `Could not initiate payment: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
     };
 
     const handlePrizeSubmit = async () => {
+        console.log('handlePrizeSubmit_clicked');
         if (!sponsorName || !linkUrl || !bannerImage || !prizeDescription || !prizeValue || !contactEmail) {
-            Alert.alert('Missing Information', 'Please fill in all fields.');
+            if (Platform.OS === 'web') {
+                window.alert('Missing Information: Please fill in all fields.');
+            } else {
+                Alert.alert('Missing Information', 'Please fill in all fields.');
+            }
             return;
         }
 
         setLoading(true);
         try {
+            console.log('Submitting prize application...');
             await apiService.submitPrizeApplication({
                 sponsorName,
                 bannerUrl: bannerImage,
@@ -93,11 +114,20 @@ const SponsorScreen = ({ navigation }) => {
                 contactEmail
             });
 
-            Alert.alert('Application Submitted', 'Your prize draw application has been submitted for review!');
-            navigation.goBack();
+            if (Platform.OS === 'web') {
+                window.alert('Application Submitted: Your prize draw application has been submitted for review!');
+                navigation.goBack();
+            } else {
+                Alert.alert(
+                    'Application Submitted',
+                    'Your prize draw application has been submitted for review!',
+                    [{ text: 'OK', onPress: () => navigation.goBack() }]
+                );
+            }
         } catch (error) {
             console.error('Application Error:', error);
-            Alert.alert('Error', 'Failed to submit application.');
+            const errorMessage = error.response?.data?.message || error.message || JSON.stringify(error);
+            Alert.alert('Submission Failed', `Failed to submit application: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -142,7 +172,7 @@ const SponsorScreen = ({ navigation }) => {
                     autoCapitalize="none"
                 />
 
-                <Text style={styles.label}>Banner Image (3:1 Ratio)</Text>
+                <Text style={styles.label}>Banner Image (3.2:1 Ratio)</Text>
                 <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
                     {bannerImage ? (
                         <Image source={{ uri: bannerImage }} style={styles.previewImage} resizeMode="cover" />
@@ -217,7 +247,7 @@ const SponsorScreen = ({ navigation }) => {
                     onChangeText={setPrizeValue}
                 />
                 <Text style={styles.helperText}>
-                    {parseFloat(prizeValue) >= 50 ? 'Est. Duration: 1 Month' : 'Est. Duration: 1 Week'}
+                    Est. Duration: 1 Month
                 </Text>
 
                 <Text style={styles.label}>Contact Email</Text>
@@ -231,7 +261,7 @@ const SponsorScreen = ({ navigation }) => {
                     keyboardType="email-address"
                 />
 
-                <Text style={styles.label}>Banner Image (3:1 Ratio)</Text>
+                <Text style={styles.label}>Banner Image (3.2:1 Ratio)</Text>
                 <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
                     {bannerImage ? (
                         <Image source={{ uri: bannerImage }} style={styles.previewImage} resizeMode="cover" />

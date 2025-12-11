@@ -1,7 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
+import BackgroundWrapper from '../components/BackgroundWrapper';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 const MoreScreen = ({ navigation }) => {
     const { user, logout } = useAuth();
@@ -37,154 +40,196 @@ const MoreScreen = ({ navigation }) => {
     ];
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>More</Text>
-            </View>
-
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                {/* Profile Card */}
-                <View style={styles.profileCard}>
-                    <View style={styles.avatarContainer}>
-                        <Text style={styles.avatarText}>{user?.username?.charAt(0).toUpperCase() || 'U'}</Text>
-                    </View>
-                    <View style={styles.profileInfo}>
-                        <Text style={styles.username}>{user?.username || 'Guest'}</Text>
-                        <Text style={styles.email}>{user?.email || 'Sign in to sync'}</Text>
-                    </View>
+        <BackgroundWrapper>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>MORE</Text>
+                    <Text style={styles.headerSubtitle}>SETTINGS & INFO</Text>
                 </View>
 
-                {/* Stats Row */}
-                <View style={styles.statsRow}>
-                    <View style={styles.statItem}>
-                        <Ionicons name="wallet" size={24} color="#fbbf24" />
-                        <Text style={styles.statValue}>{user?.tokens || 0}</Text>
-                        <Text style={styles.statLabel}>Tokens</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <MaterialCommunityIcons name="crown" size={24} color="#38bdf8" />
-                        <Text style={styles.statValue}>{user?.crowns || 0}</Text>
-                        <Text style={styles.statLabel}>Crowns</Text>
-                    </View>
-                </View>
-
-                {/* Menu Items */}
-                <View style={styles.menuContainer}>
-                    {menuItems.map((item, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            style={styles.menuItem}
-                            onPress={() => {
-                                if (item.label === 'How to Play') {
-                                    navigation.navigate('HowToPlay');
-                                } else if (item.label === 'Leaderboard') {
-                                    navigation.navigate('Leaderboard');
-                                } else if (item.label === 'Prize Draws') {
-                                    navigation.navigate('WeeklyDraw');
-                                } else if (item.label === 'Help & Support') {
-                                    navigation.navigate('HelpSupport');
-                                } else if (item.label === 'Advertise with Us') {
-                                    navigation.navigate('Sponsor');
-                                }
-                            }}
-                            accessibilityLabel={`Menu: ${item.label}`}
-                            testID={`more-menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    {/* Profile Card */}
+                    <TouchableOpacity style={styles.profileCard} onPress={() => navigation.navigate('Profile')}>
+                        <LinearGradient
+                            colors={['rgba(255, 215, 0, 0.15)', 'rgba(255, 215, 0, 0.05)']}
+                            style={styles.profileCardGradient}
                         >
-                            <View style={styles.menuIcon}>
-                                <Ionicons name={item.icon} size={24} color="#94a3b8" />
+                            <View style={styles.avatarContainer}>
+                                <Text style={styles.avatarText}>{user?.username?.charAt(0).toUpperCase() || 'U'}</Text>
                             </View>
-                            <Text style={styles.menuLabel}>{item.label}</Text>
-                            <Ionicons name="chevron-forward" size={20} color="#475569" />
-                        </TouchableOpacity>
-                    ))}
-
-                    {/* Admin Panel - Only visible to admins */}
-                    {user?.role === 'admin' && (
-                        <TouchableOpacity
-                            style={[styles.menuItem, styles.adminMenuItem]}
-                            onPress={() => navigation.navigate('Admin')}
-                            accessibilityLabel="Menu: Admin Panel"
-                            testID="more-menu-admin"
-                        >
-                            <View style={styles.menuIcon}>
-                                <Ionicons name="shield-checkmark" size={24} color="#fbbf24" />
+                            <View style={styles.profileInfo}>
+                                <Text style={styles.username}>{user?.username || 'Guest'}</Text>
+                                <Text style={styles.email}>{user?.email || 'Sign in to sync'}</Text>
+                                <Text style={styles.viewProfileText}>View Profile & Settings</Text>
                             </View>
-                            <Text style={[styles.menuLabel, { color: '#fbbf24' }]}>Admin Panel</Text>
-                            <Ionicons name="chevron-forward" size={20} color="#fbbf24" />
-                        </TouchableOpacity>
-                    )}
-
-                    <TouchableOpacity style={styles.menuItem} onPress={handleLogout} accessibilityLabel="Logout Button" testID="more-logout-button">
-                        <View style={styles.menuIcon}>
-                            <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-                        </View>
-                        <Text style={[styles.menuLabel, { color: '#ef4444' }]}>Logout</Text>
+                            <Ionicons name="chevron-forward" size={24} color={COLORS.accent.gold} />
+                        </LinearGradient>
                     </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+
+                    {/* Stats Row */}
+                    <View style={styles.statsRow}>
+                        <View style={styles.statItem}>
+                            <Ionicons name="wallet" size={28} color={COLORS.accent.gold} />
+                            <Text style={styles.statValue}>{user?.tokens || 0}</Text>
+                            <Text style={styles.statLabel}>Tokens</Text>
+                        </View>
+                        <View style={styles.statDivider} />
+                        <View style={styles.statItem}>
+                            <MaterialCommunityIcons name="crown" size={28} color={COLORS.accent.gold} />
+                            <Text style={styles.statValue}>{user?.crowns || 0}</Text>
+                            <Text style={styles.statLabel}>Crowns</Text>
+                        </View>
+                    </View>
+
+                    {/* Menu Items */}
+                    <View style={styles.menuContainer}>
+                        {menuItems.map((item, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.menuItem}
+                                onPress={() => {
+                                    if (item.label === 'How to Play') {
+                                        navigation.navigate('HowToPlay');
+                                    } else if (item.label === 'Leaderboard') {
+                                        navigation.navigate('Leaderboard');
+                                    } else if (item.label === 'Prize Draws') {
+                                        navigation.navigate('WeeklyDraw');
+                                    } else if (item.label === 'Settings') {
+                                        navigation.navigate('Profile');
+                                    } else if (item.label === 'Help & Support') {
+                                        navigation.navigate('HelpSupport');
+                                    } else if (item.label === 'Advertise with Us') {
+                                        navigation.navigate('Sponsor');
+                                    }
+                                }}
+                                accessibilityLabel={`Menu: ${item.label}`}
+                                testID={`more-menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                            >
+                                <View style={styles.menuIcon}>
+                                    <Ionicons name={item.icon} size={24} color={COLORS.text.secondary} />
+                                </View>
+                                <Text style={styles.menuLabel}>{item.label}</Text>
+                                {item.badge && (
+                                    <View style={styles.badge}>
+                                        <Text style={styles.badgeText}>{item.badge}</Text>
+                                    </View>
+                                )}
+                                <Ionicons name="chevron-forward" size={20} color={COLORS.text.tertiary} />
+                            </TouchableOpacity>
+                        ))}
+
+                        {/* Admin Panel - Only visible to admins */}
+                        {user?.role === 'admin' && (
+                            <TouchableOpacity
+                                style={[styles.menuItem, styles.adminMenuItem]}
+                                onPress={() => navigation.navigate('Admin')}
+                                accessibilityLabel="Menu: Admin Panel"
+                                testID="more-menu-admin"
+                            >
+                                <View style={styles.menuIcon}>
+                                    <Ionicons name="shield-checkmark" size={24} color={COLORS.accent.gold} />
+                                </View>
+                                <Text style={[styles.menuLabel, { color: COLORS.accent.gold }]}>Admin Panel</Text>
+                                <Ionicons name="chevron-forward" size={20} color={COLORS.accent.gold} />
+                            </TouchableOpacity>
+                        )}
+
+                        <TouchableOpacity style={styles.menuItem} onPress={handleLogout} accessibilityLabel="Logout Button" testID="more-logout-button">
+                            <View style={styles.menuIcon}>
+                                <Ionicons name="log-out-outline" size={24} color={COLORS.status.error} />
+                            </View>
+                            <Text style={[styles.menuLabel, { color: COLORS.status.error }]}>Logout</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
+        </BackgroundWrapper>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0f172a',
     },
     header: {
-        padding: 20,
+        padding: SPACING.lg,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.05)',
+        borderBottomColor: COLORS.border.tertiary,
+        alignItems: 'center',
     },
     headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#fff',
+        fontSize: TYPOGRAPHY.sizes.xxl,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.text.primary,
+        letterSpacing: 2,
+    },
+    headerSubtitle: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.accent.gold,
+        letterSpacing: 1,
+        marginTop: SPACING.xs,
     },
     scrollContent: {
-        padding: 20,
+        padding: SPACING.lg,
     },
     profileCard: {
+        marginBottom: SPACING.xl,
+        borderRadius: BORDER_RADIUS.lg,
+        overflow: 'hidden',
+        ...SHADOWS.lg,
+    },
+    profileCardGradient: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 30,
+        padding: SPACING.lg,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 215, 0, 0.3)',
+        borderRadius: BORDER_RADIUS.lg,
     },
     avatarContainer: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#38bdf8',
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: COLORS.accent.gold,
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: 15,
+        marginRight: SPACING.base,
+        ...SHADOWS.md,
     },
     avatarText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#fff',
+        fontSize: TYPOGRAPHY.sizes.xxl,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.text.inverse,
     },
     profileInfo: {
         flex: 1,
     },
     username: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 4,
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+        marginBottom: SPACING.xs,
     },
     email: {
-        fontSize: 14,
-        color: '#94a3b8',
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.secondary,
+        marginBottom: SPACING.xs,
+    },
+    viewProfileText: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.accent.gold,
+        fontWeight: TYPOGRAPHY.weights.semibold,
     },
     statsRow: {
         flexDirection: 'row',
-        backgroundColor: 'rgba(30, 41, 59, 0.5)',
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 30,
+        backgroundColor: COLORS.background.card,
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.xl,
+        marginBottom: SPACING.xl,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(255, 215, 0, 0.2)',
+        ...SHADOWS.md,
     },
     statItem: {
         flex: 1,
@@ -192,41 +237,60 @@ const styles = StyleSheet.create({
     },
     statDivider: {
         width: 1,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: COLORS.border.secondary,
+        marginHorizontal: SPACING.base,
     },
     statValue: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginVertical: 5,
+        fontSize: TYPOGRAPHY.sizes.xxl,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.accent.gold,
+        marginVertical: SPACING.sm,
     },
     statLabel: {
-        fontSize: 12,
-        color: '#94a3b8',
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.secondary,
+        fontWeight: TYPOGRAPHY.weights.semibold,
     },
     menuContainer: {
-        backgroundColor: 'rgba(30, 41, 59, 0.3)',
-        borderRadius: 16,
+        backgroundColor: COLORS.background.card,
+        borderRadius: BORDER_RADIUS.lg,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 15,
+        padding: SPACING.base,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.05)',
+        borderBottomColor: COLORS.border.tertiary,
     },
     menuIcon: {
-        marginRight: 15,
+        marginRight: SPACING.base,
+        width: 32,
+        alignItems: 'center',
     },
     menuLabel: {
         flex: 1,
-        color: '#fff',
-        fontSize: 16,
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    badge: {
+        backgroundColor: COLORS.accent.lime,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: SPACING.xs / 2,
+        borderRadius: BORDER_RADIUS.sm,
+        marginRight: SPACING.sm,
+    },
+    badgeText: {
+        color: COLORS.text.inverse,
+        fontSize: TYPOGRAPHY.sizes.xs,
+        fontWeight: TYPOGRAPHY.weights.black,
     },
     adminMenuItem: {
-        backgroundColor: 'rgba(251, 191, 36, 0.05)',
-        borderColor: 'rgba(251, 191, 36, 0.2)',
+        backgroundColor: 'rgba(255, 215, 0, 0.05)',
+        borderColor: 'rgba(255, 215, 0, 0.2)',
     },
 });
 

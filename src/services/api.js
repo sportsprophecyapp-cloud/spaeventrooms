@@ -1,5 +1,5 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import storage from '../utils/storage';
 
 // Use environment variable or fallback to local API for development
 // Use environment variable or fallback to local API for development
@@ -16,7 +16,7 @@ const api = axios.create({
 // Add a request interceptor to add the auth token
 api.interceptors.request.use(
     async (config) => {
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await storage.getItem('userToken');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -213,6 +213,16 @@ export const apiService = {
         }
     },
 
+    getPublicStats: async () => {
+        try {
+            const response = await api.get('/public/stats');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching public stats:', error);
+            throw error;
+        }
+    },
+
     // --- League Methods ---
     createLeague: async (userId, name, entryFee) => {
         try {
@@ -253,23 +263,9 @@ export const apiService = {
     },
 
     // --- Sponsor Methods ---
-    createSponsorCheckout: async (data) => {
-        try {
-            const response = await api.post('/sponsors/create-checkout-session', data);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error;
-        }
-    },
 
-    submitPrizeApplication: async (data) => {
-        try {
-            const response = await api.post('/sponsors/apply', data);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error;
-        }
-    },
+
+
 
     getPendingSponsors: async () => {
         try {
@@ -308,12 +304,82 @@ export const apiService = {
         }
     },
 
-    submitPrizeApplication: async (prizeData) => {
+    submitPrizeApplication: async (data) => {
         try {
-            const response = await api.post('/sponsors/prize-application', prizeData);
+            const response = await api.post('/sponsors/prize-application', data);
             return response.data;
         } catch (error) {
-            throw error.response ? error.response.data : error;
+            throw error.response?.data || error;
+        }
+    },
+
+    // --- Admin Endpoints ---
+    getPendingSponsors: async () => {
+        try {
+            const response = await api.get('/admin/sponsors/pending');
+            return response.data;
+        } catch (error) {
+            console.error('getPendingSponsors error:', error);
+            throw error.response?.data || error;
+        }
+    },
+
+    approveSponsor: async (sponsorId, duration = '1month') => {
+        try {
+            const response = await api.post(`/admin/sponsors/${sponsorId}/approve`, { duration });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+
+    rejectSponsor: async (id) => {
+        try {
+            const response = await api.post(`/admin/sponsors/${id}/reject`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    holdSponsor: async (id) => {
+        try {
+            const response = await api.post(`/admin/sponsors/${id}/hold`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    deleteSponsor: async (id) => {
+        try {
+            const response = await api.delete(`/admin/sponsors/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    getActiveSponsors: async () => {
+        try {
+            const response = await api.get('/admin/sponsors/active');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    deactivateSponsor: async (id) => {
+        try {
+            const response = await api.post(`/admin/sponsors/${id}/deactivate`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    getActivePrizeSponsors: async () => {
+        try {
+            const response = await api.get('/sponsors/prizes');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching active prize sponsors:', error);
+            return [];
         }
     },
 
@@ -327,31 +393,43 @@ export const apiService = {
         }
     },
 
-    getRooms: async () => {
+
+
+    toggleNotifications: async (userId, enabled) => {
         try {
-            const response = await api.get('/chat/rooms');
+            const response = await api.post('/user/notifications/settings', { userId, enabled });
             return response.data;
         } catch (error) {
-            console.error('Error fetching rooms:', error);
+            console.error('Error toggling notifications:', error);
+            throw error;
+        }
+    },
+
+    getNotifications: async (userId) => {
+        try {
+            const response = await api.get(`/notifications/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
             return [];
         }
     },
 
-    createRoom: async (roomData) => {
+    sendAdminNotification: async (message, targetUserId = 'all') => {
         try {
-            const response = await api.post('/chat/rooms', roomData);
+            const response = await api.post('/admin/notify', { message, targetUserId });
             return response.data;
         } catch (error) {
             throw error.response ? error.response.data : error;
         }
     },
 
-    joinRoom: async (roomId, password) => {
+    updateRoomCustomAd: async (roomId, adData) => {
         try {
-            const response = await api.post('/chat/rooms/join', { roomId, password });
+            const response = await api.put(`/chat/rooms/${roomId}/custom-ad`, adData);
             return response.data;
         } catch (error) {
-            throw error.response ? error.response.data : error;
+            throw error.response?.data || error;
         }
     }
 };

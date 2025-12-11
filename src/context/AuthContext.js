@@ -14,8 +14,8 @@ export const AuthProvider = ({ children }) => {
         apiService.setUnauthorizedCallback(logout);
     }, []);
 
-    const checkDailyReward = async (userId) => {
-        if (!userId) return;
+    const checkDailyReward = async (userId, isGuest = false) => {
+        if (!userId || isGuest || userId === 'guest') return;
         try {
             console.log('Checking daily reward for user:', userId);
             const result = await apiService.claimDailyLoginReward(userId);
@@ -49,16 +49,24 @@ export const AuthProvider = ({ children }) => {
             const storedUser = await storage.getItem('userData');
             if (storedUser) {
                 const parsedUser = JSON.parse(storedUser);
+
+                // If it's a guest user, just load local state and skip backend fetch
+                if (parsedUser.isGuest || parsedUser.uuid === 'guest') {
+                    setUser(parsedUser);
+                    setIsLoading(false);
+                    return;
+                }
+
                 // Fetch fresh data from backend immediately
                 try {
                     const freshUser = await apiService.getUserProfile(parsedUser.uuid);
                     setUser(freshUser);
                     await storage.setItem('userData', JSON.stringify(freshUser));
-                    checkDailyReward(freshUser.uuid);
+                    checkDailyReward(freshUser.uuid, false);
                 } catch (err) {
                     console.warn('Failed to fetch fresh user data, using stored data', err);
                     setUser(parsedUser);
-                    checkDailyReward(parsedUser.uuid);
+                    checkDailyReward(parsedUser.uuid, false);
                 }
             }
         } catch (e) {
@@ -74,12 +82,11 @@ export const AuthProvider = ({ children }) => {
             if (data.user) {
                 setUser(data.user);
 
-                if (remember) {
-                    await storage.setItem('userData', JSON.stringify(data.user));
-                    // If the backend returned a token, store it too
-                    if (data.token) {
-                        await storage.setItem('userToken', data.token);
-                    }
+                // Always store data for the session.
+                // TODO: Implement SessionStorage for 'remember=false' if needed.
+                await storage.setItem('userData', JSON.stringify(data.user));
+                if (data.token) {
+                    await storage.setItem('userToken', data.token);
                 }
 
                 // Check for daily reward
@@ -99,11 +106,10 @@ export const AuthProvider = ({ children }) => {
             if (data.user) {
                 setUser(data.user);
 
-                if (remember) {
-                    await storage.setItem('userData', JSON.stringify(data.user));
-                    if (data.token) {
-                        await storage.setItem('userToken', data.token);
-                    }
+                // Always store data for the session
+                await storage.setItem('userData', JSON.stringify(data.user));
+                if (data.token) {
+                    await storage.setItem('userToken', data.token);
                 }
 
                 // Show referral bonus message if applicable

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, TextInput, Alert, ActivityIndicator, Image, Linking } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, TextInput, Alert, ActivityIndicator, Image, Linking, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
@@ -20,6 +20,11 @@ const AdminScreen = ({ navigation }) => {
 
     // Sponsor Management State
     const [pendingSponsors, setPendingSponsors] = useState([]);
+    const [activeSponsors, setActiveSponsors] = useState([]);
+
+    // Notification State
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [notifLoading, setNotifLoading] = useState(false);
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -34,7 +39,9 @@ const AdminScreen = ({ navigation }) => {
         if (activeTab === 'users') {
             fetchModerators();
         } else {
+            fetchModerators();
             fetchPendingSponsors();
+            fetchActiveSponsors();
         }
     };
 
@@ -54,7 +61,16 @@ const AdminScreen = ({ navigation }) => {
             const sponsors = await apiService.getPendingSponsors();
             setPendingSponsors(sponsors);
         } catch (error) {
-            console.error('Error fetching sponsors:', error);
+            console.error('Error fetching pending sponsors:', error);
+        }
+    };
+
+    const fetchActiveSponsors = async () => {
+        try {
+            const sponsors = await apiService.getActiveSponsors();
+            setActiveSponsors(sponsors);
+        } catch (error) {
+            console.error('Error fetching active sponsors:', error);
         }
     };
 
@@ -111,24 +127,189 @@ const AdminScreen = ({ navigation }) => {
         );
     };
 
-    const handleApproveSponsor = async (sponsor) => {
-        Alert.alert(
-            'Approve Sponsor',
-            `Approve ${sponsor.sponsorName} for a ${sponsor.prizeDetails.value >= 50 ? '1 Month' : '1 Week'} ad?`,
-            [
+    const handleApproveSponsor = async (sponsor, duration) => {
+        const title = 'Approve Sponsor';
+        const durationText = duration === '1week' ? '1 Week' : '1 Month';
+        const message = `Approve ${sponsor.sponsorName} for a ${durationText} ad?`;
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`${title}\n${message}`)) {
+                setLoading(true);
+                try {
+                    await apiService.approveSponsor(sponsor._id, duration);
+                    window.alert(`Success: Sponsor approved for ${durationText}!`);
+                    fetchPendingSponsors();
+                } catch (error) {
+                    window.alert('Error: Failed to approve sponsor');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        } else {
+            Alert.alert(title, message, [
                 { text: 'Cancel', style: 'cancel' },
                 {
-                    text: 'Approve',
+                    text: `Approve (${durationText})`,
                     onPress: async () => {
                         setLoading(true);
                         try {
-                            await apiService.approveSponsor(sponsor._id);
-                            Alert.alert('Success', 'Sponsor approved and ad is live!');
+                            await apiService.approveSponsor(sponsor._id, duration);
+                            Alert.alert('Success', `Sponsor approved for ${durationText}!`);
                             fetchPendingSponsors();
                         } catch (error) {
                             Alert.alert('Error', 'Failed to approve sponsor');
                         } finally {
                             setLoading(false);
+                        }
+                    }
+                }
+            ]);
+        }
+    };
+
+    const handleHoldSponsor = async (sponsor) => {
+        const title = 'Hold Sponsor';
+        const message = 'Put this application on hold? The sponsor will not be live.';
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`${title}\n${message}`)) {
+                setLoading(true);
+                try {
+                    await apiService.holdSponsor(sponsor._id);
+                    window.alert('Success: Sponsor put on hold');
+                    fetchPendingSponsors();
+                } catch (error) {
+                    window.alert('Error: Failed to update sponsor');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        } else {
+            Alert.alert(title, message, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Put on Hold',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            await apiService.holdSponsor(sponsor._id);
+                            Alert.alert('Success', 'Sponsor put on hold');
+                            fetchPendingSponsors();
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to update sponsor');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]);
+        }
+    };
+
+    const handleDeactivateSponsor = async (sponsor) => {
+        const title = 'Remove Prize Draw Ad';
+        const message = `Remove ${sponsor.sponsorName} from Prize Draws page? This will hide the ad but keep the sponsor record.`;
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`${title}\n${message}`)) {
+                setLoading(true);
+                try {
+                    await apiService.deactivateSponsor(sponsor._id);
+                    window.alert('Success: Ad removed from Prize Draws!');
+                    fetchActiveSponsors();
+                } catch (error) {
+                    window.alert('Error: Failed to remove ad');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        } else {
+            Alert.alert(title, message, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Remove',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            await apiService.deactivateSponsor(sponsor._id);
+                            Alert.alert('Success', 'Ad removed from Prize Draws!');
+                            fetchActiveSponsors();
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to remove ad');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]);
+        }
+    };
+
+    const handleDeleteSponsor = async (sponsor) => {
+        const title = 'Delete Sponsor';
+        const message = `Are you sure you want to permanently delete ${sponsor.sponsorName}? This action cannot be undone.`;
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`${title}\n${message}`)) {
+                setLoading(true);
+                try {
+                    await apiService.deleteSponsor(sponsor._id);
+                    window.alert('Success: Sponsor deleted successfully!');
+                    fetchPendingSponsors();
+                } catch (error) {
+                    window.alert('Error: Failed to delete sponsor');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        } else {
+            Alert.alert(title, message, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            await apiService.deleteSponsor(sponsor._id);
+                            Alert.alert('Success', 'Sponsor deleted successfully!');
+                            fetchPendingSponsors();
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to delete sponsor');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]);
+        }
+    };
+
+    const handleSendNotification = async () => {
+        if (!notificationMessage.trim()) {
+            Alert.alert('Error', 'Please enter a message');
+            return;
+        }
+
+        Alert.alert(
+            'Confirm Send',
+            'This will notify ALL users. Are you sure?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Send',
+                    onPress: async () => {
+                        setNotifLoading(true);
+                        try {
+                            await apiService.sendAdminNotification(notificationMessage.trim());
+                            Alert.alert('Success', 'Notification sent to all users');
+                            setNotificationMessage('');
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to send notification');
+                            console.error(error);
+                        } finally {
+                            setNotifLoading(false);
                         }
                     }
                 }
@@ -225,6 +406,8 @@ const AdminScreen = ({ navigation }) => {
         </>
     );
 
+
+
     const renderSponsorManagement = () => (
         <View style={styles.section}>
             <Text style={styles.sectionTitle}>📢 Pending Prize Applications</Text>
@@ -239,6 +422,14 @@ const AdminScreen = ({ navigation }) => {
 
                         <View style={styles.sponsorDetails}>
                             <Text style={styles.sponsorName}>{sponsor.sponsorName}</Text>
+
+                            {/* STATUS BADGE */}
+                            {sponsor.paymentStatus === 'hold' && (
+                                <View style={{ backgroundColor: '#facc15', alignSelf: 'flex-start', paddingHorizontal: 8, borderRadius: 4, marginBottom: 5 }}>
+                                    <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 10 }}>ON HOLD</Text>
+                                </View>
+                            )}
+
                             <TouchableOpacity onPress={() => Linking.openURL(sponsor.linkUrl)}>
                                 <Text style={styles.sponsorLink}>{sponsor.linkUrl}</Text>
                             </TouchableOpacity>
@@ -252,17 +443,155 @@ const AdminScreen = ({ navigation }) => {
                             <Text style={styles.detailValue}>${sponsor.prizeDetails.value}</Text>
 
                             <Text style={styles.detailLabel}>Contact:</Text>
-                            <Text style={styles.detailValue}>{sponsor.contactEmail}</Text>
+                            <TouchableOpacity onPress={() => Linking.openURL(`mailto:${sponsor.contactEmail}`)}>
+                                <Text style={[styles.detailValue, { color: '#38bdf8', textDecorationLine: 'underline' }]}>{sponsor.contactEmail}</Text>
+                            </TouchableOpacity>
                         </View>
 
-                        <TouchableOpacity style={styles.actionButton} onPress={() => handleApproveSponsor(sponsor)} disabled={loading}>
-                            <LinearGradient colors={['#059669', '#10b981']} style={styles.gradient}>
-                                {loading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="checkmark-circle" size={20} color="#fff" /><Text style={styles.buttonText}>Approve Ad</Text></>}
+                        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+                            <TouchableOpacity style={[styles.actionButton, { flex: 1 }]} onPress={() => handleApproveSponsor(sponsor, '1week')} disabled={loading}>
+                                <LinearGradient colors={['#059669', '#10b981']} style={styles.gradient}>
+                                    {loading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="time" size={16} color="#fff" /><Text style={[styles.buttonText, { fontSize: 13 }]}>1 Week</Text></>}
+                                </LinearGradient>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={[styles.actionButton, { flex: 1 }]} onPress={() => handleApproveSponsor(sponsor, '1month')} disabled={loading}>
+                                <LinearGradient colors={['#047857', '#059669']} style={styles.gradient}>
+                                    {loading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="calendar" size={16} color="#fff" /><Text style={[styles.buttonText, { fontSize: 13 }]}>1 Month</Text></>}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                            {/* Hold Button moved to own row? Or combine? Let's keep structure clean */}
+                            <TouchableOpacity style={[styles.actionButton, { flex: 1 }]} onPress={() => handleHoldSponsor(sponsor)} disabled={loading}>
+                                <LinearGradient colors={['#eab308', '#facc15']} style={styles.gradient}>
+                                    <Ionicons name="pause-circle" size={16} color="#000" /><Text style={[styles.buttonText, { fontSize: 14, color: '#000' }]}>Hold</Text>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity style={[styles.actionButton, { marginTop: 10, opacity: 0.8 }]} onPress={() => {
+                            const title = 'Reject Application';
+                            const message = 'Are you sure you want to reject and delete this application?';
+
+                            if (Platform.OS === 'web') {
+                                if (window.confirm(`${title}\n${message}`)) {
+                                    setLoading(true);
+                                    apiService.rejectSponsor(sponsor._id)
+                                        .then(() => {
+                                            window.alert('Application rejected');
+                                            fetchPendingSponsors();
+                                        })
+                                        .catch(() => window.alert('Failed to reject'))
+                                        .finally(() => setLoading(false));
+                                }
+                            } else {
+                                Alert.alert(title, message, [
+                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                        text: 'Reject', style: 'destructive', onPress: async () => {
+                                            setLoading(true);
+                                            try {
+                                                await apiService.rejectSponsor(sponsor._id);
+                                                Alert.alert('Success', 'Application rejected');
+                                                fetchPendingSponsors();
+                                            } catch (error) {
+                                                Alert.alert('Error', 'Failed to reject');
+                                            } finally {
+                                                setLoading(false);
+                                            }
+                                        }
+                                    }
+                                ]);
+                            }
+                        }} disabled={loading}>
+                            <Text style={{ color: '#ef4444', textAlign: 'center', fontWeight: 'bold' }}>Reject Application</Text>
+                        </TouchableOpacity>
+
+                        {/* Delete Button - for permanently removing sponsors */}
+                        <TouchableOpacity
+                            style={[styles.actionButton, { marginTop: 10, opacity: 0.9 }]}
+                            onPress={() => handleDeleteSponsor(sponsor)}
+                            disabled={loading}
+                        >
+                            <LinearGradient colors={['#dc2626', '#ef4444']} style={styles.gradient}>
+                                {loading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="trash" size={16} color="#fff" /><Text style={[styles.buttonText, { fontSize: 14 }]}>Delete Sponsor</Text></>}
                             </LinearGradient>
                         </TouchableOpacity>
+
                     </LinearGradient>
                 ))
             )}
+
+            {/* Active Prize Draws Section */}
+            <Text style={[styles.sectionTitle, { marginTop: 30 }]}>🎯 Active Prize Draws</Text>
+            <Text style={styles.sectionSubtitle}>Manage live ads on Prize Draws page</Text>
+            {activeSponsors.length === 0 ? (
+                <View style={[styles.card, { padding: 20 }]}>
+                    <Text style={{ color: '#94a3b8', textAlign: 'center' }}>No active prize draws</Text>
+                </View>
+            ) : (
+                activeSponsors.map(sponsor => (
+                    <LinearGradient key={sponsor._id} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 15 }]}>
+                        {sponsor.bannerUrl && (
+                            <Image source={{ uri: sponsor.bannerUrl }} style={styles.sponsorBanner} resizeMode="cover" />
+                        )}
+
+                        <View style={{ padding: 15 }}>
+                            <Text style={styles.sponsorName}>{sponsor.sponsorName}</Text>
+
+                            <Text style={styles.detailLabel}>Prize:</Text>
+                            <Text style={styles.detailValue}>{sponsor.prizeDetails?.description || 'N/A'}</Text>
+
+                            <Text style={styles.detailLabel}>Value:</Text>
+                            <Text style={styles.detailValue}>${sponsor.prizeDetails?.value || 0}</Text>
+
+                            <Text style={styles.detailLabel}>Expires:</Text>
+                            <Text style={styles.detailValue}>{sponsor.endDate ? new Date(sponsor.endDate).toLocaleDateString() : 'N/A'}</Text>
+
+                            <TouchableOpacity
+                                style={[styles.actionButton, { marginTop: 15 }]}
+                                onPress={() => handleDeactivateSponsor(sponsor)}
+                                disabled={loading}
+                            >
+                                <LinearGradient colors={['#dc2626', '#ef4444']} style={styles.gradient}>
+                                    {loading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="close-circle" size={16} color="#fff" /><Text style={[styles.buttonText, { fontSize: 14 }]}>Remove from Prize Draws</Text></>}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </LinearGradient>
+                ))
+            )}
+        </View>
+    );
+
+    const renderNotificationManagement = () => (
+        <View style={styles.section}>
+            <Text style={styles.sectionTitle}>🔔 Send Global Notification</Text>
+            <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.card}>
+                <Text style={styles.label}>Message</Text>
+                <Text style={styles.infoText}>This message will be sent to all users and appear in their profile notifications.</Text>
+                <TextInput
+                    style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+                    placeholder="Enter notification message..."
+                    placeholderTextColor="#64748b"
+                    value={notificationMessage}
+                    onChangeText={setNotificationMessage}
+                    multiline
+                    numberOfLines={4}
+                />
+
+                <TouchableOpacity
+                    style={[styles.actionButton, !notificationMessage.trim() && { opacity: 0.5 }]}
+                    onPress={handleSendNotification}
+                    disabled={notifLoading || !notificationMessage.trim()}
+                >
+                    <LinearGradient colors={['#8b5cf6', '#a78bfa']} style={styles.gradient}>
+                        {notifLoading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="paper-plane" size={20} color="#fff" /><Text style={styles.buttonText}>Send to All Users</Text></>}
+                    </LinearGradient>
+                </TouchableOpacity>
+            </LinearGradient>
         </View>
     );
 
@@ -283,6 +612,9 @@ const AdminScreen = ({ navigation }) => {
                 <TouchableOpacity style={[styles.tab, activeTab === 'sponsors' && styles.activeTab]} onPress={() => setActiveTab('sponsors')}>
                     <Text style={[styles.tabText, activeTab === 'sponsors' && styles.activeTabText]}>Sponsors</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={[styles.tab, activeTab === 'notifications' && styles.activeTab]} onPress={() => setActiveTab('notifications')}>
+                    <Text style={[styles.tabText, activeTab === 'notifications' && styles.activeTabText]}>Notifications</Text>
+                </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
@@ -296,7 +628,9 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={styles.emailText}>{user?.email}</Text>
                 </LinearGradient>
 
-                {activeTab === 'users' ? renderUserManagement() : renderSponsorManagement()}
+                {activeTab === 'users' && renderUserManagement()}
+                {activeTab === 'sponsors' && renderSponsorManagement()}
+                {activeTab === 'notifications' && renderNotificationManagement()}
             </ScrollView>
         </SafeAreaView>
     );

@@ -43,3 +43,6 @@ yarn-error.*
 optimized_events.json
 temp_events.json
 token.json
+
+# Backups
+backups_archive

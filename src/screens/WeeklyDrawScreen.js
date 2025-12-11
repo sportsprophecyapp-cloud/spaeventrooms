@@ -1,62 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Image } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
-const SAMPLE_DRAWS = [
+// Placeholder draws for sponsors
+const PLACEHOLDER_DRAWS = [
     {
-        id: 4,
-        sponsor: 'Sports Prophecy',
-        prize: 'Beta Testers Draw',
-        description: 'Exclusive draw for all registered users who make predictions in December. GOOD LUCK TO ALL!',
-        entries: 0,
-        cost: 1,
-        colors: ['#064e3b', '#065f46'],
-        accent: '#34d399',
-        icon: 'rocket-launch-outline',
-        daysLeft: 35, // Approx days until Jan 6th
-        isReal: true
-    },
-    {
-        id: 1,
+        id: 'placeholder_1',
         sponsor: 'Your Brand Here',
-        prize: 'Sponsor This Draw',
-        description: 'Sponsors donate a prize and this ad is yours. Contact us to feature your brand here!',
-        entries: 0,
+        prize: 'Sponsor This Draw #1',
+        prizeDetails: { description: 'Sponsors donate a prize and this ad is yours. Contact us!' },
         cost: 0,
-        colors: ['#1e293b', '#334155'],
+        colors: COLORS.gradients.dark,
         accent: '#94a3b8',
         icon: 'gift-outline',
         daysLeft: 7,
         isReal: false
     },
     {
-        id: 2,
+        id: 'placeholder_2',
         sponsor: 'Your Brand Here',
-        prize: 'Sponsor This Draw',
-        description: 'Sponsors donate a prize and this ad is yours. Reach thousands of sports fans.',
-        entries: 0,
+        prize: 'Sponsor This Draw #2',
+        prizeDetails: { description: 'Sponsors donate a prize and this ad is yours. Contact us!' },
         cost: 0,
-        colors: ['#1e293b', '#334155'],
+        colors: COLORS.gradients.dark,
         accent: '#94a3b8',
-        icon: 'bullhorn-outline',
-        daysLeft: 14,
-        isReal: false
-    },
-    {
-        id: 3,
-        sponsor: 'Your Brand Here',
-        prize: 'Sponsor This Draw',
-        description: 'Sponsors donate a prize and this ad is yours. High visibility placement available.',
-        entries: 0,
-        cost: 0,
-        colors: ['#1e293b', '#334155'],
-        accent: '#94a3b8',
-        icon: 'star-outline',
-        daysLeft: 21,
+        icon: 'gift-outline',
+        daysLeft: 7,
         isReal: false
     }
 ];
@@ -67,15 +41,40 @@ const WeeklyDrawScreen = ({ navigation }) => {
     const [stats, setStats] = useState({ totalEntries: 0 });
     const [enteredDraws, setEnteredDraws] = useState([]);
     const [pendingConfirmation, setPendingConfirmation] = useState(null);
+    const [activeDraws, setActiveDraws] = useState([]);
 
     useEffect(() => {
         const init = async () => {
             await refreshUser();
             fetchStats();
+            fetchPrizes();
             loadEnteredDraws();
         };
         init();
     }, []);
+
+    const fetchPrizes = async () => {
+        try {
+            const prizes = await apiService.getActivePrizeSponsors();
+            // Transform API data to UI format
+            const formattedPrizes = prizes.map(p => ({
+                id: p._id,
+                sponsor: p.sponsorName,
+                prize: p.prizeDetails?.description || 'Prize Draw', // Use sponsor's prize description
+                prizeDetails: p.prizeDetails, // { description, value }
+                cost: 1, // Default cost
+                colors: ['#064e3b', '#065f46'], // Green theme for real prizes
+                accent: '#34d399',
+                icon: 'trophy-outline',
+                daysLeft: Math.ceil((new Date(p.endDate) - new Date()) / (1000 * 60 * 60 * 24)),
+                isReal: true,
+                bannerUrl: p.bannerUrl // Include banner URL from API
+            }));
+            setActiveDraws(formattedPrizes);
+        } catch (error) {
+            console.error('Failed to fetch prizes:', error);
+        }
+    };
 
     const loadEnteredDraws = async () => {
         if (!user) return;
@@ -90,24 +89,21 @@ const WeeklyDrawScreen = ({ navigation }) => {
     };
 
     const fetchStats = async () => {
-        const data = await apiService.getWeeklyDrawStats();
-        setStats(data);
+        try {
+            const data = await apiService.getWeeklyDrawStats();
+            setStats(data);
+        } catch (e) { console.log(e); }
     };
 
     const handleEnterDraw = async (drawId, cost) => {
-        console.log('handleEnterDraw called!', { drawId, cost, pendingConfirmation, userCrowns: user?.crowns });
+        console.log('handleEnterDraw called!', { drawId, cost });
 
-        // First click: Set pending confirmation
         if (pendingConfirmation !== drawId) {
-            console.log('Setting pending confirmation for draw:', drawId);
             setPendingConfirmation(drawId);
             return;
         }
 
-        // Second click: Proceed with entry
-        console.log('Proceeding with entry for draw:', drawId);
         if (!user || user.crowns < cost) {
-            console.log('Insufficient crowns!', { userCrowns: user?.crowns, cost });
             Alert.alert('Insufficient Crowns', `You need at least ${cost} crowns to enter this draw.`);
             setPendingConfirmation(null);
             return;
@@ -115,28 +111,18 @@ const WeeklyDrawScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            console.log('Submitting draw entry...');
-            // In a real app, we'd pass the drawId to the API
             const response = await apiService.enterWeeklyDraw(user.uuid);
-
-            // Save entered state locally
             const newEnteredDraws = [...enteredDraws, drawId];
             setEnteredDraws(newEnteredDraws);
             await AsyncStorage.setItem(`user_entered_draws_${user.uuid}`, JSON.stringify(newEnteredDraws));
 
-            // Update user crowns immediately from response
-            if (response.crowns !== undefined) {
-                await updateUser({ crowns: response.crowns });
-            } else {
-                await refreshUser(); // Fallback
-            }
+            if (response.crowns !== undefined) await updateUser({ crowns: response.crowns });
+            else await refreshUser();
 
-            await fetchStats(); // Update total entries
+            await fetchStats();
             setPendingConfirmation(null);
-            console.log('Draw entry successful!');
             Alert.alert('Success', 'You have entered the prize draw!');
         } catch (error) {
-            console.error('Draw entry failed:', error);
             Alert.alert('Error', error.error || 'Failed to enter draw');
             setPendingConfirmation(null);
         } finally {
@@ -144,17 +130,23 @@ const WeeklyDrawScreen = ({ navigation }) => {
         }
     };
 
-    const getDateString = (daysToAdd) => {
+    const formattedDate = (days) => {
         const date = new Date();
-        date.setDate(date.getDate() + daysToAdd);
+        date.setDate(date.getDate() + days);
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
+
+    // Display: Real Approved Ads first, then ALWAYS 2 Placeholder Slots
+    const displayDraws = [
+        ...activeDraws,
+        ...PLACEHOLDER_DRAWS
+    ];
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} accessibilityLabel="Back Button" testID="weekly-draw-back-button">
-                    <Ionicons name="arrow-back" size={24} color="#fff" />
+                    <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
                 </TouchableOpacity>
                 <View style={{ alignItems: 'center' }}>
                     <Text style={styles.headerTitle}>Prize Draws</Text>
@@ -168,7 +160,7 @@ const WeeklyDrawScreen = ({ navigation }) => {
                     <Text style={styles.balanceLabel}>Your Balance:</Text>
                     <View style={styles.balanceValue}>
                         <Text style={styles.balanceText}>{user?.crowns || 0}</Text>
-                        <MaterialCommunityIcons name="crown" size={20} color="#38bdf8" />
+                        <MaterialCommunityIcons name="crown" size={20} color={COLORS.accent.cyan} />
                     </View>
                 </View>
 
@@ -186,47 +178,74 @@ const WeeklyDrawScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {SAMPLE_DRAWS.map((draw) => {
+                {displayDraws.map((draw) => {
                     const isEntered = enteredDraws.includes(draw.id);
                     const isPending = pendingConfirmation === draw.id;
                     return (
                         <View key={draw.id} style={[styles.drawCard, isEntered && styles.enteredCard]}>
                             {/* Sponsor Banner */}
-                            <LinearGradient
-                                colors={draw.colors}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                style={styles.sponsorBanner}
-                            >
-                                <View style={styles.sponsorInfo}>
-                                    <Text style={[styles.sponsorLabel, { color: draw.accent }]}>SPONSORED BY</Text>
-                                    <Text style={styles.sponsorName}>{draw.sponsor}</Text>
+                            {draw.bannerUrl ? (
+                                <View style={styles.sponsorBannerContainer}>
+                                    <Image
+                                        source={{ uri: draw.bannerUrl }}
+                                        style={styles.sponsorBannerImage}
+                                        resizeMode="cover"
+                                    />
                                 </View>
-                                <View style={[styles.drawDateBadge, { borderColor: draw.accent }]}>
-                                    <Text style={[styles.drawDateText, { color: draw.accent }]}>
-                                        Draws {getDateString(draw.daysLeft)}
-                                    </Text>
-                                </View>
-                            </LinearGradient>
+                            ) : (
+                                <LinearGradient
+                                    colors={draw.colors}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    style={styles.sponsorBanner}
+                                >
+                                    <View style={styles.sponsorInfo}>
+                                        <Text style={[styles.sponsorLabel, { color: draw.accent }]}>SPONSORED BY</Text>
+                                        <Text style={styles.sponsorName}>{draw.sponsor}</Text>
+                                    </View>
+                                    <View style={[styles.drawDateBadge, { borderColor: draw.accent }]}>
+                                        <Text style={[styles.drawDateText, { color: draw.accent }]}>
+                                            Draws {formattedDate(draw.daysLeft)}
+                                        </Text>
+                                    </View>
+                                </LinearGradient>
+                            )}
 
                             <View style={styles.cardContent}>
+                                {/* Sponsor Info Row (only show for real sponsors with banners) */}
+                                {draw.bannerUrl && (
+                                    <View style={styles.sponsorInfoRow}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.sponsorLabelSmall}>SPONSORED BY</Text>
+                                            <Text style={styles.sponsorNameSmall}>{draw.sponsor}</Text>
+                                        </View>
+                                        <View style={styles.drawDateBadgeSmall}>
+                                            <Text style={styles.drawDateTextSmall}>
+                                                Draws {formattedDate(draw.daysLeft)}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                )}
+
                                 <View style={styles.prizeHeader}>
-                                    <View style={[styles.iconContainer, { backgroundColor: `${draw.accent} 20` }]}>
+                                    <View style={[styles.iconContainer, { backgroundColor: `${draw.accent}20` }]}>
                                         <MaterialCommunityIcons name={draw.icon} size={32} color={draw.accent} />
                                     </View>
                                     <View style={styles.prizeInfo}>
                                         <Text style={styles.prizeTitle}>{draw.prize}</Text>
-
+                                        {draw.prizeDetails?.value && (
+                                            <Text style={styles.prizeValue}>${draw.prizeDetails.value}</Text>
+                                        )}
                                     </View>
                                 </View>
 
-                                <Text style={styles.prizeDescription}>{draw.description}</Text>
+                                <Text style={styles.prizeDescription}>{draw.prizeDetails.description}</Text>
 
                                 <View style={styles.actionRow}>
                                     <View style={styles.costContainer}>
                                         <Text style={styles.costLabel}>Cost:</Text>
                                         <Text style={styles.costValue}>{draw.cost}</Text>
-                                        <MaterialCommunityIcons name="crown" size={16} color="#38bdf8" />
+                                        <MaterialCommunityIcons name="crown" size={16} color={COLORS.accent.cyan} />
                                     </View>
 
                                     <TouchableOpacity
@@ -239,18 +258,14 @@ const WeeklyDrawScreen = ({ navigation }) => {
                                         }}
                                         disabled={loading || (draw.isReal && user?.crowns < draw.cost)}
                                         style={styles.enterButtonWrapper}
-                                        accessibilityLabel={!draw.isReal ? "Become a Sponsor" : isEntered ? `Enter Again: ${draw.prize}` : isPending ? `Confirm Entry: ${draw.prize}` : `Enter Draw: ${draw.prize}`}
-                                        testID={`draw-action-button-${draw.id}`}
                                     >
                                         <LinearGradient
                                             colors={
                                                 !draw.isReal
-                                                    ? ['#334155', '#475569'] // Sponsor button colors
-                                                    : isPending
-                                                        ? ['#f59e0b', '#d97706']
-                                                        : (loading || user?.crowns < draw.cost)
-                                                            ? ['#334155', '#334155']
-                                                            : ['#00d4ff', '#2979ff']
+                                                    ? ['#f59e0b', '#d97706']
+                                                    : (loading || user?.crowns < draw.cost)
+                                                        ? COLORS.gradients.disabled
+                                                        : COLORS.gradients.primary
                                             }
                                             start={{ x: 0, y: 0 }}
                                             end={{ x: 1, y: 0 }}
@@ -261,12 +276,12 @@ const WeeklyDrawScreen = ({ navigation }) => {
                                             ) : isPending ? (
                                                 <>
                                                     <Text style={styles.enterButtonText}>Confirm Entry</Text>
-                                                    <Ionicons name="alert-circle" size={20} color="#fff" />
+                                                    <Ionicons name="alert-circle" size={20} color={COLORS.text.inverse} />
                                                 </>
                                             ) : isEntered ? (
                                                 <>
                                                     <Text style={styles.enterButtonText}>Enter Again (+1)</Text>
-                                                    <Ionicons name="add-circle" size={20} color="#fff" />
+                                                    <Ionicons name="add-circle" size={20} color={COLORS.text.inverse} />
                                                 </>
                                             ) : (
                                                 <Text style={styles.enterButtonText}>Enter Draw</Text>
@@ -287,62 +302,62 @@ const WeeklyDrawScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0f172a',
+        backgroundColor: COLORS.background.primary,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 20,
+        padding: SPACING.lg,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.05)',
-        backgroundColor: '#0f172a',
+        borderBottomColor: COLORS.border.tertiary,
+        backgroundColor: COLORS.background.secondary,
         zIndex: 10,
     },
     backButton: {
-        padding: 5,
+        padding: SPACING.xs,
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
     },
     versionText: {
-        fontSize: 10,
-        color: '#64748b',
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.text.tertiary,
         marginTop: 2,
     },
     content: {
         flex: 1,
     },
     scrollContent: {
-        padding: 20,
+        padding: SPACING.lg,
     },
     balanceHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: SPACING.lg,
         backgroundColor: 'rgba(56, 189, 248, 0.1)',
-        padding: 15,
-        borderRadius: 12,
+        padding: SPACING.base,
+        borderRadius: BORDER_RADIUS.md,
         borderWidth: 1,
         borderColor: 'rgba(56, 189, 248, 0.3)',
     },
     balanceLabel: {
-        color: '#94a3b8',
-        fontSize: 16,
-        fontWeight: '600',
+        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: TYPOGRAPHY.weights.semibold,
     },
     balanceValue: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: SPACING.sm,
     },
     balanceText: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: 'bold',
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
     },
     statsCard: {
         flexDirection: 'row',
@@ -367,78 +382,132 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     statsLabel: {
-        color: '#94a3b8',
+        color: COLORS.text.secondary,
         fontSize: 13,
-        fontWeight: '600',
+        fontWeight: TYPOGRAPHY.weights.semibold,
         marginBottom: 4,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
     statsValue: {
-        color: '#fff',
-        fontSize: 28,
-        fontWeight: 'bold',
+        color: COLORS.text.primary,
+        fontSize: 28, // Keep large for emphasis
+        fontWeight: TYPOGRAPHY.weights.bold,
     },
     statsBadge: {
         width: 32,
         height: 32,
-        borderRadius: 8,
+        borderRadius: BORDER_RADIUS.sm,
         backgroundColor: 'rgba(52, 211, 153, 0.15)',
         alignItems: 'center',
         justifyContent: 'center',
     },
     drawCard: {
-        backgroundColor: '#1e293b',
-        borderRadius: 16,
+        backgroundColor: COLORS.background.card,
+        borderRadius: BORDER_RADIUS.lg,
         overflow: 'hidden',
-        marginBottom: 20,
+        marginBottom: SPACING.lg,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: COLORS.border.tertiary,
     },
     enteredCard: {
-        borderColor: '#10b981',
+        borderColor: COLORS.status.success,
         borderWidth: 2,
     },
     sponsorBanner: {
-        padding: 15,
+        padding: SPACING.md,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
+    sponsorBannerContainer: {
+        position: 'relative',
+        width: '100%',
+        height: 120,
+    },
+    sponsorBannerImage: {
+        width: '100%',
+        height: '100%',
+    },
+    bannerOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        padding: SPACING.md,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.3)', // Semi-transparent overlay for text readability
+    },
     sponsorLabel: {
-        fontSize: 10,
-        fontWeight: 'bold',
+        fontSize: TYPOGRAPHY.sizes.xs,
+        fontWeight: TYPOGRAPHY.weights.bold,
         letterSpacing: 1,
         marginBottom: 2,
     },
     sponsorName: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: TYPOGRAPHY.weights.bold,
     },
     drawDateBadge: {
-        paddingHorizontal: 10,
+        paddingHorizontal: SPACING.md,
         paddingVertical: 4,
-        borderRadius: 20,
+        borderRadius: BORDER_RADIUS.full,
         borderWidth: 1,
         backgroundColor: 'rgba(0,0,0,0.3)',
     },
     drawDateText: {
-        fontSize: 12,
-        fontWeight: '600',
+        fontSize: TYPOGRAPHY.sizes.xs,
+        fontWeight: TYPOGRAPHY.weights.semibold,
     },
     cardContent: {
-        padding: 20,
+        padding: SPACING.lg,
+    },
+    sponsorInfoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingBottom: SPACING.md,
+        marginBottom: SPACING.md,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.1)',
+    },
+    sponsorLabelSmall: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.accent.cyan,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+        marginBottom: 2,
+    },
+    sponsorNameSmall: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.primary,
+        fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    drawDateBadgeSmall: {
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 4,
+        borderRadius: BORDER_RADIUS.full,
+        backgroundColor: 'rgba(52, 211, 153, 0.1)',
+        borderWidth: 1,
+        borderColor: COLORS.accent.cyan,
+    },
+    drawDateTextSmall: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.accent.cyan,
+        fontWeight: TYPOGRAPHY.weights.semibold,
     },
     prizeHeader: {
         flexDirection: 'row',
-        gap: 15,
-        marginBottom: 15,
+        gap: SPACING.base,
+        marginBottom: SPACING.md,
     },
     iconContainer: {
         width: 50,
         height: 50,
-        borderRadius: 12,
+        borderRadius: BORDER_RADIUS.md,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -447,52 +516,60 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     prizeTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#fff',
+        fontSize: TYPOGRAPHY.sizes.lg,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
         marginBottom: 4,
+    },
+    prizeValue: {
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.accent.cyan,
     },
 
     prizeDescription: {
-        fontSize: 14,
-        color: '#94a3b8',
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.secondary,
         lineHeight: 20,
-        marginBottom: 20,
+        marginBottom: SPACING.lg,
     },
     actionRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: 15,
+        paddingTop: SPACING.md,
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.05)',
+        borderTopColor: COLORS.border.tertiary,
     },
     costContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: SPACING.sm,
     },
     costLabel: {
-        color: '#64748b',
-        fontSize: 14,
+        color: COLORS.text.tertiary,
+        fontSize: TYPOGRAPHY.sizes.sm,
     },
     costValue: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.lg,
+        fontWeight: TYPOGRAPHY.weights.bold,
     },
     enterButtonWrapper: {
-        borderRadius: 8,
+        borderRadius: BORDER_RADIUS.md,
         overflow: 'hidden',
     },
     enterButton: {
-        paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingHorizontal: SPACING.lg,
+        paddingVertical: SPACING.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.xs,
     },
     enterButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 14,
+        color: COLORS.text.inverse,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.sm,
     },
 });
 

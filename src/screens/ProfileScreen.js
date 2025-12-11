@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { BiometricService } from '../services/biometrics';
 
 const ProfileScreen = () => {
     const navigation = useNavigation();
     const { user, refreshUser } = useAuth();
     const [predictions, setPredictions] = useState([]);
     const [notifications, setNotifications] = useState([]);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(user?.notificationsEnabled ?? true);
+    const [biometricsEnabled, setBiometricsEnabled] = useState(false);
+    const [isBiometricSupported, setIsBiometricSupported] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
@@ -23,7 +27,21 @@ const ProfileScreen = () => {
 
     useEffect(() => {
         fetchUserData();
+        if (user) {
+            setNotificationsEnabled(user.notificationsEnabled ?? true);
+        }
+        checkBiometrics();
     }, [user]);
+
+    const checkBiometrics = async () => {
+        const { hasHardware, isEnrolled } = await BiometricService.checkBiometricSupport();
+        setIsBiometricSupported(hasHardware && isEnrolled);
+
+        if (hasHardware && isEnrolled) {
+            const credentials = await BiometricService.getCredentials();
+            setBiometricsEnabled(!!credentials && credentials.email === user?.email);
+        }
+    };
 
     const fetchUserData = async () => {
         if (!user) return;
@@ -34,17 +52,30 @@ const ProfileScreen = () => {
             const userPredictions = await apiService.getUserPredictions(user.uuid);
             setPredictions(userPredictions || []);
 
-            // Create notifications for resolved predictions
+            // Fetch real notifications from backend
+            let realNotifications = [];
+            try {
+                realNotifications = await apiService.getNotifications(user.uuid);
+            } catch (e) {
+                console.log('Error fetching real notifications', e);
+            }
+
+            // Create fake notifications for resolved predictions (legacy/fallback)
             const wonPredictions = (userPredictions || []).filter(p => p.resolved && p.won);
-            const notifs = wonPredictions.map(p => ({
-                id: p.id,
+            const predictionNotifs = wonPredictions.map(p => ({
+                id: `pred-${p.id}`,
                 type: 'win',
                 message: `You won your prediction on ${p.eventName || 'a game'}!`,
                 reward: p.exactScore ? '+4 tokens, +2 crowns' : '+3 tokens, +1 crown',
                 timestamp: p.resolvedAt || p.timestamp,
                 read: false
             }));
-            setNotifications(notifs);
+
+            // Merge and sort
+            const allNotifs = [...realNotifications, ...predictionNotifs].sort((a, b) =>
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            setNotifications(allNotifs);
         } catch (error) {
             console.error('Error fetching user data:', error);
             setError('Failed to load profile data. Please try again.');
@@ -59,6 +90,55 @@ const ProfileScreen = () => {
         await fetchUserData();
         await refreshUser();
         setRefreshing(false);
+    };
+
+    const handleToggleNotifications = async (value) => {
+        setNotificationsEnabled(value);
+        try {
+            await apiService.toggleNotifications(user.uuid, value);
+        } catch (error) {
+            console.error('Failed to toggle notifications:', error);
+            // Revert on error
+            setNotificationsEnabled(!value);
+            Alert.alert('Error', 'Failed to update notification settings');
+        }
+    };
+
+    const handleToggleBiometrics = async (value) => {
+        if (value) {
+            // Enable: Authenticate then Save
+            const authenticated = await BiometricService.authenticate('Confirm to enable biometric login');
+            if (authenticated) {
+                // Prompt for password to save securely (since we don't have it in plain text)
+                Alert.prompt(
+                    'Confirm Password',
+                    'Please enter your password to enable FaceID/TouchID functionality.',
+                    [
+                        { text: 'Cancel', onPress: () => { }, style: 'cancel' },
+                        {
+                            text: 'Enable',
+                            onPress: async (password) => {
+                                if (!password) return;
+                                const success = await BiometricService.saveCredentials(user.email, password);
+                                if (success) {
+                                    setBiometricsEnabled(true);
+                                    Alert.alert('Success', 'Biometric login enabled!');
+                                } else {
+                                    Alert.alert('Error', 'Failed to enable biometrics');
+                                }
+                            }
+                        }
+                    ],
+                    'secure-text'
+                );
+            }
+        } else {
+            // Disable: Clear credentials
+            const success = await BiometricService.clearCredentials();
+            if (success) {
+                setBiometricsEnabled(false);
+            }
+        }
     };
 
 
@@ -154,6 +234,25 @@ const ProfileScreen = () => {
                             <Text style={styles.email}>{user?.email || ''}</Text>
                         </LinearGradient>
 
+                        {/* Admin Panel Entry - Only for Admins */}
+                        {user?.role === 'admin' && (
+                            <TouchableOpacity
+                                style={styles.adminButton}
+                                onPress={() => navigation.navigate('AdminSponsors')}
+                            >
+                                <LinearGradient
+                                    colors={['#FF416C', '#FF4B2B']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    style={styles.adminButtonGradient}
+                                >
+                                    <Ionicons name="shield-checkmark" size={24} color="#fff" />
+                                    <Text style={styles.adminButtonText}>Admin Panel</Text>
+                                    <Ionicons name="chevron-forward" size={24} color="#fff" />
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        )}
+
                         {/* Stats Grid */}
                         <View style={styles.statsGrid}>
                             <View style={styles.statBox}>
@@ -246,6 +345,38 @@ const ProfileScreen = () => {
                             <View style={styles.sectionHeader}>
                                 <Ionicons name="notifications" size={20} color={COLORS.accent.cyan} />
                                 <Text style={styles.sectionTitle}>Notifications</Text>
+                            </View>
+
+                            <View style={styles.settingRow}>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.settingLabel}>Enable Notifications</Text>
+                                    <Text style={styles.settingSublabel}>Winners will be notified after draws completion</Text>
+                                </View>
+                                <Switch
+                                    trackColor={{ false: "#767577", true: COLORS.accent.cyan }}
+                                    thumbColor={notificationsEnabled ? "#fff" : "#f4f3f4"}
+                                    onValueChange={handleToggleNotifications}
+                                    value={notificationsEnabled}
+                                />
+                            </View>
+
+                            {isBiometricSupported && (
+                                <View style={[styles.settingRow, { marginTop: SPACING.lg }]}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.settingLabel}>Biometric Login</Text>
+                                        <Text style={styles.settingSublabel}>Use FaceID/TouchID for quick access</Text>
+                                    </View>
+                                    <Switch
+                                        trackColor={{ false: "#767577", true: COLORS.accent.cyan }}
+                                        thumbColor={biometricsEnabled ? "#fff" : "#f4f3f4"}
+                                        onValueChange={handleToggleBiometrics}
+                                        value={biometricsEnabled}
+                                    />
+                                </View>
+                            )}
+
+                            <View style={[styles.sectionHeader, { marginTop: 20 }]}>
+                                <Text style={styles.sectionTitle}>Recent Activity</Text>
                                 {notifications.length > 0 && (
                                     <View style={styles.badge}>
                                         <Text style={styles.badgeText}>{notifications.length}</Text>
@@ -263,7 +394,11 @@ const ProfileScreen = () => {
                                 notifications.map((notif) => (
                                     <View key={notif.id} style={styles.notificationCard}>
                                         <View style={styles.notifIcon}>
-                                            <Ionicons name="trophy" size={24} color="#FFD700" />
+                                            <Ionicons
+                                                name={notif.type === 'admin' ? "megaphone" : "trophy"}
+                                                size={24}
+                                                color={notif.type === 'admin' ? COLORS.accent.cyan : "#FFD700"}
+                                            />
                                         </View>
                                         <View style={styles.notifContent}>
                                             <Text style={styles.notifMessage}>{notif.message}</Text>
@@ -794,6 +929,25 @@ const styles = StyleSheet.create({
         color: COLORS.text.inverse,
         fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.base,
+    },
+    settingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: SPACING.md,
+        paddingHorizontal: SPACING.xs,
+        marginTop: SPACING.sm,
+    },
+    settingLabel: {
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+        marginBottom: 2,
+    },
+    settingSublabel: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.text.secondary,
+        marginRight: SPACING.md,
     },
 });
 

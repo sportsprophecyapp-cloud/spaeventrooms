@@ -16,6 +16,9 @@ export const COLORS = {
         cyan: '#00d4ff',         // Primary cyan
         cyanLight: '#1bc5e8',    // Lighter cyan
         cyanDark: '#00a8cc',     // Darker cyan
+        gold: '#FFD700',         // Gold - Primary
+        goldLight: '#FFE55C',    // Gold Light
+        goldDark: '#B8860B',     // Gold Dark
         purple: '#8b5cf6',       // Purple accent
         purpleLight: '#a78bfa',  // Light purple
         lime: '#c0ff00',         // Lime green
@@ -57,9 +60,11 @@ export const COLORS = {
     gradients: {
         primary: ['#00d4ff', '#2979ff'],      // Cyan to blue
         secondary: ['#8b5cf6', '#a78bfa'],    // Purple gradient
+        gold: ['#FFD700', '#FFAB00'],         // Gold gradient
         dark: ['#1e293b', '#0f172a'],         // Dark gradient
         lime: ['#c0ff00', '#a3e635'],         // Lime gradient
         disabled: ['#334155', '#334155'],     // Gray (no gradient)
+        card: ['#1e293b', '#334155'],         // Card gradient
     },
 };
 

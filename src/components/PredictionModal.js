@@ -150,7 +150,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                     setSelectedWinner(null);
                     setHomeScore('');
                     setAwayScore('');
-                }, 1500);
+                }, 500);
                 return;
             }
 
@@ -195,7 +195,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                 setSelectedWinner(null);
                 setHomeScore('');
                 setAwayScore('');
-            }, 1500);
+            }, 500);
 
         } catch (error) {
             const errorMsg = error.response?.data?.error || 'Failed to submit prediction';
@@ -280,10 +280,22 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                             </View>
                         </View>
 
-                        {/* Matchup Card */}
+                        {/* Matchup Card - Interactive for Selection */}
+                        <Text style={styles.sectionTitle}>Tap Team to Select Winner</Text>
                         <View style={styles.matchupCard}>
-                            <View style={styles.teamContainer}>
-                                <View style={styles.logoContainer}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.teamContainer,
+                                    selectedWinner && selectedWinner !== event.homeTeam && styles.teamUnselected
+                                ]}
+                                onPress={() => setSelectedWinner(event.homeTeam)}
+                                accessibilityLabel={`Select ${event.homeTeam} as Winner`}
+                                testID="prediction-select-home"
+                            >
+                                <View style={[
+                                    styles.logoContainer,
+                                    selectedWinner === event.homeTeam && styles.logoSelected
+                                ]}>
                                     {getTeamLogo(event.homeTeam) ? (
                                         <Image
                                             source={{ uri: getTeamLogo(event.homeTeam) }}
@@ -293,16 +305,35 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                                     ) : (
                                         <Text style={styles.logoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
                                     )}
+                                    {selectedWinner === event.homeTeam && (
+                                        <View style={styles.checkBadge}>
+                                            <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
+                                        </View>
+                                    )}
                                 </View>
-                                <Text style={styles.teamName} numberOfLines={2}>{event.homeTeam || 'Home Team'}</Text>
-                            </View>
+                                <Text style={[
+                                    styles.teamName,
+                                    selectedWinner === event.homeTeam && styles.teamNameSelected
+                                ]} numberOfLines={2}>{event.homeTeam || 'Home Team'}</Text>
+                            </TouchableOpacity>
 
                             <View style={styles.vsContainer}>
                                 <Text style={styles.vsText}>VS</Text>
                             </View>
 
-                            <View style={styles.teamContainer}>
-                                <View style={styles.logoContainer}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.teamContainer,
+                                    selectedWinner && selectedWinner !== event.awayTeam && styles.teamUnselected
+                                ]}
+                                onPress={() => setSelectedWinner(event.awayTeam)}
+                                accessibilityLabel={`Select ${event.awayTeam} as Winner`}
+                                testID="prediction-select-away"
+                            >
+                                <View style={[
+                                    styles.logoContainer,
+                                    selectedWinner === event.awayTeam && styles.logoSelected
+                                ]}>
                                     {getTeamLogo(event.awayTeam) ? (
                                         <Image
                                             source={{ uri: getTeamLogo(event.awayTeam) }}
@@ -312,76 +343,16 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                                     ) : (
                                         <Text style={styles.logoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
                                     )}
+                                    {selectedWinner === event.awayTeam && (
+                                        <View style={styles.checkBadge}>
+                                            <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
+                                        </View>
+                                    )}
                                 </View>
-                                <Text style={styles.teamName} numberOfLines={2}>{event.awayTeam || 'Away Team'}</Text>
-                            </View>
-                        </View>
-
-                        {/* Who will win? */}
-                        <Text style={styles.sectionTitle}>Who will win?</Text>
-                        <View style={styles.winnerButtons}>
-                            <TouchableOpacity
-                                style={styles.winnerButton}
-                                onPress={() => setSelectedWinner(event.homeTeam)}
-                                accessibilityLabel={`Select ${event.homeTeam} as Winner`}
-                                testID="prediction-select-home"
-                            >
-                                <LinearGradient
-                                    colors={selectedWinner === event.homeTeam ? COLORS.gradients.primary : ['#2C2C2C', '#2C2C2C']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    style={styles.winnerGradient}
-                                >
-                                    <View style={styles.miniLogo}>
-                                        {getTeamLogo(event.homeTeam) ? (
-                                            <Image
-                                                source={{ uri: getTeamLogo(event.homeTeam) }}
-                                                style={styles.miniLogoImage}
-                                                resizeMode="contain"
-                                            />
-                                        ) : (
-                                            <Text style={styles.miniLogoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
-                                        )}
-                                    </View>
-                                    <Text style={[
-                                        styles.winnerButtonText,
-                                        selectedWinner === event.homeTeam && styles.winnerButtonTextSelected
-                                    ]}>
-                                        {event.homeTeam || 'Home'}
-                                    </Text>
-                                </LinearGradient>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.winnerButton}
-                                onPress={() => setSelectedWinner(event.awayTeam)}
-                                accessibilityLabel={`Select ${event.awayTeam} as Winner`}
-                                testID="prediction-select-away"
-                            >
-                                <LinearGradient
-                                    colors={selectedWinner === event.awayTeam ? COLORS.gradients.primary : ['#2C2C2C', '#2C2C2C']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    style={styles.winnerGradient}
-                                >
-                                    <View style={styles.miniLogo}>
-                                        {getTeamLogo(event.awayTeam) ? (
-                                            <Image
-                                                source={{ uri: getTeamLogo(event.awayTeam) }}
-                                                style={styles.miniLogoImage}
-                                                resizeMode="contain"
-                                            />
-                                        ) : (
-                                            <Text style={styles.miniLogoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
-                                        )}
-                                    </View>
-                                    <Text style={[
-                                        styles.winnerButtonText,
-                                        selectedWinner === event.awayTeam && styles.winnerButtonTextSelected
-                                    ]}>
-                                        {event.awayTeam || 'Away'}
-                                    </Text>
-                                </LinearGradient>
+                                <Text style={[
+                                    styles.teamName,
+                                    selectedWinner === event.awayTeam && styles.teamNameSelected
+                                ]} numberOfLines={2}>{event.awayTeam || 'Away Team'}</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -423,15 +394,18 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                             </View>
                         </View>
 
-                        {/* Error Message */}
+                    </ScrollView>
+
+                    {/* Fixed Footer with Submit Button */}
+                    <View style={styles.footerContainer}>
+                        {/* Error Message - Inline above button if needed */}
                         {error && (
                             <View style={styles.errorContainer}>
                                 <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
-                                <Text style={styles.errorText}>{error}</Text>
+                                <Text style={styles.errorText} numberOfLines={2}>{error}</Text>
                             </View>
                         )}
 
-                        {/* Submit Button */}
                         <TouchableOpacity
                             style={[styles.submitButton, success && styles.submitButtonSuccess]}
                             onPress={handleSubmit}
@@ -440,7 +414,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                             testID="prediction-submit-button"
                         >
                             <LinearGradient
-                                colors={success ? [COLORS.status.success, COLORS.status.success] : (!selectedWinner || !hasEnoughTokens) ? COLORS.gradients.disabled : COLORS.gradients.primary}
+                                colors={success ? [COLORS.status.success, COLORS.status.success] : (!selectedWinner || !hasEnoughTokens) ? COLORS.gradients.disabled : ['#2979FF', '#00B0FF']}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                                 style={styles.submitGradient}
@@ -449,7 +423,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                                     <ActivityIndicator color={COLORS.text.inverse} />
                                 ) : success ? (
                                     <>
-                                        <Text style={styles.submitText}>PREDICTION SUBMITTED</Text>
+                                        <Text style={styles.submitText}>SUBMITTED</Text>
                                         <Ionicons name="checkmark-circle" size={24} color={COLORS.text.inverse} />
                                     </>
                                 ) : (
@@ -462,9 +436,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                                 )}
                             </LinearGradient>
                         </TouchableOpacity>
-
-
-                    </ScrollView>
+                    </View>
                 </View>
             </View>
         </Modal>
@@ -475,14 +447,33 @@ const styles = StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: COLORS.background.overlay,
-        justifyContent: 'flex-end',
+        justifyContent: 'flex-start', // Align to top to fill screen
     },
     modalContainer: {
+        flex: 1, // Fill available space
         backgroundColor: COLORS.background.primary,
-        borderTopLeftRadius: BORDER_RADIUS.xxl,
-        borderTopRightRadius: BORDER_RADIUS.xxl,
+        // Remove top radius for full screen look, or keep if desired. User complained about wasted space, implying full coverage.
+        // borderTopLeftRadius: BORDER_RADIUS.xxl, 
+        // borderTopRightRadius: BORDER_RADIUS.xxl,
         padding: SPACING.lg,
-        maxHeight: '90%',
+        paddingTop: 40, // Add top padding for status bar/safe area
+    },
+    // ...
+    submitGradient: {
+        colors: ['#2979FF', '#00B0FF'], // Bright Blue Gradient
+        start: { x: 0, y: 0 },
+        end: { x: 1, y: 0 },
+        paddingVertical: SPACING.lg,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        gap: SPACING.sm,
+    },
+    submitText: {
+        color: '#FFFFFF', // White text on blue
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: TYPOGRAPHY.weights.black,
+        letterSpacing: 1,
     },
     header: {
         flexDirection: 'row',
@@ -554,6 +545,34 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.sizes.base,
         fontWeight: TYPOGRAPHY.weights.black,
     },
+    // Interactive Team Selection Styles
+    logoSelected: {
+        borderColor: COLORS.accent.cyan,
+        backgroundColor: 'rgba(0, 212, 255, 0.15)', // Light cyan background
+        borderWidth: 3,
+        ...SHADOWS.cyan, // Add glow effect
+    },
+    teamUnselected: {
+        opacity: 0.5, // Dim unselected team
+    },
+    teamNameSelected: {
+        color: COLORS.accent.cyan,
+        fontWeight: TYPOGRAPHY.weights.black,
+    },
+    checkBadge: {
+        position: 'absolute',
+        top: -4,
+        right: -4,
+        backgroundColor: COLORS.accent.cyan,
+        borderRadius: BORDER_RADIUS.full,
+        width: 24,
+        height: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: COLORS.background.card,
+    },
+    // Existing styles below...
     sectionTitle: {
         color: COLORS.text.secondary,
         fontSize: TYPOGRAPHY.sizes.base,
@@ -654,7 +673,7 @@ const styles = StyleSheet.create({
         gap: SPACING.sm,
     },
     submitText: {
-        color: COLORS.text.inverse,
+        color: '#FFFFFF', // White text on blue
         fontSize: TYPOGRAPHY.sizes.md,
         fontWeight: TYPOGRAPHY.weights.black,
         letterSpacing: 1,
@@ -778,6 +797,12 @@ const styles = StyleSheet.create({
     },
     submitButtonSuccess: {
         ...SHADOWS.none,
+    },
+    footerContainer: {
+        paddingTop: SPACING.md,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.border.tertiary,
+        backgroundColor: COLORS.background.primary,
     },
 
 });

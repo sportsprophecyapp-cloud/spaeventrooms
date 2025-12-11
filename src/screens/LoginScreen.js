@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { BiometricService } from '../services/biometrics';
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
@@ -12,7 +13,47 @@ const LoginScreen = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { login } = useAuth();
+    const [isBiometricsAvailable, setIsBiometricsAvailable] = useState(false);
+    const { login, user } = useAuth();
+
+    React.useEffect(() => {
+        checkBiometricAvailability();
+    }, []);
+
+    const checkBiometricAvailability = async () => {
+        const { hasHardware, isEnrolled } = await BiometricService.checkBiometricSupport();
+        if (hasHardware && isEnrolled) {
+            const credentials = await BiometricService.getCredentials();
+            if (credentials) {
+                setIsBiometricsAvailable(true);
+            }
+        }
+    };
+
+    const handleBiometricLogin = async () => {
+        try {
+            const authenticated = await BiometricService.authenticate('Login with FaceID');
+            if (authenticated) {
+                setLoading(true);
+                const credentials = await BiometricService.getCredentials();
+                if (credentials) {
+                    await login(credentials.email, credentials.password, true); // Auto-remember
+                    // Navigate to Main with delay
+                    setTimeout(() => {
+                        navigation.navigate('Main');
+                    }, 100);
+                } else {
+                    setError('Biometric credentials expired. Please login manually.');
+                    setIsBiometricsAvailable(false);
+                }
+            }
+        } catch (error) {
+            console.error('Biometric login error:', error);
+            setError('Biometric login failed');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleLogin = async () => {
         setError('');
@@ -25,7 +66,34 @@ const LoginScreen = ({ navigation }) => {
         try {
             const success = await login(email, password, rememberMe);
             if (success) {
-                // Navigation is handled by App.js based on user state
+                // Force navigation to Main with a slight delay to ensure state updates
+                // Check for biometric support and ask to save credentials
+                const { hasHardware, isEnrolled } = await BiometricService.checkBiometricSupport();
+                if (hasHardware && isEnrolled) {
+                    Alert.alert(
+                        'Enable Biometrics?',
+                        'Would you like to enable FaceID/TouchID for faster login next time?',
+                        [
+                            {
+                                text: 'No Thanks',
+                                onPress: () => navigation.navigate('Main'),
+                                style: 'cancel'
+                            },
+                            {
+                                text: 'Yes, Enable',
+                                onPress: async () => {
+                                    await BiometricService.saveCredentials(email, password);
+                                    Alert.alert('Success', 'Biometric login enabled!');
+                                    navigation.navigate('Main');
+                                }
+                            }
+                        ]
+                    );
+                } else {
+                    setTimeout(() => {
+                        navigation.navigate('Main');
+                    }, 100);
+                }
             } else {
                 setError('Invalid credentials');
             }
@@ -136,7 +204,11 @@ const LoginScreen = ({ navigation }) => {
                                 <Text style={styles.rememberMeText}>Remember me</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity accessibilityLabel="Forgot Password Button" testID="login-forgot-password">
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate('ForgotPassword')}
+                                accessibilityLabel="Forgot Password Button"
+                                testID="login-forgot-password"
+                            >
                                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
                             </TouchableOpacity>
                         </View>
@@ -159,6 +231,16 @@ const LoginScreen = ({ navigation }) => {
                                 )}
                             </LinearGradient>
                         </TouchableOpacity>
+
+                        {/* Biometric Login Button */}
+                        {isBiometricsAvailable && (
+                            <TouchableOpacity style={[styles.button, styles.biometricButton]} onPress={handleBiometricLogin} disabled={loading} accessibilityLabel="Biometric Login Button">
+                                <View style={styles.biometricContent}>
+                                    <Ionicons name="scan-outline" size={24} color={COLORS.accent.cyan} />
+                                    <Text style={styles.biometricText}>Login with FaceID</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
 
                         {/* Sign Up Link */}
                         <TouchableOpacity onPress={() => navigation.navigate('Register')} accessibilityLabel="Sign Up Link" testID="login-signup-link">
@@ -299,6 +381,25 @@ const styles = StyleSheet.create({
         fontWeight: TYPOGRAPHY.weights.black,
         fontSize: TYPOGRAPHY.sizes.md,
         letterSpacing: 1,
+    },
+    biometricButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: COLORS.accent.cyan,
+        marginBottom: SPACING.lg,
+        ...SHADOWS.none,
+    },
+    biometricContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        gap: SPACING.sm,
+    },
+    biometricText: {
+        color: COLORS.accent.cyan,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        fontSize: TYPOGRAPHY.sizes.md,
     },
     linkText: {
         color: COLORS.text.secondary,
