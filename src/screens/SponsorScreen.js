@@ -85,7 +85,11 @@ const SponsorScreen = ({ navigation }) => {
         } catch (error) {
             console.error('Payment Error:', error);
             const errorMessage = error.response?.data?.message || error.message || JSON.stringify(error);
-            Alert.alert('Payment Failed', `Could not initiate payment: ${errorMessage}`);
+            if (Platform.OS === 'web') {
+                window.alert(`Payment Failed: Could not initiate payment: ${errorMessage}`);
+            } else {
+                Alert.alert('Payment Failed', `Could not initiate payment: ${errorMessage}`);
+            }
         } finally {
             setLoading(false);
         }
