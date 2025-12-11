@@ -13,21 +13,14 @@ const MoreScreen = ({ navigation }) => {
     console.log('DEBUG: MoreScreen user email:', user?.email);
 
     const handleLogout = () => {
-        // Use window.confirm for web compatibility
-        if (typeof window !== 'undefined' && window.confirm) {
-            if (window.confirm('Are you sure you want to logout?')) {
-                logout();
-            }
-        } else {
-            Alert.alert(
-                "Logout",
-                "Are you sure you want to logout?",
-                [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Logout", style: "destructive", onPress: logout }
-                ]
-            );
-        }
+        Alert.alert(
+            "Logout",
+            "Are you sure you want to logout?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "Logout", style: "destructive", onPress: logout }
+            ]
+        );
     };
 
     const menuItems = [

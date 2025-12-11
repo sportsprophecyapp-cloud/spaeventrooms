@@ -34,29 +34,32 @@ Sports Prophecy is a **100% free** React Native Expo web application that allows
 ---
 
 ## 📊 Project Status
-
-### Current Version: v2.7.0 (December 9, 2025)
-
+ 
+### Current Version: v2.8.0 (December 11, 2025)
+ 
 **✅ Completed Features:**
 - ✅ Core prediction system (6 sports leagues)
 - ✅ User authentication with biometric login (FaceID/TouchID)
+- ✅ **New Auth Screens**: Forgot Password, Reset Password, Terms of Service, Privacy Policy
+- ✅ **Sponsor Ads Enhanced**: Chat Room Ads, Custom Private Room Ads, Repositioned Weekly Draw Banners
+- ✅ **Mobile Layout Fixes**: Resolved horizontal scrolling on multiple screens
 - ✅ Token and crown reward system
-- ✅ Weekly prize draws
+- ✅ Weekly prize draws with sponsor integration
 - ✅ Leaderboard (ranked by correct predictions)
 - ✅ Chat rooms (public, league-specific, private)
 - ✅ Referral system
-- ✅ Sponsor ad system (main page, chat rooms, prize draws)
 - ✅ **Admin panel** for managing sponsors and prize draws
 - ✅ Guest mode with seamless conversion
 - ✅ Deployed to production (www.sportsprophecyapp.com)
-
-**🚧 Current Phase: Pre-Launch Testing**
-
+ 
+**🚧 Current Phase: Verification & Bug Fixing**
+ 
 ### Next Steps:
-1. **Stripe Integration Testing** - Fully test banner ads and prize draw sponsorships
-2. **App Store Preparation** - Prepare application for Google Play Store and Apple App Store submission
-3. **Final QA** - Comprehensive testing across all features
-4. **Launch** - Public release
+1. **Fix Live Logout Issue** - Resolve session persistence bug on web.
+2. **Verify New Auth Screens** - Test Forgot Password and Legal screens on live site.
+3. **Stripe Integration Testing** - Fully test banner ads and prize draw sponsorships.
+4. **App Store Preparation** - Prepare application for Google Play Store and Apple App Store submission.
+5. **Launch** - Public release
 
 ---
 
@@ -507,13 +510,13 @@ For questions or issues:
 ---
 
 **Version History:**
-- v2.7.0 (Dec 9, 2025): Admin Sponsor Management, Prize Draw Enhancements, Active Ads Control, Bug Fixes
-- v2.6.0 (Dec 9, 2025): Biometric Auth, Sponsor Integration, Handoff preparation
-- v2.5.0 (Dec 5, 2025): Login Navigation Fix, Remember Me Persistence Fix, Soccer Icon Fix
-- v2.4.9 (Dec 5, 2025): Guest Mode Overhaul, Auto-Load predictions, Register Access
-- v2.4.0 (Dec 3, 2025): Sponsorships, Chat Rooms, Correct Predictions Leaderboard
-- v2.2.0 (Dec 1, 2025): On-demand loading, Referral system, Beta banners
-- v2.1.0 (Nov 30, 2025): Cron automation (deprecated), Deployment docs
-- v2.0.0 (Nov 29, 2025): Duplicate prevention, score validation
-- v1.0.0 (Nov 28, 2025): Initial release with core features
-
+ - v2.8.0 (Dec 11, 2025): New Auth Screens, Sponsor Ad Enhancements, Layout Fixes, Logout Debugging
+ - v2.7.0 (Dec 9, 2025): Admin Sponsor Management, Prize Draw Enhancements, Active Ads Control, Bug Fixes
+ - v2.6.0 (Dec 9, 2025): Biometric Auth, Sponsor Integration, Handoff preparation
+ - v2.5.0 (Dec 5, 2025): Login Navigation Fix, Remember Me Persistence Fix, Soccer Icon Fix
+ - v2.4.9 (Dec 5, 2025): Guest Mode Overhaul, Auto-Load predictions, Register Access
+ - v2.4.0 (Dec 3, 2025): Sponsorships, Chat Rooms, Correct Predictions Leaderboard
+ - v2.2.0 (Dec 1, 2025): On-demand loading, Referral system, Beta banners
+ - v2.1.0 (Nov 30, 2025): Cron automation (deprecated), Deployment docs
+ - v2.0.0 (Nov 29, 2025): Duplicate prevention, score validation
+ - v1.0.0 (Nov 28, 2025): Initial release with core features

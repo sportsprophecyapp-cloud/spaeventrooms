@@ -136,9 +136,10 @@ export const AuthProvider = ({ children }) => {
         try {
             await storage.removeItem('userData');
             await storage.removeItem('userToken');
-            setUser(null);
         } catch (e) {
             console.error('Logout failed', e);
+        } finally {
+            setUser(null);
         }
     };
 
