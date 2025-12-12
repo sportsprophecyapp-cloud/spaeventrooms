@@ -361,7 +361,8 @@ const ChatScreen = () => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Chat Rooms</Text>
           <TouchableOpacity onPress={() => setShowCreateModal(true)} style={styles.createButton}>
-            <Ionicons name="add" size={24} color={COLORS.text.primary} />
+            <Ionicons name="add-circle-outline" size={20} color={COLORS.accent.cyan} />
+            <Text style={styles.createButtonText}>Create Room</Text>
           </TouchableOpacity>
         </View>
 
@@ -702,7 +703,21 @@ const styles = StyleSheet.create({
     color: COLORS.text.primary,
   },
   createButton: {
-    padding: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.accent.cyan,
+    elementGap: 6, // Not supported in React Native StyleSheet directly, using gap in styles below or standard margin
+    gap: 6,
+  },
+  createButtonText: {
+    color: COLORS.accent.cyan,
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: TYPOGRAPHY.weights.bold,
   },
   backButton: {
     padding: 5,
