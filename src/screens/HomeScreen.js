@@ -457,6 +457,34 @@ const styles = StyleSheet.create({
         opacity: 0.9,
         flexShrink: 1,
     },
+    quickAccessSection: {
+        marginBottom: SPACING.xl,
+        paddingHorizontal: SPACING.base,
+    },
+    quickAccessGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: SPACING.md,
+    },
+    quickAccessCard: {
+        width: '47%',
+        borderRadius: BORDER_RADIUS.lg,
+        overflow: 'hidden',
+        ...SHADOWS.sm,
+    },
+    quickAccessGradient: {
+        padding: SPACING.md,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.sm,
+        height: 100,
+    },
+    quickAccessText: {
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        textAlign: 'center',
+    },
 });
 
 export default HomeScreen;
