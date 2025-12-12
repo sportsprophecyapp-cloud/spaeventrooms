@@ -95,9 +95,9 @@ npm install  # Reinstall dependencies
 ```
 
 ### Latest Backup
-- **File:** `sportsprophecy-backup-20251209_184807.tar.gz`
-- **Date:** December 9, 2025 at 6:48 PM
-- **Version:** v2.7.0
+- **File:** `sportsprophecy-backup-20251211_205837.tar.gz`
+- **Date:** December 11, 2025 at 8:58 PM
+- **Version:** v2.9.0
 - **Location:** `/Users/williamcommu/Desktop/backups/`
 
 ---
