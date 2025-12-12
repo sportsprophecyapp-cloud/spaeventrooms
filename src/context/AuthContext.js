@@ -146,6 +146,9 @@ export const AuthProvider = ({ children }) => {
                     window.localStorage.removeItem('React_Native_Async_Storage_userData');
                     window.localStorage.removeItem('React_Native_Async_Storage_userToken');
                 }
+                // Force reload to clear memory state and ensure clean slate
+                window.location.href = '/';
+                return; // Stop execution here as page will reload
             }
         } catch (e) {
             console.error('Logout failed', e);

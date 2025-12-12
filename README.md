@@ -433,6 +433,8 @@ Deploy the frontend build to the `dist` project on Vercel.
 
 3. **No Password Reset**: Password reset functionality not implemented.
 
+4. **Logout Persistence on Web**: Users may remain logged in even after clicking Logout on the live web version. (Active Investigation)
+
 ---
 
 ## 🎯 Next Steps
