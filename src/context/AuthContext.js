@@ -136,24 +136,9 @@ export const AuthProvider = ({ children }) => {
         try {
             await storage.removeItem('userData');
             await storage.removeItem('userToken');
-
-            // Aggressive cleanup for web
-            if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                window.localStorage.removeItem('userData');
-                window.localStorage.removeItem('userToken');
-                const isAsyncStoragePresent = window.localStorage.getItem('React_Native_Async_Storage_userData');
-                if (isAsyncStoragePresent) {
-                    window.localStorage.removeItem('React_Native_Async_Storage_userData');
-                    window.localStorage.removeItem('React_Native_Async_Storage_userToken');
-                }
-                // Force reload to clear memory state and ensure clean slate
-                window.location.href = '/';
-                return; // Stop execution here as page will reload
-            }
+            setUser(null);
         } catch (e) {
             console.error('Logout failed', e);
-        } finally {
-            setUser(null);
         }
     };
 
