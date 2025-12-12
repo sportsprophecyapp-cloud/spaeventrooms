@@ -2,7 +2,7 @@
   "expo": {
     "name": "SportsProphecyApp",
     "slug": "sportsprophecyapp",
-    "version": "2.7.0",
+    "version": "2.9.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",

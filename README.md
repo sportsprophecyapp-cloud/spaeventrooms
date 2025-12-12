@@ -1,5 +1,5 @@
-# Sports Prophecy App v2.7.0
-> Last Updated: December 9, 2025  
+# Sports Prophecy App v2.9.0
+> Last Updated: December 11, 2025  
 **Developer Documentation**
 
 ## 📋 Table of Contents
@@ -35,7 +35,7 @@ Sports Prophecy is a **100% free** React Native Expo web application that allows
 
 ## 📊 Project Status
  
-### Current Version: v2.8.0 (December 11, 2025)
+### Current Version: v2.9.0 (December 11, 2025)
  
 **✅ Completed Features:**
 - ✅ Core prediction system (6 sports leagues)
@@ -55,11 +55,8 @@ Sports Prophecy is a **100% free** React Native Expo web application that allows
 **🚧 Current Phase: Verification & Bug Fixing**
  
 ### Next Steps:
-1. **Fix Live Logout Issue** - Resolve session persistence bug on web.
-2. **Verify New Auth Screens** - Test Forgot Password and Legal screens on live site.
-3. **Stripe Integration Testing** - Fully test banner ads and prize draw sponsorships.
-4. **App Store Preparation** - Prepare application for Google Play Store and Apple App Store submission.
-5. **Launch** - Public release
+1. **App Store Preparation** - Prepare application for Google Play Store and Apple App Store submission.
+2. **Marketing & Launch** - Public release and user acquisition.
 
 ---
 
@@ -301,6 +298,57 @@ Deploy the frontend build to the `dist` project on Vercel.
 
 ---
 
+## 🆕 Recent Changes (v2.9.0)
+
+### December 11, 2025
+
+#### 1. Web Session Persistence Fix ✅
+**Issue**: Users remained logged in on web even after clicking Logout.
+**Fix**: Implemented optimistic UI update with robust storage cleanup.
+**Details**:
+- Immediate `setUser(null)` for instant UI feedback
+- Direct `localStorage` access for web platform
+- Error handling to prevent logout failures
+- Verified working on iPad, iPhone, Android, and Safari
+
+#### 2. Safari Logout UX Improvement ✅
+**Issue**: `window.confirm` dialog flashed for 1ms on Safari, preventing logout.
+**Fix**: Removed confirmation dialog on web platforms.
+**Details**:
+- Platform-specific logic: Web = immediate logout, Native = confirmation dialog
+- Improved user experience on all web browsers
+
+#### 3. UI Polish ✅
+**Changes**: Enhanced visual clarity across multiple screens.
+**Details**:
+- **Home Screen**: Fixed "Quick Access" tabs with white text on gradient background
+- **Chat Screen**: Replaced "+" icon with labeled "Create Room" button (Cyan border + text)
+- Improved overall readability and user experience
+
+#### 4. Stripe Payment Integration Fix ✅
+**Issue**: "Invalid API Key" error preventing sponsor payments.
+**Fix**: Regenerated Stripe API keys and configured webhook endpoint.
+**Details**:
+- Generated fresh `sk_live_*` secret key
+- Updated Vercel environment variables
+- Configured webhook endpoint: `https://sportsprophecy-backend.vercel.app/api/webhooks/stripe`
+- Verified $25 sponsor payment flow working end-to-end
+- Used stable Vercel domain to prevent future webhook URL issues
+
+---
+
+## 🆕 Recent Changes (v2.8.0)
+
+### December 11, 2025 (Earlier)
+
+#### Auth Screens & Legal Pages ✅
+- Added Forgot Password screen
+- Added Reset Password screen  
+- Added Terms of Service screen
+- Added Privacy Policy screen
+
+---
+
 ## 🆕 Recent Changes (v2.7.0)
 
 ### December 9, 2025
@@ -431,10 +479,6 @@ Deploy the frontend build to the `dist` project on Vercel.
 
 2. **Web-Only**: Currently optimized for web, mobile platforms not fully tested.
 
-3. **No Password Reset**: Password reset functionality not implemented.
-
-4. **Logout Persistence on Web**: Users may remain logged in even after clicking Logout on the live web version. (Active Investigation)
-
 ---
 
 ## 🎯 Next Steps
@@ -512,6 +556,7 @@ For questions or issues:
 ---
 
 **Version History:**
+ - v2.9.0 (Dec 11, 2025): Web Session Fix, Safari Logout UX, UI Polish, Stripe Payment Integration
  - v2.8.0 (Dec 11, 2025): New Auth Screens, Sponsor Ad Enhancements, Layout Fixes, Logout Debugging
  - v2.7.0 (Dec 9, 2025): Admin Sponsor Management, Prize Draw Enhancements, Active Ads Control, Bug Fixes
  - v2.6.0 (Dec 9, 2025): Biometric Auth, Sponsor Integration, Handoff preparation
