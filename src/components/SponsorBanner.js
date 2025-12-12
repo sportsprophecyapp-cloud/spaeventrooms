@@ -13,13 +13,7 @@ import * as WebBrowser from 'expo-web-browser';
 // However, the Image component 'source' prop handles both {uri} and require(). 
 // But our data structure expects 'bannerUrl' as a string URI.
 // For this test, we will handle the local asset specifically in the render.
-const TEST_SPONSOR = {
-    _id: 'test_sponsor_1',
-    sponsorName: 'Sports Prophecy',
-    bannerUrl: 'LOCAL_ASSET_TEST', // Special flag
-    linkUrl: 'https://www.sportsprophecyapp.com',
-    type: 'paid'
-};
+
 
 const SponsorBanner = ({ style, sponsor = null }) => {
     const navigation = useNavigation();
@@ -40,21 +34,20 @@ const SponsorBanner = ({ style, sponsor = null }) => {
         try {
             const activeSponsors = await apiService.getActiveSponsors();
 
-            // INJECT TEST SPONSOR if list is empty or just mixed in
-            // For now, let's mix it in so it's always visible for testing
-            const allSponsors = [...activeSponsors, TEST_SPONSOR];
+            setSponsors(activeSponsors);
 
-            setSponsors(allSponsors);
-
-            if (allSponsors && allSponsors.length > 0) {
+            if (activeSponsors && activeSponsors.length > 0) {
                 // Pick a random sponsor to start
-                const randomIndex = Math.floor(Math.random() * allSponsors.length);
-                setCurrentSponsor(allSponsors[randomIndex]);
+                const randomIndex = Math.floor(Math.random() * activeSponsors.length);
+                setCurrentSponsor(activeSponsors[randomIndex]);
+            } else {
+                // No sponsors - show placeholder
+                setCurrentSponsor(null);
             }
         } catch (error) {
             console.error('Failed to fetch sponsors:', error);
-            // Fallback to test sponsor on error
-            setCurrentSponsor(TEST_SPONSOR);
+            // Show placeholder on error
+            setCurrentSponsor(null);
         } finally {
             setLoading(false);
         }
@@ -107,15 +100,11 @@ const SponsorBanner = ({ style, sponsor = null }) => {
 
     return (
         <TouchableOpacity onPress={handlePress} style={[styles.container, style]}>
-            {(currentSponsor.bannerUrl && currentSponsor.bannerUrl !== 'LOCAL_ASSET_TEST') || (currentSponsor.bannerUrl === 'LOCAL_ASSET_TEST') ? (
+            {currentSponsor.bannerUrl ? (
                 // Image Banner
                 <View style={styles.imageContainer}>
                     <Image
-                        source={
-                            currentSponsor.bannerUrl === 'LOCAL_ASSET_TEST'
-                                ? require('../../assets/sponsor_test_banner.jpg')
-                                : { uri: currentSponsor.bannerUrl }
-                        }
+                        source={{ uri: currentSponsor.bannerUrl }}
                         style={styles.bannerImage}
                         resizeMode="cover"
                     />
