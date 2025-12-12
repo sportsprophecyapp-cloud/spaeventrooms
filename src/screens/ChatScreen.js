@@ -512,13 +512,6 @@ const ChatScreen = () => {
             <Text style={{ color: COLORS.status.success, fontSize: 10 }}>Sponsored by {currentRoom.sponsor.name}</Text>
           )}
         </View>
-        {currentRoom ? (
-          <TouchableOpacity onPress={() => setShowSponsorModal(true)} style={{ padding: 5 }}>
-            <Ionicons name="star-outline" size={24} color={COLORS.status.warning} />
-          </TouchableOpacity>
-        ) : (
-          <View style={{ width: 24 }} />
-        )}
       </View>
 
       {/* Sponsor Ads Section */}
