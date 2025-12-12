@@ -52,7 +52,6 @@ const storage = {
             }
         } catch (error) {
             console.error(`Error removing item ${key}:`, error);
-            throw error;
         }
     },
 
