@@ -477,7 +477,14 @@ Deploy the frontend build to the `dist` project on Vercel.
 1. **The Odds API Rate Limits**: Free tier has limited requests.
    - **Mitigation**: We use a 60-minute cache to minimize API calls.
 
-2. **Web-Only**: Currently optimized for web, mobile platforms not fully tested.
+## ✅ Platform Testing
+
+**Verified Working On:**
+- ✅ Android (Mobile)
+- ✅ iPad (Safari & Chrome)
+- ✅ iPhone (Safari & Chrome)
+- ✅ Mac (Safari & Chrome)
+- ✅ Web Browsers (All major browsers)
 
 ---
 
