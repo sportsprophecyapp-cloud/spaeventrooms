@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
@@ -13,11 +13,11 @@ const MoreScreen = ({ navigation }) => {
     console.log('DEBUG: MoreScreen user email:', user?.email);
 
     const handleLogout = () => {
-        if (typeof window !== 'undefined' && window.confirm) {
-            if (window.confirm('Are you sure you want to logout?')) {
-                logout();
-            }
+        if (Platform.OS === 'web') {
+            // Web: Logout immediately to avoid popup blockers/issues on mobile Safari
+            logout();
         } else {
+            // Native: Use standard Alert
             Alert.alert(
                 "Logout",
                 "Are you sure you want to logout?",
