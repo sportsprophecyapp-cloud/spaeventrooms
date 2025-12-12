@@ -136,6 +136,17 @@ export const AuthProvider = ({ children }) => {
         try {
             await storage.removeItem('userData');
             await storage.removeItem('userToken');
+
+            // Aggressive cleanup for web
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.localStorage.removeItem('userData');
+                window.localStorage.removeItem('userToken');
+                const isAsyncStoragePresent = window.localStorage.getItem('React_Native_Async_Storage_userData');
+                if (isAsyncStoragePresent) {
+                    window.localStorage.removeItem('React_Native_Async_Storage_userData');
+                    window.localStorage.removeItem('React_Native_Async_Storage_userToken');
+                }
+            }
         } catch (e) {
             console.error('Logout failed', e);
         } finally {
