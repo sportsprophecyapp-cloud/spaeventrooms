@@ -133,13 +133,25 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
+        // 1. Immediate UI update to ensure responsiveness
+        setUser(null);
+
+        // 2. Cleanup storage
         try {
+            // Direct cleanup for web if available (synchronous and safe)
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.removeItem('userData');
+                window.localStorage.removeItem('userToken');
+                window.localStorage.removeItem('React_Native_Async_Storage_userData');
+                window.localStorage.removeItem('React_Native_Async_Storage_userToken');
+            }
+
+            // Standard cleanup via wrapper (for native or if wrapper handles other logic)
+            // We await this but it won't block the UI since we already updated state
             await storage.removeItem('userData');
             await storage.removeItem('userToken');
         } catch (e) {
-            console.error('Logout failed', e);
-        } finally {
-            setUser(null);
+            console.error('Logout cleanup failed', e);
         }
     };
 
