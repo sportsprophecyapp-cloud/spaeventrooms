@@ -41,6 +41,7 @@ const ChatScreen = () => {
 
   // Sponsor Ad State
   const [activeSponsors, setActiveSponsors] = useState([]);
+  const [currentSponsorIndex, setCurrentSponsorIndex] = useState(0);
   const [showCustomAdModal, setShowCustomAdModal] = useState(false);
   const [customAdBanner, setCustomAdBanner] = useState('');
   const [customAdLink, setCustomAdLink] = useState('');
@@ -90,6 +91,17 @@ const ChatScreen = () => {
   useEffect(() => {
     fetchSponsors();
   }, []);
+
+  // Rotate through sponsors every 10 seconds
+  useEffect(() => {
+    if (activeSponsors.length > 1) {
+      const rotationInterval = setInterval(() => {
+        setCurrentSponsorIndex((prevIndex) => (prevIndex + 1) % activeSponsors.length);
+      }, 10000); // 10 seconds per sponsor
+
+      return () => clearInterval(rotationInterval);
+    }
+  }, [activeSponsors]);
 
   // Load custom ad data when entering a private room
   useEffect(() => {
@@ -511,10 +523,10 @@ const ChatScreen = () => {
 
       {/* Sponsor Ads Section */}
       <View style={styles.adsContainer}>
-        {/* Main Sponsor Ad (all rooms) */}
-        {activeSponsors.length > 0 && activeSponsors[0] && (
+        {/* Main Sponsor Ad (all rooms) - ROTATING */}
+        {activeSponsors.length > 0 && activeSponsors[currentSponsorIndex] && (
           <TouchableOpacity
-            onPress={() => activeSponsors[0].linkUrl && WebBrowser.openBrowserAsync(activeSponsors[0].linkUrl)}
+            onPress={() => activeSponsors[currentSponsorIndex].linkUrl && WebBrowser.openBrowserAsync(activeSponsors[currentSponsorIndex].linkUrl)}
             style={styles.sponsorAdCard}
           >
             <LinearGradient
@@ -522,7 +534,7 @@ const ChatScreen = () => {
               style={styles.sponsorAdGradient}
             >
               <Text style={styles.sponsorAdLabel}>SPONSORED</Text>
-              <Text style={styles.sponsorAdName}>{activeSponsors[0].sponsorName}</Text>
+              <Text style={styles.sponsorAdName}>{activeSponsors[currentSponsorIndex].sponsorName}</Text>
             </LinearGradient>
           </TouchableOpacity>
         )}

@@ -139,7 +139,41 @@ const SponsorScreen = ({ navigation }) => {
 
     const renderPaidTab = () => (
         <View>
-            <Text style={styles.subtitle}>Promote your brand on our Main Page!</Text>
+            <Text style={styles.subtitle}>Reach thousands of users across the entire app!</Text>
+
+            {/* Benefits Section */}
+            <View style={styles.benefitsContainer}>
+                <Text style={styles.benefitsTitle}>Your Ad Will Appear On:</Text>
+
+                <View style={styles.benefitItem}>
+                    <Ionicons name="home" size={20} color={COLORS.accent.cyan} />
+                    <View style={styles.benefitTextContainer}>
+                        <Text style={styles.benefitText}>Home Screen</Text>
+                        <Text style={styles.benefitSubtext}>Static banner at top</Text>
+                    </View>
+                </View>
+
+                <View style={styles.benefitItem}>
+                    <Ionicons name="megaphone" size={20} color={COLORS.accent.cyan} />
+                    <View style={styles.benefitTextContainer}>
+                        <Text style={styles.benefitText}>Announcements Page</Text>
+                        <Text style={styles.benefitSubtext}>Static banner at top</Text>
+                    </View>
+                </View>
+
+                <View style={styles.benefitItem}>
+                    <Ionicons name="chatbubbles" size={20} color={COLORS.accent.cyan} />
+                    <View style={styles.benefitTextContainer}>
+                        <Text style={styles.benefitText}>All Chat Rooms</Text>
+                        <Text style={styles.benefitSubtext}>Rotating with other sponsors (10s intervals)</Text>
+                    </View>
+                </View>
+
+                <View style={styles.benefitHighlight}>
+                    <Ionicons name="trending-up" size={16} color={COLORS.status.success} />
+                    <Text style={styles.benefitHighlightText}>Maximum visibility across the platform!</Text>
+                </View>
+            </View>
 
             <View style={styles.pricingContainer}>
                 <TouchableOpacity
@@ -496,6 +530,54 @@ const styles = StyleSheet.create({
         color: '#000',
         fontSize: TYPOGRAPHY.sizes.lg,
         fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    benefitsContainer: {
+        backgroundColor: COLORS.background.secondary,
+        borderRadius: BORDER_RADIUS.md,
+        padding: SPACING.lg,
+        marginBottom: SPACING.xl,
+        borderWidth: 1,
+        borderColor: COLORS.border.primary,
+    },
+    benefitsTitle: {
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        marginBottom: SPACING.md,
+    },
+    benefitItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.md,
+        paddingVertical: SPACING.sm,
+    },
+    benefitTextContainer: {
+        marginLeft: SPACING.md,
+        flex: 1,
+    },
+    benefitText: {
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    benefitSubtext: {
+        color: COLORS.text.tertiary,
+        fontSize: TYPOGRAPHY.sizes.xs,
+        marginTop: 2,
+    },
+    benefitHighlight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        padding: SPACING.sm,
+        borderRadius: BORDER_RADIUS.sm,
+        marginTop: SPACING.sm,
+    },
+    benefitHighlightText: {
+        color: COLORS.status.success,
+        fontSize: TYPOGRAPHY.sizes.xs,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+        marginLeft: SPACING.sm,
     },
     disclaimer: {
         color: COLORS.text.tertiary,
