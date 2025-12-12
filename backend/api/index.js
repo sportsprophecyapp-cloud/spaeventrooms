@@ -8,6 +8,11 @@ const { trackAPICall, getUsageStats, checkLimits } = require('../utils/apiMonito
 const nodemailer = require('nodemailer'); // Require nodemailer
 require('dotenv').config(); // Not needed in Vercel production
 
+// Admin Configuration
+// TODO: Replace with your actual user UUID from the database
+// You can find this by logging in and checking your user object
+const ADMIN_UUID = process.env.ADMIN_UUID || 'YOUR_UUID_HERE';
+
 // Implement Helper Function for sending emails
 const sendEmail = async (to, subject, text) => {
     try {
@@ -1812,6 +1817,49 @@ app.put('/api/chat/rooms/:id/custom-ad', authenticateToken, async (req, res) => 
         res.json({ success: true, room });
     } catch (error) {
         console.error('Error updating custom ad:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete Room (Room Creator or Admin Only)
+app.delete('/api/chat/rooms/:id', authenticateToken, async (req, res) => {
+    try {
+        await dbConnect();
+        const { id } = req.params;
+        const userId = req.user.uuid;
+
+        // Find the room
+        const room = await ChatRoom.findById(id);
+        if (!room) {
+            return res.status(404).json({ error: 'Room not found' });
+        }
+
+        // Check permissions: Must be room creator OR admin
+        const isCreator = room.createdBy === userId;
+        const isAdmin = userId === ADMIN_UUID;
+
+        if (!isCreator && !isAdmin) {
+            return res.status(403).json({ error: 'Only room creator or admin can delete this room' });
+        }
+
+        // Prevent deletion of General/Lobby room (if it has a specific name or ID)
+        if (room.name === 'General' || room.name === 'Lobby') {
+            return res.status(400).json({ error: 'Cannot delete the General/Lobby room' });
+        }
+
+        // Delete all messages in the room
+        await ChatMessage.deleteMany({ roomId: id });
+
+        // Delete the room
+        await ChatRoom.findByIdAndDelete(id);
+
+        res.json({
+            success: true,
+            message: 'Room and all messages deleted successfully',
+            deletedBy: isAdmin ? 'admin' : 'creator'
+        });
+    } catch (error) {
+        console.error('Error deleting room:', error);
         res.status(500).json({ error: error.message });
     }
 });

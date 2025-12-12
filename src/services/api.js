@@ -429,9 +429,18 @@ export const apiService = {
             const response = await api.put(`/chat/rooms/${roomId}/custom-ad`, adData);
             return response.data;
         } catch (error) {
-            throw error.response?.data || error;
+            throw error;
         }
-    }
+    },
+
+    deleteRoom: async (roomId) => {
+        try {
+            const response = await api.delete(`/chat/rooms/${roomId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 export default api;
