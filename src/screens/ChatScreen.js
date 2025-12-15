@@ -368,6 +368,7 @@ const ChatScreen = () => {
           size={20}
           color={item.type === 'private' ? COLORS.status.warning : COLORS.text.tertiary}
           style={{ marginLeft: 10 }}
+        />
       </View>
     </TouchableOpacity>
   );

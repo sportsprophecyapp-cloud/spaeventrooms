@@ -492,71 +492,66 @@ const ProfileScreen = () => {
                                 ))
                             )}
                         </View>
+                        {/* Delete Account Button */}
+                        <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={handleDeleteAccount}
+                        >
+                            <Text style={styles.deleteButtonText}>Delete Account</Text>
+                        </TouchableOpacity>
+                        <View style={{ height: 40 }} />
                     </>
                 )}
-            </View>
+            </ScrollView>
 
-            {/* Delete Account Button */}
-            <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={handleDeleteAccount}
+            {/* Edit ID Name Modal */}
+            < Modal
+                animationType="slide"
+                transparent={true}
+                visible={showEditModal}
+                onRequestClose={() => setShowEditModal(false)}
             >
-                <Text style={styles.deleteButtonText}>Delete Account</Text>
-            </TouchableOpacity>
-            <View style={{ height: 40 }} />
-        </>
-    )
-}
-            </ScrollView >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Change ID Name</Text>
+                            <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                                <Ionicons name="close" size={24} color={COLORS.text.secondary} />
+                            </TouchableOpacity>
+                        </View>
 
-    {/* Edit ID Name Modal */ }
-    < Modal
-animationType = "slide"
-transparent = { true}
-visible = { showEditModal }
-onRequestClose = {() => setShowEditModal(false)}
-            >
-    <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Change ID Name</Text>
-                <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                    <Ionicons name="close" size={24} color={COLORS.text.secondary} />
-                </TouchableOpacity>
-            </View>
+                        <Text style={styles.modalDescription}>
+                            Choose a new unique ID Name. This will be displayed on the leaderboard and in chat.
+                        </Text>
 
-            <Text style={styles.modalDescription}>
-                Choose a new unique ID Name. This will be displayed on the leaderboard and in chat.
-            </Text>
+                        <View style={styles.costBadge}>
+                            <Text style={styles.costText}>Cost: 20 Tokens</Text>
+                            <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
+                        </View>
 
-            <View style={styles.costBadge}>
-                <Text style={styles.costText}>Cost: 20 Tokens</Text>
-                <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
-            </View>
+                        <TextInput
+                            style={styles.input}
+                            value={newIdName}
+                            onChangeText={setNewIdName}
+                            placeholder="Enter new ID Name"
+                            placeholderTextColor={COLORS.text.tertiary}
+                            autoCapitalize="none"
+                            maxLength={20}
+                        />
 
-            <TextInput
-                style={styles.input}
-                value={newIdName}
-                onChangeText={setNewIdName}
-                placeholder="Enter new ID Name"
-                placeholderTextColor={COLORS.text.tertiary}
-                autoCapitalize="none"
-                maxLength={20}
-            />
-
-            <TouchableOpacity
-                style={[styles.saveButton, (updatingName || !newIdName || newIdName.length < 3) && styles.disabledButton]}
-                onPress={handleUpdateIdName}
-                disabled={updatingName || !newIdName || newIdName.length < 3}
-            >
-                {updatingName ? (
-                    <ActivityIndicator color="#fff" />
-                ) : (
-                    <Text style={styles.saveButtonText}>Save Changes</Text>
-                )}
-            </TouchableOpacity>
-        </View>
-    </View>
+                        <TouchableOpacity
+                            style={[styles.saveButton, (updatingName || !newIdName || newIdName.length < 3) && styles.disabledButton]}
+                            onPress={handleUpdateIdName}
+                            disabled={updatingName || !newIdName || newIdName.length < 3}
+                        >
+                            {updatingName ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <Text style={styles.saveButtonText}>Save Changes</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </Modal >
         </SafeAreaView >
     );
