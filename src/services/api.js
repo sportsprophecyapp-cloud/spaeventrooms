@@ -3,7 +3,7 @@ import storage from '../utils/storage';
 
 // Use environment variable or fallback to local API for development
 // Use environment variable or fallback to local API for development
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.NODE_ENV === 'production' || process.env.EXPO_PUBLIC_API_URL ? (process.env.EXPO_PUBLIC_API_URL || '/api') : 'http://localhost:3001/api';
 // const API_URL = '/api'; // Use relative path for Vercel proxy
 
 const api = axios.create({
@@ -62,6 +62,34 @@ export const apiService = {
         } catch (error) {
             throw error.response ? error.response.data : error;
         }
+    },
+
+    loginAsGuest: async () => {
+        const response = await api.post('/auth/guest');
+        return response.data;
+    },
+    googleLogin: async (idToken) => {
+        const response = await api.post('/auth/google', { idToken });
+        return response.data;
+    },
+    appleLogin: async (identityToken, user) => {
+        const response = await api.post('/auth/apple', { identityToken, user });
+        return response.data;
+    },
+    getProfile: async () => {
+        try {
+            const response = await api.get('/profile');
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    googleLogin: async (payload) => {
+        // Support both old (idToken string) and new ({ idToken, accessToken }) formats
+        const data = (typeof payload === 'string') ? { idToken: payload } : payload;
+        const response = await api.post('/auth/google', data);
+        return response.data;
     },
 
     getEvents: async () => {

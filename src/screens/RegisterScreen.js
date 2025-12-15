@@ -4,6 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import GoogleSignInButton from '../components/GoogleSignInButton';
+import AppleSignInButton from '../components/AppleSignInButton';
 import { BiometricService } from '../services/biometrics';
 
 const RegisterScreen = ({ navigation }) => {
@@ -274,6 +276,9 @@ const RegisterScreen = ({ navigation }) => {
                                     Privacy Policy
                                 </Text>
                             </Text>
+
+                            <GoogleSignInButton />
+                            <AppleSignInButton />
 
                             {/* Login Link */}
                             <TouchableOpacity onPress={() => navigation.navigate('Login')} accessibilityLabel="Sign In Link" testID="register-login-link">

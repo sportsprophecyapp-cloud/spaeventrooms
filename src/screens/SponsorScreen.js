@@ -269,7 +269,7 @@ const SponsorScreen = ({ navigation }) => {
                 <Text style={styles.label}>Prize Description</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="e.g., $50 Gift Card, Signed Jersey"
+                    placeholder="e.g., Authentic Jersey, Game Tickets, Tech Gadget"
                     placeholderTextColor={COLORS.text.tertiary}
                     value={prizeDescription}
                     onChangeText={setPrizeDescription}
@@ -355,6 +355,9 @@ const SponsorScreen = ({ navigation }) => {
 
                 <Text style={styles.disclaimer}>
                     Payments processed by Stripe. Prize applications reviewed by admin.
+                    {'\n\n'}
+                    Promotions are sponsored by third parties. Sponsors are solely responsible for fulfillment.
+                    Google Play and Apple are not sponsors of, nor affiliated with, these promotions.
                 </Text>
             </ScrollView>
         </SafeAreaView>

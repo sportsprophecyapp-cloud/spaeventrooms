@@ -4,8 +4,20 @@
     "devCommand": "npx expo start --web",
     "rewrites": [
         {
+            "source": "/privacy",
+            "destination": "https://sportsprophecy-backend-8iidk1vu8.vercel.app/privacy"
+        },
+        {
+            "source": "/terms",
+            "destination": "https://sportsprophecy-backend-8iidk1vu8.vercel.app/terms"
+        },
+        {
+            "source": "/download",
+            "destination": "https://sportsprophecy-backend-8iidk1vu8.vercel.app/download"
+        },
+        {
             "source": "/api/:path*",
-            "destination": "https://api.sportsprophecyapp.com/api/:path*"
+            "destination": "https://sportsprophecy-backend-8iidk1vu8.vercel.app/api/:path*"
         },
         {
             "source": "/(.*)",

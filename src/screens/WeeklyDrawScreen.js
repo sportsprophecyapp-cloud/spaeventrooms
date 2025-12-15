@@ -293,6 +293,13 @@ const WeeklyDrawScreen = ({ navigation }) => {
                         </View>
                     );
                 })}
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                    <Text style={{ color: COLORS.text.tertiary, fontSize: 10, textAlign: 'center' }}>
+                        Promotions are sponsored by third parties. Sponsors are solely responsible for fulfillment.
+                        {'\n'}
+                        Google Play and Apple are not sponsors of, nor affiliated with, these promotions.
+                    </Text>
+                </View>
                 <View style={{ height: 40 }} />
             </ScrollView>
         </SafeAreaView>

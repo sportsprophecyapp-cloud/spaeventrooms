@@ -162,10 +162,20 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                 eventType: 'matchup'
             });
 
-            // Update balance from response
-            if (result.balance) {
-                setBalance(result.balance);
-            }
+            // Update balance from response or manual decrement
+            const newTokens = (result.balance?.tokens !== undefined)
+                ? result.balance.tokens
+                : (user.tokens - PREDICTION_COST);
+
+            const newCrowns = (result.balance?.crowns !== undefined)
+                ? result.balance.crowns
+                : user.crowns;
+
+            // Update global user state to ensure header/other screens reflect change
+            await updateUser({ tokens: newTokens, crowns: newCrowns });
+
+            // Update local state
+            setBalance({ tokens: newTokens, crowns: newCrowns });
 
             setSuccess(true);
 

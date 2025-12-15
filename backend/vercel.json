@@ -2,6 +2,18 @@
     "version": 2,
     "rewrites": [
         {
+            "source": "/privacy",
+            "destination": "/api"
+        },
+        {
+            "source": "/terms",
+            "destination": "/api"
+        },
+        {
+            "source": "/download",
+            "destination": "/api"
+        },
+        {
             "source": "/api/(.*)",
             "destination": "/api"
         }

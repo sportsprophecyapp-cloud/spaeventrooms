@@ -5,6 +5,8 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { apiService } from '../services/api';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
+import AppleSignInButton from '../components/AppleSignInButton';
 
 const { width } = Dimensions.get('window');
 
@@ -114,6 +116,9 @@ const LandingScreen = ({ navigation }) => {
                                     <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />
                                 </LinearGradient>
                             </TouchableOpacity>
+
+                            <GoogleSignInButton variant="standard" />
+                            <AppleSignInButton />
 
                             <TouchableOpacity
                                 style={styles.secondaryButton}
@@ -225,7 +230,7 @@ const LandingScreen = ({ navigation }) => {
                                 <Text style={styles.footerLink}>Terms of Service</Text>
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.copyright}>© 2025 SportsProphecy. All rights reserved.</Text>
+                        <Text style={styles.copyright}>© 2025 Sports Prophecy. All rights reserved.</Text>
                     </View>
 
                 </ScrollView>

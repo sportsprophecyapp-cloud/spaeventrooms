@@ -132,6 +132,32 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const googleLogin = async (idToken) => {
+        try {
+            const { token, user: userData } = await apiService.googleLogin(idToken);
+            setUser(userData);
+            await storage.setItem('userToken', token);
+            await storage.setItem('userData', JSON.stringify(userData));
+            return userData;
+        } catch (error) {
+            console.error('Google login context error:', error);
+            throw error;
+        }
+    };
+
+    const appleLogin = async (identityToken, user) => {
+        try {
+            const { token, user: userData } = await apiService.appleLogin(identityToken, user);
+            setUser(userData);
+            await storage.setItem('userToken', token);
+            await storage.setItem('userData', JSON.stringify(userData));
+            return userData;
+        } catch (error) {
+            console.error('Apple login context error:', error);
+            throw error;
+        }
+    };
+
     const logout = async () => {
         // 1. Immediate UI update to ensure responsiveness
         setUser(null);
@@ -201,7 +227,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout, loginAsGuest, refreshUser, updateUser }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, logout, loginAsGuest, googleLogin, appleLogin, refreshUser, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

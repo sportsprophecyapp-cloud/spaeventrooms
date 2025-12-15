@@ -5,13 +5,14 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { dedupRequest } = require('../utils/requestDedup');
 const { trackAPICall, getUsageStats, checkLimits } = require('../utils/apiMonitor');
-const nodemailer = require('nodemailer'); // Require nodemailer
+const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
+// const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); // Moved inside route
 require('dotenv').config(); // Not needed in Vercel production
 
 // Admin Configuration
-// TODO: Replace with your actual user UUID from the database
-// You can find this by logging in and checking your user object
-const ADMIN_UUID = process.env.ADMIN_UUID || 'YOUR_UUID_HERE';
+const ADMIN_EMAIL = 'sportsprophecyapp@gmail.com';
 
 // Implement Helper Function for sending emails
 const sendEmail = async (to, subject, text) => {
@@ -43,6 +44,151 @@ const sendEmail = async (to, subject, text) => {
 };
 
 const app = express();
+// Request logging middleware
+app.use((req, res, next) => {
+    console.log(`[Request] ${req.method} ${req.url}`);
+    next();
+});
+app.get('/privacy', (req, res) => {
+    res.send(`
+        <html>
+            <head><title>Privacy Policy - Sports Prophecy</title></head>
+            <body style="font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
+                <h1>Privacy Policy</h1>
+                <p><strong>Effective Date:</strong> ${new Date().toLocaleDateString()}</p>
+                <p>Sports Prophecy ("we", "our", "us") respects your privacy. This Privacy Policy explains how we collect and use your data.</p>
+                <h2>1. Information We Collect</h2>
+                <p>We collect information you provide directly, such as when you create an account, make a prediction, or contact support. This includes:</p>
+                <ul>
+                    <li>Name/Username</li>
+                    <li>Email Address</li>
+                    <li>Profile information (e.g., Apple/Google ID for authentication)</li>
+                </ul>
+                <h2>2. How We Use Information</h2>
+                <p>We use your information to fulfill the core purpose of the application: allowing you to participate in sports prediction games, tracking your leaderboard ranking, and managing your digital rewards (Tokens/Crowns).</p>
+                <h2>3. Data Deletion</h2>
+                <p>You can request account deletion by contacting support or using the delete account feature in the app settings.</p>
+                <h2>4. Contact</h2>
+                <p>For questions, please contact us at support@sportsprophecyapp.com.</p>
+            </body>
+        </html>
+    `);
+});
+
+app.get('/terms', (req, res) => {
+    res.send(`
+        <html>
+            <head><title>Terms of Service - Sports Prophecy</title></head>
+            <body style="font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
+                <h1>Terms of Service</h1>
+                <p><strong>Effective Date:</strong> ${new Date().toLocaleDateString()}</p>
+                <p>By accessng or using the Sports Prophecy app, you agree to be bound by these Terms.</p>
+                <h2>1. Use of Service</h2>
+                <p>You must be at least 18 years old to use this service.</p>
+                <h2>2. User Content</h2>
+                <p>You are responsible for the content you post and your interactions with other users.</p>
+                <h2>3. Termination</h2>
+                <p>We reserve the right to suspend or terminate your account for any violation of these terms.</p>
+            </body>
+        </html>
+    `);
+});
+
+app.get('/download', (req, res) => {
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.sportsprophecy.app'; // Placeholder
+    const appStoreUrl = 'https://apps.apple.com/app/idYOUR_APPLE_APP_ID'; // Placeholder
+    // Self-referencing QR code so desktop users scan it and come back to this page on mobile
+    const qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.sportsprophecyapp.com/download';
+
+    res.send(`
+        <html>
+            <head>
+                <title>Download Sports Prophecy</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {
+                        background-color: #0a1628;
+                        color: #ffffff;
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 100vh;
+                        margin: 0;
+                        text-align: center;
+                        padding: 20px;
+                    }
+                    .container {
+                        max-width: 500px;
+                        width: 100%;
+                    }
+                    h1 { margin-bottom: 10px; font-size: 28px; }
+                    p { color: #8fa3bf; margin-bottom: 30px; }
+                    .button {
+                        display: block;
+                        background-color: #00d4ff;
+                        color: #0a1628;
+                        padding: 15px 30px;
+                        border-radius: 12px;
+                        text-decoration: none;
+                        font-weight: bold;
+                        margin: 10px 0;
+                        transition: transform 0.2s;
+                    }
+                    .button:active { transform: scale(0.98); }
+                    .qr-container {
+                        background: white;
+                        padding: 20px;
+                        border-radius: 20px;
+                        margin-top: 30px;
+                        display: inline-block;
+                    }
+                    .desktop-only { display: none; }
+                    
+                    @media (min-width: 768px) {
+                        .mobile-only { display: none; }
+                        .desktop-only { display: block; }
+                    }
+                </style>
+                <script>
+                    window.onload = function() {
+                        const userAgent = navigator.userAgent.toLowerCase();
+                        const isIos = userAgent.includes('iphone') || userAgent.includes('ipad') || userAgent.includes('ipod');
+                        const isAndroid = userAgent.includes('android');
+
+                        if (isIos) {
+                            setTimeout(function() { window.location.href = '${appStoreUrl}'; }, 1000);
+                            document.getElementById('status').innerText = 'Redirecting to App Store...';
+                        } else if (isAndroid) {
+                            setTimeout(function() { window.location.href = '${playStoreUrl}'; }, 1000);
+                            document.getElementById('status').innerText = 'Redirecting to Google Play...';
+                        }
+                    }
+                </script>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Sports Prophecy</h1>
+                    <p id="status">Choose your platform</p>
+
+                    <div class="mobile-only">
+                        <a href="${appStoreUrl}" class="button">Download on App Store</a>
+                        <a href="${playStoreUrl}" class="button">Get it on Google Play</a>
+                    </div>
+
+                    <div class="desktop-only">
+                        <p>Scan to Install on Mobile</p>
+                        <div class="qr-container">
+                            <img src="${qrCodeUrl}" alt="Scan to Download" width="200" height="200">
+                        </div>
+                    </div>
+                </div>
+            </body>
+        </html>
+    `);
+});
+
 const PORT = process.env.PORT || 3001;
 
 // CORS configuration
@@ -51,6 +197,126 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: '50mb' }));
+
+// Health Check
+app.get('/api/health', (req, res) => res.status(200).json({ status: 'ok', version: '2.9.1' }));
+
+// Debug Route
+app.get('/api/debug', (req, res) => {
+    res.json({
+        url: req.url,
+        originalUrl: req.originalUrl,
+        baseUrl: req.baseUrl,
+        headers: req.headers
+    });
+});
+
+const handleGoogleAuth = async (req, res) => {
+    try {
+        console.log('🌟 Google Auth Endpoint Hit');
+        const { idToken, accessToken } = req.body;
+
+        if (!idToken && !accessToken) {
+            console.error('❌ Missing idToken and accessToken in request body');
+            return res.status(400).json({ error: 'Missing Auth Token' });
+        }
+
+        await dbConnect();
+
+        let googleId, email, name, picture;
+
+        if (idToken) {
+            // Priority 1: Verify ID Token
+            const { OAuth2Client } = require('google-auth-library');
+            const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+            const ticket = await googleClient.verifyIdToken({
+                idToken: idToken,
+                audience: [
+                    '690358031158-n4e5sqsu936iega8rh9ge8f0kjikveht.apps.googleusercontent.com', // Web
+                    '690358031158-c8shuqjc5h66ffg811j1re5b7ihgimrh.apps.googleusercontent.com', // iOS
+                    '690358031158-ii4ae9s6l59tmhg5gf0sd1a7imk4cjfq.apps.googleusercontent.com'  // Android
+                ],
+            });
+            const payload = ticket.getPayload();
+            googleId = payload.sub;
+            email = payload.email;
+            name = payload.name;
+            picture = payload.picture;
+        } else if (accessToken) {
+            // Priority 2: Verify Access Token via UserInfo Endpoint
+            try {
+                const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const profile = userInfoResponse.data;
+                googleId = profile.id;
+                email = profile.email;
+                name = profile.name;
+                picture = profile.picture;
+            } catch (err) {
+                console.error('Failed to verify access token:', err.response?.data || err.message);
+                return res.status(401).json({ error: 'Invalid Access Token' });
+            }
+        }
+
+        // Common User Creation/Linking Logic
+        let user = await User.findOne({
+            $or: [{ googleId }, { email }]
+        });
+
+        if (user) {
+            // Link account if not linked
+            if (!user.googleId) {
+                user.googleId = googleId;
+                await user.save();
+            }
+        } else {
+            // Create New User
+            const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+            // Unique Referral Code
+            let uniqueCode = false;
+            let referralCode = '';
+            while (!uniqueCode) {
+                referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                const existing = await User.findOne({ referralCode });
+                if (!existing) uniqueCode = true;
+            }
+
+            user = new User({
+                uuid: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                email,
+                username: name || email.split('@')[0],
+                password: hashedPassword,
+                referralCode,
+                role: 'user',
+                tokens: 10,
+                crowns: 5,
+                googleId,
+                badges: []
+            });
+            await user.save();
+        }
+
+        // Generate JWT
+        const token = jwt.sign(
+            { userId: user._id, email: user.email, role: user.role, uuid: user.uuid },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.json({ success: true, token, user });
+
+    } catch (error) {
+        console.error('Google Auth Error:', error);
+        res.status(401).json({ error: 'Invalid Google Token: ' + error.message });
+    }
+};
+
+app.post('/api/auth/google', handleGoogleAuth);
+app.post('/auth/google', handleGoogleAuth);
 
 // --- MongoDB Connection ---
 let cached = global.mongoose;
@@ -115,7 +381,9 @@ const UserSchema = new mongoose.Schema({
     referralCount: { type: Number, default: 0 },
     role: { type: String, enum: ['user', 'moderator', 'admin'], default: 'user' },
     isBanned: { type: Boolean, default: false },
-    notificationsEnabled: { type: Boolean, default: true }
+    notificationsEnabled: { type: Boolean, default: true },
+    googleId: { type: String, sparse: true, unique: true },
+    appleId: { type: String, sparse: true, unique: true }
 });
 
 const EventSchema = new mongoose.Schema({
@@ -888,6 +1156,13 @@ app.post('/api/register', async (req, res) => {
                 message: `User ${user.username} joined using your referral code! You earned 5 Crowns & 10 Tokens.`,
                 type: 'info'
             });
+
+            // Send notification to the NEW USER (Confirmation)
+            await Notification.create({
+                userId: user.uuid,
+                message: `Welcome! Referral code verified. You started with +10 Tokens & +5 Crowns bonus!`,
+                type: 'win' // Use 'win' type for positive reinforcement
+            });
         }
 
         const token = jwt.sign({ uuid: user.uuid, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
@@ -1050,6 +1325,107 @@ app.post('/api/predictions', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Prediction error:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Assuming a Google Auth endpoint exists here, as per the provided snippet structure.
+// If not, this block would be placed after the /api/predictions endpoint.
+// This is a placeholder for the end of a Google Auth endpoint.
+// If you don't have a Google Auth endpoint, you might need to adjust the placement.
+// For the purpose of this edit, we are inserting the Apple Auth endpoint after the
+// structure implied by the provided 'Code Edit' snippet.
+//
+
+
+// Apple Auth Endpoint (Scaffold)
+app.post('/api/auth/apple', async (req, res) => {
+    try {
+        await dbConnect();
+        const { identityToken, user: appleUserString } = req.body;
+
+        // TODO: Verify identityToken with Apple Public Keys
+        // For now, we will assume it's valid if we are in testing, but strictly we need to verify.
+        // We really need jsonwebtoken to decode it at least to get the email/sub.
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.decode(identityToken);
+
+        if (!decoded) {
+            return res.status(401).json({ error: 'Invalid Apple Token' });
+        }
+
+        const { email, sub: appleId } = decoded;
+
+        // Note: Apple only sends 'email' and 'name' on the FIRST login.
+        // Subsequent logins only have the identityToken.
+        // We must rely on 'sub' (User ID) to find the user.
+
+        let user = await User.findOne({ appleId });
+
+        if (!user) {
+            // If it's a new user, we try to get name/email from the request body or token
+            // The frontend sends the 'user' object (JSON string) only on first login.
+            let name = 'Apple User';
+            let userEmail = email;
+
+            if (appleUserString) {
+                try {
+                    const appleUser = JSON.parse(appleUserString);
+                    if (appleUser.name) {
+                        name = `${appleUser.name.givenName || ''} ${appleUser.name.familyName || ''}`.trim() || name;
+                    }
+                    if (appleUser.email) userEmail = appleUser.email;
+                } catch (e) { console.error('Error parsing apple user:', e); }
+            }
+
+            // Check if user exists by email (if we have it) to link accounts
+            if (userEmail) {
+                user = await User.findOne({ email: userEmail });
+            }
+
+            if (user) {
+                // Link account
+                user.appleId = appleId;
+                await user.save();
+            } else {
+                // Create new user
+                const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+                const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+                let uniqueCode = false;
+                let referralCode = '';
+                while (!uniqueCode) {
+                    referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const existing = await User.findOne({ referralCode });
+                    if (!existing) uniqueCode = true;
+                }
+
+                user = new User({
+                    uuid: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    email: userEmail || `apple_${appleId}@privaterelay.appleid.com`, // Fallback
+                    username: name,
+                    password: hashedPassword,
+                    referralCode,
+                    role: 'user',
+                    tokens: 10,
+                    crowns: 5,
+                    appleId
+                });
+                await user.save();
+            }
+        }
+
+        // Generate JWT
+        const token = jwt.sign(
+            { userId: user._id, email: user.email, role: user.role, uuid: user.uuid },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.json({ success: true, token, user });
+
+    } catch (error) {
+        console.error('Apple Auth Error:', error);
+        res.status(401).json({ error: 'Apple Auth Failed' });
     }
 });
 

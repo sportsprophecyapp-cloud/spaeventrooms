@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Modal, Alert } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Modal, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as WebBrowser from 'expo-web-browser';
@@ -46,6 +46,13 @@ const ChatScreen = () => {
   const [customAdBanner, setCustomAdBanner] = useState('');
   const [customAdLink, setCustomAdLink] = useState('');
   const [customAdEnabled, setCustomAdEnabled] = useState(false);
+
+  // Delete Room State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingRoom, setDeletingRoom] = useState(false);
+
+  // Admin UUID - hardcoded for now (replace with your actual UUID)
+  const ADMIN_UUID = 'YOUR_UUID_HERE'; // TODO: Replace with actual admin UUID
 
   // --- Lobby Logic ---
 
@@ -187,7 +194,7 @@ const ChatScreen = () => {
   };
 
   const handleJoinRequest = (room) => {
-    if (room.isPrivate) {
+    if (room.type === 'private') {
       setSelectedRoomToJoin(room);
       setJoinPassword('');
       setShowJoinModal(true);
@@ -238,6 +245,19 @@ const ChatScreen = () => {
 
   const handleSend = async () => {
     if (!newMessage.trim()) return;
+
+    // Guest Restriction
+    if (user?.isGuest) {
+      Alert.alert(
+        'Guest Access Restricted',
+        'Please create an account to chat and participate in the community.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Create Account', onPress: () => navigation.navigate('Register') } // Navigate to Register
+        ]
+      );
+      return;
+    }
 
     const text = newMessage;
     setNewMessage('');
@@ -333,6 +353,35 @@ const ChatScreen = () => {
     </TouchableOpacity>
   );
 
+  const handleReportMessage = (msg) => {
+    Alert.alert(
+      'Report Message',
+      'Do you want to report this message provided by users? This will draft an email to our support team.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Report',
+          style: 'destructive',
+          onPress: async () => {
+            const subject = 'Chat Report – Sports Prophecy';
+
+            const roomName = currentRoom ? currentRoom.name : 'Public Lobby';
+            const timestamp = new Date().toISOString();
+            const reportingUserId = user?.uuid || user?.uid || 'Unknown';
+
+            const body = `Reported Message:\n"${msg.message}"\n\nReported User ID:\n${msg.sender_id}\n\nReporting User ID:\n${reportingUserId}\n\nRoom:\n${roomName}\n\nTimestamp:\n${timestamp}`;
+
+            const url = `mailto:Contact@sportsprophecyapp.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+            const canOpen = await Linking.canOpenURL(url);
+            if (canOpen) Linking.openURL(url);
+            else Alert.alert('Error', 'Could not open mail client. Please email Contact@sportsprophecyapp.com');
+          }
+        }
+      ]
+    );
+  };
+
   const renderMessageItem = ({ item }) => {
     const isMe = item.sender_name === (user?.idName || user?.username);
 
@@ -351,7 +400,12 @@ const ChatScreen = () => {
     const roleBadge = getRoleBadge();
 
     return (
-      <View style={[styles.messageContainer, isMe ? styles.myMessageContainer : styles.theirMessageContainer]}>
+      <TouchableOpacity
+        onLongPress={() => !isMe && handleReportMessage(item)}
+        delayLongPress={500}
+        activeOpacity={0.8}
+        style={[styles.messageContainer, isMe ? styles.myMessageContainer : styles.theirMessageContainer]}
+      >
         <View style={styles.senderRow}>
           <Text style={[styles.senderName, isMe ? styles.mySenderName : styles.theirSenderName]}>
             {item.sender_name}
@@ -363,7 +417,7 @@ const ChatScreen = () => {
         <View style={[styles.bubble, isMe ? styles.myBubble : styles.theirBubble]}>
           <Text style={styles.messageText}>{item.message}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
