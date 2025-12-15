@@ -251,6 +251,16 @@ export const apiService = {
         }
     },
 
+    deleteAccount: async () => {
+        try {
+            const response = await api.delete('/user/delete');
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            throw error.response?.data || error;
+        }
+    },
+
     // --- League Methods ---
     createLeague: async (userId, name, entryFee) => {
         try {

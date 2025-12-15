@@ -8,12 +8,17 @@ import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
+import storage from '../utils/storage';
+
 const ChatScreen = () => {
   const { user } = useAuth();
 
   // View State: 'lobby' or 'chat'
   const [view, setView] = useState('lobby');
   const [currentRoom, setCurrentRoom] = useState(null); // null = General (if we treat General as a room, or handle separately)
+
+  // Blocked Users State
+  const [blockedUsers, setBlockedUsers] = useState([]);
 
   // Lobby State
   const [rooms, setRooms] = useState([]);
@@ -23,6 +28,21 @@ const ChatScreen = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [selectedRoomToJoin, setSelectedRoomToJoin] = useState(null);
+
+  // Load Blocked Users on Mount
+  useEffect(() => {
+    const loadBlockedUsers = async () => {
+      try {
+        const stored = await storage.getItem('blocked_users');
+        if (stored) {
+          setBlockedUsers(JSON.parse(stored));
+        }
+      } catch (e) {
+        console.error('Failed to load blocked users', e);
+      }
+    };
+    loadBlockedUsers();
+  }, []);
 
   // Create Room Form
   const [newRoomName, setNewRoomName] = useState('');
@@ -348,19 +368,46 @@ const ChatScreen = () => {
           size={20}
           color={item.type === 'private' ? COLORS.status.warning : COLORS.text.tertiary}
           style={{ marginLeft: 10 }}
-        />
       </View>
     </TouchableOpacity>
   );
 
-  const handleReportMessage = (msg) => {
+  const handleBlockUser = async (userId, userName) => {
     Alert.alert(
-      'Report Message',
-      'Do you want to report this message provided by users? This will draft an email to our support team.',
+      'Block User',
+      `Are you sure you want to block ${userName}? You will no longer see their messages.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Report',
+          text: 'Block',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const newBlocked = [...blockedUsers, userId];
+              setBlockedUsers(newBlocked);
+              await storage.setItem('blocked_users', JSON.stringify(newBlocked));
+              Alert.alert('Blocked', `${userName} has been blocked.`);
+            } catch (e) {
+              Alert.alert('Error', 'Failed to block user.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleReportMessage = (msg) => {
+    Alert.alert(
+      'Message Options',
+      'Choose an action for this message:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Block User',
+          onPress: () => handleBlockUser(msg.sender_id, msg.sender_name)
+        },
+        {
+          text: 'Report Message',
           style: 'destructive',
           onPress: async () => {
             const subject = 'Chat Report – Sports Prophecy';
@@ -621,7 +668,7 @@ const ChatScreen = () => {
       ) : (
         <FlatList
           ref={flatListRef}
-          data={messages}
+          data={messages.filter(m => !blockedUsers.includes(m.sender_id))}
           renderItem={renderMessageItem}
           keyExtractor={(item) => (item._id || item.id).toString()}
           contentContainerStyle={styles.listContent}

@@ -28,10 +28,12 @@ import AdminSponsorsScreen from './src/screens/AdminSponsorsScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
+import AgeVerificationScreen from './src/screens/AgeVerificationScreen';
+
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAgeVerified } = useAuth();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -76,7 +78,10 @@ const AppNavigator = () => {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
+      {/* Age Verification Check - Blocks everything else if not verified */}
+      {!isAgeVerified ? (
+        <Stack.Screen name="AgeVerification" component={AgeVerificationScreen} />
+      ) : user ? (
         <>
           <Stack.Screen name="Main" component={MainTabNavigator} />
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />

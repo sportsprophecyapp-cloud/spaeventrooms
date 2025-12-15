@@ -2151,10 +2151,51 @@ app.post('/api/user/notifications/settings', authenticateToken, async (req, res)
     try {
         await dbConnect();
         const { userId, enabled } = req.body;
-        await User.updateOne({ uuid: userId }, { notificationsEnabled: enabled });
-        res.json({ success: true, enabled });
+        // Verify user owns this account
+        if (req.user.uuid !== userId && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        await User.findOneAndUpdate({ uuid: userId }, { notificationsEnabled: enabled });
+        res.json({ success: true, notificationsEnabled: enabled });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Notification settings error:', error);
+        res.status(500).json({ error: 'Failed to update settings' });
+    }
+});
+
+// Delete Account Endpoint
+app.delete('/api/user/delete', authenticateToken, async (req, res) => {
+    try {
+        await dbConnect();
+        const userId = req.user.userId; // From JWT
+
+        // Find user first
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Delete associated data
+        await Promise.all([
+            // Delete user record
+            User.findByIdAndDelete(userId),
+            // Delete chat messages sent by user
+            Chat.deleteMany({ sender_id: user.uuid }),
+            // Delete predictions
+            Prediction.deleteMany({ userId: user.uuid }),
+            // Delete draw entries
+            DrawEntry.deleteMany({ userId: user.uuid }),
+            // Delete notifications
+            Notification.deleteMany({ userId: user.uuid })
+        ]);
+
+        console.log(`✅ User account deleted: ${user.email} (${user.uuid})`);
+        res.json({ success: true, message: 'Account permanently deleted' });
+
+    } catch (error) {
+        console.error('❌ Delete account error:', error);
+        res.status(500).json({ error: 'Failed to delete account' });
     }
 });
 

@@ -8,11 +8,24 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAgeVerified, setIsAgeVerified] = useState(false);
 
     useEffect(() => {
         loadUser();
+        loadAgeVerification();
         apiService.setUnauthorizedCallback(logout);
     }, []);
+
+    const loadAgeVerification = async () => {
+        try {
+            const verified = await storage.getItem('age_verified');
+            if (verified === 'true') {
+                setIsAgeVerified(true);
+            }
+        } catch (e) {
+            console.error('Failed to load age verification', e);
+        }
+    };
 
     const checkDailyReward = async (userId, isGuest = false) => {
         if (!userId || isGuest || userId === 'guest') return;
@@ -226,8 +239,17 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const verifyAge = async () => {
+        try {
+            await storage.setItem('age_verified', 'true');
+            setIsAgeVerified(true);
+        } catch (e) {
+            console.error('Failed to save age verification', e);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout, loginAsGuest, googleLogin, appleLogin, refreshUser, updateUser }}>
+        <AuthContext.Provider value={{ user, isLoading, isAgeVerified, verifyAge, login, register, logout, loginAsGuest, googleLogin, appleLogin, refreshUser, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

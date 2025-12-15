@@ -24,126 +24,104 @@ const PrivacyPolicyScreen = () => {
                     colors={COLORS.gradients.dark}
                     style={styles.card}
                 >
-                    <Text style={styles.lastUpdated}>Last Updated: December 6, 2025</Text>
+                    <Text style={styles.lastUpdated}>Effective Date: 12/15/2025</Text>
+
+                    <Text style={styles.paragraph}>
+                        Sports Prophecy (“we”, “our”, “us”) respects your privacy. This Privacy Policy explains what information we collect, how we use it, and how it is protected.
+                    </Text>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>1. Introduction</Text>
+                        <Text style={styles.sectionTitle}>1. Information We Collect</Text>
                         <Text style={styles.paragraph}>
-                            Sports Prophecy ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application.
+                            We collect information you provide directly, as well as some data automatically:
+                        </Text>
+                        <Text style={[styles.paragraph, { fontWeight: 'bold', marginTop: 8 }]}>User-provided information:</Text>
+                        <Text style={styles.bulletPoint}>• Name/username</Text>
+                        <Text style={styles.bulletPoint}>• Email address</Text>
+                        <Text style={styles.bulletPoint}>• Profile information (e.g., Apple/Google ID for authentication)</Text>
+
+                        <Text style={[styles.paragraph, { fontWeight: 'bold', marginTop: 8 }]}>User-generated content:</Text>
+                        <Text style={styles.bulletPoint}>• Chat messages</Text>
+                        <Text style={styles.bulletPoint}>• Predictions and leaderboard activity</Text>
+
+                        <Text style={[styles.paragraph, { fontWeight: 'bold', marginTop: 8 }]}>Automatically collected information for ads and analytics:</Text>
+                        <Text style={styles.bulletPoint}>• Device identifiers</Text>
+                        <Text style={styles.bulletPoint}>• App usage and interaction data</Text>
+
+                        <Text style={[styles.paragraph, { fontWeight: 'bold', marginTop: 8 }]}>Third-party services:</Text>
+                        <Text style={styles.paragraph}>
+                            We use third-party services for authentication, analytics, and advertising (e.g., Google Sign-In, Apple Sign-In, AdMob).
                         </Text>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>2. Information We Collect</Text>
+                        <Text style={styles.sectionTitle}>2. How We Use Your Information</Text>
                         <Text style={styles.paragraph}>
-                            We collect information that you provide directly to us:
+                            To provide the core functionality of Sports Prophecy: game predictions, leaderboard tracking, and digital rewards (Tokens/Crowns).
                         </Text>
-                        <Text style={styles.bulletPoint}>• Account information (username, email address, password)</Text>
-                        <Text style={styles.bulletPoint}>• Profile information and preferences</Text>
-                        <Text style={styles.bulletPoint}>• Predictions and game activity</Text>
-                        <Text style={styles.bulletPoint}>• Communications with us</Text>
-                        <Text style={styles.bulletPoint}>• Referral codes and social connections</Text>
-                    </View>
-
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>3. Automatically Collected Information</Text>
                         <Text style={styles.paragraph}>
-                            When you use the App, we automatically collect:
+                            To display sponsor banners and provide relevant advertising.
                         </Text>
-                        <Text style={styles.bulletPoint}>• Device information (type, operating system, unique identifiers)</Text>
-                        <Text style={styles.bulletPoint}>• Usage data (features used, time spent, interactions)</Text>
-                        <Text style={styles.bulletPoint}>• Log data (IP address, browser type, access times)</Text>
-                        <Text style={styles.bulletPoint}>• Analytics and performance data</Text>
-                    </View>
-
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>4. How We Use Your Information</Text>
                         <Text style={styles.paragraph}>
-                            We use the collected information to:
+                            To maintain the safety and integrity of the community: moderation of chat and user content.
                         </Text>
-                        <Text style={styles.bulletPoint}>• Provide and maintain the App</Text>
-                        <Text style={styles.bulletPoint}>• Process your predictions and award prizes</Text>
-                        <Text style={styles.bulletPoint}>• Send you notifications about your account and activities</Text>
-                        <Text style={styles.bulletPoint}>• Improve and personalize your experience</Text>
-                        <Text style={styles.bulletPoint}>• Detect and prevent fraud or abuse</Text>
-                        <Text style={styles.bulletPoint}>• Communicate with you about updates and promotions</Text>
-                        <Text style={styles.bulletPoint}>• Comply with legal obligations</Text>
-                    </View>
-
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>5. Information Sharing</Text>
                         <Text style={styles.paragraph}>
-                            We may share your information with:
-                        </Text>
-                        <Text style={styles.bulletPoint}>• Service providers who assist in operating the App</Text>
-                        <Text style={styles.bulletPoint}>• Sponsors for prize fulfillment (name and contact info only)</Text>
-                        <Text style={styles.bulletPoint}>• Law enforcement when required by law</Text>
-                        <Text style={styles.bulletPoint}>• Other users (only public profile information like username and stats)</Text>
-                        <Text style={styles.paragraph}>
-                            We do not sell your personal information to third parties.
+                            To analyze app usage and improve app performance.
                         </Text>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>6. Data Security</Text>
+                        <Text style={styles.sectionTitle}>3. Advertising & Sponsor Banners</Text>
                         <Text style={styles.paragraph}>
-                            We implement appropriate technical and organizational measures to protect your personal information. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.
+                            Sports Prophecy displays sponsored banners within the app.
+                        </Text>
+                        <Text style={styles.paragraph}>
+                            Third-party ad networks may collect non-personally identifiable information, such as device identifiers and usage data, to deliver relevant ads.
+                        </Text>
+                        <Text style={styles.paragraph}>
+                            We do not share personally identifiable information with advertisers.
                         </Text>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>7. Data Retention</Text>
+                        <Text style={styles.sectionTitle}>4. Data Handling & Security</Text>
                         <Text style={styles.paragraph}>
-                            We retain your personal information for as long as your account is active or as needed to provide services. You may request deletion of your account at any time, though we may retain certain information as required by law or for legitimate business purposes.
+                            All data transmitted between your device and our servers is encrypted in transit.
+                        </Text>
+                        <Text style={styles.paragraph}>
+                            Data is not shared with third parties except for the purposes stated above (ads, analytics, authentication).
                         </Text>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>8. Your Rights</Text>
+                        <Text style={styles.sectionTitle}>5. Data Deletion & Retention</Text>
                         <Text style={styles.paragraph}>
-                            You have the right to:
+                            You may request deletion of your account and personal data at any time by contacting support@sportsprophecyapp.com or using the in-app account deletion feature.
                         </Text>
-                        <Text style={styles.bulletPoint}>• Access your personal information</Text>
-                        <Text style={styles.bulletPoint}>• Correct inaccurate data</Text>
-                        <Text style={styles.bulletPoint}>• Request deletion of your data</Text>
-                        <Text style={styles.bulletPoint}>• Opt-out of marketing communications</Text>
-                        <Text style={styles.bulletPoint}>• Export your data</Text>
-                    </View>
-
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>9. Age Requirements</Text>
                         <Text style={styles.paragraph}>
-                            Participation in prize draws requires users to be at least 18 years old or the legal age of majority in their jurisdiction. We do not knowingly allow minors to participate in prize draws. Users must verify their age eligibility before entering any prize draws.
+                            We retain data only as necessary to provide services, comply with legal obligations, or resolve disputes.
                         </Text>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>10. Cookies and Tracking</Text>
+                        <Text style={styles.sectionTitle}>6. Children’s Privacy & Age Restrictions</Text>
                         <Text style={styles.paragraph}>
-                            We use cookies and similar tracking technologies to track activity on our App and store certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.
+                            Sports Prophecy is intended for users 13 years and older. Users under 13 are not permitted to use the app.
+                        </Text>
+                        <Text style={styles.paragraph}>
+                            Account creation requires Google Sign-In or Apple Sign-In, and users are prompted to confirm their birth year. Users under 13 are blocked from accessing the app.
+                        </Text>
+                        <Text style={styles.paragraph}>
+                            We do not knowingly collect personal data from children under 13. If we learn that a child under 13 has provided information, we will promptly delete the account and all associated data.
                         </Text>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>11. Third-Party Links</Text>
+                        <Text style={styles.sectionTitle}>7. Contact</Text>
                         <Text style={styles.paragraph}>
-                            Our App may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to read their privacy policies.
+                            For questions, concerns, or privacy inquiries, contact:
                         </Text>
-                    </View>
-
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>12. Changes to This Policy</Text>
-                        <Text style={styles.paragraph}>
-                            We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.
-                        </Text>
-                    </View>
-
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>13. Contact Us</Text>
-                        <Text style={styles.paragraph}>
-                            If you have questions about this Privacy Policy, please contact us at:
-                        </Text>
-                        <Text style={styles.contactText}>Email: sportsprophecyapp@gmail.com</Text>
+                        <Text style={styles.contactText}>Email: support@sportsprophecyapp.com</Text>
                     </View>
 
                     <View style={styles.acknowledgment}>

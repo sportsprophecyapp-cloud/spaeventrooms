@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sports Prophecy",
     "slug": "sportsprophecyapp",
-    "version": "2.9.1",
+    "version": "2.9.2",
     "scheme": "sportsprophecyapp",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -29,7 +29,7 @@
         "backgroundColor": "#0a1628"
       },
       "package": "com.sportsprophecy.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "edgeToEdgeEnabled": true
     },
     "web": {

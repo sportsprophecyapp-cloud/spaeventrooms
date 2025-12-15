@@ -10,7 +10,7 @@ import { BiometricService } from '../services/biometrics';
 
 const ProfileScreen = () => {
     const navigation = useNavigation();
-    const { user, refreshUser } = useAuth();
+    const { user, refreshUser, logout } = useAuth();
     const [predictions, setPredictions] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [notificationsEnabled, setNotificationsEnabled] = useState(user?.notificationsEnabled ?? true);
@@ -153,7 +153,38 @@ const ProfileScreen = () => {
         }
     };
 
-    const handleUpdateIdName = async () => {
+    const handleDeleteAccount = () => {
+        Alert.alert(
+            'Delete Account',
+            'Are you sure you want to permanently delete your account? This action cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            setLoading(true);
+                            await apiService.deleteAccount();
+                            Alert.alert('Account Deleted', 'Your account has been permanently deleted.');
+                            logout(); // Log out after deletion
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to delete account. Please try again.');
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleUpdateIdName = async (resetLogout = null) => {
+        // ... hook in logout if needed
+        // Re-paste original handleUpdateIdName logic here as we replaced it partially to insert handleDeleteAccount? 
+        // No, instruction says "Add handleDeleteAccount function", usually implies putting it alongside others.
+        // I am targeting lines 156-179 which is handleUpdateIdName. I should probably insert BEFORE or AFTER it, not replace it unless I include it.
+        // Let's include original logic.
+
         if (!newIdName || newIdName.length < 3) {
             Alert.alert('Invalid Name', 'ID Name must be at least 3 characters long.');
             return;
@@ -463,58 +494,71 @@ const ProfileScreen = () => {
                         </View>
                     </>
                 )}
-            </ScrollView>
+            </View>
 
-            {/* Edit ID Name Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={showEditModal}
-                onRequestClose={() => setShowEditModal(false)}
+            {/* Delete Account Button */}
+            <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={handleDeleteAccount}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Change ID Name</Text>
-                            <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                                <Ionicons name="close" size={24} color={COLORS.text.secondary} />
-                            </TouchableOpacity>
-                        </View>
+                <Text style={styles.deleteButtonText}>Delete Account</Text>
+            </TouchableOpacity>
+            <View style={{ height: 40 }} />
+        </>
+    )
+}
+            </ScrollView >
 
-                        <Text style={styles.modalDescription}>
-                            Choose a new unique ID Name. This will be displayed on the leaderboard and in chat.
-                        </Text>
+    {/* Edit ID Name Modal */ }
+    < Modal
+animationType = "slide"
+transparent = { true}
+visible = { showEditModal }
+onRequestClose = {() => setShowEditModal(false)}
+            >
+    <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Change ID Name</Text>
+                <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                    <Ionicons name="close" size={24} color={COLORS.text.secondary} />
+                </TouchableOpacity>
+            </View>
 
-                        <View style={styles.costBadge}>
-                            <Text style={styles.costText}>Cost: 20 Tokens</Text>
-                            <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
-                        </View>
+            <Text style={styles.modalDescription}>
+                Choose a new unique ID Name. This will be displayed on the leaderboard and in chat.
+            </Text>
 
-                        <TextInput
-                            style={styles.input}
-                            value={newIdName}
-                            onChangeText={setNewIdName}
-                            placeholder="Enter new ID Name"
-                            placeholderTextColor={COLORS.text.tertiary}
-                            autoCapitalize="none"
-                            maxLength={20}
-                        />
+            <View style={styles.costBadge}>
+                <Text style={styles.costText}>Cost: 20 Tokens</Text>
+                <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
+            </View>
 
-                        <TouchableOpacity
-                            style={[styles.saveButton, (updatingName || !newIdName || newIdName.length < 3) && styles.disabledButton]}
-                            onPress={handleUpdateIdName}
-                            disabled={updatingName || !newIdName || newIdName.length < 3}
-                        >
-                            {updatingName ? (
-                                <ActivityIndicator color="#fff" />
-                            ) : (
-                                <Text style={styles.saveButtonText}>Save Changes</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-        </SafeAreaView>
+            <TextInput
+                style={styles.input}
+                value={newIdName}
+                onChangeText={setNewIdName}
+                placeholder="Enter new ID Name"
+                placeholderTextColor={COLORS.text.tertiary}
+                autoCapitalize="none"
+                maxLength={20}
+            />
+
+            <TouchableOpacity
+                style={[styles.saveButton, (updatingName || !newIdName || newIdName.length < 3) && styles.disabledButton]}
+                onPress={handleUpdateIdName}
+                disabled={updatingName || !newIdName || newIdName.length < 3}
+            >
+                {updatingName ? (
+                    <ActivityIndicator color="#fff" />
+                ) : (
+                    <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
+            </TouchableOpacity>
+        </View>
+    </View>
+            </Modal >
+        </SafeAreaView >
     );
 };
 
@@ -806,6 +850,13 @@ const styles = StyleSheet.create({
         height: 40,
         backgroundColor: 'rgba(255, 255, 255, 0.3)',
     },
+    referralInfo: {
+        textAlign: 'center',
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.inverse,
+        fontStyle: 'italic',
+        opacity: 0.9,
+    },
     badgesSection: {
         marginBottom: SPACING.lg,
     },
@@ -815,43 +866,39 @@ const styles = StyleSheet.create({
         gap: SPACING.sm,
     },
     badgeItem: {
-        backgroundColor: 'rgba(56, 189, 248, 0.15)',
-        paddingHorizontal: SPACING.base,
-        paddingVertical: SPACING.sm,
-        borderRadius: BORDER_RADIUS.lg,
+        backgroundColor: COLORS.background.card,
+        paddingHorizontal: SPACING.md,
+        paddingVertical: SPACING.xs,
+        borderRadius: BORDER_RADIUS.full,
         borderWidth: 1,
-        borderColor: 'rgba(56, 189, 248, 0.3)',
+        borderColor: COLORS.border.primary,
     },
     badgeText: {
         color: COLORS.text.primary,
         fontSize: TYPOGRAPHY.sizes.sm,
         fontWeight: TYPOGRAPHY.weights.semibold,
     },
-    referralInfo: {
-        fontSize: TYPOGRAPHY.sizes.sm,
-        color: COLORS.text.inverse,
-        textAlign: 'center',
-        opacity: 0.9,
-        lineHeight: 20,
-    },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
+        alignItems: 'center',
         padding: SPACING.lg,
     },
     modalContent: {
+        width: '100%',
         backgroundColor: COLORS.background.card,
-        borderRadius: BORDER_RADIUS.lg,
+        borderRadius: BORDER_RADIUS.xl,
         padding: SPACING.xl,
         borderWidth: 1,
         borderColor: COLORS.border.secondary,
+        ...SHADOWS.card,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: SPACING.md,
+        marginBottom: SPACING.lg,
     },
     modalTitle: {
         fontSize: TYPOGRAPHY.sizes.xl,
@@ -859,23 +906,20 @@ const styles = StyleSheet.create({
         color: COLORS.text.primary,
     },
     modalDescription: {
-        fontSize: TYPOGRAPHY.sizes.sm,
+        fontSize: TYPOGRAPHY.sizes.base,
         color: COLORS.text.secondary,
         marginBottom: SPACING.lg,
-        lineHeight: 20,
+        lineHeight: 22,
     },
     costBadge: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: SPACING.xs,
-        backgroundColor: 'rgba(132, 204, 22, 0.1)',
-        paddingHorizontal: SPACING.md,
-        paddingVertical: SPACING.sm,
+        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+        padding: SPACING.sm,
         borderRadius: BORDER_RADIUS.md,
-        alignSelf: 'flex-start',
         marginBottom: SPACING.lg,
-        borderWidth: 1,
-        borderColor: 'rgba(132, 204, 22, 0.3)',
     },
     costText: {
         color: COLORS.accent.lime,
@@ -883,12 +927,13 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.sizes.sm,
     },
     input: {
-        backgroundColor: COLORS.background.primary,
+        backgroundColor: COLORS.background.input,
+        borderWidth: 1,
+        borderColor: COLORS.border.primary,
         borderRadius: BORDER_RADIUS.md,
         padding: SPACING.md,
         color: COLORS.text.primary,
-        borderWidth: 1,
-        borderColor: COLORS.border.secondary,
+        fontSize: TYPOGRAPHY.sizes.lg,
         marginBottom: SPACING.xl,
     },
     saveButton: {
@@ -901,39 +946,85 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     saveButtonText: {
-        color: '#000',
-        fontWeight: TYPOGRAPHY.weights.bold,
-        fontSize: TYPOGRAPHY.sizes.base,
-    },
-
-    errorContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: SPACING.xl,
-        marginTop: SPACING.xl,
-    },
-    errorText: {
-        color: COLORS.status.error,
-        fontSize: TYPOGRAPHY.sizes.md,
-        textAlign: 'center',
-        marginTop: SPACING.md,
-        marginBottom: SPACING.lg,
-    },
-    retryButton: {
-        backgroundColor: COLORS.accent.cyan,
-        paddingHorizontal: SPACING.xl,
-        paddingVertical: SPACING.md,
-        borderRadius: BORDER_RADIUS.md,
-    },
-    retryButtonText: {
         color: COLORS.text.inverse,
-        fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    // Admin Button (missing from prev snippet? checking context...)
+    adminButton: {
+        marginBottom: SPACING.lg,
+        borderRadius: BORDER_RADIUS.lg,
+        overflow: 'hidden',
+        ...SHADOWS.card,
+    },
+    adminButtonGradient: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: SPACING.md,
+        justifyContent: 'space-between',
+    },
+    adminButtonText: {
+        color: '#fff',
+        fontSize: TYPOGRAPHY.sizes.lg,
+        fontWeight: TYPOGRAPHY.weights.bold,
     },
     settingRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        backgroundColor: COLORS.background.card,
+        padding: SPACING.md,
+        borderRadius: BORDER_RADIUS.md,
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+        marginBottom: SPACING.sm,
+    },
+    settingLabel: {
+        color: COLORS.text.primary,
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+        marginBottom: 2,
+    },
+    settingSublabel: {
+        color: COLORS.text.tertiary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+    },
+    // New delete button
+    deleteButton: {
+        alignSelf: 'center',
+        paddingVertical: SPACING.md,
+        paddingHorizontal: SPACING.xl,
+        marginTop: SPACING.xl,
+        borderWidth: 1,
+        borderColor: COLORS.status.error,
+        borderRadius: BORDER_RADIUS.md,
+    },
+    deleteButtonText: {
+        color: COLORS.status.error,
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: TYPOGRAPHY.weights.bold,
+    },
+
+    // retry
+    errorContainer: {
+        alignItems: 'center',
+        padding: SPACING.xxxl,
+    },
+    errorText: {
+        color: COLORS.status.error,
+        marginTop: SPACING.md,
+        marginBottom: SPACING.lg,
+        textAlign: 'center',
+    },
+    retryButton: {
+        backgroundColor: COLORS.background.card,
+        paddingHorizontal: SPACING.xl,
+        paddingVertical: SPACING.sm,
+        borderRadius: BORDER_RADIUS.md,
+        borderWidth: 1,
+        borderColor: COLORS.border.primary,
+    },
+    retryButtonText: {
         marginBottom: SPACING.md,
         paddingHorizontal: SPACING.xs,
         marginTop: SPACING.sm,
