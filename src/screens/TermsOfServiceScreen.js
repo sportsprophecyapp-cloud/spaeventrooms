@@ -36,7 +36,7 @@ const TermsOfServiceScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>2. Description of Service</Text>
                         <Text style={styles.paragraph}>
-                            Sports Prophecy is a free-to-play sports prediction platform where users can make predictions on sporting events, earn virtual tokens and crowns, and compete for prizes sponsored by third parties. The App is provided for entertainment purposes only and does not involve real money gambling or wagering.
+                            Sports Prophecy is a skill-based sports prediction platform for entertainment purposes. No gambling, wagering, or cash payouts are offered. Users can make predictions on sporting events, earn virtual tokens and crowns, and compete for rewards sponsored by third parties.
                         </Text>
                     </View>
 

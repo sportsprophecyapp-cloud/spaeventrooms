@@ -188,9 +188,9 @@ const SportScreen = () => {
                         ) : (
                             <>
                                 <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
-                                <Text style={styles.emptyText}>No upcoming games found</Text>
+                                <Text style={styles.emptyText}>No games available</Text>
                                 <Text style={styles.emptySubtext}>
-                                    Check back later for new matches
+                                    New games are added daily.
                                 </Text>
                             </>
                         )}

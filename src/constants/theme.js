@@ -1,5 +1,5 @@
 // Professional Sports Prophecy Design System
-// Based on modern sports betting aesthetics (DraftKings, FanDuel style)
+// Based on modern sports analytics platforms
 
 export const COLORS = {
     // Primary Background Colors
@@ -143,8 +143,8 @@ export const SHADOWS = {
     cyan: {
         shadowColor: '#00d4ff',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.5,
-        shadowRadius: 8,
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
         elevation: 6,
     },
 };

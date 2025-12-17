@@ -780,7 +780,7 @@ async function fetchGameResults() {
             axios.get(`https://api.the-odds-api.com/v4/sports/${sport}/scores`, {
                 params: {
                     apiKey: apiKey,
-                    daysFrom: 3,
+                    daysFrom: 10,
                     dateFormat: 'iso'
                 },
                 timeout: 8000
@@ -871,6 +871,20 @@ async function gradePredictions() {
                     won = true;
                     tokensWon = 3;
                     crownsWon = 1;
+
+                    // Send Notification
+                    try {
+                        await Notification.create({
+                            userId: prediction.userId,
+                            message: `You made a correct prediction for ${event.homeTeam} vs ${event.awayTeam}!`,
+                            reward: `+${tokensWon} Tokens, +${crownsWon} Crowns`,
+
+                            type: 'win',
+                            timestamp: new Date()
+                        });
+                    } catch (err) {
+                        console.error('Failed to create win notification', err);
+                    }
                 }
 
                 await User.findOneAndUpdate(
@@ -947,6 +961,25 @@ const authenticateToken = (req, res, next) => {
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);
         req.user = user;
+        next();
+    });
+};
+
+const authenticateTokenOptional = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        req.user = null;
+        return next();
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            req.user = null;
+        } else {
+            req.user = user;
+        }
         next();
     });
 };
@@ -1433,7 +1466,23 @@ app.get('/api/predictions/:userId', async (req, res) => {
     try {
         await dbConnect();
         const { userId } = req.params;
-        const predictions = await Prediction.find({ userId });
+
+        // Lazy Update Logic: check/update results if user has pending predictions
+        const hasPending = await Prediction.exists({ userId, resolved: false });
+
+        if (hasPending) {
+            const now = Date.now();
+            // Check if we haven't updated results recently (throttle to 15 mins)
+            // Note: In serverless, global vars reset on cold start, which is actually good here (ensures fresh data)
+            if (!global.lastResultFetch || (now - global.lastResultFetch > 15 * 60 * 1000)) {
+                console.log(`⏳ Lazy update triggered for user ${userId}...`);
+                await fetchGameResults();
+                await gradePredictions();
+                global.lastResultFetch = Date.now();
+            }
+        }
+
+        const predictions = await Prediction.find({ userId }).sort({ timestamp: -1 });
         res.json(predictions);
     } catch (error) {
         console.error('Get predictions error:', error);
@@ -1503,15 +1552,82 @@ app.post('/api/daily-login-reward', authenticateToken, async (req, res) => {
 
         const now = new Date();
         const lastLogin = user.lastLoginReward ? new Date(user.lastLoginReward) : null;
-        const canClaim = !lastLogin || (now - lastLogin) > 24 * 60 * 60 * 1000;
+
+        // Helper to check if two dates are the same calendar day (UTC or Server Local time)
+        // Using simplified approach: check if Year, Month, Date match
+        const isSameDay = (d1, d2) => {
+            return d1.getFullYear() === d2.getFullYear() &&
+                d1.getMonth() === d2.getMonth() &&
+                d1.getDate() === d2.getDate();
+        };
+
+        const isYesterday = (d1, d2) => {
+            const yesterday = new Date(d1);
+            yesterday.setDate(yesterday.getDate() - 1);
+            return isSameDay(yesterday, d2);
+        };
+
+        // If never claimed, or last claim was NOT today
+        const canClaim = !lastLogin || !isSameDay(now, lastLogin);
 
         if (canClaim) {
-            user.tokens += 3;
+            // Calculate Streak
+            let streak = user.loginStreak || 0;
+            if (lastLogin && isYesterday(now, lastLogin)) {
+                streak += 1;
+            } else {
+                streak = 1; // Reset streak if missed a day (or first time)
+            }
+
+            // Determine Rewards
+            let tokensToAdd = 5; // Base daily tokens
+            let crownsToAdd = 1; // Base daily crowns
+            let isStreakBonus = false;
+            let message = 'Daily Reward Claimed!';
+
+            // Weekly Bonus (Every 7 days)
+            if (streak > 0 && streak % 7 === 0) {
+                tokensToAdd += 10;
+                crownsToAdd += 5;
+                isStreakBonus = true;
+                message = '🔥 7-Day Streak Bonus Awarded!';
+            }
+
+            // Apply Updates
+            user.tokens = (user.tokens || 0) + tokensToAdd;
+            user.crowns = (user.crowns || 0) + crownsToAdd;
+            user.loginStreak = streak;
             user.lastLoginReward = now;
+
             await user.save();
-            res.json({ canClaim: true, claimed: true, tokens: user.tokens });
+
+            res.json({
+                canClaim: true,
+                claimed: true,
+                balance: {
+                    tokens: user.tokens,
+                    crowns: user.crowns
+                },
+                reward: {
+                    tokens: tokensToAdd,
+                    crowns: crownsToAdd,
+                    streak: streak,
+                    isStreakBonus: isStreakBonus
+                },
+                message
+            });
         } else {
-            res.json({ canClaim: false, claimed: false });
+            // Already claimed today
+            res.json({
+                canClaim: false,
+                claimed: false,
+                message: 'Already claimed today. Come back tomorrow!',
+                balance: {
+                    tokens: user.tokens,
+                    crowns: user.crowns
+                },
+                streak: user.loginStreak || 0
+            });
         }
     } catch (error) {
         console.error('Daily login error:', error);
@@ -1519,51 +1635,166 @@ app.post('/api/daily-login-reward', authenticateToken, async (req, res) => {
     }
 });
 
-app.get('/api/leaderboard', async (req, res) => {
+app.get('/api/leaderboard', authenticateTokenOptional, async (req, res) => {
     try {
         await dbConnect();
+        const timeframe = req.query.timeframe || 'all';
+        const userId = req.user?.uuid; // From optional auth middleware
 
-        // Get all users sorted by correctPredictions and tokens
-        const users = await User.find({}).sort({ correctPredictions: -1, tokens: -1 });
+        // Configuration
+        const CONFIG = {
+            weekly: { min: 10, target: 30, days: 7 },
+            monthly: { min: 20, target: 60, days: 30 },
+            all: { min: 100, target: 300, days: null }
+        };
 
-        // Create a map to ensure unique usernames (keep the best entry per username)
-        const uniqueUsers = new Map();
+        const config = CONFIG[timeframe] || CONFIG.all;
 
-        for (const user of users) {
-            const username = user.idName || user.username;
+        // Date Filter
+        let matchStage = { resolved: true };
+        if (config.days) {
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - config.days);
+            matchStage.timestamp = { $gte: startDate };
+        }
 
-            // If we haven't seen this username, or this entry has better stats, keep it
-            if (!uniqueUsers.has(username)) {
-                uniqueUsers.set(username, user);
-            } else {
-                const existing = uniqueUsers.get(username);
-                // Keep the one with more correct predictions, or more tokens if tied
-                if (user.correctPredictions > existing.correctPredictions ||
-                    (user.correctPredictions === existing.correctPredictions && user.tokens > existing.tokens)) {
-                    uniqueUsers.set(username, user);
+        const getConfidence = (total, target) => {
+            if (total >= config.target) return 'High';
+            if (total >= config.target * 0.5) return 'Medium';
+            return 'Low';
+        };
+
+        // 1. Calculate Stats for ALL Users
+        // Note: In high-scale production, this should be a scheduled job or materialized view.
+        const pipeline = [
+            { $match: matchStage },
+            {
+                $group: {
+                    _id: "$userId",
+                    totalPredictions: { $sum: 1 },
+                    correctPredictions: {
+                        $sum: {
+                            $cond: [{ $or: [{ $eq: ["$result.won", true] }, { $eq: ["$won", true] }] }, 1, 0]
+                        }
+                    },
+                    exactPredictions: {
+                        $sum: {
+                            $cond: [{ $eq: ["$result.exactScore", true] }, 1, 0]
+                        }
+                    },
+                    lastActivity: { $max: "$timestamp" }
                 }
+            },
+            // Filter Eligibility
+            { $match: { totalPredictions: { $gte: config.min } } },
+            // Calculate Score
+            {
+                $addFields: {
+                    score: {
+                        $divide: ["$correctPredictions", { $max: ["$totalPredictions", config.target] }]
+                    },
+                    accuracy: {
+                        $divide: ["$correctPredictions", { $cond: [{ $eq: ["$totalPredictions", 0] }, 1, "$totalPredictions"] }]
+                    }
+                }
+            },
+            // Sort
+            { $sort: { score: -1, correctPredictions: -1, exactPredictions: -1, lastActivity: 1 } }
+        ];
+
+        const allRankings = await Prediction.aggregate(pipeline);
+
+        // Fetch User Details for Top 100 (Optimized Batch Fetch)
+        const top100Data = allRankings.slice(0, 100);
+        const userIds = top100Data.map(e => e._id);
+
+        const users = await User.find({ uuid: { $in: userIds } }).select('uuid username idName crowns');
+        const userMap = users.reduce((acc, user) => {
+            acc[user.uuid] = user;
+            return acc;
+        }, {});
+
+        const enrichedLeaderboard = top100Data.map((entry, i) => {
+            const user = userMap[entry._id];
+            // If user not found (deleted?), skip or show 'Unknown'
+            // We'll keep them in list to maintain rank integrity but show fallback
+            return {
+                id: entry._id,
+                username: user?.idName || user?.username || 'Unknown Player',
+                correctPredictions: entry.correctPredictions,
+                totalPredictions: entry.totalPredictions,
+                accuracy: entry.accuracy,
+                score: entry.score,
+                confidenceTier: getConfidence(entry.totalPredictions, config.target),
+                crowns: user?.crowns || 0,
+                rank: i + 1
+            };
+        });
+
+        // Get Current User Stats if logged in
+        let userRankData = null;
+        if (userId) {
+            const userIndex = allRankings.findIndex(r => r._id === userId);
+            if (userIndex !== -1) {
+                const entry = allRankings[userIndex];
+                const user = await User.findOne({ uuid: userId }).select('username idName crowns');
+                if (user) {
+                    userRankData = {
+                        id: userId,
+                        username: user.idName || user.username,
+                        correctPredictions: entry.correctPredictions,
+                        totalPredictions: entry.totalPredictions,
+                        accuracy: entry.accuracy,
+                        score: entry.score,
+                        confidenceTier: getConfidence(entry.totalPredictions, config.target),
+                        crowns: user.crowns,
+                        rank: userIndex + 1
+                    };
+                }
+            } else {
+                // User didn't qualify or has no data
+                // We need to fetch their raw stats even if not eligible for leaderboard
+                // to show them "You need X more predictions"
+                // Run a specific query for them
+                const userStats = await Prediction.aggregate([
+                    { $match: { ...matchStage, userId: userId } },
+                    {
+                        $group: {
+                            _id: "$userId",
+                            totalPredictions: { $sum: 1 },
+                            correctPredictions: {
+                                $sum: {
+                                    $cond: [{ $or: [{ $eq: ["$result.won", true] }, { $eq: ["$won", true] }] }, 1, 0]
+                                }
+                            }
+                        }
+                    }
+                ]);
+
+                const stats = userStats[0] || { totalPredictions: 0, correctPredictions: 0 };
+                const currentUser = await User.findOne({ uuid: userId }).select('username idName crowns');
+
+                userRankData = {
+                    id: userId,
+                    username: currentUser?.idName || currentUser?.username,
+                    correctPredictions: stats.correctPredictions,
+                    totalPredictions: stats.totalPredictions,
+                    accuracy: stats.totalPredictions > 0 ? stats.correctPredictions / stats.totalPredictions : 0,
+                    score: 0,
+                    crowns: currentUser?.crowns || 0,
+                    rank: null,
+                    notEligible: true,
+                    minNeeded: config.min
+                };
             }
         }
 
-        // Convert map to array and create leaderboard with ranks
-        const leaderboard = Array.from(uniqueUsers.values())
-            .sort((a, b) => {
-                if (b.correctPredictions !== a.correctPredictions) {
-                    return b.correctPredictions - a.correctPredictions;
-                }
-                return b.tokens - a.tokens;
-            })
-            .slice(0, 100) // Limit to top 100
-            .map((user, index) => ({
-                id: user.uuid, // Use uuid as unique ID for FlatList key
-                rank: index + 1,
-                username: user.idName || user.username,
-                tokens: user.tokens,
-                crowns: user.crowns,
-                correctPredictions: user.correctPredictions || 0
-            }));
+        return res.json({
+            leaderboard: enrichedLeaderboard,
+            userStats: userRankData,
+            config: { min: config.min, target: config.target }
+        });
 
-        res.json(leaderboard);
     } catch (error) {
         console.error('Leaderboard error:', error);
         res.status(500).json({ error: error.message });
@@ -2137,7 +2368,7 @@ app.post('/api/chat/rooms/join', async (req, res) => {
         if (!room) return res.status(404).json({ error: 'Room not found' });
 
         if (room.type === 'private' && room.password !== password) {
-            return res.status(401).json({ error: 'Incorrect password' });
+            return res.status(403).json({ error: 'Incorrect password' });
         }
 
         res.json({ success: true, room });

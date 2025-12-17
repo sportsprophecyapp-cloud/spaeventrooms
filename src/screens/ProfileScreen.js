@@ -19,6 +19,8 @@ const ProfileScreen = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'won', 'lost', 'pending'
+    const [sortOrder, setSortOrder] = useState('desc'); // 'desc' (newest), 'asc' (oldest)
 
     // ID Name Change State
     const [showEditModal, setShowEditModal] = useState(false);
@@ -50,7 +52,11 @@ const ProfileScreen = () => {
         try {
             setLoading(true);
             const userPredictions = await apiService.getUserPredictions(user.uuid);
-            setPredictions(userPredictions || []);
+            // Sort by timestamp descending to show newest first
+            const sortedPredictions = (userPredictions || []).sort((a, b) =>
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            setPredictions(sortedPredictions);
 
             // Fetch real notifications from backend
             let realNotifications = [];
@@ -153,29 +159,59 @@ const ProfileScreen = () => {
         }
     };
 
-    const handleDeleteAccount = () => {
-        Alert.alert(
-            'Delete Account',
-            'Are you sure you want to permanently delete your account? This action cannot be undone.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            setLoading(true);
-                            await apiService.deleteAccount();
-                            Alert.alert('Account Deleted', 'Your account has been permanently deleted.');
-                            logout(); // Log out after deletion
-                        } catch (error) {
-                            Alert.alert('Error', 'Failed to delete account. Please try again.');
-                            setLoading(false);
-                        }
+    const handleDeleteAccount = async () => {
+        if (Platform.OS === 'web') {
+            if (window.confirm('Are you sure you want to permanently delete your account?')) {
+                if (window.confirm('Final Warning\n\nThis action is irreversible. All your tokens, crowns, and history will be lost forever.\n\nAre you absolutely sure?')) {
+                    try {
+                        setLoading(true);
+                        await apiService.deleteAccount();
+                        window.alert('Account Deleted. Your account has been permanently deleted.');
+                        logout();
+                    } catch (error) {
+                        window.alert('Error: Failed to delete account. Please try again.');
+                        setLoading(false);
                     }
                 }
-            ]
-        );
+            }
+        } else {
+            Alert.alert(
+                'Delete Account',
+                'Are you sure you want to permanently delete your account?',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Continue',
+                        style: 'destructive',
+                        onPress: () => {
+                            // Second Confirmation
+                            Alert.alert(
+                                'Final Warning',
+                                'This action is irreversible. All your tokens, crowns, and history will be lost forever.\n\nAre you absolutely sure?',
+                                [
+                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                        text: 'Confirm Delete',
+                                        style: 'destructive',
+                                        onPress: async () => {
+                                            try {
+                                                setLoading(true);
+                                                await apiService.deleteAccount();
+                                                Alert.alert('Account Deleted', 'Your account has been permanently deleted.');
+                                                logout();
+                                            } catch (error) {
+                                                Alert.alert('Error', 'Failed to delete account. Please try again.');
+                                                setLoading(false);
+                                            }
+                                        }
+                                    }
+                                ]
+                            );
+                        }
+                    }
+                ]
+            );
+        }
     };
 
     const handleUpdateIdName = async (resetLogout = null) => {
@@ -210,8 +246,31 @@ const ProfileScreen = () => {
     };
 
     const totalPredictions = predictions.length;
-    const wonPredictions = predictions.filter(p => p.resolved && p.won).length;
+    // Fix: Backend stores result in 'result.won', not root 'won'
+    const wonPredictions = predictions.filter(p => p.resolved && (p.result?.won || p.won)).length;
     const winRate = totalPredictions > 0 ? Math.round((wonPredictions / totalPredictions) * 100) : 0;
+
+    const filteredPredictions = React.useMemo(() => {
+        let result = [...predictions];
+
+        // Filter
+        if (activeFilter === 'won') {
+            result = result.filter(p => p.resolved && (p.result?.won || p.won));
+        } else if (activeFilter === 'lost') {
+            result = result.filter(p => p.resolved && !(p.result?.won || p.won));
+        } else if (activeFilter === 'pending') {
+            result = result.filter(p => !p.resolved);
+        }
+
+        // Sort
+        result.sort((a, b) => {
+            const dateA = new Date(a.timestamp);
+            const dateB = new Date(b.timestamp);
+            return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+        });
+
+        return result;
+    }, [predictions, activeFilter, sortOrder]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -299,12 +358,12 @@ const ProfileScreen = () => {
                             <View style={styles.statBox}>
                                 <Ionicons name="checkmark-circle" size={24} color={COLORS.status.success} />
                                 <Text style={styles.statValue}>{user?.correctPredictions || 0}</Text>
-                                <Text style={styles.statLabel}>Wins</Text>
+                                <Text style={styles.statLabel}>Correct Picks</Text>
                             </View>
                             <View style={styles.statBox}>
                                 <Ionicons name="percent" size={24} color={COLORS.accent.cyan} />
                                 <Text style={styles.statValue}>{winRate}%</Text>
-                                <Text style={styles.statLabel}>Win Rate</Text>
+                                <Text style={styles.statLabel}>Accuracy</Text>
                             </View>
                         </View>
 
@@ -419,7 +478,7 @@ const ProfileScreen = () => {
                                 <View style={styles.emptyState}>
                                     <Ionicons name="notifications-off-outline" size={48} color={COLORS.text.tertiary} />
                                     <Text style={styles.emptyText}>No notifications yet</Text>
-                                    <Text style={styles.emptySubtext}>Win predictions to get notified!</Text>
+                                    <Text style={styles.emptySubtext}>Make correct predictions to get notified!</Text>
                                 </View>
                             ) : (
                                 notifications.map((notif) => (
@@ -447,18 +506,57 @@ const ProfileScreen = () => {
                         {/* Recent Predictions */}
                         <View style={styles.section}>
                             <View style={styles.sectionHeader}>
-                                <Ionicons name="list" size={20} color={COLORS.accent.cyan} />
-                                <Text style={styles.sectionTitle}>Recent Predictions</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+                                    <Ionicons name="list" size={20} color={COLORS.accent.cyan} />
+                                    <Text style={styles.sectionTitle}>Recent Predictions</Text>
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                                    style={{ padding: 4 }}
+                                >
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                        <Text style={{ color: COLORS.text.secondary, fontSize: 12 }}>
+                                            {sortOrder === 'desc' ? 'Newest' : 'Oldest'}
+                                        </Text>
+                                        <Ionicons name={sortOrder === 'desc' ? "arrow-down" : "arrow-up"} size={16} color={COLORS.accent.cyan} />
+                                    </View>
+                                </TouchableOpacity>
                             </View>
 
-                            {predictions.length === 0 ? (
+                            {/* Filters */}
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                style={{ marginBottom: 16 }}
+                                contentContainerStyle={{ gap: 8 }}
+                            >
+                                {['all', 'won', 'lost', 'pending'].map(filter => (
+                                    <TouchableOpacity
+                                        key={filter}
+                                        style={[
+                                            styles.filterChip,
+                                            activeFilter === filter && styles.activeFilterChip
+                                        ]}
+                                        onPress={() => setActiveFilter(filter)}
+                                    >
+                                        <Text style={[
+                                            styles.filterText,
+                                            activeFilter === filter && styles.activeFilterText
+                                        ]}>
+                                            {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+
+                            {filteredPredictions.length === 0 ? (
                                 <View style={styles.emptyState}>
                                     <Ionicons name="football-outline" size={48} color={COLORS.text.tertiary} />
-                                    <Text style={styles.emptyText}>No predictions yet</Text>
-                                    <Text style={styles.emptySubtext}>Start making predictions to see them here!</Text>
+                                    <Text style={styles.emptyText}>No predictions found</Text>
+                                    <Text style={styles.emptySubtext}>Try changing your filters</Text>
                                 </View>
                             ) : (
-                                predictions.slice(0, 5).map((pred) => (
+                                filteredPredictions.slice(0, 20).map((pred) => (
                                     <View key={pred.id} style={styles.predictionCard}>
                                         <View style={styles.predContent}>
                                             <Text style={styles.predTeam}>{pred.predictedWinner}</Text>
@@ -469,15 +567,15 @@ const ProfileScreen = () => {
                                         </View>
                                         <View style={styles.predStatus}>
                                             {pred.resolved ? (
-                                                pred.won ? (
+                                                (pred.result?.won || pred.won) ? (
                                                     <View style={styles.statusBadge}>
                                                         <Ionicons name="checkmark-circle" size={16} color={COLORS.status.success} />
-                                                        <Text style={[styles.statusText, { color: COLORS.status.success }]}>Won</Text>
+                                                        <Text style={[styles.statusText, { color: COLORS.status.success }]}>Correct</Text>
                                                     </View>
                                                 ) : (
                                                     <View style={styles.statusBadge}>
                                                         <Ionicons name="close-circle" size={16} color={COLORS.status.error} />
-                                                        <Text style={[styles.statusText, { color: COLORS.status.error }]}>Lost</Text>
+                                                        <Text style={[styles.statusText, { color: COLORS.status.error }]}>Incorrect</Text>
                                                     </View>
                                                 )
                                             ) : (
@@ -798,7 +896,26 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         borderRadius: BORDER_RADIUS.md,
         padding: SPACING.base,
-        marginBottom: SPACING.lg,
+    },
+    filterChip: {
+        paddingHorizontal: SPACING.md,
+        paddingVertical: 6,
+        borderRadius: BORDER_RADIUS.full,
+        backgroundColor: COLORS.background.card,
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+    },
+    activeFilterChip: {
+        backgroundColor: COLORS.accent.cyan,
+        borderColor: COLORS.accent.cyan,
+    },
+    filterText: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.secondary,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    activeFilterText: {
+        color: COLORS.text.inverse,
     },
     referralCode: {
         fontSize: TYPOGRAPHY.sizes.xxxl,

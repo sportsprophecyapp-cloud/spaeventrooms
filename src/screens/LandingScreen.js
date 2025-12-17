@@ -152,7 +152,7 @@ const LandingScreen = ({ navigation }) => {
                                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(0, 212, 255, 0.15)' }]}>
                                     <Ionicons name="trophy" size={32} color={COLORS.accent.cyan} />
                                 </View>
-                                <Text style={styles.featureTitle}>Win Sponsor Prizes</Text>
+                                <Text style={styles.featureTitle}>Get Sponsor Rewards</Text>
                                 <Text style={styles.featureDesc}>Daily, weekly & seasonal rewards</Text>
                             </View>
 
@@ -213,7 +213,7 @@ const LandingScreen = ({ navigation }) => {
                                 <Text style={styles.stepNumberText}>3</Text>
                             </View>
                             <View style={styles.stepContent}>
-                                <Text style={styles.stepTitle}>Win Prizes</Text>
+                                <Text style={styles.stepTitle}>Claim Rewards</Text>
                                 <Text style={styles.stepDesc}>Earn points and claim rewards</Text>
                             </View>
                         </View>

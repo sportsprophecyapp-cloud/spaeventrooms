@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAgeVerified, setIsAgeVerified] = useState(false);
+    const [dailyReward, setDailyReward] = useState(null);
 
     useEffect(() => {
         loadUser();
@@ -35,7 +36,9 @@ export const AuthProvider = ({ children }) => {
             console.log('Daily reward result:', result);
 
             if (result.claimed) {
-                Alert.alert('Daily Reward', result.message);
+                // Set daily reward state to trigger the modal
+                setDailyReward(result);
+
                 // Update user state with new balance
                 if (result.balance) {
                     setUser(prev => {
@@ -55,6 +58,10 @@ export const AuthProvider = ({ children }) => {
             console.error('Error checking daily reward:', error);
             // Don't block app loading if daily reward check fails
         }
+    };
+
+    const clearDailyReward = () => {
+        setDailyReward(null);
     };
 
     const loadUser = async () => {
@@ -249,7 +256,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, isAgeVerified, verifyAge, login, register, logout, loginAsGuest, googleLogin, appleLogin, refreshUser, updateUser }}>
+        <AuthContext.Provider value={{ user, isLoading, isAgeVerified, verifyAge, login, register, logout, loginAsGuest, googleLogin, appleLogin, refreshUser, updateUser, dailyReward, clearDailyReward }}>
             {children}
         </AuthContext.Provider>
     );

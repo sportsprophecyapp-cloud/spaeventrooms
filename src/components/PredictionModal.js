@@ -433,7 +433,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                                     <ActivityIndicator color={COLORS.text.inverse} />
                                 ) : success ? (
                                     <>
-                                        <Text style={styles.submitText}>SUBMITTED</Text>
+                                        <Text style={styles.submitText}>PREDICTION SAVED</Text>
                                         <Ionicons name="checkmark-circle" size={24} color={COLORS.text.inverse} />
                                     </>
                                 ) : (
@@ -446,6 +446,10 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                                 )}
                             </LinearGradient>
                         </TouchableOpacity>
+
+                        <Text style={{ textAlign: 'center', color: COLORS.text.tertiary, fontSize: 10, marginTop: 4 }}>
+                            Predictions are skill-based and free.
+                        </Text>
                     </View>
                 </View>
             </View>

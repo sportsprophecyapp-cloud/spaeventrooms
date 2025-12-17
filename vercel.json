@@ -5,19 +5,19 @@
     "rewrites": [
         {
             "source": "/privacy",
-            "destination": "https://sportsprophecy-backend-8iidk1vu8.vercel.app/privacy"
+            "destination": "https://api.sportsprophecyapp.com/privacy"
         },
         {
             "source": "/terms",
-            "destination": "https://sportsprophecy-backend-8iidk1vu8.vercel.app/terms"
+            "destination": "https://api.sportsprophecyapp.com/terms"
         },
         {
             "source": "/download",
-            "destination": "https://sportsprophecy-backend-8iidk1vu8.vercel.app/download"
+            "destination": "https://api.sportsprophecyapp.com/download"
         },
         {
             "source": "/api/:path*",
-            "destination": "https://sportsprophecy-backend-8iidk1vu8.vercel.app/api/:path*"
+            "destination": "https://api.sportsprophecyapp.com/api/:path*"
         },
         {
             "source": "/(.*)",

@@ -220,4 +220,4 @@ src/
 ---
 
 **Created:** 2025-11-28
-**Design Reference:** Professional sports betting platforms (DraftKings, FanDuel style)
+**Design Reference:** Modern sports analytics platforms

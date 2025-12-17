@@ -211,9 +211,9 @@ export const apiService = {
         }
     },
 
-    getLeaderboard: async () => {
+    getLeaderboard: async (timeframe = 'all') => {
         try {
-            const response = await api.get('/leaderboard');
+            const response = await api.get('/leaderboard', { params: { timeframe } });
             return response.data;
         } catch (error) {
             console.error('Error fetching leaderboard:', error);

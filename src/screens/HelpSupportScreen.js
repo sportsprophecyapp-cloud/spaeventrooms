@@ -13,7 +13,7 @@ const HelpSupportScreen = () => {
         {
             id: 1,
             question: "Is Sports Prophecy really free?",
-            answer: "Yes! Sports Prophecy is 100% free to play. No deposits, no gambling, no risk. You compete for prizes from our sponsors, not cash."
+            answer: "Yes! Sports Prophecy is 100% free to play. No deposits, no gambling, no risk. You compete for rewards from our sponsors, not cash."
         },
         {
             id: 2,
@@ -43,7 +43,7 @@ const HelpSupportScreen = () => {
         {
             id: 7,
             question: "What prizes can I win?",
-            answer: "You can win prizes from our sponsors! Check the Weekly Draw screen for current prize details. Remember, this is not gambling - all prizes are sponsor-provided, not cash."
+            answer: "You can earn rewards from our sponsors! Check the Weekly Draw screen for current reward details. Remember, this is not gambling - all rewards are sponsor-provided, not cash."
         },
         {
             id: 8,

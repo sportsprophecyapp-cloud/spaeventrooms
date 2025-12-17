@@ -4,14 +4,15 @@
 
 Sports Prophecy is a **100% free** React Native application that allows users to predict the outcomes of games across major sports leagues (NBA, NFL, NHL, MLB, EPL, MLS). Users compete for **tokens** and **crowns**, climb the leaderboard, and enter weekly prize draws sponsored by real brands.
 
-**Note:** This is a skill-based competition platform. No gambling. No cash prizes. No deposits.
+**App Store Description Disclaimer:**
+Sports Prophecy is a skill-based sports prediction platform for entertainment purposes. No gambling, wagering, or cash payouts are offered.
 
 ---
 
 ## 📱 Features
 
 ### 🎮 Core Gameplay
-- **Predict & Win**: Predict match winners to earn Tokens and Crowns.
+- **Predict & Earn**: Predict match winners to earn Tokens and Crowns.
 - **Score Bonus**: Predict exact scores to earn Crowns.
 - **Leagues**: comprehensive coverage of NBA, NFL, NHL, MLB, EPL, and MLS.
 - **Leaderboard**: Ranked by correct predictions to highlight true sports knowledge.

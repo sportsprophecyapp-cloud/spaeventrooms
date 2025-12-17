@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator, RefreshControl, Linking } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator, RefreshControl, Linking, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import GameCard from '../components/GameCard';
@@ -7,6 +7,7 @@ import SportCategoryTabs from '../components/SportCategoryTabs';
 import PredictionModal from '../components/PredictionModal';
 
 import SponsorBanner from '../components/SponsorBanner';
+import DailyRewardModal from '../components/DailyRewardModal';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
@@ -18,7 +19,7 @@ const HomeScreen = ({ navigation }) => {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedSport, setSelectedSport] = useState('all');
-    const { user } = useAuth();
+    const { user, dailyReward, clearDailyReward, logout } = useAuth();
 
     const fetchEvents = async () => {
         try {
@@ -58,6 +59,32 @@ const HomeScreen = ({ navigation }) => {
     const handleGamePress = (event) => {
         setSelectedEvent(event);
         setModalVisible(true);
+    };
+
+    const handleLogout = async () => {
+        // Web compatibility check
+        if (Platform.OS === 'web') {
+            const confirmed = window.confirm('Are you sure you want to log out?');
+            if (confirmed) {
+                await logout();
+            }
+        } else {
+            // Native Alert
+            Alert.alert(
+                'Logout',
+                'Are you sure you want to log out?',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Logout',
+                        style: 'destructive',
+                        onPress: async () => {
+                            await logout();
+                        }
+                    }
+                ]
+            );
+        }
     };
 
     // Filter events by selected sport
@@ -115,6 +142,14 @@ const HomeScreen = ({ navigation }) => {
                     >
                         <Ionicons name="notifications-outline" size={24} color={COLORS.text.primary} />
                         <View style={styles.notificationDot} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.iconButton}
+                        onPress={handleLogout}
+                        accessibilityLabel="Logout Button"
+                        testID="home-logout-button"
+                    >
+                        <Ionicons name="log-out-outline" size={24} color={COLORS.text.primary} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -265,6 +300,12 @@ const HomeScreen = ({ navigation }) => {
                 event={selectedEvent}
                 onPredictionSuccess={fetchEvents}
                 onLoadNextGame={getNextUnpredictedGame}
+            />
+
+            <DailyRewardModal
+                visible={!!dailyReward}
+                rewardData={dailyReward?.reward}
+                onClose={clearDailyReward}
             />
         </SafeAreaView>
     );

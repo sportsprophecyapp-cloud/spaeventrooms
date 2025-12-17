@@ -177,7 +177,7 @@ const HowToPlayScreen = () => {
                     >
                         <Text style={styles.bonusTitle}>100% Free to Play!</Text>
                         <Text style={styles.bonusDescription}>
-                            No deposits, no gambling, no risk. Win prizes from our sponsors by making accurate predictions. Login daily for bonus tokens and build your streak for crown rewards!
+                            No deposits, no gambling, no risk. Earn rewards from our sponsors by making accurate predictions. Login daily for bonus tokens and build your streak for crown rewards!
                         </Text>
                         <View style={styles.streakInfo}>
                             <Ionicons name="flame" size={20} color={COLORS.text.inverse} />

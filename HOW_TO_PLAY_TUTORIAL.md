@@ -14,7 +14,7 @@ This document outlines the complete user journey for the "How to Play" tutorial 
 - "Login" and "Sign Up" buttons
 - Brief view of the welcome message
 
-**Narration:** "Welcome to Sports Prophecy! Let's walk through how to play and win rewards."
+**Narration:** "Welcome to Sports Prophecy! Let's walk through how to play and earn rewards."
 
 ---
 
@@ -75,7 +75,7 @@ This document outlines the complete user journey for the "How to Play" tutorial 
 - Prediction modal opening
 - Modal header "Make Prediction"
 
-**Narration:** "Click 'Make Prediction' to place your bet on the outcome."
+**Narration:** "Click 'Make Prediction' to make your prediction on the outcome."
 
 ---
 
@@ -162,7 +162,7 @@ This document outlines the complete user journey for the "How to Play" tutorial 
 - Prize information
 - "ENTER DRAW" button (cyan)
 
-**Narration:** "The weekly draw costs 1 crown per entry. Win prizes from our sponsors - 100% free, no gambling!"
+**Narration:** "The weekly draw costs 1 crown per entry. Earn prizes from our sponsors - 100% free, no gambling!"
 
 ---
 
@@ -222,7 +222,7 @@ This document outlines the complete user journey for the "How to Play" tutorial 
 ### Economy System
 - **New users**: 50 tokens + 5 crowns
 - **Prediction cost**: 1 token
-- **Win rewards**: 3 tokens + 1 crown
+- **Correct prediction**: 3 tokens + 1 crown
 - **Exact score bonus**: +1 crown
 - **Daily login**: 3 tokens
 - **7-day streak**: 1 crown bonus
