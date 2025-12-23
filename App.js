@@ -25,15 +25,16 @@ import TermsOfServiceScreen from './src/screens/TermsOfServiceScreen';
 import PrivacyPolicyScreen from './src/screens/PrivacyPolicyScreen';
 import AnnouncementsScreen from './src/screens/AnnouncementsScreen';
 import AdminSponsorsScreen from './src/screens/AdminSponsorsScreen';
+import PredictionHistoryScreen from './src/screens/PredictionHistoryScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
-import AgeVerificationScreen from './src/screens/AgeVerificationScreen';
+
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
-  const { user, isLoading, isAgeVerified } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -43,7 +44,7 @@ const AppNavigator = () => {
       const route = navigation.getCurrentRoute();
       const routeName = route?.name;
 
-      if (!routeName || ['Login', 'Register', 'Landing', 'HowToPlay'].includes(routeName)) {
+      if (!routeName || ['Login', 'Register', 'Landing'].includes(routeName)) {
         navigation.reset({
           index: 0,
           routes: [{ name: 'Main' }],
@@ -78,10 +79,7 @@ const AppNavigator = () => {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* Age Verification Check - Blocks everything else if not verified */}
-      {!isAgeVerified ? (
-        <Stack.Screen name="AgeVerification" component={AgeVerificationScreen} />
-      ) : user ? (
+      {user ? (
         <>
           <Stack.Screen name="Main" component={MainTabNavigator} />
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
@@ -96,6 +94,7 @@ const AppNavigator = () => {
           <Stack.Screen name="League" component={LeagueScreen} />
           <Stack.Screen name="Announcements" component={AnnouncementsScreen} />
           <Stack.Screen name="AdminSponsors" component={AdminSponsorsScreen} />
+          <Stack.Screen name="PredictionHistory" component={PredictionHistoryScreen} />
           <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
           {/* Allow guests to access Register/Login to upgrade/switch account */}
@@ -123,7 +122,11 @@ export default function App() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <AuthProvider>
-          <NavigationContainer>
+          <NavigationContainer
+            documentTitle={{
+              formatter: (options, route) => options?.title ? `${options.title} | Sports Prophecy` : 'Sports Prophecy'
+            }}
+          >
             <AppNavigator />
           </NavigationContainer>
         </AuthProvider>

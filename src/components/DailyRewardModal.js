@@ -85,10 +85,50 @@ const DailyRewardModal = ({ visible, onClose, rewardData }) => {
 
                         {/* Streak Info */}
                         {streak > 0 && (
-                            <View style={styles.streakContainer}>
-                                <Ionicons name="flame" size={20} color={COLORS.text.inverse} />
-                                <Text style={styles.streakText}>
-                                    {streak} Day Streak
+                            <View style={styles.streakInfoContainer}>
+                                <View style={styles.streakCounterRow}>
+                                    <View style={styles.streakBadge}>
+                                        <Ionicons name="flame" size={20} color={COLORS.text.inverse} />
+                                        <Text style={styles.streakText}>
+                                            {streak} Day Streak
+                                        </Text>
+                                    </View>
+                                    <View style={styles.weeklyProgressBadge}>
+                                        <Text style={styles.weeklyProgressText}>
+                                            Day {((streak - 1) % 7) + 1}/7
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                {/* Progress Dots */}
+                                <View style={styles.dotsContainer}>
+                                    {[1, 2, 3, 4, 5, 6, 7].map((dot) => {
+                                        const currentDay = ((streak - 1) % 7) + 1;
+                                        const isCompleted = dot <= currentDay;
+                                        const isToday = dot === currentDay;
+
+                                        return (
+                                            <View
+                                                key={dot}
+                                                style={[
+                                                    styles.dot,
+                                                    isCompleted && styles.completedDot,
+                                                    isToday && styles.todayDot
+                                                ]}
+                                            >
+                                                {isToday ? (
+                                                    <Ionicons name="star" size={10} color={COLORS.text.inverse} />
+                                                ) : isCompleted ? (
+                                                    <Ionicons name="checkmark" size={10} color={COLORS.text.inverse} />
+                                                ) : null}
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                                <Text style={styles.weeklyHint}>
+                                    {((streak - 1) % 7) + 1 === 7
+                                        ? "Weekly Bonus Claimed! 🔥"
+                                        : `${7 - (((streak - 1) % 7) + 1)} days until your next Weekly Bonus!`}
                                 </Text>
                             </View>
                         )}
@@ -196,20 +236,77 @@ const styles = StyleSheet.create({
         marginTop: SPACING.xs,
         opacity: 0.9,
     },
-    streakContainer: {
+    streakInfoContainer: {
+        width: '100%',
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        padding: SPACING.lg,
+        borderRadius: BORDER_RADIUS.lg,
+        marginBottom: SPACING.xl,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    streakCounterRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: SPACING.md,
+    },
+    streakBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: SPACING.sm,
+        gap: SPACING.xs,
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        paddingHorizontal: SPACING.lg,
-        paddingVertical: SPACING.sm,
+        paddingHorizontal: SPACING.md,
+        paddingVertical: SPACING.xs,
         borderRadius: BORDER_RADIUS.full,
-        marginBottom: SPACING.lg,
+    },
+    weeklyProgressBadge: {
+        backgroundColor: COLORS.accent.lime,
+        paddingHorizontal: SPACING.md,
+        paddingVertical: 4,
+        borderRadius: BORDER_RADIUS.full,
+    },
+    weeklyProgressText: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        fontWeight: TYPOGRAPHY.weights.black,
+        color: COLORS.text.inverse,
+    },
+    dotsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: SPACING.md,
+        paddingHorizontal: SPACING.xs,
+    },
+    dot: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+    },
+    completedDot: {
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        borderColor: COLORS.text.inverse,
+    },
+    todayDot: {
+        backgroundColor: COLORS.accent.cyan,
+        borderColor: COLORS.text.inverse,
+        transform: [{ scale: 1.1 }],
     },
     streakText: {
-        fontSize: TYPOGRAPHY.sizes.base,
+        fontSize: TYPOGRAPHY.sizes.sm,
         fontWeight: TYPOGRAPHY.weights.bold,
         color: COLORS.text.inverse,
+    },
+    weeklyHint: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.text.inverse,
+        textAlign: 'center',
+        opacity: 0.9,
+        fontWeight: TYPOGRAPHY.weights.bold,
     },
     claimButton: {
         width: '100%',

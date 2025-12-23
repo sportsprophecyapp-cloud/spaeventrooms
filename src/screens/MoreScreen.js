@@ -4,13 +4,11 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import BackgroundWrapper from '../components/BackgroundWrapper';
+import UserAvatar from '../components/UserAvatar';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 const MoreScreen = ({ navigation }) => {
     const { user, logout } = useAuth();
-
-    console.log('DEBUG: MoreScreen user role:', user?.role);
-    console.log('DEBUG: MoreScreen user email:', user?.email);
 
     const handleLogout = () => {
         if (Platform.OS === 'web') {
@@ -36,6 +34,9 @@ const MoreScreen = ({ navigation }) => {
         { icon: 'settings-outline', label: 'Settings', badge: null },
         { icon: 'help-circle-outline', label: 'Help & Support', badge: null },
         { icon: 'megaphone-outline', label: 'Advertise with Us', badge: 'Beta' },
+        { icon: 'document-text-outline', label: 'Terms of Service', badge: null },
+        { icon: 'lock-closed-outline', label: 'Privacy Policy', badge: null },
+        { icon: 'trash-outline', label: 'Account & Data Deletion', badge: null },
     ];
 
     return (
@@ -54,10 +55,18 @@ const MoreScreen = ({ navigation }) => {
                             style={styles.profileCardGradient}
                         >
                             <View style={styles.avatarContainer}>
-                                <Text style={styles.avatarText}>{user?.username?.charAt(0).toUpperCase() || 'U'}</Text>
+                                <UserAvatar
+                                    size={64}
+                                    profilePicture={user?.profilePicture}
+                                    selectedBadge={user?.selectedBadge}
+                                    fallbackName={user?.username}
+                                />
                             </View>
                             <View style={styles.profileInfo}>
                                 <Text style={styles.username}>{user?.username || 'Guest'}</Text>
+                                {user?.idName && (
+                                    <Text style={styles.idName}>@{user.idName}</Text>
+                                )}
                                 <Text style={styles.email}>{user?.email || 'Sign in to sync'}</Text>
                                 <Text style={styles.viewProfileText}>View Profile & Settings</Text>
                             </View>
@@ -99,6 +108,10 @@ const MoreScreen = ({ navigation }) => {
                                         navigation.navigate('HelpSupport');
                                     } else if (item.label === 'Advertise with Us') {
                                         navigation.navigate('Sponsor');
+                                    } else if (item.label === 'Terms of Service') {
+                                        navigation.navigate('TermsOfService');
+                                    } else if (item.label === 'Privacy Policy' || item.label === 'Account & Data Deletion') {
+                                        navigation.navigate('PrivacyPolicy');
                                     }
                                 }}
                                 accessibilityLabel={`Menu: ${item.label}`}
@@ -189,12 +202,7 @@ const styles = StyleSheet.create({
     avatarContainer: {
         width: 64,
         height: 64,
-        borderRadius: 32,
-        backgroundColor: COLORS.accent.gold,
-        alignItems: 'center',
-        justifyContent: 'center',
         marginRight: SPACING.base,
-        ...SHADOWS.md,
     },
     avatarText: {
         fontSize: TYPOGRAPHY.sizes.xxl,
@@ -210,8 +218,14 @@ const styles = StyleSheet.create({
         color: COLORS.text.primary,
         marginBottom: SPACING.xs,
     },
-    email: {
+    idName: {
         fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.accent.gold,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        marginBottom: 2,
+    },
+    email: {
+        fontSize: TYPOGRAPHY.sizes.xs,
         color: COLORS.text.secondary,
         marginBottom: SPACING.xs,
     },

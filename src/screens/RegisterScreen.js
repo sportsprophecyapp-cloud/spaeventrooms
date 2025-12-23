@@ -17,6 +17,9 @@ const RegisterScreen = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [referralCode, setReferralCode] = useState('');
+    const [birthYear, setBirthYear] = useState('');
+    const [tosAccepted, setTosAccepted] = useState(false);
+    const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { register, user } = useAuth();
@@ -38,9 +41,39 @@ const RegisterScreen = ({ navigation }) => {
             return;
         }
 
+        // Validate birth year
+        if (!birthYear || birthYear.length !== 4) {
+            setError('Please enter your birth year (4 digits)');
+            return;
+        }
+
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - parseInt(birthYear);
+
+        if (age < 13) {
+            setError('You must be at least 13 years old to use Sports Prophecy');
+            return;
+        }
+
+        if (age > 120 || parseInt(birthYear) > currentYear) {
+            setError('Please enter a valid birth year');
+            return;
+        }
+
+        // Validate TOS and Privacy Policy
+        if (!tosAccepted) {
+            setError('You must accept the Terms of Service');
+            return;
+        }
+
+        if (!privacyPolicyAccepted) {
+            setError('You must accept the Privacy Policy');
+            return;
+        }
+
         setLoading(true);
         try {
-            const success = await register(email, password, username, referralCode, rememberMe);
+            const success = await register(email, password, username, referralCode, birthYear, tosAccepted, privacyPolicyAccepted, rememberMe);
             if (success) {
                 // Force navigation to Main with a slight delay
                 // Check for biometric support
@@ -225,20 +258,79 @@ const RegisterScreen = ({ navigation }) => {
                                 </View>
                             </View>
 
-                            {/* Remember Me */}
+                            {/* Birth Year */}
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Birth Year</Text>
+                                <View style={[styles.inputWrapper, error && styles.inputError]}>
+                                    <Ionicons name="calendar-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="YYYY (e.g., 1990)"
+                                        placeholderTextColor={COLORS.text.muted}
+                                        value={birthYear}
+                                        onChangeText={(text) => { setBirthYear(text); clearError(); }}
+                                        keyboardType="numeric"
+                                        maxLength={4}
+                                        accessibilityLabel="Birth Year Input"
+                                        testID="register-birth-year-input"
+                                    />
+                                </View>
+                                <Text style={styles.helperText}>You must be 13+ to use Sports Prophecy</Text>
+                            </View>
+
+                            {/* Terms of Service Checkbox */}
                             <TouchableOpacity
-                                style={styles.rememberMeContainer}
-                                onPress={() => setRememberMe(!rememberMe)}
-                                accessibilityLabel="Remember Me Checkbox"
-                                testID="register-remember-me"
+                                style={styles.checkboxContainer}
+                                onPress={() => setTosAccepted(!tosAccepted)}
+                                accessibilityLabel="Terms of Service Checkbox"
+                                testID="register-tos-checkbox"
                             >
-                                <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
-                                    {rememberMe && (
+                                <View style={[styles.checkbox, tosAccepted && styles.checkboxChecked]}>
+                                    {tosAccepted && (
                                         <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
                                     )}
                                 </View>
-                                <Text style={styles.rememberMeText}>Remember me on this device</Text>
+                                <Text style={styles.checkboxText}>
+                                    I accept the{' '}
+                                    <Text
+                                        style={styles.termsLink}
+                                        onPress={(e) => {
+                                            e.stopPropagation();
+                                            navigation.navigate('TermsOfService');
+                                        }}
+                                    >
+                                        Terms of Service
+                                    </Text>
+                                </Text>
                             </TouchableOpacity>
+
+                            {/* Privacy Policy Checkbox */}
+                            <TouchableOpacity
+                                style={styles.checkboxContainer}
+                                onPress={() => setPrivacyPolicyAccepted(!privacyPolicyAccepted)}
+                                accessibilityLabel="Privacy Policy Checkbox"
+                                testID="register-privacy-checkbox"
+                            >
+                                <View style={[styles.checkbox, privacyPolicyAccepted && styles.checkboxChecked]}>
+                                    {privacyPolicyAccepted && (
+                                        <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
+                                    )}
+                                </View>
+                                <Text style={styles.checkboxText}>
+                                    I accept the{' '}
+                                    <Text
+                                        style={styles.termsLink}
+                                        onPress={(e) => {
+                                            e.stopPropagation();
+                                            navigation.navigate('PrivacyPolicy');
+                                        }}
+                                    >
+                                        Privacy Policy
+                                    </Text>
+                                </Text>
+                            </TouchableOpacity>
+
+
 
                             {/* Register Button */}
                             <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading} accessibilityLabel="Create Account Button" testID="register-submit-button">
@@ -259,23 +351,7 @@ const RegisterScreen = ({ navigation }) => {
                                 </LinearGradient>
                             </TouchableOpacity>
 
-                            {/* Terms */}
-                            <Text style={styles.termsText}>
-                                By signing up, you agree to our{' '}
-                                <Text
-                                    style={styles.termsLink}
-                                    onPress={() => navigation.navigate('TermsOfService')}
-                                >
-                                    Terms of Service
-                                </Text>
-                                {' '}and{' '}
-                                <Text
-                                    style={styles.termsLink}
-                                    onPress={() => navigation.navigate('PrivacyPolicy')}
-                                >
-                                    Privacy Policy
-                                </Text>
-                            </Text>
+
 
                             <GoogleSignInButton />
                             <AppleSignInButton />
@@ -392,6 +468,22 @@ const styles = StyleSheet.create({
     rememberMeText: {
         color: COLORS.text.secondary,
         fontSize: TYPOGRAPHY.sizes.sm,
+    },
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.md,
+    },
+    checkboxText: {
+        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        flex: 1,
+    },
+    helperText: {
+        color: COLORS.text.tertiary,
+        fontSize: TYPOGRAPHY.sizes.xs,
+        marginTop: SPACING.xs,
+        marginLeft: SPACING.xs,
     },
     button: {
         height: 56,

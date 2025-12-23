@@ -6,6 +6,8 @@ import SponsorBanner from '../components/SponsorBanner';
 import { apiService } from '../services/api';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+import TooltipIconButton from '../components/TooltipIconButton';
+import UserAvatar from '../components/UserAvatar';
 
 const LeaderboardScreen = ({ navigation }) => {
     const { user } = useAuth();
@@ -101,17 +103,34 @@ const LeaderboardScreen = ({ navigation }) => {
         </View>
     );
 
-    const renderHeader = () => (
-        <View style={styles.listHeader}>
-            <View style={styles.infoRow}>
-                <Text style={styles.listTitle}>Top Predictors</Text>
-                <TouchableOpacity onPress={() => setShowInfo(true)} style={styles.infoButton}>
-                    <Ionicons name="information-circle-outline" size={20} color={COLORS.text.secondary} />
-                </TouchableOpacity>
+    const renderHeader = () => {
+        // Dynamic Requirement Text
+        let reqText = "Need 100 predictions to rank";
+        if (timeframe === 'weekly') reqText = "Need 5 predictions this week to rank";
+        if (timeframe === 'monthly') reqText = "Need 20 predictions this month to rank";
+
+        return (
+            <View style={styles.listHeader}>
+                <View style={styles.infoRow}>
+                    <Text style={styles.listTitle}>Top Predictors</Text>
+                    <TooltipIconButton
+                        iconName="information-circle-outline"
+                        size={20}
+                        color={COLORS.text.secondary}
+                        onPress={() => setShowInfo(true)}
+                        tooltip="Ranking Info"
+                        style={styles.infoButton}
+                    />
+                </View>
+                {/* Persistent Requirement Banner */}
+                <View style={styles.requirementBanner}>
+                    <Ionicons name="school-outline" size={14} color={COLORS.accent.cyan} />
+                    <Text style={styles.requirementText}>{reqText}</Text>
+                </View>
+                <SponsorBanner style={styles.sponsorBanner} />
             </View>
-            <SponsorBanner style={styles.sponsorBanner} />
-        </View>
-    );
+        );
+    };
 
     const renderItem = ({ item }) => {
         const isTopThree = item.rank <= 3;
@@ -147,6 +166,15 @@ const LeaderboardScreen = ({ navigation }) => {
                     ) : (
                         <Text style={[styles.rankText, isMe && styles.currentUserText]}>{item.rank}</Text>
                     )}
+                </View>
+
+                <View style={[styles.avatarContainer, { marginRight: 10 }]}>
+                    <UserAvatar
+                        size={32}
+                        profilePicture={item.avatar}
+                        selectedBadge={item.selectedBadge}
+                        fallbackName={item.username}
+                    />
                 </View>
 
                 <View style={styles.userContainer}>
@@ -196,9 +224,14 @@ const LeaderboardScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
-                </TouchableOpacity>
+                <TooltipIconButton
+                    iconName="arrow-back"
+                    size={24}
+                    color={COLORS.text.primary}
+                    onPress={() => navigation.goBack()}
+                    tooltip="Go Back"
+                    style={styles.backButton}
+                />
                 <Text style={styles.headerTitle}>Leaderboard</Text>
                 <View style={{ width: 24 }} />
             </View>
@@ -242,6 +275,13 @@ const LeaderboardScreen = ({ navigation }) => {
                         <View style={styles.rankContainer}>
                             <Text style={styles.rankText}>{userStats.rank || '-'}</Text>
                         </View>
+                        <UserAvatar
+                            size={32}
+                            profilePicture={user?.profilePicture}
+                            selectedBadge={user?.selectedBadge}
+                            fallbackName={user?.idName || user?.username}
+                            style={{ marginLeft: 10 }}
+                        />
                         <View style={styles.userContainer}>
                             <Text style={styles.username}>You</Text>
                             {userStats.notEligible ? (
@@ -612,6 +652,22 @@ const styles = StyleSheet.create({
         color: COLORS.text.inverse,
         fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.base,
+    },
+    requirementBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: 'rgba(6, 182, 212, 0.1)', // Light Cyan
+        padding: SPACING.sm,
+        borderRadius: BORDER_RADIUS.sm,
+        marginBottom: SPACING.md,
+        borderWidth: 1,
+        borderColor: 'rgba(6, 182, 212, 0.2)',
+    },
+    requirementText: {
+        color: COLORS.accent.cyan,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.medium,
     }
 });
 

@@ -12,10 +12,23 @@ const HowToPlayScreen = () => {
     const [isLoading, setIsLoading] = React.useState(false);
 
     const handleStartPlaying = async () => {
+        // If already logged in, just go to Main
+        if (user) {
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Main' }],
+            });
+            return;
+        }
+
         setIsLoading(true);
         try {
             await loginAsGuest();
-            // Navigation to Main screen will happen automatically via App.js useEffect
+            // Explicit navigation since we removed auto-redirect in App.js
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Main' }],
+            });
         } catch (error) {
             console.error('Failed to start playing:', error);
         } finally {
@@ -211,6 +224,12 @@ const HowToPlayScreen = () => {
                         <Ionicons name="bulb" size={20} color={COLORS.accent.cyan} />
                         <Text style={styles.tipText}>
                             Check the leaderboard to see how you rank against other players!
+                        </Text>
+                    </View>
+                    <View style={styles.tipCard}>
+                        <Ionicons name="chatbubbles" size={20} color="#FFD700" />
+                        <Text style={styles.tipText}>
+                            Respect others in chat! Public rooms are moderated to ensure a fun and safe community.
                         </Text>
                     </View>
                 </View>

@@ -92,11 +92,21 @@ const WeeklyDrawScreen = ({ navigation }) => {
         try {
             const data = await apiService.getWeeklyDrawStats();
             setStats(data);
-        } catch (e) { console.log(e); }
+        } catch (e) { /* Silent fail */ }
     };
 
     const handleEnterDraw = async (drawId, cost) => {
-        console.log('handleEnterDraw called!', { drawId, cost });
+        if (user?.isGuest) {
+            Alert.alert(
+                'Join the Club!',
+                'Please create an account to participate in prize draws and join our community.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Create Account', onPress: () => navigation.navigate('Register') }
+                ]
+            );
+            return;
+        }
 
         if (pendingConfirmation !== drawId) {
             setPendingConfirmation(drawId);
@@ -130,6 +140,14 @@ const WeeklyDrawScreen = ({ navigation }) => {
         }
     };
 
+    const handleFreeEntry = () => {
+        Alert.alert(
+            'Free Entry Request',
+            'To enter without using crowns, please email "Free Entry Request" to support@sportsprophecy.com with your username. Limit 1 per week.\n\nNO PURCHASE NECESSARY.',
+            [{ text: 'OK' }]
+        );
+    };
+
     const formattedDate = (days) => {
         const date = new Date();
         date.setDate(date.getDate() + days);
@@ -150,7 +168,7 @@ const WeeklyDrawScreen = ({ navigation }) => {
                 </TouchableOpacity>
                 <View style={{ alignItems: 'center' }}>
                     <Text style={styles.headerTitle}>Prize Draws</Text>
-                    <Text style={styles.versionText}>v2025.12.03-STABLE</Text>
+                    <Text style={styles.versionText}>v2025.12.19-STABLE</Text>
                 </View>
                 <View style={{ width: 24 }} />
             </View>
@@ -289,6 +307,14 @@ const WeeklyDrawScreen = ({ navigation }) => {
                                         </LinearGradient>
                                     </TouchableOpacity>
                                 </View>
+
+                                {draw.isReal && (
+                                    <TouchableOpacity onPress={handleFreeEntry} style={{ marginTop: 15, alignSelf: 'center' }}>
+                                        <Text style={{ color: COLORS.text.tertiary, fontSize: 10, textDecorationLine: 'underline' }}>
+                                            No Purchase Necessary. Click for Free Entry Method.
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         </View>
                     );

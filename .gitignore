@@ -18,6 +18,15 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Temporary & Debug Files
+temp_*.json
+optimized_*.json
+token.json
+debug_*.js
+*.backup
+*.bak
+*~
+
 # Metro
 .metro-health-check*
 

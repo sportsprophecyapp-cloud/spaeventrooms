@@ -28,11 +28,11 @@ const AdminSponsorsScreen = () => {
         }
     };
 
-    const handleApprove = async (id) => {
+    const handleApprove = async (id, duration) => {
         setProcessingId(id);
         try {
-            await apiService.approveSponsor(id);
-            Alert.alert('Success', 'Sponsor Approved!');
+            await apiService.approveSponsor(id, duration);
+            Alert.alert('Success', `Sponsor Approved for ${duration === '1week' ? '1 Week' : '1 Month'}!`);
             setSponsors(prev => prev.filter(s => s._id !== id));
         } catch (error) {
             Alert.alert('Error', 'Failed to approve sponsor.');
@@ -80,7 +80,7 @@ const AdminSponsorsScreen = () => {
             {item.type === 'prize' && (
                 <View style={styles.prizeBox}>
                     <Text style={styles.prizeTitle}>Prize Info:</Text>
-                    <Text style={styles.detail}>{item.prizeDescription} (${item.prizeValue})</Text>
+                    <Text style={styles.detail}>{item.prizeDescription}</Text>
                 </View>
             )}
 
@@ -98,14 +98,22 @@ const AdminSponsorsScreen = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.btn, styles.btnApprove]}
-                    onPress={() => handleApprove(item._id)}
+                    style={[styles.btn, styles.btnApprove, { backgroundColor: '#059669' }]}
+                    onPress={() => handleApprove(item._id, '1week')}
+                    disabled={!!processingId}
+                >
+                    <Text style={styles.btnText}>1W</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.btn, styles.btnApprove, { backgroundColor: '#047857' }]}
+                    onPress={() => handleApprove(item._id, '1month')}
                     disabled={!!processingId}
                 >
                     {processingId === item._id ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.btnText}>Approve</Text>
+                        <Text style={styles.btnText}>1M</Text>
                     )}
                 </TouchableOpacity>
             </View>

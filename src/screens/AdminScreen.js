@@ -3,10 +3,19 @@ import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Tex
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
-import { apiService } from '../services/api';
-import axios from 'axios';
+import api, { apiService } from '../services/api';
 
-const API_URL = 'https://api.sportsprophecyapp.com/api';
+const PERMISSION_DESCRIPTIONS = {
+    can_manage_users: "Allows searching for users and viewing their basic profile info.",
+    can_ban_users: "Gives the ability to ban or unban users from the application.",
+    can_manage_sponsors: "Allows approving, rejecting, or putting sponsor applications on hold.",
+    can_send_notifications: "Gives access to send global push notifications to all users.",
+    can_manage_roles: "Allows promoting users to Moderator or Admin status.",
+    can_mute_users: "Gives power to mute users instantly from the chat room.",
+    can_kick_users: "Allows removing/banning a user from a specific chat room.",
+    can_delete_rooms: "Gives permission to permanently delete chat rooms.",
+    can_view_api_stats: "Allows viewing backend server performance and API usage statistics."
+};
 
 const AdminScreen = ({ navigation }) => {
     const { user } = useAuth();
@@ -26,9 +35,21 @@ const AdminScreen = ({ navigation }) => {
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notifLoading, setNotifLoading] = useState(false);
 
+    // Permission Management State
+    const [rolePermissions, setRolePermissions] = useState([]);
+    const [permLoading, setPermLoading] = useState(false);
+    const [permSaving, setPermSaving] = useState(null); // role being saved
+
+    // Analytics State
+    const [analytics, setAnalytics] = useState(null);
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
+    const [analyticsTab, setAnalyticsTab] = useState('overview'); // 'overview'', 'stats'
+    const [userAnalyticsData, setUserAnalyticsData] = useState([]);
+    const [userSearchQuery, setUserSearchQuery] = useState('');
+
     useEffect(() => {
-        if (user?.role !== 'admin') {
-            Alert.alert('Access Denied', 'You do not have admin privileges.');
+        if (user?.role !== 'admin' && user?.role !== 'moderator') {
+            Alert.alert('Access Denied', 'You do not have required privileges.');
             navigation.goBack();
         } else {
             fetchData();
@@ -38,6 +59,14 @@ const AdminScreen = ({ navigation }) => {
     const fetchData = async () => {
         if (activeTab === 'users') {
             fetchModerators();
+        } else if (activeTab === 'permissions') {
+            fetchRolePermissions();
+        } else if (activeTab === 'analytics') {
+            if (analyticsTab === 'overview') {
+                fetchAnalytics();
+            } else {
+                fetchUserAnalytics(userSearchQuery);
+            }
         } else {
             fetchModerators();
             fetchPendingSponsors();
@@ -47,9 +76,7 @@ const AdminScreen = ({ navigation }) => {
 
     const fetchModerators = async () => {
         try {
-            const response = await axios.get(`${API_URL}/admin/moderators`, {
-                data: { adminEmail: user.email }
-            });
+            const response = await api.get('/admin/moderators');
             setModerators(response.data.moderators || []);
         } catch (error) {
             console.error('Error fetching moderators:', error);
@@ -74,6 +101,111 @@ const AdminScreen = ({ navigation }) => {
         }
     };
 
+    const fetchRolePermissions = async () => {
+        setLoading(true);
+        try {
+            const data = await apiService.getRolePermissions();
+            setRolePermissions(data);
+        } catch (error) {
+            console.error('Error fetching role permissions:', error);
+            Alert.alert('Error', 'Failed to fetch role permissions');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAnalytics = async () => {
+        setAnalyticsLoading(true);
+        try {
+            const data = await apiService.getAdminAnalytics();
+            setAnalytics(data);
+        } catch (error) {
+            console.error('Error fetching analytics:', error);
+            // Alert.alert('Error', 'Failed to fetch analytics'); // Optional: silent fail preferred for analytics
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    };
+
+    const fetchUserAnalytics = async (search = '') => {
+        setAnalyticsLoading(true);
+        try {
+            const data = await apiService.getAdminUserAnalytics(search);
+            setUserAnalyticsData(data);
+        } catch (error) {
+            console.error('Error fetching user analytics:', error);
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    };
+
+
+    const handleTogglePermission = (role, permission) => {
+        setRolePermissions(prev => prev.map(rp => {
+            if (rp.role === role) {
+                return {
+                    ...rp,
+                    permissions: {
+                        ...rp.permissions,
+                        [permission]: !rp.permissions[permission]
+                    }
+                };
+            }
+            return rp;
+        }));
+    };
+
+    const handleSavePermissions = async (role) => {
+        const rp = rolePermissions.find(r => r.role === role);
+        if (!rp) return;
+
+        setPermSaving(role);
+        try {
+            await apiService.updateRolePermissions(role, rp.permissions);
+            Alert.alert('Success', `Permissions for ${role.toUpperCase()} updated!`);
+        } catch (error) {
+            console.error('Error saving role permissions:', error);
+            Alert.alert('Error', error.error || 'Failed to update permissions');
+        } finally {
+            setPermSaving(null);
+        }
+    };
+
+    const handleQuickRoleChange = async (email, newRole) => {
+        Alert.alert(
+            `Change Role`,
+            `Are you sure you want to change this user's role to ${newRole.toUpperCase()}?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Confirm',
+                    onPress: async () => {
+                        // Frontend check
+                        if (newRole === 'admin' && user?.role !== 'admin') {
+                            Alert.alert('Restricted', 'Only Administrators can promote users to Admin status.');
+                            return;
+                        }
+
+                        setLoading(true);
+                        try {
+                            const response = await api.post('/admin/set-role', {
+                                adminEmail: user.email,
+                                targetEmail: email,
+                                newRole: newRole
+                            });
+                            Alert.alert('Success', response.data.message);
+                            fetchModerators();
+                        } catch (error) {
+                            Alert.alert('Error', error.response?.data?.error || 'Failed to update role');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     const handleSetRole = async () => {
         if (!targetEmail.trim()) {
             Alert.alert('Error', 'Please enter a user email');
@@ -82,7 +214,7 @@ const AdminScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const response = await axios.post(`${API_URL}/admin/set-role`, {
+            const response = await api.post('/admin/set-role', {
                 adminEmail: user.email,
                 targetEmail: targetEmail.trim(),
                 newRole: selectedRole
@@ -110,7 +242,7 @@ const AdminScreen = ({ navigation }) => {
                     onPress: async () => {
                         setLoading(true);
                         try {
-                            const response = await axios.post(`${API_URL}/admin/ban-user`, {
+                            const response = await api.post('/admin/ban-user', {
                                 adminEmail: user.email,
                                 targetEmail: email,
                                 banned: shouldBan
@@ -288,33 +420,56 @@ const AdminScreen = ({ navigation }) => {
 
     const handleSendNotification = async () => {
         if (!notificationMessage.trim()) {
-            Alert.alert('Error', 'Please enter a message');
+            if (Platform.OS === 'web') {
+                window.alert('Error: Please enter a message');
+            } else {
+                Alert.alert('Error', 'Please enter a message');
+            }
             return;
         }
 
-        Alert.alert(
-            'Confirm Send',
-            'This will notify ALL users. Are you sure?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Send',
-                    onPress: async () => {
-                        setNotifLoading(true);
-                        try {
-                            await apiService.sendAdminNotification(notificationMessage.trim());
-                            Alert.alert('Success', 'Notification sent to all users');
-                            setNotificationMessage('');
-                        } catch (error) {
-                            Alert.alert('Error', 'Failed to send notification');
-                            console.error(error);
-                        } finally {
-                            setNotifLoading(false);
+        const title = 'Confirm Send';
+        const message = 'This will notify ALL users. Are you sure?';
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`${title}\n${message}`)) {
+                setNotifLoading(true);
+                try {
+                    await apiService.sendAdminNotification(notificationMessage.trim());
+                    window.alert('Success: Notification sent to all users');
+                    setNotificationMessage('');
+                } catch (error) {
+                    window.alert('Error: Failed to send notification');
+                    console.error(error);
+                } finally {
+                    setNotifLoading(false);
+                }
+            }
+        } else {
+            Alert.alert(
+                title,
+                message,
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Send',
+                        onPress: async () => {
+                            setNotifLoading(true);
+                            try {
+                                await apiService.sendAdminNotification(notificationMessage.trim());
+                                Alert.alert('Success', 'Notification sent to all users');
+                                setNotificationMessage('');
+                            } catch (error) {
+                                Alert.alert('Error', 'Failed to send notification');
+                                console.error(error);
+                            } finally {
+                                setNotifLoading(false);
+                            }
                         }
                     }
-                }
-            ]
-        );
+                ]
+            );
+        }
     };
 
     const renderUserManagement = () => (
@@ -336,7 +491,7 @@ const AdminScreen = ({ navigation }) => {
 
                     <Text style={styles.label}>Assign Role</Text>
                     <View style={styles.roleSelector}>
-                        {['user', 'moderator', 'admin'].map((role) => (
+                        {['moderator', 'admin'].filter(r => r !== 'admin' || user?.role === 'admin').map((role) => (
                             <TouchableOpacity
                                 key={role}
                                 style={[styles.roleButton, selectedRole === role && styles.activeRole]}
@@ -399,6 +554,31 @@ const AdminScreen = ({ navigation }) => {
                                 </View>
                                 <Ionicons name={mod.role === 'admin' ? 'shield' : 'shield-checkmark-outline'} size={24} color={mod.role === 'admin' ? '#fbbf24' : '#38bdf8'} />
                             </View>
+
+                            <View style={styles.modActions}>
+                                {mod.role === 'moderator' && user?.role === 'admin' && (
+                                    <TouchableOpacity
+                                        style={[styles.modActionButton, { backgroundColor: 'rgba(251, 191, 36, 0.1)' }]}
+                                        onPress={() => handleQuickRoleChange(mod.email, 'admin')}
+                                    >
+                                        <Text style={[styles.modActionText, { color: '#fbbf24' }]}>Promote</Text>
+                                    </TouchableOpacity>
+                                )}
+
+                                <TouchableOpacity
+                                    style={[styles.modActionButton, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}
+                                    onPress={() => handleQuickRoleChange(mod.email, 'user')}
+                                >
+                                    <Text style={[styles.modActionText, { color: '#ef4444' }]}>Demote</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[styles.modActionButton, { backgroundColor: 'rgba(56, 189, 248, 0.1)' }]}
+                                    onPress={() => setActiveTab('permissions')}
+                                >
+                                    <Text style={[styles.modActionText, { color: '#38bdf8' }]}>Rights</Text>
+                                </TouchableOpacity>
+                            </View>
                         </LinearGradient>
                     ))
                 )}
@@ -439,9 +619,6 @@ const AdminScreen = ({ navigation }) => {
                             <Text style={styles.detailLabel}>Prize:</Text>
                             <Text style={styles.detailValue}>{sponsor.prizeDetails.description}</Text>
 
-                            <Text style={styles.detailLabel}>Value:</Text>
-                            <Text style={styles.detailValue}>${sponsor.prizeDetails.value}</Text>
-
                             <Text style={styles.detailLabel}>Contact:</Text>
                             <TouchableOpacity onPress={() => Linking.openURL(`mailto:${sponsor.contactEmail}`)}>
                                 <Text style={[styles.detailValue, { color: '#38bdf8', textDecorationLine: 'underline' }]}>{sponsor.contactEmail}</Text>
@@ -458,15 +635,6 @@ const AdminScreen = ({ navigation }) => {
                             <TouchableOpacity style={[styles.actionButton, { flex: 1 }]} onPress={() => handleApproveSponsor(sponsor, '1month')} disabled={loading}>
                                 <LinearGradient colors={['#047857', '#059669']} style={styles.gradient}>
                                     {loading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="calendar" size={16} color="#fff" /><Text style={[styles.buttonText, { fontSize: 13 }]}>1 Month</Text></>}
-                                </LinearGradient>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={{ flexDirection: 'row', gap: 10 }}>
-                            {/* Hold Button moved to own row? Or combine? Let's keep structure clean */}
-                            <TouchableOpacity style={[styles.actionButton, { flex: 1 }]} onPress={() => handleHoldSponsor(sponsor)} disabled={loading}>
-                                <LinearGradient colors={['#eab308', '#facc15']} style={styles.gradient}>
-                                    <Ionicons name="pause-circle" size={16} color="#000" /><Text style={[styles.buttonText, { fontSize: 14, color: '#000' }]}>Hold</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
                         </View>
@@ -509,17 +677,6 @@ const AdminScreen = ({ navigation }) => {
                             <Text style={{ color: '#ef4444', textAlign: 'center', fontWeight: 'bold' }}>Reject Application</Text>
                         </TouchableOpacity>
 
-                        {/* Delete Button - for permanently removing sponsors */}
-                        <TouchableOpacity
-                            style={[styles.actionButton, { marginTop: 10, opacity: 0.9 }]}
-                            onPress={() => handleDeleteSponsor(sponsor)}
-                            disabled={loading}
-                        >
-                            <LinearGradient colors={['#dc2626', '#ef4444']} style={styles.gradient}>
-                                {loading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="trash" size={16} color="#fff" /><Text style={[styles.buttonText, { fontSize: 14 }]}>Delete Sponsor</Text></>}
-                            </LinearGradient>
-                        </TouchableOpacity>
-
                     </LinearGradient>
                 ))
             )}
@@ -544,9 +701,6 @@ const AdminScreen = ({ navigation }) => {
                             <Text style={styles.detailLabel}>Prize:</Text>
                             <Text style={styles.detailValue}>{sponsor.prizeDetails?.description || 'N/A'}</Text>
 
-                            <Text style={styles.detailLabel}>Value:</Text>
-                            <Text style={styles.detailValue}>${sponsor.prizeDetails?.value || 0}</Text>
-
                             <Text style={styles.detailLabel}>Expires:</Text>
                             <Text style={styles.detailValue}>{sponsor.endDate ? new Date(sponsor.endDate).toLocaleDateString() : 'N/A'}</Text>
 
@@ -563,6 +717,54 @@ const AdminScreen = ({ navigation }) => {
                     </LinearGradient>
                 ))
             )}
+        </View>
+    );
+
+    const renderPermissionManagement = () => (
+        <View style={styles.section}>
+            <Text style={styles.sectionTitle}>🔑 Role Permissions</Text>
+            <Text style={styles.sectionSubtitle}>Configure what each role can do in the application.</Text>
+
+            {rolePermissions.map((rp) => (
+                <LinearGradient key={rp.role} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 20 }]}>
+                    <View style={styles.roleHeader}>
+                        <View style={[styles.roleBadge, rp.role === 'admin' && styles.adminRoleBadge]}>
+                            <Text style={styles.roleBadgeText}>{rp.role.toUpperCase()}</Text>
+                        </View>
+                        {permSaving === rp.role ? (
+                            <ActivityIndicator color="#38bdf8" size="small" />
+                        ) : (
+                            <TouchableOpacity onPress={() => handleSavePermissions(rp.role)}>
+                                <Text style={styles.saveText}>Save Changes</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    <View style={styles.permissionList}>
+                        {Object.entries(rp.permissions).map(([perm, enabled]) => (
+                            <TouchableOpacity
+                                key={perm}
+                                style={styles.permissionItem}
+                                onPress={() => handleTogglePermission(rp.role, perm)}
+                            >
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.permissionName}>
+                                        {perm.replace(/_/g, ' ').replace('can ', '')}
+                                    </Text>
+                                    <Text style={styles.permissionDescription}>
+                                        {PERMISSION_DESCRIPTIONS[perm] || "No description available."}
+                                    </Text>
+                                </View>
+                                <Ionicons
+                                    name={enabled ? "checkbox" : "square-outline"}
+                                    size={24}
+                                    color={enabled ? "#38bdf8" : "#64748b"}
+                                />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </LinearGradient>
+            ))}
         </View>
     );
 
@@ -595,6 +797,178 @@ const AdminScreen = ({ navigation }) => {
         </View>
     );
 
+    const renderUserAnalyticsList = () => (
+        <View>
+            {/* Search Bar */}
+            <View style={{ flexDirection: 'row', marginBottom: 15 }}>
+                <TextInput
+                    style={[styles.input, { flex: 1, marginBottom: 0, marginRight: 10 }]}
+                    placeholder="Search by name, email, or uuid..."
+                    placeholderTextColor="#64748b"
+                    value={userSearchQuery}
+                    onChangeText={setUserSearchQuery}
+                    onSubmitEditing={() => fetchUserAnalytics(userSearchQuery)}
+                />
+                <TouchableOpacity
+                    style={[styles.actionButton, { width: 'auto', paddingHorizontal: 20 }]}
+                    onPress={() => fetchUserAnalytics(userSearchQuery)}
+                >
+                    <LinearGradient colors={['#38bdf8', '#0ea5e9']} style={styles.gradient}>
+                        <Ionicons name="search" size={20} color="#fff" />
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
+
+            {analyticsLoading ? (
+                <ActivityIndicator size="large" color="#38bdf8" style={{ marginTop: 20 }} />
+            ) : userAnalyticsData.length === 0 ? (
+                <View style={[styles.card, { padding: 30, alignItems: 'center' }]}>
+                    <Text style={{ color: '#94a3b8' }}>No users found.</Text>
+                </View>
+            ) : (
+                userAnalyticsData.map((usr) => (
+                    <LinearGradient key={usr.uuid} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 10 }]}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                            <View>
+                                <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>{usr.username}</Text>
+                                <Text style={{ color: '#94a3b8', fontSize: 12 }}>{usr.email}</Text>
+                                <Text style={{ color: '#475569', fontSize: 10, marginTop: 2 }}>{usr.uuid}</Text>
+                            </View>
+                            <View style={{ alignItems: 'flex-end' }}>
+                                <Text style={{ color: '#38bdf8', fontWeight: 'bold' }}>Tokens: {usr.tokens}</Text>
+                                <Text style={{ color: '#fbbf24', fontWeight: 'bold' }}>Crowns: {usr.crowns}</Text>
+                            </View>
+                        </View>
+
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', borderTopWidth: 1, borderTopColor: '#334155', paddingTop: 10 }}>
+                            <View style={{ width: '50%', marginBottom: 8 }}>
+                                <Text style={{ color: '#64748b', fontSize: 11 }}>Predictions</Text>
+                                <Text style={{ color: '#fff', fontWeight: '600' }}>{usr.predictionCount}</Text>
+                            </View>
+                            <View style={{ width: '50%', marginBottom: 8 }}>
+                                <Text style={{ color: '#64748b', fontSize: 11 }}>Draw Entries</Text>
+                                <Text style={{ color: '#fff', fontWeight: '600' }}>{usr.drawEntryCount}</Text>
+                            </View>
+                            <View style={{ width: '50%' }}>
+                                <Text style={{ color: '#64748b', fontSize: 11 }}>Joined</Text>
+                                <Text style={{ color: '#fff', fontSize: 12 }}>{new Date(usr.createdAt).toLocaleDateString()}</Text>
+                            </View>
+                            <View style={{ width: '50%' }}>
+                                <Text style={{ color: '#64748b', fontSize: 11 }}>Last Login</Text>
+                                <Text style={{ color: '#fff', fontSize: 12 }}>{usr.lastLoginDate ? new Date(usr.lastLoginDate).toLocaleDateString() : 'N/A'}</Text>
+                            </View>
+                        </View>
+                    </LinearGradient>
+                ))
+            )}
+        </View>
+    );
+
+    const renderAnalytics = () => (
+        <View style={styles.section}>
+            <Text style={styles.sectionTitle}>📊 App Analytics</Text>
+
+            {/* Sub-Navigation for Analytics */}
+            <View style={{ flexDirection: 'row', marginBottom: 20, backgroundColor: '#0f172a', borderRadius: 10, padding: 4 }}>
+                <TouchableOpacity
+                    style={{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8, backgroundColor: analyticsTab === 'overview' ? '#334155' : 'transparent' }}
+                    onPress={() => { setAnalyticsTab('overview'); fetchAnalytics(); }}
+                >
+                    <Text style={{ color: analyticsTab === 'overview' ? '#fff' : '#94a3b8', fontWeight: '600' }}>Overview</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8, backgroundColor: analyticsTab === 'users' ? '#334155' : 'transparent' }}
+                    onPress={() => { setAnalyticsTab('users'); fetchUserAnalytics(); }}
+                >
+                    <Text style={{ color: analyticsTab === 'users' ? '#fff' : '#94a3b8', fontWeight: '600' }}>User List</Text>
+                </TouchableOpacity>
+            </View>
+
+            {analyticsTab === 'users' ? renderUserAnalyticsList() : (
+                <>
+                    <Text style={styles.sectionSubtitle}>Performance metrics and user engagement stats.</Text>
+
+                    {analyticsLoading ? (
+                        <View style={[styles.card, { padding: 40 }]}>
+                            <ActivityIndicator size="large" color="#38bdf8" />
+                        </View>
+                    ) : !analytics ? (
+                        <View style={[styles.card, { padding: 20 }]}>
+                            <Text style={{ color: '#94a3b8', textAlign: 'center' }}>Could not load analytics.</Text>
+                            <TouchableOpacity onPress={fetchAnalytics} style={[styles.actionButton, { marginTop: 10 }]}>
+                                <LinearGradient colors={['#38bdf8', '#0ea5e9']} style={styles.gradient}>
+                                    <Text style={styles.buttonText}>Retry</Text>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <>
+                            {/* User Growth Section */}
+                            <Text style={styles.subHeader}>User Growth</Text>
+                            <View style={styles.statsGrid}>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>Total Users</Text>
+                                    <Text style={styles.statValue}>{analytics.growth.totalUsers}</Text>
+                                </LinearGradient>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>Signups (7d)</Text>
+                                    <Text style={[styles.statValue, { color: '#4ade80' }]}>+{analytics.growth.newUsers7d}</Text>
+                                </LinearGradient>
+                            </View>
+                            <View style={styles.statsGrid}>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>Organic (30d)</Text>
+                                    <Text style={styles.statValue}>{analytics.growth.organicRate}%</Text>
+                                </LinearGradient>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>Referral (30d)</Text>
+                                    <Text style={styles.statValue}>{analytics.growth.referralRate}%</Text>
+                                </LinearGradient>
+                            </View>
+
+                            {/* Engagement Section */}
+                            <Text style={styles.subHeader}>Engagement</Text>
+                            <View style={styles.statsGrid}>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>DAU (Today)</Text>
+                                    <Text style={styles.statValue}>{analytics.engagement.dau}</Text>
+                                </LinearGradient>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>MAU (30d)</Text>
+                                    <Text style={styles.statValue}>{analytics.engagement.mau}</Text>
+                                </LinearGradient>
+                            </View>
+                            <View style={styles.statsGrid}>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>Avg Preds/User</Text>
+                                    <Text style={styles.statValue}>{analytics.engagement.avgPredsPerUser}</Text>
+                                </LinearGradient>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>Total Preds (7d)</Text>
+                                    <Text style={styles.statValue}>{analytics.engagement.predictions7d}</Text>
+                                </LinearGradient>
+                            </View>
+
+                            {/* Retention Section */}
+                            <Text style={styles.subHeader}>Retention & Monetization</Text>
+                            <View style={styles.statsGrid}>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>Day 3 Retention</Text>
+                                    <Text style={[styles.statValue, { color: '#fbbf24' }]}>{analytics.retention.day3RetentionRate}%</Text>
+                                    <Text style={styles.statSub}>Cohort: {analytics.retention.cohortSize}</Text>
+                                </LinearGradient>
+                                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.statCard}>
+                                    <Text style={styles.statLabel}>Prize Entry Rate</Text>
+                                    <Text style={[styles.statValue, { color: '#a78bfa' }]}>{analytics.retention.prizeEntryRate}%</Text>
+                                </LinearGradient>
+                            </View>
+                        </>
+                    )}
+                </>
+            )}
+        </View>
+    );
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -615,6 +989,16 @@ const AdminScreen = ({ navigation }) => {
                 <TouchableOpacity style={[styles.tab, activeTab === 'notifications' && styles.activeTab]} onPress={() => setActiveTab('notifications')}>
                     <Text style={[styles.tabText, activeTab === 'notifications' && styles.activeTabText]}>Notifications</Text>
                 </TouchableOpacity>
+                {user?.role === 'admin' && (
+                    <TouchableOpacity style={[styles.tab, activeTab === 'analytics' && styles.activeTab]} onPress={() => setActiveTab('analytics')}>
+                        <Text style={[styles.tabText, activeTab === 'analytics' && styles.activeTabText]}>Analytics</Text>
+                    </TouchableOpacity>
+                )}
+                {user?.role === 'admin' && (
+                    <TouchableOpacity style={[styles.tab, activeTab === 'permissions' && styles.activeTab]} onPress={() => setActiveTab('permissions')}>
+                        <Text style={[styles.tabText, activeTab === 'permissions' && styles.activeTabText]}>Permissions</Text>
+                    </TouchableOpacity>
+                )}
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
@@ -631,12 +1015,113 @@ const AdminScreen = ({ navigation }) => {
                 {activeTab === 'users' && renderUserManagement()}
                 {activeTab === 'sponsors' && renderSponsorManagement()}
                 {activeTab === 'notifications' && renderNotificationManagement()}
+                {activeTab === 'analytics' && renderAnalytics()}
+                {activeTab === 'permissions' && renderPermissionManagement()}
             </ScrollView>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    sectionSubtitle: {
+        color: '#94a3b8',
+        fontSize: 14,
+        marginBottom: 20,
+        marginTop: -10,
+    },
+    roleHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.05)',
+        paddingBottom: 10,
+    },
+    statsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+        marginBottom: 10,
+    },
+    statCard: {
+        flex: 1,
+        minWidth: '45%',
+        padding: 15,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
+    },
+    statLabel: {
+        color: '#94a3b8',
+        fontSize: 12,
+        marginBottom: 5,
+        textAlign: 'center',
+    },
+    statValue: {
+        color: '#fff',
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    statSub: {
+        color: '#64748b',
+        fontSize: 10,
+        marginTop: 2,
+    },
+    subHeader: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 15,
+        marginBottom: 10,
+    },
+    saveText: {
+        color: '#38bdf8',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    permissionList: {
+        gap: 12,
+    },
+    permissionItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    permissionName: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: '600',
+        textTransform: 'capitalize',
+        marginBottom: 2,
+    },
+    permissionDescription: {
+        color: '#94a3b8',
+        fontSize: 12,
+    },
+    modActions: {
+        flexDirection: 'row',
+        marginTop: 15,
+        gap: 10,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.05)',
+        paddingTop: 15,
+    },
+    modActionButton: {
+        flex: 1,
+        paddingVertical: 8,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modActionText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
     container: {
         flex: 1,
         backgroundColor: '#0f172a',

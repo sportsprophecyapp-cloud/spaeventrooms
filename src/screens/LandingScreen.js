@@ -24,7 +24,7 @@ const LandingScreen = ({ navigation }) => {
                 });
             })
             .catch(err => {
-                console.log('Failed to fetch stats, using defaults', err);
+                // Use defaults if fetch fails
             });
     }, []);
 
@@ -89,8 +89,8 @@ const LandingScreen = ({ navigation }) => {
                             </View>
                             <View style={styles.statDivider} />
                             <View style={styles.statItem}>
-                                <Text style={styles.statNumber}>$100K+</Text>
-                                <Text style={styles.statLabel}>Prizes</Text>
+                                <Text style={styles.statNumber}>OPEN</Text>
+                                <Text style={styles.statLabel}>Prize Draws</Text>
                             </View>
                             <View style={styles.statItem}>
                                 <Text style={styles.statNumber}>{formatNumber(stats.predictions)}</Text>
@@ -137,7 +137,7 @@ const LandingScreen = ({ navigation }) => {
                             >
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.accent.lime }} />
-                                    <Text style={styles.secondaryButtonText}>PLAY NOW</Text>
+                                    <Text style={styles.secondaryButtonText}>PLAY NOW AS GUEST</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>

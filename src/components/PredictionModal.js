@@ -46,7 +46,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                     setBalance(userBalance);
                 }
             } catch (err) {
-                console.log('Failed to fetch latest balance, using context');
+                // Failed to fetch latest balance, use context
             }
         }
     };

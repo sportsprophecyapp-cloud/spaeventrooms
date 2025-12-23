@@ -55,9 +55,19 @@ export const apiService = {
         }
     },
 
-    register: async (email, password, username, referralCode) => {
+    register: async (email, password, username, referralCode, deviceLanguage = null, deviceRegion = null, birthYear = null, tosAccepted = false, privacyPolicyAccepted = false) => {
         try {
-            const response = await api.post('/register', { email, password, username, referralCode });
+            const response = await api.post('/register', {
+                email,
+                password,
+                username,
+                referralCode,
+                deviceLanguage,
+                deviceRegion,
+                birthYear,
+                tosAccepted,
+                privacyPolicyAccepted
+            });
             return response.data;
         } catch (error) {
             throw error.response ? error.response.data : error;
@@ -85,9 +95,12 @@ export const apiService = {
         }
     },
 
-    googleLogin: async (payload) => {
+    googleLogin: async (payload, deviceLanguage = null, deviceRegion = null) => {
         // Support both old (idToken string) and new ({ idToken, accessToken }) formats
-        const data = (typeof payload === 'string') ? { idToken: payload } : payload;
+        let data = (typeof payload === 'string') ? { idToken: payload } : payload;
+        // Add device language and region if provided
+        if (deviceLanguage) data.deviceLanguage = deviceLanguage;
+        if (deviceRegion) data.deviceRegion = deviceRegion;
         const response = await api.post('/auth/google', data);
         return response.data;
     },
@@ -231,6 +244,16 @@ export const apiService = {
         }
     },
 
+    updateProfile: async (data) => {
+        try {
+            const response = await api.patch('/user/profile', data);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            throw error.response?.data || error;
+        }
+    },
+
     getUserProfile: async (userId) => {
         try {
             const response = await api.get(`/user/${userId}`);
@@ -305,24 +328,7 @@ export const apiService = {
 
 
 
-    getPendingSponsors: async () => {
-        try {
-            const response = await api.get('/admin/sponsors/pending');
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching pending sponsors:', error);
-            return [];
-        }
-    },
 
-    approveSponsor: async (sponsorId) => {
-        try {
-            const response = await api.post('/admin/sponsors/approve', { sponsorId });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error;
-        }
-    },
 
     createSponsorCheckout: async (sponsorData) => {
         try {
@@ -352,6 +358,16 @@ export const apiService = {
     },
 
     // --- Admin Endpoints ---
+    getAdminUserAnalytics: async (search = '') => {
+        try {
+            const response = await api.get('/admin/analytics/users', { params: { search } });
+            return response.data;
+        } catch (error) {
+            console.error('getAdminUserAnalytics error:', error);
+            throw error.response?.data || error;
+        }
+    },
+
     getPendingSponsors: async () => {
         try {
             const response = await api.get('/admin/sponsors/pending');
@@ -453,9 +469,19 @@ export const apiService = {
         }
     },
 
-    sendAdminNotification: async (message, targetUserId = 'all') => {
+    acknowledgeWarning: async () => {
         try {
-            const response = await api.post('/admin/notify', { message, targetUserId });
+            const response = await api.post('/notifications/acknowledge');
+            return response.data;
+        } catch (error) {
+            console.error('Error acknowledging warning:', error);
+            throw error;
+        }
+    },
+
+    sendAdminNotification: async (message, targetUserId = 'all', requireAcknowledge = true) => {
+        try {
+            const response = await api.post('/admin/notify', { message, targetUserId, requireAcknowledge });
             return response.data;
         } catch (error) {
             throw error.response ? error.response.data : error;
@@ -477,6 +503,46 @@ export const apiService = {
             return response.data;
         } catch (error) {
             throw error;
+        }
+    },
+    getRolePermissions: async () => {
+        try {
+            const response = await api.get('/admin/role-permissions');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    updateRolePermissions: async (role, permissions) => {
+        try {
+            const response = await api.post('/admin/role-permissions', { role, permissions });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    setUserRole: async (newRole, targetEmail, targetUuid) => {
+        try {
+            const response = await api.post('/admin/set-role', { targetEmail, targetUuid, newRole });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    muteUser: async (targetEmail, muted, targetUuid) => {
+        try {
+            const response = await api.post('/admin/mute-user', { targetEmail, targetUuid, muted });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+    kickUser: async (targetEmail, roomId, targetUuid) => {
+        try {
+            const response = await api.post('/admin/kick-user', { targetEmail, targetUuid, roomId });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
         }
     },
 };

@@ -1,4 +1,4 @@
-# Sports Prophecy App (v2.9.1)
+# Sports Prophecy App (v2.12.5)
 
 > **The Ultimate Free Sports Prediction Platform**
 
@@ -13,8 +13,8 @@ Sports Prophecy is a skill-based sports prediction platform for entertainment pu
 
 ### 🎮 Core Gameplay
 - **Predict & Earn**: Predict match winners to earn Tokens and Crowns.
-- **Score Bonus**: Predict exact scores to earn Crowns.
-- **Leagues**: comprehensive coverage of NBA, NFL, NHL, MLB, EPL, and MLS.
+- **Score Bonus**: Predict exact scores to earn bonus Crowns.
+- **Leagues**: Comprehensive coverage of NBA, NFL, NHL, MLB, EPL, and MLS.
 - **Leaderboard**: Ranked by correct predictions to highlight true sports knowledge.
 
 ### 🏆 Rewards & Prizes
@@ -22,15 +22,17 @@ Sports Prophecy is a skill-based sports prediction platform for entertainment pu
 - **Sponsorships**: Real brands sponsor specific draws and rooms.
 - **Referral System**: Invite friends to earn bonus currency.
 
-### 💬 Community
+### 💬 Community & Social
 - **Chat Rooms**: Public lobby, league-specific channels, and **Private Rooms** with password protection.
+- **Profile Customization**: Users can select custom **Profile Pictures** and equip **Badges** (Premium Metal & Glass aesthetics).
+- **Moderation**: Robust tools for Admins/Moderators (Mute, Ban, Kick).
 - **Live Updates**: Real-time game data powered by The Odds API.
 
 ---
 
-## � Compatibility & Testing
+## 💻 Compatibility & Testing
 
-This application has been rigorously tested and verified on the following platforms:
+This application has been verified on the following platforms:
 
 | Platform | Device/Browser | Status |
 |----------|---------------|--------|
@@ -39,12 +41,12 @@ This application has been rigorously tested and verified on the following platfo
 | **Web** | Chrome (Desktop/Mobile) | ✅ Verified |
 | **Web** | Safari (Mac/iOS) | ✅ Verified |
 
-## �🛠 Tech Stack
+## 🛠 Tech Stack
 
-- **Frontend**: React Native (Expo SDK 50+), React Navigation
+- **Frontend**: React Native (Expo SDK 54), React 19, React Navigation 7
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB (Mongoose)
-- **Auth**: Custom JWT Auth + Biometric Login (FaceID/TouchID)
+- **Auth**: Custom JWT Auth + Biometric Login (FaceID/TouchID) + Google Sign-In
 - **Payments**: Stripe Integration (for Sponsor Ads)
 - **Platform**: iOS, Android, Web (Responsive)
 
@@ -67,7 +69,10 @@ This application has been rigorously tested and verified on the following platfo
 
 2.  **Install Dependencies**
     ```bash
+    # Install frontend dependencies
     npm install
+
+    # Install backend dependencies
     cd backend && npm install && cd ..
     ```
 
@@ -108,14 +113,12 @@ eas build --platform android --profile production
 
 ## 📜 Version History
 
-For a detailed list of changes, please refer to [CHANGELOG.md](./CHANGELOG.md).
+See [CHANGELOG.md](./CHANGELOG.md) for the full history of changes.
 
-**Current Version: v2.9.1**
-- **Hotfix**: Resolved Login Failure (API URL config).
-- **Security**: Enforced Private Room password protection.
-- **Feature**: Restricted Guest Chat access.
-- **Enhancement**: Improved Referral Notifications.
-- **Assets**: Updated App Icon (512px).
+**Latest Update: v2.12.5 (December 2025)**
+- **Security**: Implemented permanent admin rights for super-admin account.
+- **Enhancement**: Super-admin cannot be demoted or managed by other administrators.
+- **Admin Panel**: Super-admin excluded from moderator management list.
 
 ---
 

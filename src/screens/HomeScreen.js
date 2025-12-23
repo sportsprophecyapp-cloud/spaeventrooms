@@ -11,6 +11,7 @@ import DailyRewardModal from '../components/DailyRewardModal';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import TooltipIconButton from '../components/TooltipIconButton';
 
 const HomeScreen = ({ navigation }) => {
     const [events, setEvents] = useState([]);
@@ -134,23 +135,22 @@ const HomeScreen = ({ navigation }) => {
                         <Ionicons name="trophy" size={16} color="#FFD700" />
                         <Text style={styles.crownText}>{user?.crowns || 0}</Text>
                     </View>
-                    <TouchableOpacity
-                        style={styles.iconButton}
+                    <TooltipIconButton
                         onPress={() => navigation.navigate('Profile')}
-                        accessibilityLabel="Notifications and Profile Button"
-                        testID="home-notifications-button"
+                        tooltip="Notifications"
+                        style={styles.iconButton}
                     >
                         <Ionicons name="notifications-outline" size={24} color={COLORS.text.primary} />
                         <View style={styles.notificationDot} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.iconButton}
+                    </TooltipIconButton>
+                    <TooltipIconButton
+                        iconName="log-out-outline"
+                        size={24}
+                        color={COLORS.text.primary}
                         onPress={handleLogout}
-                        accessibilityLabel="Logout Button"
-                        testID="home-logout-button"
-                    >
-                        <Ionicons name="log-out-outline" size={24} color={COLORS.text.primary} />
-                    </TouchableOpacity>
+                        tooltip="Log Out"
+                        style={styles.iconButton}
+                    />
                 </View>
             </View>
 

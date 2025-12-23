@@ -15,10 +15,10 @@ const SponsorScreen = ({ navigation }) => {
     const [linkUrl, setLinkUrl] = useState('');
     const [selectedDuration, setSelectedDuration] = useState('week'); // 'week' or 'month'
     const [bannerImage, setBannerImage] = useState(null);
+    const [amount, setAmount] = useState('25');
 
     // Prize State
     const [prizeDescription, setPrizeDescription] = useState('');
-    const [prizeValue, setPrizeValue] = useState('');
     const [contactEmail, setContactEmail] = useState('');
 
     const [loading, setLoading] = useState(false);
@@ -48,28 +48,30 @@ const SponsorScreen = ({ navigation }) => {
     };
 
     const handlePaidSubmit = async () => {
-        console.log('handlePaidSubmit_clicked');
         if (!sponsorName || !linkUrl || !bannerImage) {
-            if (Platform.OS === 'web') {
-                window.alert('Missing Information: Please fill in all fields and upload a banner image.');
-            } else {
-                Alert.alert('Missing Information', 'Please fill in all fields and upload a banner image.');
-            }
+            const msg = 'Missing Information: Please fill in all fields and upload a banner image.';
+            if (Platform.OS === 'web') window.alert(msg);
+            else Alert.alert('Missing Information', msg);
+            return;
+        }
+
+        const numericAmount = parseFloat(amount);
+        if (isNaN(numericAmount) || numericAmount < 0.50) {
+            const msg = 'Invalid Amount: Minimum sponsorship amount is $0.50.';
+            if (Platform.OS === 'web') window.alert(msg);
+            else Alert.alert('Invalid Amount', msg);
             return;
         }
 
         setLoading(true);
         try {
-            console.log('Initiating sponsor checkout...');
             const response = await apiService.createSponsorCheckout({
                 sponsorName,
                 bannerUrl: bannerImage,
                 linkUrl,
                 duration: '30days',
-                price: 25
+                amount: parseFloat(amount) || 25
             });
-
-            console.log('Checkout response:', response);
 
             if (response.checkoutUrl) {
                 if (Platform.OS === 'web') {
@@ -83,7 +85,6 @@ const SponsorScreen = ({ navigation }) => {
                 throw new Error('No checkout URL received from server');
             }
         } catch (error) {
-            console.error('Payment Error:', error);
             const errorMessage = error.response?.data?.message || error.message || JSON.stringify(error);
             if (Platform.OS === 'web') {
                 window.alert(`Payment Failed: Could not initiate payment: ${errorMessage}`);
@@ -96,8 +97,7 @@ const SponsorScreen = ({ navigation }) => {
     };
 
     const handlePrizeSubmit = async () => {
-        console.log('handlePrizeSubmit_clicked');
-        if (!sponsorName || !linkUrl || !bannerImage || !prizeDescription || !prizeValue || !contactEmail) {
+        if (!sponsorName || !linkUrl || !bannerImage || !prizeDescription || !contactEmail) {
             if (Platform.OS === 'web') {
                 window.alert('Missing Information: Please fill in all fields.');
             } else {
@@ -108,13 +108,11 @@ const SponsorScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            console.log('Submitting prize application...');
             await apiService.submitPrizeApplication({
                 sponsorName,
                 bannerUrl: bannerImage,
                 linkUrl,
                 prizeDescription,
-                prizeValue: parseFloat(prizeValue),
                 contactEmail
             });
 
@@ -184,7 +182,7 @@ const SponsorScreen = ({ navigation }) => {
                         <Text style={styles.badgeText}>BEST VALUE</Text>
                     </View>
                     <Text style={styles.priceTitle}>30-Day Banner Ad</Text>
-                    <Text style={styles.priceAmount}>$25</Text>
+                    <Text style={styles.priceAmount}>${amount || '25'}</Text>
                     <Text style={styles.priceSub}>for 30 days</Text>
                     <Ionicons name="checkmark-circle" size={24} color={COLORS.accent.cyan} style={styles.checkIcon} />
                 </TouchableOpacity>
@@ -210,6 +208,17 @@ const SponsorScreen = ({ navigation }) => {
                     autoCapitalize="none"
                 />
 
+                <Text style={styles.label}>Sponsorship Amount ($)</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="0.50"
+                    placeholderTextColor={COLORS.text.tertiary}
+                    value={amount}
+                    onChangeText={setAmount}
+                    keyboardType="decimal-pad"
+                />
+                <Text style={styles.helperText}>Minimum amount is $0.50 (Stripe requirement)</Text>
+
                 <Text style={styles.label}>Banner Image (3.2:1 Ratio)</Text>
                 <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
                     {bannerImage ? (
@@ -232,7 +241,7 @@ const SponsorScreen = ({ navigation }) => {
                     <ActivityIndicator color="#000" />
                 ) : (
                     <Text style={styles.payButtonText}>
-                        Pay $25 for 30 Days
+                        Pay ${amount || '25'} for 30 Days
                     </Text>
                 )}
             </TouchableOpacity>
@@ -241,10 +250,32 @@ const SponsorScreen = ({ navigation }) => {
 
     const renderPrizeTab = () => (
         <View>
-            <Text style={styles.subtitle}>Sponsor a Prize Draw for Free Exposure!</Text>
-            <Text style={styles.infoText}>
-                Offer a prize to our users. The higher the value, the longer your ad runs (up to 1 month).
-            </Text>
+            <View style={styles.marketingContainer}>
+                <Ionicons name="gift-outline" size={48} color={COLORS.accent.gold} style={{ alignSelf: 'center', marginBottom: SPACING.md }} />
+                <Text style={styles.marketingTitle}>Partner with Sports Prophecy</Text>
+                <Text style={styles.marketingText}>
+                    Connect your brand with thousands of engaged sports fans through our Weekly Prize Draws.
+                </Text>
+
+                <View style={styles.marketingGrid}>
+                    <View style={styles.marketingItem}>
+                        <Ionicons name="people" size={24} color={COLORS.accent.cyan} />
+                        <Text style={styles.marketingItemTitle}>Massive Reach</Text>
+                        <Text style={styles.marketingItemText}>Your brand front & center during peak activity.</Text>
+                    </View>
+                    <View style={styles.marketingItem}>
+                        <Ionicons name="heart" size={24} color={COLORS.status.error} />
+                        <Text style={styles.marketingItemTitle}>Brand Love</Text>
+                        <Text style={styles.marketingItemText}>Build goodwill by gifting prizes users love.</Text>
+                    </View>
+                </View>
+
+                <View style={styles.highlightBox}>
+                    <Text style={styles.highlightText}>
+                        💡 The higher the prize value, the longer your campaign runs (up to 1 month)!
+                    </Text>
+                </View>
+            </View>
 
             <View style={styles.formContainer}>
                 <Text style={styles.label}>Sponsor Name</Text>
@@ -274,19 +305,6 @@ const SponsorScreen = ({ navigation }) => {
                     value={prizeDescription}
                     onChangeText={setPrizeDescription}
                 />
-
-                <Text style={styles.label}>Prize Value ($)</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="50"
-                    placeholderTextColor={COLORS.text.tertiary}
-                    keyboardType="numeric"
-                    value={prizeValue}
-                    onChangeText={setPrizeValue}
-                />
-                <Text style={styles.helperText}>
-                    Est. Duration: 1 Month
-                </Text>
 
                 <Text style={styles.label}>Contact Email</Text>
                 <TextInput
@@ -587,6 +605,71 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.sizes.xs,
         textAlign: 'center',
         marginBottom: SPACING.xl,
+    },
+    marketingContainer: {
+        backgroundColor: COLORS.background.secondary,
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.xl,
+        marginBottom: SPACING.xl,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+    },
+    marketingTitle: {
+        fontSize: TYPOGRAPHY.sizes.xl,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+        marginBottom: SPACING.sm,
+        textAlign: 'center',
+    },
+    marketingText: {
+        fontSize: TYPOGRAPHY.sizes.md,
+        color: COLORS.text.secondary,
+        textAlign: 'center',
+        marginBottom: SPACING.xl,
+        lineHeight: 22,
+    },
+    marketingGrid: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: SPACING.lg,
+        gap: SPACING.md,
+    },
+    marketingItem: {
+        flex: 1,
+        alignItems: 'center',
+        padding: SPACING.md,
+        backgroundColor: COLORS.background.primary,
+        borderRadius: BORDER_RADIUS.md,
+    },
+    marketingItemTitle: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+        marginTop: SPACING.sm,
+        marginBottom: 4,
+        textAlign: 'center',
+    },
+    marketingItemText: {
+        fontSize: TYPOGRAPHY.sizes.xs,
+        color: COLORS.text.tertiary,
+        textAlign: 'center',
+        lineHeight: 16,
+    },
+    highlightBox: {
+        backgroundColor: 'rgba(251, 191, 36, 0.1)',
+        padding: SPACING.md,
+        borderRadius: BORDER_RADIUS.md,
+        width: '100%',
+        borderWidth: 1,
+        borderColor: 'rgba(251, 191, 36, 0.3)',
+    },
+    highlightText: {
+        color: COLORS.accent.gold,
+        fontSize: TYPOGRAPHY.sizes.sm,
+        textAlign: 'center',
+        fontWeight: TYPOGRAPHY.weights.semibold,
     },
 });
 

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
+import * as Localization from 'expo-localization';
 import storage from '../utils/storage';
 import { apiService } from '../services/api';
 
@@ -8,32 +9,124 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isAgeVerified, setIsAgeVerified] = useState(false);
     const [dailyReward, setDailyReward] = useState(null);
 
     useEffect(() => {
         loadUser();
-        loadAgeVerification();
         apiService.setUnauthorizedCallback(logout);
     }, []);
 
-    const loadAgeVerification = async () => {
-        try {
-            const verified = await storage.getItem('age_verified');
-            if (verified === 'true') {
-                setIsAgeVerified(true);
+    // Flag to prevent duplicate alerts for the same session
+    const [showingWarningIdx, setShowingWarningIdx] = useState(null);
+
+    useEffect(() => {
+        let interval;
+        if (user && user.uuid && !user.isGuest && user.uuid !== 'guest') {
+            checkNotifications();
+            // Regularly refresh user profile to catch mute/warning flags
+            // Reduced frequency to 30 seconds to support higher user concurrency (up to 1000 users/day)
+            interval = setInterval(refreshUser, 30000);
+
+            // Also poll notifications less frequently (60 seconds)
+            const notifInterval = setInterval(checkNotifications, 60000);
+            return () => {
+                clearInterval(interval);
+                clearInterval(notifInterval);
+            };
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [user?.uuid]);
+
+    // Fail-safe warning trigger: Watch the user object itself
+    useEffect(() => {
+        if (user?.needsWarningAcknowledge && showingWarningIdx !== user.uuid) {
+            const warningMsg = user.pendingWarningMessage || "You have received an official warning. Please acknowledge to continue.";
+
+            const handleAcknowledge = async () => {
+                try {
+                    await apiService.acknowledgeWarning();
+                    setShowingWarningIdx(null); // Reset local flag
+                    await refreshUser();
+                } catch (e) {
+                    console.error('Failed to acknowledge warning:', e);
+                }
+            };
+
+            if (Platform.OS === 'web') {
+                window.alert(`🛡️ Administrator Message\n\n${warningMsg}`);
+                handleAcknowledge();
+            } else {
+                Alert.alert(
+                    '🛡️ Administrator Message',
+                    warningMsg,
+                    [{
+                        text: 'Acknowledged',
+                        onPress: handleAcknowledge
+                    }],
+                    { cancelable: false }
+                );
             }
-        } catch (e) {
-            console.error('Failed to load age verification', e);
+            setShowingWarningIdx(user.uuid); // Mark as showing for this user
+        }
+    }, [user?.needsWarningAcknowledge, user?.pendingWarningMessage]);
+
+    const checkNotifications = async () => {
+        if (!user || user.isGuest || user.uuid === 'guest') return;
+        try {
+            const notifications = await apiService.getNotifications(user.uuid);
+            if (!notifications || !Array.isArray(notifications) || notifications.length === 0) {
+                return;
+            }
+
+            const lastSeenId = await storage.getItem(`lastSeenNotif_${user.uuid}`);
+
+            // Filter for admin notifications (warnings)
+            const adminNotifs = notifications.filter(n => n.type === 'admin');
+            if (adminNotifs.length === 0) return;
+
+            // Arrays from backend are sorted newest-first {timestamp: -1}
+            const latestNotif = adminNotifs[0];
+
+            // If we haven't seen this specific message ID yet, show it
+            if (latestNotif._id !== lastSeenId) {
+                const handleAcknowledge = async () => {
+                    try {
+                        await apiService.acknowledgeWarning();
+                        await refreshUser();
+                    } catch (e) {
+                        console.error('Failed to acknowledge warning:', e);
+                    }
+                };
+
+                if (Platform.OS === 'web') {
+                    window.alert(`🛡️ Administrator Message\n\n${latestNotif.message}`);
+                    handleAcknowledge();
+                } else {
+                    Alert.alert(
+                        '🛡️ Administrator Message',
+                        latestNotif.message,
+                        [{
+                            text: 'Acknowledged',
+                            onPress: handleAcknowledge
+                        }]
+                    );
+                }
+                // Mark as seen immediately to prevent duplicate alerts in the next cycle
+                await storage.setItem(`lastSeenNotif_${user.uuid}`, latestNotif._id);
+            }
+        } catch (error) {
+            console.error('Error in notification poller:', error);
         }
     };
+
+
 
     const checkDailyReward = async (userId, isGuest = false) => {
         if (!userId || isGuest || userId === 'guest') return;
         try {
-            console.log('Checking daily reward for user:', userId);
             const result = await apiService.claimDailyLoginReward(userId);
-            console.log('Daily reward result:', result);
 
             if (result.claimed) {
                 // Set daily reward state to trigger the modal
@@ -48,7 +141,6 @@ export const AuthProvider = ({ children }) => {
                             tokens: result.balance.tokens,
                             crowns: result.balance.crowns
                         };
-                        console.log('Updating user state with new balance:', newUser.tokens);
                         storage.setItem('userData', JSON.stringify(newUser));
                         return newUser;
                     });
@@ -102,8 +194,7 @@ export const AuthProvider = ({ children }) => {
             if (data.user) {
                 setUser(data.user);
 
-                // Always store data for the session.
-                // TODO: Implement SessionStorage for 'remember=false' if needed.
+                // Store session data (persists across app restarts via AsyncStorage)
                 await storage.setItem('userData', JSON.stringify(data.user));
                 if (data.token) {
                     await storage.setItem('userToken', data.token);
@@ -120,9 +211,13 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (email, password, username, referralCode, remember = true) => {
+    const register = async (email, password, username, referralCode, birthYear, tosAccepted, privacyPolicyAccepted, remember = true) => {
         try {
-            const data = await apiService.register(email, password, username, referralCode);
+            // Detect device language and region
+            const deviceLanguage = Localization.locale || null; // e.g., "en-US"
+            const deviceRegion = Localization.region || null; // e.g., "US"
+
+            const data = await apiService.register(email, password, username, referralCode, deviceLanguage, deviceRegion, birthYear, tosAccepted, privacyPolicyAccepted);
             if (data.user) {
                 setUser(data.user);
 
@@ -154,7 +249,11 @@ export const AuthProvider = ({ children }) => {
 
     const googleLogin = async (idToken) => {
         try {
-            const { token, user: userData } = await apiService.googleLogin(idToken);
+            // Detect device language and region
+            const deviceLanguage = Localization.locale || null; // e.g., "en-US"
+            const deviceRegion = Localization.region || null; // e.g., "US"
+
+            const { token, user: userData } = await apiService.googleLogin(idToken, deviceLanguage, deviceRegion);
             setUser(userData);
             await storage.setItem('userToken', token);
             await storage.setItem('userData', JSON.stringify(userData));
@@ -246,17 +345,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const verifyAge = async () => {
-        try {
-            await storage.setItem('age_verified', 'true');
-            setIsAgeVerified(true);
-        } catch (e) {
-            console.error('Failed to save age verification', e);
-        }
-    };
+
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, isAgeVerified, verifyAge, login, register, logout, loginAsGuest, googleLogin, appleLogin, refreshUser, updateUser, dailyReward, clearDailyReward }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, logout, loginAsGuest, googleLogin, appleLogin, refreshUser, updateUser, dailyReward, clearDailyReward }}>
             {children}
         </AuthContext.Provider>
     );

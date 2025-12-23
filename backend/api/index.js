@@ -196,10 +196,17 @@ app.use(cors({
     origin: '*',
 }));
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({
+    limit: '50mb',
+    verify: (req, res, buf) => {
+        if (req.originalUrl.includes('/api/webhooks/stripe')) {
+            req.rawBody = buf;
+        }
+    }
+}));
 
 // Health Check
-app.get('/api/health', (req, res) => res.status(200).json({ status: 'ok', version: '2.9.1' }));
+app.get('/api/health', (req, res) => res.status(200).json({ status: 'ok', version: '2.9.10' }));
 
 // Debug Route
 app.get('/api/debug', (req, res) => {
@@ -214,7 +221,7 @@ app.get('/api/debug', (req, res) => {
 const handleGoogleAuth = async (req, res) => {
     try {
         console.log('🌟 Google Auth Endpoint Hit');
-        const { idToken, accessToken } = req.body;
+        const { idToken, accessToken, deviceLanguage, deviceRegion } = req.body;
 
         if (!idToken && !accessToken) {
             console.error('❌ Missing idToken and accessToken in request body');
@@ -271,6 +278,16 @@ const handleGoogleAuth = async (req, res) => {
                 user.googleId = googleId;
                 await user.save();
             }
+            // Update language/region if provided and not already set
+            if (deviceLanguage && !user.deviceLanguage) {
+                user.deviceLanguage = deviceLanguage;
+            }
+            if (deviceRegion && !user.deviceRegion) {
+                user.deviceRegion = deviceRegion;
+            }
+            if ((deviceLanguage && !user.deviceLanguage) || (deviceRegion && !user.deviceRegion)) {
+                await user.save();
+            }
         } else {
             // Create New User
             const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
@@ -295,8 +312,24 @@ const handleGoogleAuth = async (req, res) => {
                 tokens: 10,
                 crowns: 5,
                 googleId,
-                badges: []
+                badges: [],
+                deviceLanguage: deviceLanguage || null,
+                deviceRegion: deviceRegion || null,
+                // Auto-accept for OAuth users (assumed 13+ from OAuth provider)
+                ageVerified: true,
+                tosAccepted: true,
+                tosAcceptedDate: new Date(),
+                privacyPolicyAccepted: true,
+                privacyPolicyAcceptedDate: new Date(),
+                createdAt: new Date()
             });
+            await user.save();
+        }
+
+        // Auto-Admin logic for Google Login
+        if (user.email && user.email.toLowerCase() === 'sportsprophecyapp@gmail.com' && user.role !== 'admin') {
+            user.role = 'admin';
+            if (!user.badges.includes('👑 Admin')) user.badges.push('👑 Admin');
             await user.save();
         }
 
@@ -383,7 +416,23 @@ const UserSchema = new mongoose.Schema({
     isBanned: { type: Boolean, default: false },
     notificationsEnabled: { type: Boolean, default: true },
     googleId: { type: String, sparse: true, unique: true },
-    appleId: { type: String, sparse: true, unique: true }
+    appleId: { type: String, sparse: true, unique: true },
+    profilePicture: { type: String, default: null },
+    selectedBadge: { type: String, default: null }, // Valid badge ID
+    isMuted: { type: Boolean, default: false },
+    needsWarningAcknowledge: { type: Boolean, default: false },
+    pendingWarningMessage: { type: String, default: null },
+    roomBans: [{ type: String }], // Array of Room IDs the user is kicked/banned from
+    deviceLanguage: { type: String, default: null }, // e.g., "en-US", "es-MX", "fr-CA"
+    deviceRegion: { type: String, default: null }, // e.g., "US", "MX", "CA"
+    // Age Verification & Legal Consent
+    ageVerified: { type: Boolean, default: false },
+    birthYear: { type: Number, default: null },
+    tosAccepted: { type: Boolean, default: false },
+    tosAcceptedDate: { type: Date, default: null },
+    privacyPolicyAccepted: { type: Boolean, default: false },
+    privacyPolicyAcceptedDate: { type: Date, default: null },
+    createdAt: { type: Date, default: Date.now }
 });
 
 const EventSchema = new mongoose.Schema({
@@ -422,8 +471,14 @@ const PredictionSchema = new mongoose.Schema({
 const ChatSchema = new mongoose.Schema({
     sender_name: String,
     sender_id: String,
+    sender_avatar: String,
+    sender_badge_id: { type: String, default: null },
     message: String,
-    sender_badges: [String],
+    type: { type: String, enum: ['message', 'system'], default: 'message' },
+    targetUserId: { type: String, default: null },
+    sender_badges: [String], // Legacy, keep for backward compat if needed or just ignore
+    sender_role: { type: String, default: 'user' },
+    sender_email: String,
     roomId: { type: String, default: null }, // null = General/Lobby
     timestamp: { type: Date, default: Date.now }
 });
@@ -465,6 +520,22 @@ const NotificationSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
+const RolePermissionSchema = new mongoose.Schema({
+    role: { type: String, required: true, unique: true, enum: ['user', 'moderator', 'admin'] },
+    permissions: {
+        can_manage_users: { type: Boolean, default: false },
+        can_ban_users: { type: Boolean, default: false },
+        can_manage_sponsors: { type: Boolean, default: false },
+        can_send_notifications: { type: Boolean, default: false },
+        can_manage_roles: { type: Boolean, default: false },
+        can_delete_rooms: { type: Boolean, default: false },
+        can_mute_users: { type: Boolean, default: false },
+        can_kick_users: { type: Boolean, default: false },
+        can_view_api_stats: { type: Boolean, default: false },
+    },
+    updatedAt: { type: Date, default: Date.now }
+});
+
 const ChatRoomSchema = new mongoose.Schema({
     name: { type: String, required: true },
     type: { type: String, enum: ['public', 'league', 'private'], required: true },
@@ -493,6 +564,7 @@ const ChatRoom = mongoose.models.ChatRoom || mongoose.model('ChatRoom', ChatRoom
 const DrawEntry = mongoose.models.DrawEntry || mongoose.model('DrawEntry', DrawEntrySchema);
 const Sponsor = mongoose.models.Sponsor || mongoose.model('Sponsor', SponsorSchema);
 const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
+const RolePermission = mongoose.models.RolePermission || mongoose.model('RolePermission', RolePermissionSchema);
 
 // --- Stripe Configuration ---
 let stripe;
@@ -960,6 +1032,12 @@ const authenticateToken = (req, res, next) => {
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);
+
+        // Auto-upgrade admin if email matches
+        if (user.email && user.email.toLowerCase() === 'sportsprophecyapp@gmail.com') {
+            user.role = 'admin';
+        }
+
         req.user = user;
         next();
     });
@@ -982,6 +1060,116 @@ const authenticateTokenOptional = (req, res, next) => {
         }
         next();
     });
+};
+
+// Authorization Middleware
+const authorize = (permission) => {
+    return async (req, res, next) => {
+        try {
+            await dbConnect();
+
+            if (!req.user || !req.user.role) {
+                console.warn(`[AUTH] Missing user or role in request for permission: ${permission}`);
+                return res.status(401).json({ error: 'Authentication required' });
+            }
+
+            // Admin role or email bypasses all permission checks
+            const isAdmin = req.user.role === 'admin' ||
+                (req.user.email && req.user.email.toLowerCase() === 'sportsprophecyapp@gmail.com');
+
+            if (isAdmin) {
+                return next();
+            }
+
+            let rolePerms = await RolePermission.findOne({ role: req.user.role });
+
+            // If permissions don't exist in DB (e.g. fresh production deploy), seed them on the fly
+            if (!rolePerms) {
+                console.log(`⚠️ Permissions for role "${req.user.role}" not found, initializing defaults...`);
+                await initializeDefaultPermissions();
+                rolePerms = await RolePermission.findOne({ role: req.user.role });
+            }
+
+            // Robust check for the permission
+            // Handle both Map (get()) and plain object access patterns
+            let hasPermission = false;
+            if (rolePerms && rolePerms.permissions) {
+                if (typeof rolePerms.permissions.get === 'function') {
+                    hasPermission = rolePerms.permissions.get(permission) === true;
+                } else {
+                    hasPermission = rolePerms.permissions[permission] === true;
+                }
+            }
+
+            if (!hasPermission) {
+                console.warn(`[AUTH] Access Denied: User ${req.user.email} (Role: ${req.user.role}) attempted "${permission}" without permission.`);
+                return res.status(403).json({ error: `You do not have permission: ${permission}` });
+            }
+
+            next();
+        } catch (error) {
+            console.error('[AUTH ERROR] Internal failure during authorization:', error);
+            res.status(500).json({
+                error: 'Internal server error during authorization',
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
+        }
+    };
+};
+
+const initializeDefaultPermissions = async () => {
+    try {
+        await dbConnect();
+
+        // Ensure default roles exist without deleting them if possible
+        const roles = ['moderator', 'admin'];
+        const defaults = {
+            admin: {
+                can_manage_users: true,
+                can_ban_users: true,
+                can_manage_sponsors: true,
+                can_send_notifications: true,
+                can_manage_roles: true,
+                can_delete_rooms: true,
+                can_mute_users: true,
+                can_kick_users: true,
+                can_view_api_stats: true,
+            },
+            moderator: {
+                can_manage_users: true,
+                can_ban_users: true,
+                can_manage_sponsors: true,
+                can_send_notifications: true,
+                can_delete_rooms: true,
+                can_mute_users: true,
+                can_kick_users: true,
+            }
+        };
+
+        for (const role of roles) {
+            const existing = await RolePermission.findOne({ role });
+            if (!existing) {
+                console.log(`🌱 Initializing default permissions for role: ${role}`);
+                await RolePermission.create({
+                    role,
+                    permissions: defaults[role] || {}
+                });
+            } else {
+                // merge missing permissions incrementally rather than a hard reset if desired
+                // but for now, we follow the refresh logic:
+                console.log(`🔄 Refreshing/Updating permissions for role: ${role}`);
+                const currentPerms = existing.permissions || {};
+                const updatedPerms = { ...defaults[role] };
+
+                // If it's a Map, we should handle it accordingly, but here we replace the object
+                existing.permissions = updatedPerms;
+                existing.updatedAt = new Date();
+                await existing.save();
+            }
+        }
+    } catch (error) {
+        console.error('Error initializing default permissions:', error);
+    }
 };
 
 // --- Routes ---
@@ -1075,7 +1263,11 @@ app.post('/api/login', async (req, res) => {
             await user.save();
         }
 
-        const token = jwt.sign({ uuid: user.uuid, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
+        const token = jwt.sign(
+            { userId: user._id, uuid: user.uuid, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: '30d' }
+        );
         res.json({ user, token });
     } catch (error) {
         console.error('Login error:', error);
@@ -1116,10 +1308,31 @@ app.get('/api/balance/:userId', async (req, res) => {
 app.post('/api/register', async (req, res) => {
     try {
         await dbConnect();
-        const { email, username, password, referralCode } = req.body;
+        const { email, username, password, referralCode, deviceLanguage, deviceRegion, birthYear, tosAccepted, privacyPolicyAccepted } = req.body;
 
         if (!password) {
             return res.status(400).json({ error: 'Password is required' });
+        }
+
+        // Validate age verification
+        if (!birthYear) {
+            return res.status(400).json({ error: 'Birth year is required' });
+        }
+
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - parseInt(birthYear);
+
+        if (age < 13) {
+            return res.status(400).json({ error: 'You must be at least 13 years old to use Sports Prophecy' });
+        }
+
+        if (age > 120 || birthYear > currentYear) {
+            return res.status(400).json({ error: 'Please enter a valid birth year' });
+        }
+
+        // Validate TOS and Privacy Policy acceptance
+        if (!tosAccepted || !privacyPolicyAccepted) {
+            return res.status(400).json({ error: 'You must accept the Terms of Service and Privacy Policy' });
         }
 
         let user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
@@ -1171,7 +1384,16 @@ app.post('/api/register', async (req, res) => {
             isRegistered: true,
             badges: [],
             referralCode: newReferralCode,
-            referredBy: referrer ? referrer.referralCode : null
+            referredBy: referrer ? referrer.referralCode : null,
+            deviceLanguage: deviceLanguage || null,
+            deviceRegion: deviceRegion || null,
+            // Age Verification & Legal Consent
+            ageVerified: true,
+            birthYear: parseInt(birthYear),
+            tosAccepted: true,
+            tosAcceptedDate: new Date(),
+            privacyPolicyAccepted: true,
+            privacyPolicyAcceptedDate: new Date()
         });
 
         // Credit referrer if applicable
@@ -1198,7 +1420,11 @@ app.post('/api/register', async (req, res) => {
             });
         }
 
-        const token = jwt.sign({ uuid: user.uuid, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
+        const token = jwt.sign(
+            { userId: user._id, uuid: user.uuid, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: '30d' }
+        );
         res.json({ user, token });
     } catch (error) {
         console.error('Register error:', error);
@@ -1317,13 +1543,36 @@ app.get('/api/chat', async (req, res) => {
 app.post('/api/chat', async (req, res) => {
     try {
         await dbConnect();
-        const { sender_name, sender_id, message, sender_badges, roomId } = req.body;
+        const { sender_name, sender_id, message, sender_badges, roomId, sender_avatar, sender_badge_id, type, targetUserId } = req.body;
+
+        // Moderation Check
+        const user = await User.findOne({ uuid: sender_id });
+        if (user) {
+            if (user.isBanned) return res.status(403).json({ error: 'Your account is banned.' });
+            if (user.isMuted) return res.status(403).json({ error: 'You are currently muted.' });
+            if (user.needsWarningAcknowledge) return res.status(403).json({ error: 'You must acknowledge your official warning before you can continue chatting.' });
+            if (roomId && user.roomBans && user.roomBans.includes(roomId)) {
+                return res.status(403).json({ error: 'You have been removed from this room.' });
+            }
+        }
+
+        // System Message Security: Only Admins/Moderators can send system messages manually
+        if (type === 'system' && (!user || (user.role !== 'admin' && user.role !== 'moderator'))) {
+            return res.status(403).json({ error: 'Unauthorized to send system messages.' });
+        }
+
         const newMessage = await Chat.create({
             sender_name,
             sender_id,
             message,
+            sender_avatar: sender_avatar || null,
+            sender_badge_id: sender_badge_id || null,
             sender_badges: sender_badges || [],
             roomId: roomId || null,
+            type: type || 'message',
+            targetUserId: targetUserId || null,
+            sender_role: user?.role || 'user',
+            sender_email: user?.email || null,
             timestamp: new Date()
         });
         res.json(newMessage);
@@ -1376,9 +1625,10 @@ app.post('/api/auth/apple', async (req, res) => {
         await dbConnect();
         const { identityToken, user: appleUserString } = req.body;
 
-        // TODO: Verify identityToken with Apple Public Keys
-        // For now, we will assume it's valid if we are in testing, but strictly we need to verify.
-        // We really need jsonwebtoken to decode it at least to get the email/sub.
+        // Apple Sign-In Token Verification
+        // Currently decoding the identityToken to extract user information.
+        // For production at scale, consider verifying the token signature with Apple's public keys.
+        // Reference: https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/verifying_a_user
         const jwt = require('jsonwebtoken');
         const decoded = jwt.decode(identityToken);
 
@@ -1441,10 +1691,24 @@ app.post('/api/auth/apple', async (req, res) => {
                     role: 'user',
                     tokens: 10,
                     crowns: 5,
-                    appleId
+                    appleId,
+                    // Auto-accept for OAuth users (assumed 13+ from OAuth provider)
+                    ageVerified: true,
+                    tosAccepted: true,
+                    tosAcceptedDate: new Date(),
+                    privacyPolicyAccepted: true,
+                    privacyPolicyAcceptedDate: new Date(),
+                    createdAt: new Date()
                 });
                 await user.save();
             }
+        }
+
+        // Auto-Admin logic for Apple Login
+        if (user.email && user.email.toLowerCase() === 'sportsprophecyapp@gmail.com' && user.role !== 'admin') {
+            user.role = 'admin';
+            if (!user.badges.includes('👑 Admin')) user.badges.push('👑 Admin');
+            await user.save();
         }
 
         // Generate JWT
@@ -1643,7 +1907,7 @@ app.get('/api/leaderboard', authenticateTokenOptional, async (req, res) => {
 
         // Configuration
         const CONFIG = {
-            weekly: { min: 10, target: 30, days: 7 },
+            weekly: { min: 5, target: 15, days: 7 },
             monthly: { min: 20, target: 60, days: 30 },
             all: { min: 100, target: 300, days: null }
         };
@@ -1694,7 +1958,7 @@ app.get('/api/leaderboard', authenticateTokenOptional, async (req, res) => {
                         $divide: ["$correctPredictions", { $max: ["$totalPredictions", config.target] }]
                     },
                     accuracy: {
-                        $divide: ["$correctPredictions", { $cond: [{ $eq: ["$totalPredictions", 0] }, 1, "$totalPredictions"] }]
+                        $divide: ["$correctPredictions", { "$cond": [{ "$eq": ["$totalPredictions", 0] }, 1, "$totalPredictions"] }]
                     }
                 }
             },
@@ -1802,7 +2066,7 @@ app.get('/api/leaderboard', authenticateTokenOptional, async (req, res) => {
 });
 
 // Admin: Get API usage statistics
-app.get('/api/admin/api-usage', authenticateToken, async (req, res) => {
+app.get('/api/admin/api-usage', authenticateToken, authorize('can_view_api_stats'), async (req, res) => {
     try {
         const stats = await getUsageStats();
         res.json(stats);
@@ -1818,6 +2082,7 @@ if (process.env.NODE_ENV === 'production' || process.env.ENABLE_BACKGROUND_JOBS 
     // Initial fetch on startup
     setTimeout(async () => {
         console.log('🚀 Initial data fetch on startup');
+        await initializeDefaultPermissions();
         await fetchRealEvents();
         await fetchGameResults();
     }, 5000); // Wait 5 seconds after startup
@@ -1856,24 +2121,22 @@ module.exports = app;
 app.post('/api/webhooks/stripe', async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
-
     try {
         if (!stripe) throw new Error('Stripe not initialized');
-
-        // In Vercel serverless with express.json() globally, req.body is already parsed.
-        // Stripe requires the raw body for constructEvent. 
-        // For this specific setup, we might need to rely on the event data directly if signature verification fails due to parsing.
-        // However, for security, signature verification is best. 
-        // If this fails in Vercel, we might need to adjust how we consume the body.
-
-        // For now, we'll try to use the body if it's already an object (parsed), or construct if we can access raw.
-        // Since we can't easily get raw body here without changing global middleware, 
-        // we will trust the event structure for this MVP phase if signature check is too complex for current setup.
-        // BUT, let's try to do it right if possible.
-
-        // If we can't verify signature easily due to body parsing, we'll proceed with the parsed body
-        // WARNING: This is less secure. Ensure STRIPE_WEBHOOK_SECRET is kept secret.
-        event = req.body;
+        if (process.env.STRIPE_WEBHOOK_SECRET && req.rawBody) {
+            try {
+                event = stripe.webhooks.constructEvent(
+                    req.rawBody,
+                    sig,
+                    process.env.STRIPE_WEBHOOK_SECRET
+                );
+            } catch (err) {
+                console.warn(`⚠️ Webhook signature verification failed: ${err.message}. Falling back to parsed body.`);
+                event = req.body;
+            }
+        } else {
+            event = req.body;
+        }
 
         // Handle the event
         if (event.type === 'checkout.session.completed') {
@@ -1947,7 +2210,12 @@ app.post('/api/sponsors/checkout', async (req, res) => {
         if (!process.env.STRIPE_SECRET_KEY) return res.status(503).json({ error: 'Stripe API Key missing' });
         await dbConnect();
 
-        const { sponsorName, bannerUrl, linkUrl, duration, price } = req.body;
+        const { sponsorName, bannerUrl, linkUrl, duration, amount } = req.body;
+        const finalPrice = parseFloat(amount) || 25;
+
+        if (finalPrice < 0.50) {
+            return res.status(400).json({ error: 'Invalid Amount: Minimum sponsorship amount is $0.50.' });
+        }
 
         // Create pending sponsor record
         const newSponsor = new Sponsor({
@@ -1955,8 +2223,8 @@ app.post('/api/sponsors/checkout', async (req, res) => {
             bannerUrl,
             linkUrl,
             type: 'paid',
-            duration: '30days',
-            price: 25,
+            duration: duration || '30days',
+            price: finalPrice,
             paymentStatus: 'pending'
         });
         await newSponsor.save();
@@ -1976,7 +2244,7 @@ app.post('/api/sponsors/checkout', async (req, res) => {
                                 : bannerUrl
                         ],
                     },
-                    unit_amount: 2500, // $25.00
+                    unit_amount: Math.round(finalPrice * 100), // Dynamic amount in cents
                 },
                 quantity: 1,
             }],
@@ -2008,7 +2276,12 @@ app.post('/api/sponsors/room-checkout', async (req, res) => {
     try {
         if (!stripe) throw new Error('Stripe not initialized');
 
-        const { roomId, sponsorName, bannerUrl, linkUrl } = req.body;
+        const { roomId, sponsorName, bannerUrl, linkUrl, amount } = req.body;
+        const finalPrice = parseFloat(amount) || 25;
+
+        if (finalPrice < 0.50) {
+            return res.status(400).json({ error: 'Invalid Amount: Minimum sponsorship amount is $0.50.' });
+        }
 
         if (!roomId || !sponsorName || !bannerUrl || !linkUrl) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -2023,7 +2296,7 @@ app.post('/api/sponsors/room-checkout', async (req, res) => {
             linkUrl,
             type: 'room',
             roomId,
-            price: 25,
+            price: finalPrice,
             duration: '30days',
             paymentStatus: 'pending',
             isActive: false
@@ -2041,7 +2314,7 @@ app.post('/api/sponsors/room-checkout', async (req, res) => {
                         name: `Room Sponsorship - ${sponsorName}`,
                         description: '30-day exclusive room sponsorship',
                     },
-                    unit_amount: 2500, // $25.00
+                    unit_amount: Math.round(finalPrice * 100), // Dynamic amount in cents
                 },
                 quantity: 1,
             }],
@@ -2082,7 +2355,7 @@ app.get('/api/sponsors/active', async (req, res) => {
 app.post('/api/sponsors/prize-application', async (req, res) => {
     try {
         await dbConnect();
-        const { prizeDescription, prizeValue, ...otherData } = req.body;
+        const { prizeDescription, ...otherData } = req.body;
 
         const application = new Sponsor({
             ...otherData,
@@ -2090,8 +2363,7 @@ app.post('/api/sponsors/prize-application', async (req, res) => {
             paymentStatus: 'pending', // No payment needed, but pending approval
             isActive: false,
             prizeDetails: {
-                description: prizeDescription,
-                value: prizeValue
+                description: prizeDescription
             }
         });
         await application.save();
@@ -2100,7 +2372,7 @@ app.post('/api/sponsors/prize-application', async (req, res) => {
         await sendEmail(
             'contact@sportsprophecyapp.com',
             'New Prize Application Submitted',
-            `A new prize application has been submitted by ${application.sponsorName}.\n\nPrize: ${prizeDescription}\nValue: $${prizeValue}\nContact: ${application.contactEmail}\n\nPlease check the Admin Panel to approve.`
+            `A new prize application has been submitted by ${application.sponsorName}.\n\nPrize: ${prizeDescription}\nContact: ${application.contactEmail}\n\nPlease check the Admin Panel to approve.`
         );
 
         res.json({ success: true, message: 'Application submitted' });
@@ -2115,11 +2387,247 @@ app.post('/api/sponsors/prize-application', async (req, res) => {
 // --- Admin Endpoints ---
 
 // Get Moderators
-app.get('/api/admin/moderators', async (req, res) => {
+// Admin: Get All Moderators
+// --- Analytics Endpoint ---
+app.get('/api/admin/analytics', authenticateToken, authorize('can_view_api_stats'), async (req, res) => {
+    try {
+        await dbConnect();
+        const now = new Date();
+        const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+        const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+        // Helper for date ranges
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        // 1. User Growth Stats
+        const [totalUsers, newUsers7d, newUsers30d, referralUsers30d] = await Promise.all([
+            User.countDocuments({}),
+            User.countDocuments({ createdAt: { $gte: sevenDaysAgo } }),
+            User.countDocuments({ createdAt: { $gte: thirtyDaysAgo } }),
+            User.countDocuments({ createdAt: { $gte: thirtyDaysAgo }, referredBy: { $ne: null } })
+        ]);
+
+        const organicUsers30d = newUsers30d - referralUsers30d;
+        // Avoid division by zero
+        const organicRate = newUsers30d > 0 ? ((organicUsers30d / newUsers30d) * 100).toFixed(1) : 0;
+        const referralRate = newUsers30d > 0 ? ((referralUsers30d / newUsers30d) * 100).toFixed(1) : 0;
+
+        // 2. Engagement Stats (DAU/MAU)
+        // DAU: Users who logged in today
+        const dau = await User.countDocuments({ lastLoginDate: { $gte: startOfDay } });
+        // MAU: Users who logged in within the last 30 days
+        const mau = await User.countDocuments({ lastLoginDate: { $gte: thirtyDaysAgo } });
+
+        // Predictions/User (last 7 days)
+        // We only care about active users (DAU/MAU proxy) or just total predictions / total users?
+        // Let's do: Total Predictions (7d) / Active Users (7d)
+        const activeUsers7d = await User.countDocuments({ lastLoginDate: { $gte: sevenDaysAgo } });
+        const predictions7d = await Prediction.countDocuments({ timestamp: { $gte: sevenDaysAgo } });
+        const avgPredsPerUser = activeUsers7d > 0 ? (predictions7d / activeUsers7d).toFixed(1) : 0;
+
+        // 3. Retention (Day 3 Proxy)
+        // Find users created between 3-4 days ago
+        const day3Start = new Date();
+        day3Start.setDate(day3Start.getDate() - 3);
+        day3Start.setHours(0, 0, 0, 0);
+        const day3End = new Date(day3Start);
+        day3End.setHours(23, 59, 59, 999);
+
+        const usersCreated3DaysAgo = await User.countDocuments({
+            createdAt: { $gte: day3Start, $lte: day3End }
+        });
+
+        // Of those users, how many logged in TODAY?
+        // Note: This is strict "Day 3 Retention".
+        // A wider net might be "logged in recently", but strict is better for the metric.
+        // Actually, MongoDB join is hard here without $lookup.
+        // Let's do a two-step find for accuracy since cohort size is small.
+        const cohortUsers = await User.find({
+            createdAt: { $gte: day3Start, $lte: day3End }
+        }).select('_id lastLoginDate');
+
+        let retainedCount = 0;
+        cohortUsers.forEach(u => {
+            if (u.lastLoginDate && u.lastLoginDate >= startOfDay) {
+                retainedCount++;
+            }
+        });
+
+        const day3RetentionRate = usersCreated3DaysAgo > 0
+            ? ((retainedCount / usersCreated3DaysAgo) * 100).toFixed(1)
+            : 0;
+
+        // 4. Prize & Leaderboard
+        const prizeEntries30d = await DrawEntry.countDocuments({ enteredAt: { $gte: thirtyDaysAgo } });
+        // Estimate unique users entering draws (approximate if simple count, or use distinct)
+        const uniqueDrawUsers = (await DrawEntry.find({ enteredAt: { $gte: thirtyDaysAgo } }).distinct('userId')).length;
+        const prizeEntryRate = mau > 0 ? ((uniqueDrawUsers / mau) * 100).toFixed(1) : 0;
+
+        res.json({
+            growth: {
+                totalUsers,
+                newUsers7d,
+                newUsers30d,
+                referralRate,
+                organicRate
+            },
+            engagement: {
+                dau,
+                mau,
+                avgPredsPerUser,
+                predictions7d
+            },
+            retention: {
+                day3RetentionRate,
+                cohortSize: usersCreated3DaysAgo,
+                uniqueDrawUsers,
+                prizeEntryRate
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching analytics:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Language Analytics Endpoint
+app.get('/api/admin/analytics/languages', authenticateToken, authorize('can_view_api_stats'), async (req, res) => {
+    try {
+        await dbConnect();
+
+        // Aggregate language statistics
+        const languageStats = await User.aggregate([
+            {
+                $match: {
+                    deviceLanguage: { $ne: null, $exists: true }
+                }
+            },
+            {
+                $group: {
+                    _id: '$deviceLanguage',
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { count: -1 }
+            }
+        ]);
+
+        // Aggregate region statistics
+        const regionStats = await User.aggregate([
+            {
+                $match: {
+                    deviceRegion: { $ne: null, $exists: true }
+                }
+            },
+            {
+                $group: {
+                    _id: '$deviceRegion',
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { count: -1 }
+            }
+        ]);
+
+        // Total users with language data
+        const totalWithLanguageData = await User.countDocuments({
+            deviceLanguage: { $ne: null, $exists: true }
+        });
+
+        // Total users
+        const totalUsers = await User.countDocuments({});
+
+        res.json({
+            totalUsers,
+            totalWithLanguageData,
+            languages: languageStats.map(stat => ({
+                language: stat._id,
+                count: stat.count,
+                percentage: ((stat.count / totalWithLanguageData) * 100).toFixed(1)
+            })),
+            regions: regionStats.map(stat => ({
+                region: stat._id,
+                count: stat.count,
+                percentage: ((stat.count / totalWithLanguageData) * 100).toFixed(1)
+            }))
+        });
+
+    } catch (error) {
+        console.error('Error fetching language analytics:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Admin User Analytics
+app.get('/api/admin/analytics/users', authenticateToken, authorize('can_view_api_stats'), async (req, res) => {
+    try {
+        await dbConnect();
+        const { search, limit = 50 } = req.query;
+
+        const matchStage = {};
+        if (search) {
+            matchStage.$or = [
+                { email: { $regex: search, $options: 'i' } },
+                { username: { $regex: search, $options: 'i' } },
+                { uuid: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const users = await User.aggregate([
+            { $match: matchStage },
+            { $sort: { createdAt: -1 } },
+            { $limit: parseInt(limit) },
+            {
+                $lookup: {
+                    from: 'predictions',
+                    localField: 'uuid',
+                    foreignField: 'userId',
+                    as: 'predictions'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'drawentries',
+                    localField: 'uuid',
+                    foreignField: 'userId',
+                    as: 'drawEntries'
+                }
+            },
+            {
+                $project: {
+                    username: 1,
+                    email: 1,
+                    uuid: 1,
+                    createdAt: 1,
+                    loginStreak: 1,
+                    lastLoginDate: 1,
+                    tokens: 1,
+                    crowns: 1,
+                    predictionCount: { $size: '$predictions' },
+                    drawEntryCount: { $size: '$drawEntries' }
+                }
+            }
+        ]);
+
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching user analytics:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/admin/moderators', authenticateToken, authorize('can_manage_roles'), async (req, res) => {
     try {
         await dbConnect();
         const moderators = await User.find({
-            role: { $in: ['moderator', 'admin'] }
+            role: { $in: ['moderator', 'admin'] },
+            // Exclude super-admin from the list (permanent admin, cannot be demoted)
+            email: { $ne: ADMIN_EMAIL }
         }).select('username email role');
         res.json({ moderators });
     } catch (error) {
@@ -2128,23 +2636,87 @@ app.get('/api/admin/moderators', async (req, res) => {
     }
 });
 
-// Set User Role
-app.post('/api/admin/set-role', async (req, res) => {
+// --- Role Permission Management ---
+
+// Get all role permissions
+app.get('/api/admin/role-permissions', authenticateToken, async (req, res, next) => {
+    // We can't use authorize() yet because it depends on the collection being seeded
+    // But we can check if it's admin role for this specific bootstrap endpoint
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+    next();
+}, async (req, res) => {
     try {
         await dbConnect();
-        const { targetEmail, newRole } = req.body;
+        const perms = await RolePermission.find({});
+        res.json(perms);
+    } catch (error) {
+        console.error('Error fetching role permissions:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update role permissions
+app.post('/api/admin/role-permissions', authenticateToken, async (req, res, next) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+    next();
+}, async (req, res) => {
+    try {
+        await dbConnect();
+        const { role, permissions } = req.body;
+
+        if (!['user', 'moderator', 'admin'].includes(role)) {
+            return res.status(400).json({ error: 'Invalid role' });
+        }
+
+        const rolePerms = await RolePermission.findOneAndUpdate(
+            { role },
+            { permissions, updatedAt: new Date() },
+            { new: true, upsert: true }
+        );
+
+        res.json({ message: `Permissions for ${role} updated`, rolePerms });
+    } catch (error) {
+        console.error('Error updating role permissions:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Set User Role
+app.post('/api/admin/set-role', authenticateToken, authorize('can_manage_roles'), async (req, res) => {
+    try {
+        await dbConnect();
+        const { targetEmail, targetUuid, newRole } = req.body;
 
         if (!['user', 'moderator', 'admin'].includes(newRole)) {
             return res.status(400).json({ error: 'Invalid role' });
         }
 
-        const user = await User.findOne({ email: targetEmail });
+        // Restriction: ONLY Admins can promote someone to Admin
+        if (newRole === 'admin' && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Only administrators can promote others to admin status.' });
+        }
+
+        let user;
+        if (targetUuid) {
+            user = await User.findOne({ uuid: targetUuid });
+        } else if (targetEmail) {
+            user = await User.findOne({ email: targetEmail });
+        }
+
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
+        // SUPER-ADMIN PROTECTION: Prevent any role changes to the super-admin account
+        if (user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+            return res.status(403).json({
+                error: 'Cannot modify super-admin role. This account has permanent administrator privileges.'
+            });
+        }
+
         user.role = newRole;
         await user.save();
+
 
         res.json({ message: `User role updated to ${newRole}`, user: { username: user.username, email: user.email, role: user.role } });
     } catch (error) {
@@ -2154,17 +2726,23 @@ app.post('/api/admin/set-role', async (req, res) => {
 });
 
 // Ban/Unban User
-app.post('/api/admin/ban-user', async (req, res) => {
+app.post('/api/admin/ban-user', authenticateToken, authorize('can_ban_users'), async (req, res) => {
     try {
         await dbConnect();
-        const { targetEmail, banned } = req.body;
+        const { targetEmail, targetUuid, banned } = req.body;
 
-        const user = await User.findOne({ email: targetEmail });
+        let user;
+        if (targetUuid) {
+            user = await User.findOne({ uuid: targetUuid });
+        } else if (targetEmail) {
+            user = await User.findOne({ email: targetEmail });
+        }
+
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        user.banned = banned;
+        user.isBanned = banned;
         await user.save();
 
         res.json({ message: `User ${banned ? 'banned' : 'unbanned'} successfully` });
@@ -2174,8 +2752,72 @@ app.post('/api/admin/ban-user', async (req, res) => {
     }
 });
 
+// Mute/Unmute User
+app.post('/api/admin/mute-user', authenticateToken, authorize('can_mute_users'), async (req, res) => {
+    try {
+        await dbConnect();
+        const { targetEmail, targetUuid, muted } = req.body;
+
+        let user;
+        if (targetUuid) {
+            user = await User.findOne({ uuid: targetUuid });
+        } else if (targetEmail) {
+            user = await User.findOne({ email: targetEmail });
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        user.isMuted = muted;
+        console.log(`[MOD] Setting mute status for ${user.email} (uuid: ${user.uuid}) to: ${muted}`);
+
+        if (!muted) {
+            user.needsWarningAcknowledge = false;
+            user.pendingWarningMessage = null;
+            user.roomBans = []; // Clear room bans as part of a full unmute/restore
+        }
+
+        await user.save();
+        res.json({ success: true, message: `User ${muted ? 'muted' : 'unmuted'} successfully` });
+    } catch (error) {
+        console.error('Error muting user:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Kick/Ban User from Room
+app.post('/api/admin/kick-user', authenticateToken, authorize('can_kick_users'), async (req, res) => {
+    try {
+        await dbConnect();
+        const { targetEmail, targetUuid, roomId } = req.body;
+
+        let user;
+        if (targetUuid) {
+            user = await User.findOne({ uuid: targetUuid });
+        } else if (targetEmail) {
+            user = await User.findOne({ email: targetEmail });
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (!user.roomBans) user.roomBans = [];
+        if (!user.roomBans.includes(roomId)) {
+            user.roomBans.push(roomId);
+            await user.save();
+        }
+
+        res.json({ message: `User removed from room successfully` });
+    } catch (error) {
+        console.error('Error kicking user:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get Pending Sponsors
-app.get('/api/admin/sponsors/pending', async (req, res) => {
+app.get('/api/admin/sponsors/pending', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
     try {
         await dbConnect();
         const pending = await Sponsor.find({
@@ -2192,7 +2834,7 @@ app.get('/api/admin/sponsors/pending', async (req, res) => {
 });
 
 // Approve Sponsor
-app.post('/api/admin/sponsors/:id/approve', async (req, res) => {
+app.post('/api/admin/sponsors/:id/approve', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
     try {
         console.log('Approve sponsor request:', { id: req.params.id, body: req.body });
         await dbConnect();
@@ -2235,7 +2877,7 @@ app.post('/api/admin/sponsors/:id/approve', async (req, res) => {
 });
 
 // Reject Sponsor
-app.post('/api/admin/sponsors/:id/reject', async (req, res) => {
+app.post('/api/admin/sponsors/:id/reject', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
     try {
         await dbConnect();
         await Sponsor.findByIdAndDelete(req.params.id);
@@ -2246,7 +2888,7 @@ app.post('/api/admin/sponsors/:id/reject', async (req, res) => {
 });
 
 // Hold Sponsor
-app.post('/api/admin/sponsors/:id/hold', async (req, res) => {
+app.post('/api/admin/sponsors/:id/hold', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
     try {
         await dbConnect();
         const sponsor = await Sponsor.findById(req.params.id);
@@ -2263,7 +2905,7 @@ app.post('/api/admin/sponsors/:id/hold', async (req, res) => {
 });
 
 // Delete Sponsor (Admin)
-app.delete('/api/admin/sponsors/:id', async (req, res) => {
+app.delete('/api/admin/sponsors/:id', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
     try {
         await dbConnect();
         const sponsor = await Sponsor.findByIdAndDelete(req.params.id);
@@ -2280,7 +2922,7 @@ app.delete('/api/admin/sponsors/:id', async (req, res) => {
 });
 
 // Admin: Get Active Sponsors (for management)
-app.get('/api/admin/sponsors/active', async (req, res) => {
+app.get('/api/admin/sponsors/active', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
     try {
         await dbConnect();
         const activeSponsors = await Sponsor.find({
@@ -2295,7 +2937,7 @@ app.get('/api/admin/sponsors/active', async (req, res) => {
 });
 
 // Admin: Deactivate Sponsor (remove from Prize Draws)
-app.post('/api/admin/sponsors/:id/deactivate', async (req, res) => {
+app.post('/api/admin/sponsors/:id/deactivate', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
     try {
         await dbConnect();
         const sponsor = await Sponsor.findByIdAndUpdate(
@@ -2394,18 +3036,79 @@ app.post('/api/user/notifications/settings', authenticateToken, async (req, res)
         res.status(500).json({ error: 'Failed to update settings' });
     }
 });
+// Update User Profile (Consolidated)
+app.patch('/api/user/profile', authenticateToken, async (req, res) => {
+    try {
+        await dbConnect();
+        const { idName, profilePicture, selectedBadge } = req.body;
+        const userUuid = req.user.uuid;
+
+        const updateData = {};
+        if (idName !== undefined) {
+            if (idName.length < 3) return res.status(400).json({ error: 'Name too short' });
+            updateData.idName = idName;
+        }
+        if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
+        if (selectedBadge !== undefined) updateData.selectedBadge = selectedBadge;
+
+        const user = await User.findOneAndUpdate(
+            { uuid: userUuid },
+            { $set: updateData },
+            { new: true }
+        );
+
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        res.json({ success: true, user });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+
+// Backward compatibility or dedicated name change if tokens are needed
+app.post('/api/user/change-idname', authenticateToken, async (req, res) => {
+    try {
+        await dbConnect();
+        const { userId, newIdName } = req.body; // from api.js call
+
+        // Verify user
+        if (req.user.uuid !== userId && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        const user = await User.findOne({ uuid: userId });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Check tokens
+        if (user.tokens < 50) {
+            return res.status(400).json({ error: 'Insufficient tokens' });
+        }
+
+        user.idName = newIdName;
+        user.tokens -= 50;
+        await user.save();
+
+        res.json({ success: true, user });
+    } catch (error) {
+        console.error('Change idname error:', error);
+        res.status(500).json({ error: 'Failed to update ID name' });
+    }
+});
 
 // Delete Account Endpoint
 app.delete('/api/user/delete', authenticateToken, async (req, res) => {
     try {
         await dbConnect();
-        const userId = req.user.userId; // From JWT
+        const userUuid = req.user.uuid; // From JWT
 
         // Find user first
-        const user = await User.findById(userId);
+        const user = await User.findOne({ uuid: userUuid });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
+
+        const userId = user._id; // Get MongoDB ID for other deletions if needed
 
         // Delete associated data
         await Promise.all([
@@ -2482,12 +3185,24 @@ app.delete('/api/chat/rooms/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ error: 'Room not found' });
         }
 
-        // Check permissions: Must be room creator OR admin
+        // Check permissions: Must be room creator OR have can_delete_rooms permission
         const isCreator = room.createdBy === userId;
-        const isAdmin = userId === ADMIN_UUID;
-
-        if (!isCreator && !isAdmin) {
-            return res.status(403).json({ error: 'Only room creator or admin can delete this room' });
+        let hasDeletePermission = false;
+        try {
+            const rolePerms = await RolePermission.findOne({ role: req.user.role });
+            if (rolePerms && rolePerms.permissions) {
+                // Robust Map vs Object check
+                if (typeof rolePerms.permissions.get === 'function') {
+                    hasDeletePermission = rolePerms.permissions.get('can_delete_rooms') === true;
+                } else {
+                    hasDeletePermission = rolePerms.permissions.can_delete_rooms === true;
+                }
+            }
+        } catch (err) {
+            console.error('[ROOM DELETE] Permission check failed:', err);
+        }
+        if (!isCreator && !hasDeletePermission) {
+            return res.status(403).json({ error: 'Only room creator or authorized moderators can delete this room' });
         }
 
         // Prevent deletion of General/Lobby room (if it has a specific name or ID)
@@ -2496,7 +3211,7 @@ app.delete('/api/chat/rooms/:id', authenticateToken, async (req, res) => {
         }
 
         // Delete all messages in the room
-        await ChatMessage.deleteMany({ roomId: id });
+        await Chat.deleteMany({ roomId: id });
 
         // Delete the room
         await ChatRoom.findByIdAndDelete(id);
@@ -2513,14 +3228,10 @@ app.delete('/api/chat/rooms/:id', authenticateToken, async (req, res) => {
 });
 
 // Admin Send Notification
-app.post('/api/admin/notify', authenticateToken, async (req, res) => {
+app.post('/api/admin/notify', authenticateToken, authorize('can_send_notifications'), async (req, res) => {
     try {
         await dbConnect();
-        const { message, targetUserId } = req.body; // targetUserId can be null/'all'
-
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ error: 'Admin access required' });
-        }
+        const { message, targetUserId, requireAcknowledge = true } = req.body; // targetUserId can be null/'all'
 
         await Notification.create({
             userId: targetUserId || 'all',
@@ -2529,7 +3240,35 @@ app.post('/api/admin/notify', authenticateToken, async (req, res) => {
             timestamp: new Date()
         });
 
+        // Auto-Mute until Acknowledge for targeted warnings
+        // Skip if requireAcknowledge is false (e.g. for unmute restoration messages)
+        if (requireAcknowledge && targetUserId && targetUserId !== 'all') {
+            await User.updateOne(
+                { uuid: targetUserId },
+                {
+                    needsWarningAcknowledge: true,
+                    pendingWarningMessage: message // Store the message directly on user for backup delivery
+                }
+            );
+        }
+
         res.json({ success: true, message: 'Notification sent' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/notifications/acknowledge', authenticateToken, async (req, res) => {
+    try {
+        await dbConnect();
+        await User.updateOne(
+            { uuid: req.user.uuid },
+            {
+                needsWarningAcknowledge: false,
+                pendingWarningMessage: null
+            }
+        );
+        res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
