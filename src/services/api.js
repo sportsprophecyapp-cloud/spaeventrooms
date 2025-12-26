@@ -55,7 +55,7 @@ export const apiService = {
         }
     },
 
-    register: async (email, password, username, referralCode, deviceLanguage = null, deviceRegion = null, birthYear = null, tosAccepted = false, privacyPolicyAccepted = false) => {
+    register: async (email, password, username, referralCode, deviceLanguage = null, deviceRegion = null, ageVerified = false, tosAccepted = false, privacyPolicyAccepted = false) => {
         try {
             const response = await api.post('/register', {
                 email,
@@ -64,7 +64,7 @@ export const apiService = {
                 referralCode,
                 deviceLanguage,
                 deviceRegion,
-                birthYear,
+                ageVerified,
                 tosAccepted,
                 privacyPolicyAccepted
             });
@@ -274,6 +274,26 @@ export const apiService = {
         }
     },
 
+    getFeaturedWinner: async () => {
+        try {
+            const response = await api.get('/winners/featured');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching featured winner:', error);
+            // Return null instead of throwing to prevent landing page crash
+            return null;
+        }
+    },
+
+    pickWinner: async (data) => {
+        try {
+            const response = await api.post('/weekly-draw/pick-winner', data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+
     deleteAccount: async () => {
         try {
             const response = await api.delete('/user/delete');
@@ -358,6 +378,16 @@ export const apiService = {
     },
 
     // --- Admin Endpoints ---
+    getAdminAnalytics: async () => {
+        try {
+            const response = await api.get('/admin/analytics');
+            return response.data;
+        } catch (error) {
+            console.error('getAdminAnalytics error:', error);
+            throw error.response?.data || error;
+        }
+    },
+
     getAdminUserAnalytics: async (search = '') => {
         try {
             const response = await api.get('/admin/analytics/users', { params: { search } });
@@ -433,6 +463,16 @@ export const apiService = {
             return response.data;
         } catch (error) {
             console.error('Error fetching active prize sponsors:', error);
+            return [];
+        }
+    },
+
+    getPrizeDrawSponsors: async () => {
+        try {
+            const response = await api.get('/sponsors/prize-draws');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching prize draw sponsors:', error);
             return [];
         }
     },
@@ -543,6 +583,51 @@ export const apiService = {
             return response.data;
         } catch (error) {
             throw error.response?.data || error;
+        }
+    },
+
+    // User Management
+    getAllUsers: async (search = '') => {
+        try {
+            const response = await api.get(`/admin/users?search=${search}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching all users:', error);
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    getAllWinners: async () => {
+        try {
+            const response = await api.get('/admin/winners');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching winners:', error);
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    updateUserBalance: async (userId, tokens, crowns) => {
+        try {
+            const response = await api.post('/admin/update-user-balance', {
+                userId,
+                tokens,
+                crowns
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error updating user balance:', error);
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    deleteWinner: async (winnerId) => {
+        try {
+            const response = await api.post('/admin/delete-winner', { winnerId });
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting winner:', error);
+            throw error.response ? error.response.data : error;
         }
     },
 };

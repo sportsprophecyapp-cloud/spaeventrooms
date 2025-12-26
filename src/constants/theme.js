@@ -2,69 +2,69 @@
 // Based on modern sports analytics platforms
 
 export const COLORS = {
-    // Primary Background Colors
+    // Primary Background Colors (Light Mode)
     background: {
-        primary: '#0a1628',      // Deep navy - main background
-        secondary: '#1a2332',    // Slightly lighter navy
-        tertiary: '#0f172a',     // Slate dark
-        card: '#1e293b',         // Card background
-        overlay: 'rgba(0, 0, 0, 0.95)', // Modal overlay
+        primary: '#F9FAFB',      // Light Gray - main background
+        secondary: '#FFFFFF',    // White - Secondary/Surfaces
+        tertiary: '#F3F4F6',     // Gray-100 - Subtle dark
+        card: '#FFFFFF',         // Card background (White)
+        overlay: 'rgba(0, 0, 0, 0.5)', // Modal overlay
     },
 
     // Accent Colors
     accent: {
-        cyan: '#00d4ff',         // Primary cyan
-        cyanLight: '#1bc5e8',    // Lighter cyan
-        cyanDark: '#00a8cc',     // Darker cyan
-        gold: '#FFD700',         // Gold - Primary
-        goldLight: '#FFE55C',    // Gold Light
-        goldDark: '#B8860B',     // Gold Dark
-        purple: '#8b5cf6',       // Purple accent
-        purpleLight: '#a78bfa',  // Light purple
-        lime: '#c0ff00',         // Lime green
-        limeAlt: '#a3e635',      // Alternative lime
+        cyan: '#0ea5e9',         // Sky-500 (Darker for light mode contrast)
+        cyanLight: '#38bdf8',    // Sky-400
+        cyanDark: '#0284c7',     // Sky-600
+        gold: '#d97706',         // Amber-600 (Darker for light mode)
+        goldLight: '#fbbf24',    // Amber-400
+        goldDark: '#b45309',     // Amber-700
+        purple: '#7c3aed',       // Violet-600
+        purpleLight: '#a78bfa',  // Violet-400
+        lime: '#65a30d',         // Lime-600
+        limeAlt: '#84cc16',      // Lime-500
     },
 
-    // Text Colors
+    // Text Colors (Inverted for Light Mode)
     text: {
-        primary: '#ffffff',      // White
-        secondary: '#94a3b8',    // Gray
-        tertiary: '#64748b',     // Darker gray
-        muted: '#475569',        // Very muted
-        inverse: '#000000',      // Black (for light backgrounds)
+        primary: '#111827',      // Gray-900 (Nearly Black)
+        secondary: '#4B5563',    // Gray-600
+        tertiary: '#9CA3AF',     // Gray-400
+        muted: '#D1D5DB',        // Gray-300
+        inverse: '#FFFFFF',      // White (for dark buttons/badges)
     },
 
     // Border Colors
     border: {
-        primary: '#00d4ff',      // Cyan border
-        secondary: '#334155',    // Gray border
-        tertiary: '#1e293b',     // Subtle border
+        primary: '#0ea5e9',      // Cyan border
+        secondary: '#E5E7EB',    // Gray-200 (Light border)
+        tertiary: '#F3F4F6',     // Gray-100 (Subtle border)
     },
 
     // Status Colors
     status: {
-        success: '#10b981',      // Green
-        error: '#ef4444',        // Red
-        warning: '#f59e0b',      // Orange
-        info: '#3b82f6',         // Blue
+        success: '#10b981',      // Emerald-500
+        error: '#ef4444',        // Red-500
+        warning: '#f59e0b',      // Amber-500
+        info: '#3b82f6',         // Blue-500
     },
-    // Alias for status (fix for potential typos/legacy code causing crashes)
+    // Alias for status
     state: {
-        success: '#10b981',      // Green
-        error: '#ef4444',        // Red
-        warning: '#f59e0b',      // Orange
-        info: '#3b82f6',         // Blue
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6',
     },
 
     // Gradient Combinations
     gradients: {
-        primary: ['#00d4ff', '#2979ff'],      // Cyan to blue
-        secondary: ['#8b5cf6', '#a78bfa'],    // Purple gradient
-        gold: ['#FFD700', '#FFAB00'],         // Gold gradient
-        dark: ['#1e293b', '#0f172a'],         // Dark gradient
-        lime: ['#c0ff00', '#a3e635'],         // Lime gradient
-        disabled: ['#334155', '#334155'],     // Gray (no gradient)
-        card: ['#1e293b', '#334155'],         // Card gradient
+        primary: ['#0ea5e9', '#2563eb'],      // Sky to Blue
+        secondary: ['#7c3aed', '#8b5cf6'],    // Violet gradient
+        gold: ['#d97706', '#fbbf24'],         // Gold gradient
+        dark: ['#1f2937', '#111827'],         // Dark gradient (for inverse elements)
+        lime: ['#65a30d', '#84cc16'],         // Lime gradient
+        disabled: ['#9CA3AF', '#D1D5DB'],     // Gray
+        card: ['#FFFFFF', '#F9FAFB'],         // Card gradient (Subtle)
     },
 };
 

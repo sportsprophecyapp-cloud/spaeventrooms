@@ -103,6 +103,35 @@ const LeaderboardScreen = ({ navigation }) => {
         </View>
     );
 
+    const renderUserRankCard = () => {
+        if (!user || !userStats) return null;
+
+        return (
+            <LinearGradient
+                colors={['#A855F7', '#3B82F6']} // Purple to Blue
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.userRankCard}
+            >
+                <View style={styles.userRankLeft}>
+                    <Text style={styles.userRankLabel}>YOUR RANK</Text>
+                    <Text style={styles.userRankValue}>#{userStats.rank || '—'}</Text>
+                    <Text style={styles.userRankPercentile}>Top {userStats.percentile || '50'}% of players</Text>
+                </View>
+                <View style={styles.userRankRight}>
+                    <View style={styles.userRankStat}>
+                        <Text style={styles.userRankStatValue}>{formatAccuracy(userStats.accuracy)}</Text>
+                        <Text style={styles.userRankStatLabel}>Win Rate</Text>
+                    </View>
+                    <View style={styles.userRankStat}>
+                        <Text style={styles.userRankStatValue}>{userStats.correctPredictions || 0}</Text>
+                        <Text style={styles.userRankStatLabel}>Wins</Text>
+                    </View>
+                </View>
+            </LinearGradient>
+        );
+    };
+
     const renderHeader = () => {
         // Dynamic Requirement Text
         let reqText = "Need 100 predictions to rank";
@@ -111,6 +140,8 @@ const LeaderboardScreen = ({ navigation }) => {
 
         return (
             <View style={styles.listHeader}>
+                {renderUserRankCard()}
+
                 <View style={styles.infoRow}>
                     <Text style={styles.listTitle}>Top Predictors</Text>
                     <TooltipIconButton
@@ -135,34 +166,35 @@ const LeaderboardScreen = ({ navigation }) => {
     const renderItem = ({ item }) => {
         const isTopThree = item.rank <= 3;
         const ItemWrapper = isTopThree ? LinearGradient : View;
+
+        let colors = [];
+        if (item.rank === 1) colors = ['#FCD34D', '#F59E0B']; // Gold
+        else if (item.rank === 2) colors = ['#E5E7EB', '#9CA3AF']; // Silver
+        else if (item.rank === 3) colors = ['#FDBA74', '#C2410C']; // Bronze
+
         const wrapperProps = isTopThree ? {
-            colors: item.rank === 1
-                ? ['rgba(251, 191, 36, 0.15)', 'rgba(251, 191, 36, 0.05)']
-                : item.rank === 2
-                    ? ['rgba(148, 163, 184, 0.15)', 'rgba(148, 163, 184, 0.05)']
-                    : ['rgba(180, 83, 9, 0.15)', 'rgba(180, 83, 9, 0.05)'],
+            colors: colors,
             start: { x: 0, y: 0 },
             end: { x: 1, y: 0 },
-            style: [styles.itemContainer, isTopThree && styles.topThreeItem]
+            style: [styles.itemContainer, styles.topThreeItem]
         } : { style: styles.itemContainer };
 
-        // Highlight current user
+        // Highlight current user if found in list
         const isMe = user?.uuid === item.id;
         if (isMe && !wrapperProps.style) {
             wrapperProps.style = [styles.itemContainer, styles.currentUserItem];
-        } else if (isMe) {
+        } else if (isMe && !isTopThree) {
             wrapperProps.style.push(styles.currentUserItem);
         }
+
+        const textColor = isTopThree ? '#FFF' : COLORS.text.primary;
+        const rankColor = isTopThree ? '#FFF' : COLORS.text.secondary;
 
         return (
             <ItemWrapper {...wrapperProps}>
                 <View style={styles.rankContainer}>
                     {item.rank <= 3 ? (
-                        <MaterialCommunityIcons
-                            name="crown"
-                            size={28}
-                            color={item.rank === 1 ? '#fbbf24' : item.rank === 2 ? '#94a3b8' : '#b45309'}
-                        />
+                        <Text style={[styles.rankEmoji]}>{item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : '🥉'}</Text>
                     ) : (
                         <Text style={[styles.rankText, isMe && styles.currentUserText]}>{item.rank}</Text>
                     )}
@@ -170,37 +202,34 @@ const LeaderboardScreen = ({ navigation }) => {
 
                 <View style={[styles.avatarContainer, { marginRight: 10 }]}>
                     <UserAvatar
-                        size={32}
+                        size={isTopThree ? 48 : 32}
                         profilePicture={item.avatar}
                         selectedBadge={item.selectedBadge}
                         fallbackName={item.username}
+                        borderColor={isTopThree ? '#FFF' : undefined}
                     />
                 </View>
 
                 <View style={styles.userContainer}>
-                    <Text style={[styles.username, isMe && styles.currentUserText]}>
+                    <Text style={[styles.username, { color: textColor, fontWeight: isTopThree ? 'bold' : '600' }]}>
                         {isMe ? 'You' : item.username}
                     </Text>
                     <View style={styles.secondaryStats}>
-                        <View style={styles.statBadge}>
-                            <Text style={styles.statLabel}>{item.correctPredictions}/{item.totalPredictions || '?'}</Text>
+                        <View style={[styles.statBadge, isTopThree && { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                            <Text style={[styles.statLabel, isTopThree && { color: '#FFF' }]}>{item.correctPredictions}/{item.totalPredictions || '?'}</Text>
                         </View>
                     </View>
                 </View>
 
                 <View style={[styles.scoreContainer, isMe && styles.currentUserScore]}>
-                    <Text style={[styles.score, isMe && styles.currentUserText]}>
+                    <Text style={[styles.score, { color: textColor }]}>
                         {formatAccuracy(item.accuracy)}
                     </Text>
-                    {renderConfidence(item.confidenceTier)}
+                    {!isTopThree && renderConfidence(item.confidenceTier)}
                 </View>
             </ItemWrapper>
         );
     };
-
-    // Determine if we need to show sticky user footer
-    // Show if: User is logged in, User Stats exist, AND User is NOT in the visible leaderboard list
-    const showStickyFooter = user && userStats && (!userStats.rank || !leaderboardData.find(u => u.id === user.uuid));
 
     if (loading && !refreshing && leaderboardData.length === 0) {
         return (
@@ -223,6 +252,7 @@ const LeaderboardScreen = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* Header with Gradient */}
             <View style={styles.header}>
                 <TooltipIconButton
                     iconName="arrow-back"
@@ -266,42 +296,6 @@ const LeaderboardScreen = ({ navigation }) => {
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent.cyan} />
                     }
                 />
-            )}
-
-            {/* Sticky User Footer */}
-            {showStickyFooter && (
-                <View style={styles.stickyFooter}>
-                    <View style={styles.stickyContent}>
-                        <View style={styles.rankContainer}>
-                            <Text style={styles.rankText}>{userStats.rank || '-'}</Text>
-                        </View>
-                        <UserAvatar
-                            size={32}
-                            profilePicture={user?.profilePicture}
-                            selectedBadge={user?.selectedBadge}
-                            fallbackName={user?.idName || user?.username}
-                            style={{ marginLeft: 10 }}
-                        />
-                        <View style={styles.userContainer}>
-                            <Text style={styles.username}>You</Text>
-                            {userStats.notEligible ? (
-                                <Text style={styles.eligibilityText}>
-                                    Need {Math.max(0, (config?.min || 0) - (userStats.totalPredictions || 0))} more picks
-                                </Text>
-                            ) : (
-                                <Text style={styles.statLabel}>
-                                    {userStats.correctPredictions}/{userStats.totalPredictions}
-                                </Text>
-                            )}
-                        </View>
-                        <View style={styles.scoreContainer}>
-                            <Text style={styles.score}>
-                                {formatAccuracy(userStats.accuracy)}
-                            </Text>
-                            {renderConfidence(userStats.confidenceTier)}
-                        </View>
-                    </View>
-                </View>
             )}
 
             {/* Info Modal */}
@@ -388,7 +382,7 @@ const styles = StyleSheet.create({
     },
     listContent: {
         paddingHorizontal: SPACING.base,
-        paddingBottom: 100, // Space for sticky footer
+        paddingBottom: 40,
     },
     listHeader: {
         marginBottom: SPACING.sm,
@@ -410,6 +404,50 @@ const styles = StyleSheet.create({
     infoButton: {
         padding: 4,
     },
+    // User Rank Card
+    userRankCard: {
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    userRankLeft: {
+        flex: 1,
+    },
+    userRankLabel: {
+        color: 'rgba(255,255,255,0.8)',
+        fontSize: 12,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+    },
+    userRankValue: {
+        color: '#FFF',
+        fontSize: 40,
+        fontWeight: 'bold',
+        marginVertical: 4,
+    },
+    userRankPercentile: {
+        color: 'rgba(255,255,255,0.9)',
+        fontSize: 12,
+    },
+    userRankRight: {
+        alignItems: 'flex-end',
+        gap: 12,
+    },
+    userRankStat: {
+        alignItems: 'flex-end',
+    },
+    userRankStatValue: {
+        color: '#FFF',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    userRankStatLabel: {
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 10,
+    },
     itemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -425,7 +463,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 212, 255, 0.05)',
     },
     topThreeItem: {
-        borderWidth: 1, // Reduced/Simplified
+        borderWidth: 0,
+        paddingVertical: 20,
     },
     rankContainer: {
         width: 40,
@@ -437,13 +476,14 @@ const styles = StyleSheet.create({
         fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.md,
     },
+    rankEmoji: {
+        fontSize: 24,
+    },
     userContainer: {
         flex: 1,
         marginLeft: SPACING.md,
     },
     username: {
-        color: COLORS.text.primary,
-        fontWeight: TYPOGRAPHY.weights.bold,
         fontSize: TYPOGRAPHY.sizes.base,
     },
     currentUserText: {
@@ -470,12 +510,10 @@ const styles = StyleSheet.create({
         minWidth: 60,
     },
     score: {
-        color: COLORS.text.primary,
         fontWeight: TYPOGRAPHY.weights.black,
         fontSize: TYPOGRAPHY.sizes.lg,
     },
     currentUserScore: {
-        // logic handled in text color usually
     },
     loadingContainer: {
         flex: 1,
@@ -537,22 +575,6 @@ const styles = StyleSheet.create({
     activeTabText: {
         color: COLORS.accent.cyan,
         fontWeight: TYPOGRAPHY.weights.bold,
-    },
-    // Sticky Footer
-    stickyFooter: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: COLORS.background.secondary,
-        borderTopWidth: 1,
-        borderTopColor: COLORS.accent.cyan,
-        padding: SPACING.base,
-        ...SHADOWS.lg,
-    },
-    stickyContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
     },
     eligibilityText: {
         color: COLORS.status.warning,

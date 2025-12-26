@@ -17,7 +17,7 @@ const RegisterScreen = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [referralCode, setReferralCode] = useState('');
-    const [birthYear, setBirthYear] = useState('');
+    const [ageVerified, setAgeVerified] = useState(false);
     const [tosAccepted, setTosAccepted] = useState(false);
     const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -41,22 +41,9 @@ const RegisterScreen = ({ navigation }) => {
             return;
         }
 
-        // Validate birth year
-        if (!birthYear || birthYear.length !== 4) {
-            setError('Please enter your birth year (4 digits)');
-            return;
-        }
-
-        const currentYear = new Date().getFullYear();
-        const age = currentYear - parseInt(birthYear);
-
-        if (age < 13) {
-            setError('You must be at least 13 years old to use Sports Prophecy');
-            return;
-        }
-
-        if (age > 120 || parseInt(birthYear) > currentYear) {
-            setError('Please enter a valid birth year');
+        // Validate age verification
+        if (!ageVerified) {
+            setError('You must confirm that you are at least 18 years old');
             return;
         }
 
@@ -73,7 +60,7 @@ const RegisterScreen = ({ navigation }) => {
 
         setLoading(true);
         try {
-            const success = await register(email, password, username, referralCode, birthYear, tosAccepted, privacyPolicyAccepted, rememberMe);
+            const success = await register(email, password, username, referralCode, ageVerified, tosAccepted, privacyPolicyAccepted, rememberMe);
             if (success) {
                 // Force navigation to Main with a slight delay
                 // Check for biometric support
@@ -258,25 +245,20 @@ const RegisterScreen = ({ navigation }) => {
                                 </View>
                             </View>
 
-                            {/* Birth Year */}
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Birth Year</Text>
-                                <View style={[styles.inputWrapper, error && styles.inputError]}>
-                                    <Ionicons name="calendar-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="YYYY (e.g., 1990)"
-                                        placeholderTextColor={COLORS.text.muted}
-                                        value={birthYear}
-                                        onChangeText={(text) => { setBirthYear(text); clearError(); }}
-                                        keyboardType="numeric"
-                                        maxLength={4}
-                                        accessibilityLabel="Birth Year Input"
-                                        testID="register-birth-year-input"
-                                    />
+                            {/* Age Verification Checkbox */}
+                            <TouchableOpacity
+                                style={styles.checkboxContainer}
+                                onPress={() => setAgeVerified(!ageVerified)}
+                                accessibilityLabel="Age Verification Checkbox"
+                                testID="register-age-checkbox"
+                            >
+                                <View style={[styles.checkbox, ageVerified && styles.checkboxChecked]}>
+                                    {ageVerified && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
                                 </View>
-                                <Text style={styles.helperText}>You must be 13+ to use Sports Prophecy</Text>
-                            </View>
+                                <Text style={styles.checkboxText}>
+                                    I confirm that I am <Text style={{ color: COLORS.accent.cyan, fontWeight: 'bold' }}>18 years of age or older</Text>.
+                                </Text>
+                            </TouchableOpacity>
 
                             {/* Terms of Service Checkbox */}
                             <TouchableOpacity

@@ -494,6 +494,7 @@ const SponsorSchema = new mongoose.Schema({
     bannerUrl: { type: String, required: true },
     linkUrl: { type: String, required: true },
     type: { type: String, enum: ['paid', 'prize', 'room'], default: 'paid' },
+    placement: { type: String, enum: ['main', 'prizeDraws', 'both'], default: 'main' }, // Ad placement location
     roomId: { type: String }, // For room-specific sponsorships
     duration: { type: String, default: '30days' },
     price: { type: Number, default: 25 },
@@ -536,6 +537,17 @@ const RolePermissionSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
+const WinnerSchema = new mongoose.Schema({
+    userId: String,
+    username: String,
+    userAvatar: String,
+    prizeName: String,
+    quote: String,
+    drawId: String,
+    wonAt: { type: Date, default: Date.now },
+    isFeatured: { type: Boolean, default: true }
+});
+
 const ChatRoomSchema = new mongoose.Schema({
     name: { type: String, required: true },
     type: { type: String, enum: ['public', 'league', 'private'], required: true },
@@ -563,6 +575,7 @@ const Chat = mongoose.models.Chat || mongoose.model('Chat', ChatSchema);
 const ChatRoom = mongoose.models.ChatRoom || mongoose.model('ChatRoom', ChatRoomSchema);
 const DrawEntry = mongoose.models.DrawEntry || mongoose.model('DrawEntry', DrawEntrySchema);
 const Sponsor = mongoose.models.Sponsor || mongoose.model('Sponsor', SponsorSchema);
+const Winner = mongoose.models.Winner || mongoose.model('Winner', WinnerSchema);
 const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
 const RolePermission = mongoose.models.RolePermission || mongoose.model('RolePermission', RolePermissionSchema);
 
@@ -1308,26 +1321,15 @@ app.get('/api/balance/:userId', async (req, res) => {
 app.post('/api/register', async (req, res) => {
     try {
         await dbConnect();
-        const { email, username, password, referralCode, deviceLanguage, deviceRegion, birthYear, tosAccepted, privacyPolicyAccepted } = req.body;
+        const { email, username, password, referralCode, deviceLanguage, deviceRegion, ageVerified, tosAccepted, privacyPolicyAccepted } = req.body;
 
         if (!password) {
             return res.status(400).json({ error: 'Password is required' });
         }
 
         // Validate age verification
-        if (!birthYear) {
-            return res.status(400).json({ error: 'Birth year is required' });
-        }
-
-        const currentYear = new Date().getFullYear();
-        const age = currentYear - parseInt(birthYear);
-
-        if (age < 13) {
-            return res.status(400).json({ error: 'You must be at least 13 years old to use Sports Prophecy' });
-        }
-
-        if (age > 120 || birthYear > currentYear) {
-            return res.status(400).json({ error: 'Please enter a valid birth year' });
+        if (ageVerified !== true) {
+            return res.status(400).json({ error: 'You must confirm that you are 18 years of age or older.' });
         }
 
         // Validate TOS and Privacy Policy acceptance
@@ -1389,7 +1391,7 @@ app.post('/api/register', async (req, res) => {
             deviceRegion: deviceRegion || null,
             // Age Verification & Legal Consent
             ageVerified: true,
-            birthYear: parseInt(birthYear),
+            birthYear: null, // No longer collecting specific birth year
             tosAccepted: true,
             tosAcceptedDate: new Date(),
             privacyPolicyAccepted: true,
@@ -1804,6 +1806,82 @@ app.get('/api/weekly-draw/stats', async (req, res) => {
     }
 });
 
+app.get('/api/winners/featured', async (req, res) => {
+    try {
+        await dbConnect();
+        const winner = await Winner.findOne({ isFeatured: true }).sort({ wonAt: -1 });
+        res.json(winner || null);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/weekly-draw/pick-winner', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
+    try {
+        await dbConnect();
+        // Allow manual override or random pick
+        const { drawId, prizeName, quote, customUserId } = req.body;
+
+        let winnerUser;
+        const targetDrawId = drawId || `weekly-draw-${new Date().getFullYear()}-W${getWeekNumber(new Date())}`;
+
+        if (customUserId) {
+            winnerUser = await User.findOne({ uuid: customUserId });
+        } else {
+            // Random Pick from Entrants
+            const entries = await DrawEntry.find({ drawId: targetDrawId });
+
+            if (entries.length === 0) {
+                return res.status(400).json({ error: `No entries found for draw ${targetDrawId}` });
+            }
+
+            // Shuffle entries using Fisher-Yates algorithm for better randomization
+            const shuffledEntries = [...entries];
+            for (let i = shuffledEntries.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledEntries[i], shuffledEntries[j]] = [shuffledEntries[j], shuffledEntries[i]];
+            }
+
+            // Pick the first entry from shuffled array
+            const winnerEntry = shuffledEntries[0];
+            winnerUser = await User.findOne({ uuid: winnerEntry.userId });
+        }
+
+        if (!winnerUser) {
+            return res.status(404).json({ error: 'Winner user not found' });
+        }
+
+        // Un-feature previous winners
+        await Winner.updateMany({}, { isFeatured: false });
+
+        // Create Winner
+        const newWinner = await Winner.create({
+            userId: winnerUser.uuid,
+            username: winnerUser.username,
+            // Try to find reasonable avatar source, or let frontend handle default
+            userAvatar: winnerUser.profilePicture || winnerUser.avatar || null,
+            prizeName: prizeName || 'Weekly Mystery Prize',
+            quote: quote || "I never thought I'd actually win! This is amazing!",
+            drawId: targetDrawId,
+            isFeatured: true,
+            wonAt: new Date()
+        });
+
+        // Optional: Send notification
+        await Notification.create({
+            userId: winnerUser.uuid,
+            message: `🎉 CONGRATULATIONS! You won the ${newWinner.prizeName}! Check your email for details.`,
+            type: 'win'
+        });
+
+        res.json({ success: true, winner: newWinner });
+
+    } catch (error) {
+        console.error('Pick winner error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.post('/api/daily-login-reward', authenticateToken, async (req, res) => {
     try {
         await dbConnect();
@@ -2210,7 +2288,7 @@ app.post('/api/sponsors/checkout', async (req, res) => {
         if (!process.env.STRIPE_SECRET_KEY) return res.status(503).json({ error: 'Stripe API Key missing' });
         await dbConnect();
 
-        const { sponsorName, bannerUrl, linkUrl, duration, amount } = req.body;
+        const { sponsorName, bannerUrl, linkUrl, duration, amount, placement = 'main' } = req.body;
         const finalPrice = parseFloat(amount) || 25;
 
         if (finalPrice < 0.50) {
@@ -2223,6 +2301,7 @@ app.post('/api/sponsors/checkout', async (req, res) => {
             bannerUrl,
             linkUrl,
             type: 'paid',
+            placement: placement || 'main', // Store placement preference
             duration: duration || '30days',
             price: finalPrice,
             paymentStatus: 'pending'
@@ -2348,6 +2427,28 @@ app.get('/api/sponsors/active', async (req, res) => {
         const sponsors = await Sponsor.find({ isActive: true, endDate: { $gt: new Date() } });
         res.json(sponsors);
     } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get sponsors specifically for Prize Draws page
+app.get('/api/sponsors/prize-draws', async (req, res) => {
+    try {
+        await dbConnect();
+        const now = new Date();
+        const prizeDrawSponsors = await Sponsor.find({
+            isActive: true,
+            isApproved: true,
+            type: 'paid',
+            placement: { $in: ['prizeDraws', 'both'] },
+            $or: [
+                { endDate: { $gt: now } },
+                { endDate: null }
+            ]
+        }).sort({ createdAt: -1 });
+        res.json(prizeDrawSponsors);
+    } catch (error) {
+        console.error('Error fetching prize draw sponsors:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -2632,6 +2733,133 @@ app.get('/api/admin/moderators', authenticateToken, authorize('can_manage_roles'
         res.json({ moderators });
     } catch (error) {
         console.error('Error fetching moderators:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Admin: Get All Users with Search
+app.get('/api/admin/users', authenticateToken, authorize('can_manage_users'), async (req, res) => {
+    try {
+        await dbConnect();
+        const { search = '', limit = 50, skip = 0 } = req.query;
+
+        let query = {};
+        if (search) {
+            query = {
+                $or: [
+                    { username: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } },
+                    { uuid: { $regex: search, $options: 'i' } }
+                ]
+            };
+        }
+
+        const users = await User.find(query)
+            .select('uuid username email tokens crowns createdAt lastLogin role banned')
+            .limit(parseInt(limit))
+            .skip(parseInt(skip))
+            .sort({ createdAt: -1 });
+
+        // Get additional stats for each user
+        const usersWithStats = await Promise.all(users.map(async (user) => {
+            const predictionsMade = await Prediction.countDocuments({ userId: user.uuid });
+            const drawEntries = await DrawEntry.countDocuments({ userId: user.uuid });
+
+            return {
+                uuid: user.uuid,
+                username: user.username,
+                email: user.email,
+                tokens: user.tokens,
+                crowns: user.crowns,
+                createdAt: user.createdAt,
+                lastLogin: user.lastLogin,
+                predictionsMade,
+                drawEntries,
+                role: user.role,
+                banned: user.banned
+            };
+        }));
+
+        const total = await User.countDocuments(query);
+
+        res.json({ users: usersWithStats, total });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Admin: Get All Winners
+app.get('/api/admin/winners', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
+    try {
+        await dbConnect();
+        const winners = await Winner.find({}).sort({ wonAt: -1 });
+        res.json({ winners });
+    } catch (error) {
+        console.error('Error fetching winners:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Admin: Update User Balance
+app.post('/api/admin/update-user-balance', authenticateToken, authorize('can_manage_users'), async (req, res) => {
+    try {
+        await dbConnect();
+        const { userId, tokens, crowns } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
+        const updateData = {};
+        if (tokens !== undefined) updateData.tokens = parseInt(tokens);
+        if (crowns !== undefined) updateData.crowns = parseInt(crowns);
+
+        const user = await User.findOneAndUpdate(
+            { uuid: userId },
+            updateData,
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({
+            success: true,
+            message: 'User balance updated successfully',
+            user: {
+                uuid: user.uuid,
+                username: user.username,
+                tokens: user.tokens,
+                crowns: user.crowns
+            }
+        });
+    } catch (error) {
+        console.error('Error updating user balance:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Admin: Delete Winner
+app.post('/api/admin/delete-winner', authenticateToken, authorize('can_manage_sponsors'), async (req, res) => {
+    try {
+        await dbConnect();
+        const { winnerId } = req.body;
+
+        if (!winnerId) {
+            return res.status(400).json({ error: 'Winner ID is required' });
+        }
+
+        const winner = await Winner.findByIdAndDelete(winnerId);
+
+        if (!winner) {
+            return res.status(404).json({ error: 'Winner not found' });
+        }
+
+        res.json({ success: true, message: 'Winner deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting winner:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -3228,6 +3456,42 @@ app.delete('/api/chat/rooms/:id', authenticateToken, async (req, res) => {
 });
 
 // Admin Send Notification
+app.post('/api/admin/emergency/fix-referral', async (req, res) => {
+    try {
+        await dbConnect();
+        const { email, newCode, secret } = req.body;
+
+        if (secret !== 'EMERGENCY_FIX_2025_SECURE') {
+            return res.status(403).json({ error: 'Invalid secret' });
+        }
+
+        const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const oldCode = user.referralCode;
+
+        // Force update (bypass schema validation if needed using mongoose update directly)
+        await User.updateOne(
+            { _id: user._id },
+            { $set: { referralCode: newCode, badges: [...user.badges, '🛠️ FixedCode'] } }
+        );
+
+        res.json({
+            success: true,
+            message: 'Referral code updated (Force)',
+            email: user.email,
+            oldCode: oldCode,
+            newCode: newCode
+        });
+
+    } catch (error) {
+        console.error('Emergency fix error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.post('/api/admin/notify', authenticateToken, authorize('can_send_notifications'), async (req, res) => {
     try {
         await dbConnect();

@@ -23,19 +23,45 @@ async function backfillReferralCodes() {
         await mongoose.connect(MONGODB_URI);
         console.log('✅ Connected to MongoDB');
 
-        // Find all users without a referral code
+        // Step 1: Find all users without a referral code or with placeholder codes
         const usersWithoutCode = await User.find({
             $or: [
                 { referralCode: { $exists: false } },
                 { referralCode: null },
-                { referralCode: '' }
+                { referralCode: '' },
+                { referralCode: 'LOADING' }  // Fix placeholder codes
             ]
         });
 
-        console.log(`\n📊 Found ${usersWithoutCode.length} users without referral codes\n`);
+        console.log(`\n📊 Found ${usersWithoutCode.length} users without valid referral codes`);
 
-        if (usersWithoutCode.length === 0) {
-            console.log('✅ All users already have referral codes!');
+        // Step 2: Find duplicate referral codes
+        const duplicates = await User.aggregate([
+            { $match: { referralCode: { $exists: true, $ne: null, $ne: '', $ne: 'LOADING' } } },
+            { $group: { _id: '$referralCode', count: { $sum: 1 }, users: { $push: '$$ROOT' } } },
+            { $match: { count: { $gt: 1 } } }
+        ]);
+
+        console.log(`\n🔍 Found ${duplicates.length} duplicate referral codes`);
+
+        // Collect all users that need new codes
+        let usersNeedingNewCodes = [...usersWithoutCode];
+
+        // For duplicates, keep the first user and reassign codes to others
+        for (const dup of duplicates) {
+            console.log(`\n⚠️  Duplicate code "${dup._id}" used by ${dup.count} users:`);
+            // Skip the first user (they keep their code), add the rest to the list
+            for (let i = 1; i < dup.users.length; i++) {
+                const user = await User.findById(dup.users[i]._id);
+                console.log(`   - ${user.email || user.username || user.uuid} (will get new code)`);
+                usersNeedingNewCodes.push(user);
+            }
+        }
+
+        console.log(`\n📋 Total users needing new codes: ${usersNeedingNewCodes.length}\n`);
+
+        if (usersNeedingNewCodes.length === 0) {
+            console.log('✅ All users already have unique referral codes!');
             await mongoose.disconnect();
             return;
         }
@@ -43,7 +69,7 @@ async function backfillReferralCodes() {
         let updatedCount = 0;
         let errorCount = 0;
 
-        for (const user of usersWithoutCode) {
+        for (const user of usersNeedingNewCodes) {
             try {
                 // Generate unique 6-character referral code
                 let newReferralCode;
@@ -80,7 +106,7 @@ async function backfillReferralCodes() {
         }
 
         console.log('\n📈 Migration Summary:');
-        console.log(`   Total users processed: ${usersWithoutCode.length}`);
+        console.log(`   Total users processed: ${usersNeedingNewCodes.length}`);
         console.log(`   ✅ Successfully updated: ${updatedCount}`);
         console.log(`   ❌ Errors: ${errorCount}`);
 

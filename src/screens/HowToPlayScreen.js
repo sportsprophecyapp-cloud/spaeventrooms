@@ -48,6 +48,19 @@ const HowToPlayScreen = () => {
             </View>
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                {/* Legal Banner */}
+                <View style={styles.complianceBanner}>
+                    <Text style={styles.complianceBannerTitle}>
+                        ✓ Legal & Compliant
+                    </Text>
+                    <Text style={styles.complianceBannerText}>
+                        Sports Prophecy is a skill-based prediction platform. No purchase
+                        necessary. No gambling. No risk. Prizes awarded through sweepstakes
+                        drawings administered by Sports Prophecy LLC. Odds vary based on
+                        number of eligible entries.
+                    </Text>
+                </View>
+
                 {/* Getting Started */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>🚀 Getting Started</Text>
@@ -471,6 +484,25 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.sizes.md,
         fontWeight: TYPOGRAPHY.weights.black,
         letterSpacing: 1,
+    },
+    complianceBanner: {
+        backgroundColor: '#F3F4F6',
+        borderRadius: BORDER_RADIUS.md,
+        padding: SPACING.md,
+        marginBottom: SPACING.xl,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    complianceBannerTitle: {
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: 'bold',
+        color: '#059669', // Green color
+        marginBottom: 4,
+    },
+    complianceBannerText: {
+        fontSize: 12,
+        color: '#6B7280',
+        lineHeight: 18,
     },
 });
 

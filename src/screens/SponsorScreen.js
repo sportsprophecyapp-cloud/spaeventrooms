@@ -13,6 +13,7 @@ const SponsorScreen = ({ navigation }) => {
     // Paid State
     const [sponsorName, setSponsorName] = useState('');
     const [linkUrl, setLinkUrl] = useState('');
+    const [placement, setPlacement] = useState('main'); // NEW: 'main', 'prizeDraws', or 'both'
     const [selectedDuration, setSelectedDuration] = useState('week'); // 'week' or 'month'
     const [bannerImage, setBannerImage] = useState(null);
     const [amount, setAmount] = useState('25');
@@ -69,6 +70,7 @@ const SponsorScreen = ({ navigation }) => {
                 sponsorName,
                 bannerUrl: bannerImage,
                 linkUrl,
+                placement, // Include placement in API call
                 duration: '30days',
                 amount: parseFloat(amount) || 25
             });
@@ -138,6 +140,47 @@ const SponsorScreen = ({ navigation }) => {
     const renderPaidTab = () => (
         <View>
             <Text style={styles.subtitle}>Reach thousands of users across the entire app!</Text>
+
+            {/* Placement Selector */}
+            <View style={styles.placementContainer}>
+                <Text style={styles.label}>Choose Ad Placement</Text>
+
+                <TouchableOpacity
+                    style={[styles.placementCard, placement === 'main' && styles.selectedPlacement]}
+                    onPress={() => setPlacement('main')}
+                >
+                    <View style={styles.placementHeader}>
+                        <Ionicons name="home" size={24} color={placement === 'main' ? COLORS.accent.cyan : COLORS.text.secondary} />
+                        <Text style={[styles.placementTitle, placement === 'main' && styles.selectedPlacementText]}>Main Pages</Text>
+                    </View>
+                    <Text style={styles.placementSubtext}>Home, Announcements, Chat Rooms</Text>
+                    {placement === 'main' && <Ionicons name="checkmark-circle" size={24} color={COLORS.accent.cyan} style={styles.placementCheck} />}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.placementCard, placement === 'prizeDraws' && styles.selectedPlacement]}
+                    onPress={() => setPlacement('prizeDraws')}
+                >
+                    <View style={styles.placementHeader}>
+                        <Ionicons name="gift" size={24} color={placement === 'prizeDraws' ? COLORS.accent.cyan : COLORS.text.secondary} />
+                        <Text style={[styles.placementTitle, placement === 'prizeDraws' && styles.selectedPlacementText]}>Prize Draws Page</Text>
+                    </View>
+                    <Text style={styles.placementSubtext}>High engagement, prize-focused users</Text>
+                    {placement === 'prizeDraws' && <Ionicons name="checkmark-circle" size={24} color={COLORS.accent.cyan} style={styles.placementCheck} />}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.placementCard, placement === 'both' && styles.selectedPlacement]}
+                    onPress={() => setPlacement('both')}
+                >
+                    <View style={styles.placementHeader}>
+                        <Ionicons name="star" size={24} color={placement === 'both' ? COLORS.accent.gold : COLORS.text.secondary} />
+                        <Text style={[styles.placementTitle, placement === 'both' && styles.selectedPlacementText]}>All Pages (Premium)</Text>
+                    </View>
+                    <Text style={styles.placementSubtext}>Maximum reach (+$10)</Text>
+                    {placement === 'both' && <Ionicons name="checkmark-circle" size={24} color={COLORS.accent.cyan} style={styles.placementCheck} />}
+                </TouchableOpacity>
+            </View>
 
             {/* Benefits Section */}
             <View style={styles.benefitsContainer}>
@@ -670,6 +713,45 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.sizes.sm,
         textAlign: 'center',
         fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    placementContainer: {
+        marginBottom: SPACING.xl,
+    },
+    placementCard: {
+        backgroundColor: COLORS.background.secondary,
+        borderRadius: BORDER_RADIUS.md,
+        padding: SPACING.lg,
+        marginBottom: SPACING.md,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    selectedPlacement: {
+        borderColor: COLORS.accent.cyan,
+        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+    },
+    placementHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.sm,
+        marginBottom: 4,
+    },
+    placementTitle: {
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+    },
+    selectedPlacementText: {
+        color: COLORS.accent.cyan,
+    },
+    placementSubtext: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.tertiary,
+        marginLeft: 32,
+    },
+    placementCheck: {
+        position: 'absolute',
+        top: 12,
+        right: 12,
     },
 });
 

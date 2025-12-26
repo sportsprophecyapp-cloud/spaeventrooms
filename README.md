@@ -1,4 +1,4 @@
-# Sports Prophecy App (v2.12.5)
+# Sports Prophecy App (v2.13.0)
 
 > **The Ultimate Free Sports Prediction Platform**
 
@@ -115,7 +115,8 @@ eas build --platform android --profile production
 
 See [CHANGELOG.md](./CHANGELOG.md) for the full history of changes.
 
-**Latest Update: v2.12.5 (December 2025)**
+**Latest Update: v2.13.0 (December 2025)**
+- **Analytics**: Fixed analytics loading issues and referrer tracking.
 - **Security**: Implemented permanent admin rights for super-admin account.
 - **Enhancement**: Super-admin cannot be demoted or managed by other administrators.
 - **Admin Panel**: Super-admin excluded from moderator management list.

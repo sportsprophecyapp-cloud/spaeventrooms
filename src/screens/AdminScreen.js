@@ -31,8 +31,76 @@ const AdminScreen = ({ navigation }) => {
     const [pendingSponsors, setPendingSponsors] = useState([]);
     const [activeSponsors, setActiveSponsors] = useState([]);
 
+    // Draw Management State
+    const [winnerPrize, setWinnerPrize] = useState('Weekly Mystery Prize');
+    const [winnerQuote, setWinnerQuote] = useState("I never thought I'd actually win! This is amazing!");
+    const [manualWinnerId, setManualWinnerId] = useState('');
+
     // Notification State
     const [notificationMessage, setNotificationMessage] = useState('');
+
+    // User List State
+    const [allUsers, setAllUsers] = useState([]);
+    const [userSearch, setUserSearch] = useState('');
+    const [winners, setWinners] = useState([]);
+    const [editingUser, setEditingUser] = useState(null);
+    const [editTokens, setEditTokens] = useState('');
+    const [editCrowns, setEditCrowns] = useState('');
+
+    // ... (rest of state)
+
+    // ... (fetch functions)
+
+    const handlePickWinner = async () => {
+        const title = 'Pick Weekly Winner';
+        const message = manualWinnerId
+            ? `Manually select user ${manualWinnerId} as winner?`
+            : 'Randomly select a winner from weekly entries?';
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`${title}\n${message}`)) {
+                setLoading(true);
+                try {
+                    const result = await apiService.pickWinner({
+                        prizeName: winnerPrize,
+                        quote: winnerQuote,
+                        customUserId: manualWinnerId || undefined
+                    });
+                    window.alert(`Success: ${result.winner.username} won the ${result.winner.prizeName}!`);
+                    // Maybe refresh something if needed
+                } catch (error) {
+                    window.alert('Error: Failed to pick winner. ' + (error.error || error.message));
+                } finally {
+                    setLoading(false);
+                }
+            }
+        } else {
+            Alert.alert(title, message, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Confirm',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            const result = await apiService.pickWinner({
+                                prizeName: winnerPrize,
+                                quote: winnerQuote,
+                                customUserId: manualWinnerId || undefined
+                            });
+                            Alert.alert('Success', `${result.winner.username} won the ${result.winner.prizeName}!`);
+                        } catch (error) {
+                            Alert.alert('Error', error.error || error.message || 'Failed to pick winner');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]);
+        }
+    };
+
+    // ...
+
     const [notifLoading, setNotifLoading] = useState(false);
 
     // Permission Management State
@@ -59,6 +127,9 @@ const AdminScreen = ({ navigation }) => {
     const fetchData = async () => {
         if (activeTab === 'users') {
             fetchModerators();
+        } else if (activeTab === 'userList') {
+            fetchAllUsers();
+            fetchWinners();
         } else if (activeTab === 'permissions') {
             fetchRolePermissions();
         } else if (activeTab === 'analytics') {
@@ -136,6 +207,28 @@ const AdminScreen = ({ navigation }) => {
             console.error('Error fetching user analytics:', error);
         } finally {
             setAnalyticsLoading(false);
+        }
+    };
+
+    const fetchAllUsers = async () => {
+        setLoading(true);
+        try {
+            const data = await apiService.getAllUsers(userSearch);
+            setAllUsers(data.users || []);
+        } catch (error) {
+            console.error('Error fetching all users:', error);
+            Alert.alert('Error', 'Failed to fetch users');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchWinners = async () => {
+        try {
+            const data = await apiService.getAllWinners();
+            setWinners(data.winners || []);
+        } catch (error) {
+            console.error('Error fetching winners:', error);
         }
     };
 
@@ -472,6 +565,231 @@ const AdminScreen = ({ navigation }) => {
         }
     };
 
+    const handleEditUser = (user) => {
+        setEditingUser(user);
+        setEditTokens(user.tokens.toString());
+        setEditCrowns(user.crowns.toString());
+    };
+
+    const handleSaveUserBalance = async () => {
+        if (!editingUser) return;
+
+        const title = 'Update Balance';
+        const message = `Update ${editingUser.username}'s balance to ${editTokens} tokens and ${editCrowns} crowns?`;
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`${title}\n${message}`)) {
+                setLoading(true);
+                try {
+                    await apiService.updateUserBalance(editingUser.uuid, parseInt(editTokens), parseInt(editCrowns));
+                    window.alert('Success: User balance updated!');
+                    setEditingUser(null);
+                    fetchAllUsers();
+                } catch (error) {
+                    window.alert('Error: ' + (error.error || 'Failed to update balance'));
+                } finally {
+                    setLoading(false);
+                }
+            }
+        } else {
+            Alert.alert(title, message, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Update',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            await apiService.updateUserBalance(editingUser.uuid, parseInt(editTokens), parseInt(editCrowns));
+                            Alert.alert('Success', 'User balance updated!');
+                            setEditingUser(null);
+                            fetchAllUsers();
+                        } catch (error) {
+                            Alert.alert('Error', error.error || 'Failed to update balance');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]);
+        }
+    };
+
+    const handleDeleteWinner = async (winner) => {
+        const title = 'Delete Winner';
+        const message = `Are you sure you want to delete ${winner.username} from the winners list?`;
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`${title}\n${message}`)) {
+                setLoading(true);
+                try {
+                    await apiService.deleteWinner(winner._id);
+                    window.alert('Success: Winner deleted!');
+                    fetchWinners();
+                } catch (error) {
+                    window.alert('Error: Failed to delete winner');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        } else {
+            Alert.alert(title, message, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            await apiService.deleteWinner(winner._id);
+                            Alert.alert('Success', 'Winner deleted!');
+                            fetchWinners();
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to delete winner');
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]);
+        }
+    };
+
+    const renderUserList = () => (
+        <View style={styles.section}>
+            {/* Search Bar */}
+            <Text style={styles.sectionTitle}>🔍 Search All Users</Text>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search by name, email, or UUID..."
+                    placeholderTextColor="#64748b"
+                    value={userSearch}
+                    onChangeText={setUserSearch}
+                    onSubmitEditing={fetchAllUsers}
+                />
+                <TouchableOpacity style={styles.searchButton} onPress={fetchAllUsers}>
+                    <Ionicons name="search" size={20} color="#fff" />
+                </TouchableOpacity>
+            </View>
+
+            {/* User List */}
+            {allUsers.length === 0 ? (
+                <View style={styles.emptyCard}>
+                    <Text style={styles.emptyText}>No users found. Try a different search.</Text>
+                </View>
+            ) : (
+                allUsers.map((u) => (
+                    <LinearGradient key={u.uuid} colors={['#1e293b', '#0f172a']} style={styles.userCard}>
+                        <View style={styles.userHeader}>
+                            <View style={styles.userInfoMain}>
+                                <Text style={styles.userName}>{u.username}</Text>
+                                <Text style={styles.userEmail}>{u.email}</Text>
+                                <Text style={styles.userUuid}>ID: {u.uuid}</Text>
+                            </View>
+                            <View style={[styles.roleBadge, u.role === 'admin' && styles.adminRoleBadge]}>
+                                <Text style={styles.roleBadgeText}>{u.role?.toUpperCase()}</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.userStatsRow}>
+                            <View style={styles.userStatItem}>
+                                <Ionicons name="flash" size={14} color="#eab308" />
+                                <Text style={styles.userStatValue}>{u.tokens}</Text>
+                                <Text style={styles.userStatLabel}>Tokens</Text>
+                            </View>
+                            <View style={styles.userStatItem}>
+                                <Ionicons name="trophy" size={14} color="#fbbf24" />
+                                <Text style={styles.userStatValue}>{u.crowns}</Text>
+                                <Text style={styles.userStatLabel}>Crowns</Text>
+                            </View>
+                            <View style={styles.userStatItem}>
+                                <Ionicons name="analytics" size={14} color="#38bdf8" />
+                                <Text style={styles.userStatValue}>{u.predictionsMade || 0}</Text>
+                                <Text style={styles.userStatLabel}>Preds</Text>
+                            </View>
+                            <View style={styles.userStatItem}>
+                                <Ionicons name="ticket" size={14} color="#a78bfa" />
+                                <Text style={styles.userStatValue}>{u.drawEntries || 0}</Text>
+                                <Text style={styles.userStatLabel}>Entries</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.userFooter}>
+                            <Text style={styles.userDate}>Joined: {new Date(u.createdAt).toLocaleDateString()}</Text>
+                            <TouchableOpacity
+                                style={styles.editBalanceButton}
+                                onPress={() => handleEditUser(u)}
+                            >
+                                <Text style={styles.editBalanceText}>Edit Balance</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </LinearGradient>
+                ))
+            )}
+
+            {/* Edit Modal (Overlay style) */}
+            {editingUser && (
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Edit Balance: {editingUser.username}</Text>
+
+                        <Text style={styles.modalLabel}>Tokens</Text>
+                        <TextInput
+                            style={styles.modalInput}
+                            keyboardType="numeric"
+                            value={editTokens}
+                            onChangeText={setEditTokens}
+                        />
+
+                        <Text style={styles.modalLabel}>Crowns</Text>
+                        <TextInput
+                            style={styles.modalInput}
+                            keyboardType="numeric"
+                            value={editCrowns}
+                            onChangeText={setEditCrowns}
+                        />
+
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={() => setEditingUser(null)}
+                            >
+                                <Text style={styles.modalButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.saveButton]}
+                                onPress={handleSaveUserBalance}
+                            >
+                                <Text style={styles.modalButtonText}>Save Changes</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            )}
+
+            {/* Past Winners Section */}
+            <Text style={[styles.sectionTitle, { marginTop: 40 }]}>🏆 Past Winners History</Text>
+            {winners.length === 0 ? (
+                <View style={styles.emptyCard}>
+                    <Text style={styles.emptyText}>No winners history found.</Text>
+                </View>
+            ) : (
+                winners.map((win) => (
+                    <LinearGradient key={win._id} colors={['#1e293b', '#0f172a']} style={styles.winnerCard}>
+                        <View style={styles.winnerInfo}>
+                            <Text style={styles.winnerName}>{win.username}</Text>
+                            <Text style={styles.winnerPrize}>{win.prizeName}</Text>
+                            <Text style={styles.winnerDate}>{new Date(win.wonAt).toLocaleDateString()} - Draw: {win.drawId}</Text>
+                        </View>
+                        <TouchableOpacity style={styles.deleteWinnerButton} onPress={() => handleDeleteWinner(win)}>
+                            <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                        </TouchableOpacity>
+                    </LinearGradient>
+                ))
+            )}
+        </View>
+    );
+
     const renderUserManagement = () => (
         <>
             {/* Role Management */}
@@ -590,6 +908,49 @@ const AdminScreen = ({ navigation }) => {
 
     const renderSponsorManagement = () => (
         <View style={styles.section}>
+
+            {/* Weekly Draw Section */}
+            <Text style={styles.sectionTitle}>🏆 Weekly Draw Management</Text>
+            <LinearGradient colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 30 }]}>
+                <Text style={styles.label}>Prize Name</Text>
+                <TextInput
+                    style={styles.input}
+                    value={winnerPrize}
+                    onChangeText={setWinnerPrize}
+                    placeholder="e.g. $50 Amazon Gift Card"
+                    placeholderTextColor="#64748b"
+                />
+
+                <Text style={styles.label}>Winner Quote (Placeholder)</Text>
+                <TextInput
+                    style={styles.input}
+                    value={winnerQuote}
+                    onChangeText={setWinnerQuote}
+                    placeholder="Quote to display..."
+                    placeholderTextColor="#64748b"
+                />
+
+                <Text style={styles.label}>Manual Winner UUID (Optional)</Text>
+                <TextInput
+                    style={styles.input}
+                    value={manualWinnerId}
+                    onChangeText={setManualWinnerId}
+                    placeholder="Leave empty for random pick"
+                    placeholderTextColor="#64748b"
+                    autoCapitalize="none"
+                />
+
+                <TouchableOpacity
+                    style={[styles.actionButton, { marginTop: 10 }]}
+                    onPress={handlePickWinner}
+                    disabled={loading}
+                >
+                    <LinearGradient colors={['#eab308', '#ca8a04']} style={styles.gradient}>
+                        {loading ? <ActivityIndicator color="#fff" /> : <><Ionicons name="trophy" size={20} color="#fff" /><Text style={styles.buttonText}>Pick Winner & Publish</Text></>}
+                    </LinearGradient>
+                </TouchableOpacity>
+            </LinearGradient>
+
             <Text style={styles.sectionTitle}>📢 Pending Prize Applications</Text>
             {pendingSponsors.length === 0 ? (
                 <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.card}>
@@ -983,6 +1344,9 @@ const AdminScreen = ({ navigation }) => {
                 <TouchableOpacity style={[styles.tab, activeTab === 'users' && styles.activeTab]} onPress={() => setActiveTab('users')}>
                     <Text style={[styles.tabText, activeTab === 'users' && styles.activeTabText]}>Users</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={[styles.tab, activeTab === 'userList' && styles.activeTab]} onPress={() => setActiveTab('userList')}>
+                    <Text style={[styles.tabText, activeTab === 'userList' && styles.activeTabText]}>User List</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={[styles.tab, activeTab === 'sponsors' && styles.activeTab]} onPress={() => setActiveTab('sponsors')}>
                     <Text style={[styles.tabText, activeTab === 'sponsors' && styles.activeTabText]}>Sponsors</Text>
                 </TouchableOpacity>
@@ -1013,6 +1377,7 @@ const AdminScreen = ({ navigation }) => {
                 </LinearGradient>
 
                 {activeTab === 'users' && renderUserManagement()}
+                {activeTab === 'userList' && renderUserList()}
                 {activeTab === 'sponsors' && renderSponsorManagement()}
                 {activeTab === 'notifications' && renderNotificationManagement()}
                 {activeTab === 'analytics' && renderAnalytics()}
@@ -1352,6 +1717,200 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 14,
         fontWeight: '600',
+    },
+    // User Management Styles
+    searchContainer: {
+        flexDirection: 'row',
+        gap: 10,
+        marginBottom: 20,
+    },
+    searchInput: {
+        flex: 1,
+        backgroundColor: 'rgba(30, 41, 49, 0.5)',
+        borderRadius: 12,
+        padding: 12,
+        color: '#fff',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    searchButton: {
+        backgroundColor: '#38bdf8',
+        paddingHorizontal: 15,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyCard: {
+        padding: 30,
+        alignItems: 'center',
+        backgroundColor: 'rgba(30, 41, 59, 0.3)',
+        borderRadius: 16,
+    },
+    userCard: {
+        padding: 15,
+        borderRadius: 16,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
+    },
+    userHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 15,
+    },
+    userInfoMain: {
+        flex: 1,
+    },
+    userName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    userEmail: {
+        fontSize: 12,
+        color: '#94a3b8',
+    },
+    userUuid: {
+        fontSize: 10,
+        color: '#64748b',
+        marginTop: 2,
+    },
+    userStatsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        padding: 10,
+        borderRadius: 12,
+        marginBottom: 15,
+    },
+    userStatItem: {
+        alignItems: 'center',
+        flex: 1,
+    },
+    userStatValue: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#fff',
+        marginTop: 2,
+    },
+    userStatLabel: {
+        fontSize: 10,
+        color: '#64748b',
+    },
+    userFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    userDate: {
+        fontSize: 10,
+        color: '#64748b',
+    },
+    editBalanceButton: {
+        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    editBalanceText: {
+        color: '#38bdf8',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+        padding: 20,
+    },
+    modalContent: {
+        backgroundColor: '#1e293b',
+        borderRadius: 20,
+        padding: 20,
+        width: '100%',
+        maxWidth: 400,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#fff',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    modalLabel: {
+        color: '#94a3b8',
+        fontSize: 12,
+        marginBottom: 5,
+        marginTop: 15,
+    },
+    modalInput: {
+        backgroundColor: '#0f172a',
+        borderRadius: 10,
+        padding: 12,
+        color: '#fff',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    modalActions: {
+        flexDirection: 'row',
+        gap: 10,
+        marginTop: 30,
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    cancelButton: {
+        backgroundColor: 'rgba(255,255,255,0.05)',
+    },
+    saveButton: {
+        backgroundColor: '#38bdf8',
+    },
+    modalButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    winnerCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        borderRadius: 16,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
+    },
+    winnerInfo: {
+        flex: 1,
+    },
+    winnerName: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+    winnerPrize: {
+        color: '#fbbf24',
+        fontSize: 13,
+        fontWeight: '600',
+        marginTop: 2,
+    },
+    winnerDate: {
+        color: '#64748b',
+        fontSize: 11,
+        marginTop: 4,
+    },
+    deleteWinnerButton: {
+        padding: 10,
     },
 });
 

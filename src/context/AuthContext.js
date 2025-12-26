@@ -211,13 +211,13 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (email, password, username, referralCode, birthYear, tosAccepted, privacyPolicyAccepted, remember = true) => {
+    const register = async (email, password, username, referralCode, ageVerified, tosAccepted, privacyPolicyAccepted, remember = true) => {
         try {
             // Detect device language and region
             const deviceLanguage = Localization.locale || null; // e.g., "en-US"
             const deviceRegion = Localization.region || null; // e.g., "US"
 
-            const data = await apiService.register(email, password, username, referralCode, deviceLanguage, deviceRegion, birthYear, tosAccepted, privacyPolicyAccepted);
+            const data = await apiService.register(email, password, username, referralCode, deviceLanguage, deviceRegion, ageVerified, tosAccepted, privacyPolicyAccepted);
             if (data.user) {
                 setUser(data.user);
 

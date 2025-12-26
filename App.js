@@ -28,6 +28,8 @@ import AdminSponsorsScreen from './src/screens/AdminSponsorsScreen';
 import PredictionHistoryScreen from './src/screens/PredictionHistoryScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState } from 'react';
 
 
 
@@ -52,6 +54,7 @@ const AppNavigator = () => {
       }
     }
   }, [user, isLoading]);
+
 
   // Handle logout - navigate back to Landing when user becomes null
   useEffect(() => {
@@ -131,7 +134,7 @@ export default function App() {
           </NavigationContainer>
         </AuthProvider>
       </ErrorBoundary>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
     </SafeAreaProvider>
   );
 }
@@ -139,6 +142,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: '#F9FAFB',
   },
 });

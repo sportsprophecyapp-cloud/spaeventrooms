@@ -189,7 +189,7 @@ const HelpSupportScreen = () => {
                 {/* App Info */}
                 <View style={styles.appInfo}>
                     <Text style={styles.appName}>Sports Prophecy</Text>
-                    <Text style={styles.versionText}>Version 2.12.5</Text>
+                    <Text style={styles.versionText}>Version 2.13.0</Text>
                     <Text style={styles.appTagline}>100% Free Sports Predictions</Text>
                 </View>
             </ScrollView>

@@ -8,14 +8,17 @@ import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import AppleSignInButton from '../components/AppleSignInButton';
 
+import WinnerSpotlight from '../components/WinnerSpotlight';
+
 const { width } = Dimensions.get('window');
 
 const LandingScreen = ({ navigation }) => {
     const { loginAsGuest } = useAuth();
     const [stats, setStats] = React.useState({ users: 0, predictions: 0 });
+    const [featuredWinner, setFeaturedWinner] = React.useState(null);
 
     React.useEffect(() => {
-        // Fetch real stats from backend using apiService (avoid CORS by using configured base URL)
+        // Fetch real stats
         apiService.getPublicStats()
             .then(data => {
                 setStats({
@@ -26,6 +29,13 @@ const LandingScreen = ({ navigation }) => {
             .catch(err => {
                 // Use defaults if fetch fails
             });
+
+        // Fetch Featured Winner
+        apiService.getFeaturedWinner()
+            .then(winner => {
+                if (winner) setFeaturedWinner(winner);
+            })
+            .catch(err => console.log('No featured winner found or error', err));
     }, []);
 
     // Format numbers for display (e.g., 1234 -> 1.2K)
@@ -80,6 +90,9 @@ const LandingScreen = ({ navigation }) => {
                         <Text style={styles.heroSubtitle}>
                             EARN TOKENS & CROWNS | SPONSOR PRIZE DRAWS
                         </Text>
+
+                        {/* Recent Winner Spotlight */}
+                        <WinnerSpotlight winner={featuredWinner} />
 
                         {/* Stats Row */}
                         <View style={styles.statsRow}>

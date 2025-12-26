@@ -1,239 +1,253 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { getTeamLogo } from '../utils/teamLogos';
-import { Image } from 'react-native';
 
-const GameCard = ({ game, onPress }) => {
-    const formatDate = (dateString) => {
+const GameCard = ({ game, onPress, style }) => {
+    // Format date/time
+    const formatTimeUntil = (dateString) => {
+        if (!dateString) return '';
         const date = new Date(dateString);
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const now = new Date();
+        const diff = date - now;
 
-        const isToday = date.toDateString() === today.toDateString();
-        const isTomorrow = date.toDateString() === tomorrow.toDateString();
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const days = Math.floor(hours / 24);
 
-        if (isToday) {
-            return `Today, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-        } else if (isTomorrow) {
-            return `Tomorrow, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-        } else {
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit'
-            });
-        }
+        if (days > 0) return `${days}d ${hours % 24}h`;
+        if (hours > 0) return `${hours}h`;
+
+        // If passed or very close
+        if (diff < 0) return 'Live/Final';
+        return 'Soon';
     };
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'live':
-                return COLORS.status.error;
-            case 'upcoming':
-                return COLORS.accent.cyan;
-            case 'final':
-                return COLORS.text.tertiary;
-            default:
-                return COLORS.text.secondary;
-        }
+    // Helper for team avatar background
+    const getAvatarColor = (teamName) => {
+        // Simple hash or random color logic could go here, 
+        // for now returning a fixed color or logic based on name length
+        return '#8B5CF6'; // Default Purple
     };
 
-    const isLive = game.status === 'live';
+    const TeamAvatar = ({ teamName, color }) => {
+        const logoUrl = getTeamLogo(teamName);
+
+        return (
+            <View style={[styles.teamAvatar, { backgroundColor: logoUrl ? 'transparent' : color }]}>
+                {logoUrl ? (
+                    <Image
+                        source={{ uri: logoUrl }}
+                        style={{ width: '100%', height: '100%' }}
+                        resizeMode="contain"
+                    />
+                ) : (
+                    <Text style={styles.teamAvatarText}>
+                        {teamName?.substring(0, 3).toUpperCase()}
+                    </Text>
+                )}
+            </View>
+        );
+    };
 
     return (
-        <TouchableOpacity
-            onPress={onPress}
-            activeOpacity={0.8}
-            accessibilityLabel={`Game: ${game.homeTeam} vs ${game.awayTeam}`}
-            testID={`game-card-${game.id}`}
-        >
+        <View style={[styles.gameCard, style]}>
+            {/* Game Header */}
             <LinearGradient
-                colors={COLORS.gradients.dark}
-                style={styles.card}
+                colors={['#1F2937', '#111827']}
+                style={styles.gameHeader}
             >
-                {/* Status Badge */}
-                {isLive && (
-                    <View style={styles.liveBadge}>
-                        <View style={styles.liveDot} />
-                        <Text style={styles.liveText}>LIVE</Text>
-                    </View>
-                )}
+                <View style={styles.gameHeaderLeft}>
+                    <Ionicons name="calendar" size={16} color="#FFF" />
+                    <Text style={styles.gameHeaderText}>
+                        {game.sport_key?.toUpperCase() || game.sport?.toUpperCase() || 'GAME'}
+                    </Text>
+                </View>
+                <View style={styles.gameHeaderRight}>
+                    <Ionicons name="time" size={16} color="#FFF" />
+                    <Text style={styles.gameHeaderText}>
+                        {formatTimeUntil(game.commence_time || game.startTime)}
+                    </Text>
+                </View>
+            </LinearGradient>
 
-                {/* Date/Time */}
-                <Text style={styles.dateText}>{formatDate(game.commence_time || game.startTime)}</Text>
-
-                {/* Teams */}
-                <View style={styles.matchupContainer}>
-                    {/* Home Team */}
-                    <View style={styles.teamSection}>
-                        <View style={styles.teamLogoContainer}>
-                            {getTeamLogo(game.homeTeam) ? (
-                                <Image
-                                    source={{ uri: getTeamLogo(game.homeTeam) }}
-                                    style={styles.teamLogoImage}
-                                    resizeMode="contain"
-                                />
-                            ) : (
-                                <Text style={styles.teamLogoText}>{game.homeTeam?.charAt(0) || 'H'}</Text>
-                            )}
-                        </View>
-                        <Text style={styles.teamName} numberOfLines={2}>{game.homeTeam || 'Home Team'}</Text>
-                    </View>
-
-                    {/* VS */}
-                    <View style={styles.vsContainer}>
-                        <Text style={styles.vsText}>VS</Text>
-                    </View>
-
-                    {/* Away Team */}
-                    <View style={styles.teamSection}>
-                        <View style={styles.teamLogoContainer}>
-                            {getTeamLogo(game.awayTeam) ? (
-                                <Image
-                                    source={{ uri: getTeamLogo(game.awayTeam) }}
-                                    style={styles.teamLogoImage}
-                                    resizeMode="contain"
-                                />
-                            ) : (
-                                <Text style={styles.teamLogoText}>{game.awayTeam?.charAt(0) || 'A'}</Text>
-                            )}
-                        </View>
-                        <Text style={styles.teamName} numberOfLines={2}>{game.awayTeam || 'Away Team'}</Text>
+            {/* Teams */}
+            <View style={styles.teamsContainer}>
+                <View style={styles.team}>
+                    <TeamAvatar teamName={game.home_team || game.homeTeam} color="#8B5CF6" />
+                    <View style={styles.teamInfo}>
+                        <Text style={styles.teamName} numberOfLines={2}>
+                            {game.home_team || game.homeTeam}
+                        </Text>
+                        <Text style={styles.teamLabel}>Home</Text>
                     </View>
                 </View>
 
-                {/* Action Button */}
-                <TouchableOpacity
-                    style={styles.predictButton}
-                    onPress={game.hasPredicted ? null : onPress}
-                    disabled={game.hasPredicted}
-                    accessibilityLabel={game.hasPredicted ? `Prediction already made for ${game.homeTeam} vs ${game.awayTeam}` : `Make Prediction for ${game.homeTeam} vs ${game.awayTeam}`}
-                    testID={`game-predict-button-${game.id}`}
-                >
-                    <LinearGradient
-                        colors={game.hasPredicted ? [COLORS.status.success, COLORS.status.success] : COLORS.gradients.primary}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.predictGradient}
-                    >
-                        <Text style={styles.predictText}>
-                            {game.hasPredicted ? 'PREDICTED' : 'MAKE PREDICTION'}
+                <Text style={styles.vsText}>VS</Text>
+
+                <View style={[styles.team, styles.teamRight]}>
+                    <View style={styles.teamInfo}>
+                        <Text style={[styles.teamName, styles.teamNameRight]} numberOfLines={2}>
+                            {game.away_team || game.awayTeam}
                         </Text>
-                        <Ionicons
-                            name={game.hasPredicted ? "checkmark-circle" : "arrow-forward"}
-                            size={16}
-                            color={COLORS.text.inverse}
-                        />
-                    </LinearGradient>
-                </TouchableOpacity>
-            </LinearGradient>
-        </TouchableOpacity>
+                        <Text style={[styles.teamLabel, styles.teamLabelRight]}>Away</Text>
+                    </View>
+                    <TeamAvatar teamName={game.away_team || game.awayTeam} color="#EF4444" />
+                </View>
+            </View>
+
+            {/* Predict Button */}
+            <TouchableOpacity
+                style={styles.predictButton}
+                onPress={game.hasPredicted ? null : onPress}
+                disabled={game.hasPredicted}
+            >
+                <LinearGradient
+                    colors={game.hasPredicted ? ['#10B981', '#059669'] : ['#2563EB', '#9333EA']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.predictButtonGradient}
+                >
+                    <Text style={styles.predictButtonText}>
+                        {game.hasPredicted ? 'PREDICTED' : 'Make Prediction'}
+                    </Text>
+                </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Cost Info */}
+            <View style={styles.costInfo}>
+                <View style={styles.costItem}>
+                    <Ionicons name="logo-bitcoin" size={16} color="#F59E0B" />
+                    <Text style={styles.costText}>Cost: 1 Token</Text>
+                </View>
+                <View style={styles.costItem}>
+                    <Ionicons name="trophy" size={16} color="#F59E0B" />
+                    <Text style={styles.costText}>Win: +1 Crown</Text>
+                </View>
+            </View>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    card: {
-        borderRadius: BORDER_RADIUS.lg,
-        padding: SPACING.base,
-        marginBottom: SPACING.base,
+    gameCard: {
+        backgroundColor: '#FFF',
+        borderRadius: 16,
+        overflow: 'hidden',
+        marginBottom: 12,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
         borderWidth: 1,
-        borderColor: COLORS.border.tertiary,
-        ...SHADOWS.md,
+        borderColor: '#F3F4F6',
     },
-    liveBadge: {
-        position: 'absolute',
-        top: SPACING.md,
-        right: SPACING.md,
+    gameHeader: {
         flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.status.error,
-        paddingHorizontal: SPACING.sm,
-        paddingVertical: SPACING.xs,
-        borderRadius: BORDER_RADIUS.sm,
-        gap: SPACING.xs,
-    },
-    liveDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: COLORS.text.primary,
-    },
-    liveText: {
-        color: COLORS.text.primary,
-        fontSize: TYPOGRAPHY.sizes.xs,
-        fontWeight: TYPOGRAPHY.weights.black,
-    },
-    dateText: {
-        color: COLORS.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        marginBottom: SPACING.md,
-    },
-    matchupContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: SPACING.base,
+        alignItems: 'center',
+        padding: 12,
     },
-    teamSection: {
+    gameHeaderLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    gameHeaderRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    gameHeaderText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#FFF',
+    },
+    teamsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+    },
+    team: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
         flex: 1,
-        alignItems: 'center',
     },
-    teamLogoContainer: {
-        width: 56,
-        height: 56,
-        borderRadius: BORDER_RADIUS.full,
-        backgroundColor: COLORS.background.card,
-        borderWidth: 2,
-        borderColor: COLORS.accent.cyan,
-        alignItems: 'center',
+    teamRight: {
+        justifyContent: 'flex-end',
+    },
+    teamAvatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         justifyContent: 'center',
-        marginBottom: SPACING.sm,
+        alignItems: 'center',
         overflow: 'hidden',
     },
-    teamLogoImage: {
-        width: '80%',
-        height: '80%',
+    teamAvatarText: {
+        color: '#FFF',
+        fontWeight: 'bold',
+        fontSize: 14,
     },
-    teamLogoText: {
-        fontSize: TYPOGRAPHY.sizes.xl,
-        fontWeight: TYPOGRAPHY.weights.black,
-        color: COLORS.accent.cyan,
+    teamInfo: {
+        flex: 1,
     },
     teamName: {
-        color: COLORS.text.primary,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        fontWeight: TYPOGRAPHY.weights.semibold,
-        textAlign: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#111827',
     },
-    vsContainer: {
-        paddingHorizontal: SPACING.md,
+    teamNameRight: {
+        textAlign: 'right',
+    },
+    teamLabel: {
+        fontSize: 14,
+        color: '#6B7280',
+    },
+    teamLabelRight: {
+        textAlign: 'right',
     },
     vsText: {
-        color: COLORS.text.tertiary,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        fontWeight: TYPOGRAPHY.weights.black,
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#D1D5DB',
+        marginHorizontal: 16,
     },
     predictButton: {
-        borderRadius: BORDER_RADIUS.md,
+        marginHorizontal: 16,
+        marginBottom: 12,
+        borderRadius: 12,
         overflow: 'hidden',
     },
-    predictGradient: {
+    predictButtonGradient: {
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    predictButtonText: {
+        color: '#FFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    costInfo: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 16,
+        paddingVertical: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#F3F4F6',
+    },
+    costItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: SPACING.md,
-        gap: SPACING.sm,
+        gap: 4,
     },
-    predictText: {
-        color: COLORS.text.inverse,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        fontWeight: TYPOGRAPHY.weights.black,
-        letterSpacing: 0.5,
+    costText: {
+        fontSize: 14,
+        color: '#6B7280',
     },
 });
 

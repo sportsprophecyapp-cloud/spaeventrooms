@@ -1,5 +1,39 @@
 # Changelog
 
+## [v2.14.0] - 2025-12-26
+### Authentication & Navigation Refactor
+- **Age Verification**: Replaced birth year input with simple 18+ checkbox during registration
+- **Removed Age Gate**: Eliminated blocking age verification screen on app launch for better UX
+- **Navigation Cleanup**: Removed Chat tab from main navigation (Home → Prizes → Ranks → More)
+- **Backend**: Updated registration endpoint to accept `ageVerified` boolean instead of calculating age from birth year
+
+### Sponsor Ads on Prize Draws Page
+- **New Ad Placement**: Sponsors can now advertise specifically on the Prize Draws page
+- **Placement Options**: Three choices - Main Pages, Prize Draws Page, or All Pages (premium)
+- **Ad Rotation**: Automatic 10-second rotation when multiple sponsors buy same placement
+- **Backend**: Added `placement` field to Sponsor schema and new `/api/sponsors/prize-draws` endpoint
+- **UI**: Two banner slots on Prize Draws page (top and mid-page) with "Sponsored" labels
+
+### Prize Draw Winner Selection Fix
+- **Improved Randomization**: Implemented Fisher-Yates shuffle algorithm for truly random winner selection
+- **Bug Fix**: Resolved issue where same winner was being selected repeatedly
+- **Better Algorithm**: Replaced simple `Math.random()` with proper shuffling for fair draws
+
+### Technical Improvements
+- **HomeScreen Fix**: Updated to use AuthContext for user data instead of broken AsyncStorage calls
+- **Debug Logging**: Added console logging to help troubleshoot user data display issues
+- **Code Quality**: Improved winner selection logic with industry-standard randomization
+
+## [v2.13.1] - 2025-12-25
+- **UI Overhaul**: Switched entire application to a new "Light Mode" aesthetic with premium white/gray themes.
+- **Navigation Fix**: Resolved bug where some game screens would render without a title.
+- **Design Alignment**: Updated navigation bar and status bar to match the new light theme.
+
+## [v2.13.0] - 2025-12-23
+- **Referral Code Fix**: Resolved issue with "LOADING" and duplicate referral codes via migration script.
+- **Analytics Fix**: Fixed broken Admin Analytics dashboard by restoring missing backend API method.
+- **Production Cleanup**: Removed debug logs, fixed critical TODOs, and updated security settings.
+
 ## [v2.12.5] - 2025-12-20
 - **Super-Admin Protection**: Implemented permanent admin rights for sportsprophecyapp@gmail.com.
 - **Security Enhancement**: Super-admin account cannot be demoted or managed by other administrators.

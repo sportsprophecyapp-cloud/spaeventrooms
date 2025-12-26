@@ -7,8 +7,34 @@ import { useAuth } from '../context/AuthContext';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { getTeamLogo } from '../utils/teamLogos';
 
+const CONFIDENCE_OPTIONS = [
+    {
+        id: 'normal',
+        label: 'Standard',
+        tokenCost: 1,
+        crownReward: 1,
+        description: 'Standard prediction',
+    },
+    {
+        id: 'confident',
+        label: 'Confident',
+        tokenCost: 2,
+        crownReward: 3,
+        description: '3x reward if correct',
+    },
+    {
+        id: 'lock',
+        label: 'Lock Pick 🔒',
+        tokenCost: 5,
+        crownReward: 10,
+        description: '10x reward if correct!',
+        badge: 'ADVANCED',
+    },
+];
+
 const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadNextGame }) => {
     const [selectedWinner, setSelectedWinner] = useState(null);
+    const [confidenceLevel, setConfidenceLevel] = useState('normal');
     const [homeScore, setHomeScore] = useState('');
     const [awayScore, setAwayScore] = useState('');
     const [loading, setLoading] = useState(false);
@@ -55,6 +81,7 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
     useEffect(() => {
         if (visible && event) {
             setSelectedWinner(null);
+            setConfidenceLevel('normal');
             setHomeScore('');
             setAwayScore('');
         }
@@ -62,7 +89,10 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
 
     if (!event) return null;
 
-    const PREDICTION_COST = 1;
+    if (!event) return null;
+
+    const selectedOption = CONFIDENCE_OPTIONS.find(o => o.id === confidenceLevel);
+    const PREDICTION_COST = selectedOption ? selectedOption.tokenCost : 1;
     const hasEnoughTokens = balance.tokens >= PREDICTION_COST;
 
     const handleSubmit = async () => {
@@ -159,7 +189,10 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                 eventId: event.id,
                 predictedWinner: selectedWinner,
                 predictedScores: [homeScoreNum, awayScoreNum],
-                eventType: 'matchup'
+                predictedWinner: selectedWinner,
+                predictedScores: [homeScoreNum, awayScoreNum],
+                eventType: 'matchup',
+                confidenceLevel: confidenceLevel,
             });
 
             // Update balance from response or manual decrement
@@ -256,9 +289,46 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                                 <Text style={styles.costLabel}>Prediction Cost:</Text>
                                 <View style={styles.costValue}>
                                     <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
-                                    <Text style={styles.costText}>{PREDICTION_COST} Token</Text>
+                                    <Text style={styles.costText}>{PREDICTION_COST} Tokens</Text>
                                 </View>
                             </View>
+                        </View>
+
+                        {/* Confidence Selector */}
+                        <Text style={styles.sectionTitle}>Confidence Level</Text>
+                        <View style={styles.confidenceSelector}>
+                            {CONFIDENCE_OPTIONS.map((option) => (
+                                <TouchableOpacity
+                                    key={option.id}
+                                    style={[
+                                        styles.confidenceOption,
+                                        confidenceLevel === option.id && styles.confidenceOptionSelected,
+                                    ]}
+                                    onPress={() => setConfidenceLevel(option.id)}
+                                >
+                                    <View style={styles.confidenceHeader}>
+                                        <Text style={[styles.confidenceLabel, confidenceLevel === option.id && styles.confidenceLabelSelected]}>
+                                            {option.label}
+                                        </Text>
+                                        {option.badge && (
+                                            <View style={styles.badge}>
+                                                <Text style={styles.badgeText}>{option.badge}</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                    <Text style={[styles.confidenceDesc, confidenceLevel === option.id && styles.confidenceDescSelected]}>
+                                        {option.description}
+                                    </Text>
+                                    <View style={styles.confidenceCost}>
+                                        <Text style={[styles.costLabelSmall, confidenceLevel === option.id && styles.costLabelSmallSelected]}>
+                                            Cost: {option.tokenCost}
+                                        </Text>
+                                        <Text style={[styles.rewardLabelSmall, confidenceLevel === option.id && styles.rewardLabelSmallSelected]}>
+                                            Win: {option.crownReward}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
                         </View>
 
                         {/* Rewards Info */}
@@ -798,16 +868,86 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: COLORS.status.error + '20',
-        padding: SPACING.sm,
-        borderRadius: BORDER_RADIUS.sm,
-        marginBottom: SPACING.md,
+        padding: SPACING.base,
+        borderRadius: BORDER_RADIUS.md,
         gap: SPACING.sm,
+        marginTop: SPACING.md,
+        marginBottom: SPACING.xs,
     },
     errorText: {
         color: COLORS.status.error,
         fontSize: TYPOGRAPHY.sizes.sm,
-        fontWeight: TYPOGRAPHY.weights.medium,
+        fontWeight: TYPOGRAPHY.weights.bold,
         flex: 1,
+    },
+    // Confidence Selector Styles
+    confidenceSelector: {
+        gap: SPACING.sm,
+        marginBottom: SPACING.xl,
+    },
+    confidenceOption: {
+        backgroundColor: COLORS.background.card,
+        borderRadius: BORDER_RADIUS.md,
+        padding: SPACING.base,
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+    },
+    confidenceOptionSelected: {
+        borderColor: COLORS.accent.cyan,
+        backgroundColor: 'rgba(0, 212, 255, 0.05)',
+        ...SHADOWS.cyan,
+    },
+    confidenceHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    confidenceLabel: {
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        color: COLORS.text.primary,
+    },
+    confidenceLabelSelected: {
+        color: COLORS.accent.cyan,
+    },
+    badge: {
+        backgroundColor: COLORS.accent.cyan,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    badgeText: {
+        color: COLORS.text.inverse,
+        fontSize: 10,
+        fontWeight: 'bold',
+    },
+    confidenceDesc: {
+        fontSize: TYPOGRAPHY.sizes.sm,
+        color: COLORS.text.secondary,
+        marginBottom: 8,
+    },
+    confidenceDescSelected: {
+        color: COLORS.text.primary,
+    },
+    confidenceCost: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    costLabelSmall: {
+        fontSize: 12,
+        color: COLORS.text.tertiary,
+    },
+    costLabelSmallSelected: {
+        color: COLORS.text.secondary,
+    },
+    rewardLabelSmall: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#FCD34D',
+    },
+    rewardLabelSmallSelected: {
+        color: '#F59E0B',
     },
     submitButtonSuccess: {
         ...SHADOWS.none,
@@ -818,7 +958,6 @@ const styles = StyleSheet.create({
         borderTopColor: COLORS.border.tertiary,
         backgroundColor: COLORS.background.primary,
     },
-
 });
 
 export default PredictionModal;
