@@ -86,7 +86,7 @@ const SportCategoryTabs = () => {
     return (
         <View style={styles.container}>
             <View style={styles.pillsContainer}>
-                {SPORTS.map((sport) => (
+                {(Array.isArray(SPORTS) ? SPORTS : []).map((sport) => (
                     <SportPill
                         key={sport.id}
                         sport={sport}

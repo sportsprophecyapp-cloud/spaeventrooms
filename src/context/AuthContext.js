@@ -102,22 +102,26 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         let interval;
         let notifInterval;
+        let notifTimeoutId;
 
         if (authState.user && authState.user.uuid && !authState.user.isGuest && authState.user.uuid !== 'guest') {
-            checkNotifications();
-
             interval = setInterval(refreshUser, 30000);
-            notifInterval = setInterval(checkNotifications, 60000);
+            notifTimeoutId = setTimeout(() => {
+                checkNotifications();
+                notifInterval = setInterval(checkNotifications, 60000);
+            }, 500);
 
             return () => {
                 clearInterval(interval);
                 clearInterval(notifInterval);
+                clearTimeout(notifTimeoutId);
             };
         }
 
         return () => {
             if (interval) clearInterval(interval);
             if (notifInterval) clearInterval(notifInterval);
+            if (notifTimeoutId) clearTimeout(notifTimeoutId);
         };
     }, [authState.user?.uuid]);
 
@@ -157,55 +161,63 @@ export const AuthProvider = ({ children }) => {
     const checkNotifications = async () => {
         if (!authState.user || authState.user.isGuest || authState.user.uuid === 'guest') return;
 
-        try {
-            // 🟡 Track API call
+        setTimeout(() => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 1500);
             const apiCallId = sessionMonitor.startAPICall('/notifications');
 
-            const notifications = await apiService.getNotifications(authState.user.uuid);
-            sessionMonitor.endAPICall(apiCallId, true);
+            apiService
+                .getNotifications(authState.user.uuid, { signal: controller.signal })
+                .then(async (notifications) => {
+                    clearTimeout(timeoutId);
+                    sessionMonitor.endAPICall(apiCallId, true);
 
-            if (!notifications || !Array.isArray(notifications) || notifications.length === 0) {
-                return;
-            }
-
-            const lastSeenId = await storage.getItem(`lastSeenNotif_${authState.user.uuid}`);
-            const adminNotifs = notifications.filter(n => n.type === 'admin');
-
-            if (adminNotifs.length === 0) return;
-
-            const latestNotif = adminNotifs[0];
-
-            if (latestNotif._id !== lastSeenId && latestNotif._id !== lastAlertedNotifId) {
-                const handleAcknowledge = async () => {
-                    try {
-                        await apiService.acknowledgeWarning();
-                        await refreshUser();
-                    } catch (e) {
-                        console.error('Failed to acknowledge warning:', e);
+                    if (!Array.isArray(notifications) || notifications.length === 0) {
+                        return;
                     }
-                };
 
-                if (Platform.OS === 'web') {
-                    window.alert(`🛡️ Administrator Message\n\n${latestNotif.message}`);
-                    handleAcknowledge();
-                } else {
-                    Alert.alert(
-                        '🛡️ Administrator Message',
-                        latestNotif.message,
-                        [{
-                            text: 'Acknowledged',
-                            onPress: handleAcknowledge
-                        }]
-                    );
-                }
+                    const lastSeenId = await storage.getItem(`lastSeenNotif_${authState.user.uuid}`);
+                    const adminNotifs = (Array.isArray(notifications) ? notifications : []).filter(n => n?.type === 'admin');
 
-                setLastAlertedNotifId(latestNotif._id);
-                await storage.setItem(`lastSeenNotif_${authState.user.uuid}`, latestNotif._id);
-            }
-        } catch (error) {
-            console.error('Error in notification poller:', error);
-            sessionMonitor.endAPICall(apiCallId, false, error);
-        }
+                    if (!Array.isArray(adminNotifs) || adminNotifs.length === 0) return;
+
+                    const latestNotif = adminNotifs[0];
+                    if (!latestNotif?._id) return;
+
+                    if (latestNotif._id !== lastSeenId && latestNotif._id !== lastAlertedNotifId) {
+                        const handleAcknowledge = async () => {
+                            try {
+                                await apiService.acknowledgeWarning();
+                                await refreshUser();
+                            } catch (e) {
+                                console.error('Failed to acknowledge warning:', e);
+                            }
+                        };
+
+                        if (Platform.OS === 'web') {
+                            window.alert(`🛡️ Administrator Message\n\n${latestNotif.message || ''}`);
+                            handleAcknowledge();
+                        } else {
+                            Alert.alert(
+                                '🛡️ Administrator Message',
+                                latestNotif.message || '',
+                                [{
+                                    text: 'Acknowledged',
+                                    onPress: handleAcknowledge
+                                }]
+                            );
+                        }
+
+                        setLastAlertedNotifId(latestNotif._id);
+                        await storage.setItem(`lastSeenNotif_${authState.user.uuid}`, latestNotif._id);
+                    }
+                })
+                .catch((error) => {
+                    clearTimeout(timeoutId);
+                    console.log('[Auth] Notifications check deferred/timed out - keeping app stable.');
+                    sessionMonitor.endAPICall(apiCallId, false, error);
+                });
+        }, 500);
     };
 
     const checkDailyReward = async (userId, isGuest = false) => {

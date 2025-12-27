@@ -113,7 +113,7 @@ const ProfileScreen = () => {
 
             // Create fake notifications for resolved predictions (legacy/fallback)
             const wonPredictions = (userPredictions || []).filter(p => p.resolved && p.won);
-            const predictionNotifs = wonPredictions.map(p => ({
+            const predictionNotifs = (Array.isArray(wonPredictions) ? wonPredictions : []).map(p => ({
                 id: `pred-${p.id}`,
                 type: 'win',
                 message: `You won your prediction on ${p.eventName || 'a game'}!`,
@@ -277,11 +277,12 @@ const ProfileScreen = () => {
     const isBadgeUnlocked = (badge) => {
         if (!user || user.isGuest) return false;
 
-        const wins = predictions.filter(p => p.resolved && (p.result?.won || p.won)).length;
+        const safePredictions = Array.isArray(predictions) ? predictions : [];
+        const wins = safePredictions.filter(p => p && p.resolved && (p.result?.won || p.won)).length;
 
         switch (badge.unlockType) {
             case 'predictions':
-                return predictions.length >= badge.unlockThreshold;
+                return safePredictions.length >= badge.unlockThreshold;
             case 'wins':
                 return wins >= badge.unlockThreshold;
             case 'roomsCreated':
@@ -393,8 +394,8 @@ const ProfileScreen = () => {
         }
     };
 
-    const totalPredictions = predictions.length;
-    const wonPredictions = predictions.filter(p => p.resolved && (p.result?.won || p.won)).length;
+    const totalPredictions = Array.isArray(predictions) ? predictions.length : 0;
+    const wonPredictions = (Array.isArray(predictions) ? predictions : []).filter(p => p && p.resolved && (p.result?.won || p.won)).length;
     const winRate = totalPredictions > 0 ? Math.round((wonPredictions / totalPredictions) * 100) : 0;
 
     const filteredPredictions = React.useMemo(() => {
@@ -405,11 +406,11 @@ const ProfileScreen = () => {
 
         // Filter
         if (activeFilter === 'won') {
-            result = result.filter(p => p.resolved && (p.result?.won || p.won));
+            result = result.filter(p => p && p.resolved && (p.result?.won || p.won));
         } else if (activeFilter === 'lost') {
-            result = result.filter(p => p.resolved && !(p.result?.won || p.won));
+            result = result.filter(p => p && p.resolved && !(p.result?.won || p.won));
         } else if (activeFilter === 'pending') {
-            result = result.filter(p => !p.resolved);
+            result = result.filter(p => p && !p.resolved);
         }
 
         // Sort
@@ -710,7 +711,7 @@ const ProfileScreen = () => {
                             style={styles.categoryScroll}
                             contentContainerStyle={styles.categoryContainer}
                         >
-                            {AVATAR_CATEGORIES.map(category => (
+                            {(Array.isArray(AVATAR_CATEGORIES) ? AVATAR_CATEGORIES : []).map(category => (
                                 <TouchableOpacity
                                     key={category}
                                     style={[
@@ -732,7 +733,7 @@ const ProfileScreen = () => {
                         <ScrollView style={styles.presetsScrollView}>
                             <View style={styles.presetsGrid}>
                                 {activeCategory === 'Badges' ? (
-                                    BADGE_AVATARS.map((badge) => {
+                                    (Array.isArray(BADGE_AVATARS) ? BADGE_AVATARS : []).map((badge) => {
                                         const unlocked = isBadgeUnlocked(badge);
                                         const isEquipped = user?.selectedBadge === badge.id;
 

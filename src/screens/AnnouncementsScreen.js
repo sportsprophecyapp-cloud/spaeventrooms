@@ -38,7 +38,7 @@ const AnnouncementsScreen = ({ navigation }) => {
                     <Text style={styles.sectionTitle}>🎁 Support The Sponsors - They Supply The Prizes!</Text>
 
                     {/* Dynamic Sponsors */}
-                    {sponsors.map((sponsor) => (
+                    {(Array.isArray(sponsors) ? sponsors : []).map((sponsor) => (
                         <SponsorBanner key={sponsor._id} sponsor={sponsor} style={{ marginTop: SPACING.md }} />
                     ))}
 

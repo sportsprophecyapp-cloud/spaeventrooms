@@ -191,7 +191,11 @@ class MapSafetyChecker {
     printResults() {
         if (this.results.length === 0) {
             console.log('\n✅ No unsafe .map() calls found!\n');
-            return;
+            return {
+                filesAffected: 0,
+                totalIssues: 0,
+                results: [],
+            };
         }
 
         console.log('\n' + '='.repeat(80));

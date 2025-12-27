@@ -284,12 +284,34 @@ const ChatScreen = () => {
     if (room) {
       // Add to joinedRooms if not already there, maintain max 3
       setJoinedRooms(prev => {
-        const exists = prev.find(r => r._id === room._id);
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const exists = safePrev.find(r => r._id === room._id);
         if (exists) return prev;
-        const newJoined = [room, ...prev].slice(0, 3);
+        const newJoined = [room, ...safePrev].slice(0, 3);
         return newJoined;
       });
     }
+  };
+
+  const handleExitRoom = (room) => {
+    if (!room) return;
+    Alert.alert(
+      'Leave Room',
+      `Are you sure you want to leave ${room.name}? You will need to join it again to see messages.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Leave',
+          style: 'destructive',
+          onPress: () => {
+            setJoinedRooms(prev => (Array.isArray(prev) ? prev : []).filter(r => r?._id !== room._id));
+            if (activeTab === room._id || activeRoom?._id === room._id) {
+              handleLeaveRoom();
+            }
+          },
+        },
+      ]
+    );
   };
 
   // --- Chat Logic ---
@@ -348,7 +370,7 @@ const ChatScreen = () => {
       message: text,
       pending: true
     };
-    setMessages(prev => [...prev, tempMsg]);
+    setMessages(prev => (Array.isArray(prev) ? [...prev, tempMsg] : [tempMsg]));
 
     try {
       await apiService.sendChat({
@@ -365,7 +387,7 @@ const ChatScreen = () => {
       console.error('Failed to send message', error);
       Alert.alert('Message Not Sent', error.error || 'Failed to send message. Please try again.');
       // Remove the optimistic message on failure
-      setMessages(prev => prev.filter(m => m.id !== tempMsg.id));
+      setMessages(prev => (Array.isArray(prev) ? prev.filter(m => m?.id !== tempMsg.id) : []));
     } finally {
       setSending(false);
     }
@@ -375,27 +397,6 @@ const ChatScreen = () => {
     setActiveRoom(null);
     setActiveTab('lobby');
     setMessages([]);
-  };
-
-  const handleExitRoom = (room) => {
-    if (!room) return;
-    Alert.alert(
-      'Leave Room',
-      `Are you sure you want to leave ${room.name}? You will need to join it again to see messages.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Leave',
-          style: 'destructive',
-          onPress: () => {
-            setJoinedRooms(prev => prev.filter(r => r._id !== room._id));
-            if (activeTab === room._id || activeRoom?._id === room._id) {
-              handleLeaveRoom();
-            }
-          }
-        }
-      ]
-    );
   };
 
   // --- Room Sponsorship Logic ---
@@ -765,7 +766,7 @@ const ChatScreen = () => {
         </TouchableOpacity>
 
         {/* Dynamic Joined Rooms */}
-        {joinedRooms.map((room) => (
+        {(Array.isArray(joinedRooms) ? joinedRooms : []).map((room) => (
           <TouchableOpacity
             key={room._id}
             style={[styles.tab, activeTab === room._id && styles.activeTab]}
@@ -836,7 +837,7 @@ const ChatScreen = () => {
       ) : (
         <FlatList
           ref={flatListRef}
-          data={messages.filter(m => !blockedUsers.includes(m.sender_id))}
+          data={(Array.isArray(messages) ? messages : []).filter(m => !blockedUsers.includes(m.sender_id))}
           renderItem={renderMessageItem}
           keyExtractor={(item) => (item._id || item.id).toString()}
           contentContainerStyle={styles.listContent}
@@ -871,7 +872,7 @@ const ChatScreen = () => {
   );
 
   const renderJoinView = () => {
-    const filteredRooms = rooms.filter(room => {
+    const filteredRooms = (Array.isArray(rooms) ? rooms : []).filter(room => {
       if (filterType === 'all') return true;
       return room.type === filterType;
     });
@@ -1213,7 +1214,7 @@ const ChatScreen = () => {
             </View>
 
             <ScrollView style={{ maxHeight: 300 }}>
-              {WARNING_PRESETS.map((preset, index) => (
+              {(Array.isArray(WARNING_PRESETS) ? WARNING_PRESETS : []).map((preset, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.presetItem}

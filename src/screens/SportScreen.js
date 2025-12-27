@@ -61,7 +61,7 @@ const SportScreen = () => {
             const safePredictions = Array.isArray(predictionsData) ? predictionsData : [];
 
             // 🛡️ FIX #2b: Safely extract prediction IDs with fallback
-            const backendPredictedIds = safePredictions
+            const backendPredictedIds = (Array.isArray(safePredictions) ? safePredictions : [])
                 .map(p => p?.eventId)
                 .filter(Boolean); // Remove null/undefined
 
@@ -74,7 +74,7 @@ const SportScreen = () => {
             const allPredictedIds = new Set([...backendPredictedIds, ...localPredictedIds]);
 
             // 🛡️ FIX #2d: Map with null checks on each event
-            const eventsWithStatus = safeEvents.map(event => {
+            const eventsWithStatus = (Array.isArray(safeEvents) ? safeEvents : []).map(event => {
                 if (!event || typeof event !== 'object') {
                     return null; // Skip malformed events
                 }
@@ -296,7 +296,7 @@ const SportScreen = () => {
 
         // 🛡️ IRON-CLAD MAP: Triple-layer safety on games list
         return (Array.isArray(upcomingEvents) && upcomingEvents.length > 0) ? (
-            upcomingEvents.map((event, index) => {
+            (Array.isArray(upcomingEvents) ? upcomingEvents : []).map((event, index) => {
                 // Layer 1: Validate event exists and is object
                 if (!event || typeof event !== 'object') {
                     return null;

@@ -116,7 +116,7 @@ export const apiService = {
             return [];
         } catch (error) {
             console.error('Error fetching events:', error);
-            return []; // Always return empty array to prevent .map() crashes
+            return []; // Always return empty array to prevent map crashes
         }
     },
 
@@ -456,9 +456,9 @@ export const apiService = {
         }
     },
 
-    getNotifications: async (userId) => {
+    getNotifications: async (userId, config = {}) => {
         try {
-            const response = await api.get(`/notifications/${userId}`);
+            const response = await api.get(`/notifications/${userId}`, config);
             return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
             console.error('Error fetching notifications:', error);

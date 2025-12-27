@@ -235,7 +235,7 @@ const AdminScreen = ({ navigation }) => {
 
 
     const handleTogglePermission = (role, permission) => {
-        setRolePermissions(prev => prev.map(rp => {
+        setRolePermissions(prev => (Array.isArray(prev) ? prev : []).map(rp => {
             if (rp.role === role) {
                 return {
                     ...rp,
@@ -674,7 +674,7 @@ const AdminScreen = ({ navigation }) => {
             </View>
 
             {/* User List */}
-            {allUsers.length === 0 ? (
+            {(Array.isArray(allUsers) ? allUsers : []).length === 0 ? (
                 <View style={styles.emptyCard}>
                     <Text style={styles.emptyText}>No users found. Try a different search.</Text>
                 </View>

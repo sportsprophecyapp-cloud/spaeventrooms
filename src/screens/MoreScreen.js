@@ -91,7 +91,7 @@ const MoreScreen = ({ navigation }) => {
 
                     {/* Menu Items */}
                     <View style={styles.menuContainer}>
-                        {menuItems.map((item, index) => (
+                        {(Array.isArray(menuItems) ? menuItems : []).map((item, index) => (
                             <TouchableOpacity
                                 key={index}
                                 style={styles.menuItem}

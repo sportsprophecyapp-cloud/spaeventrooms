@@ -66,7 +66,7 @@ export default function HomeScreen({ navigation }) {
       // 2. Fetch games with explicit type checking
       try {
         const gamesData = await apiService.getEvents();
-        const safeGames = Array.isArray(gamesData) ? gamesData.slice(0, 3) : [];
+        const safeGames = (Array.isArray(gamesData) ? gamesData : []).slice(0, 3);
         setGames(safeGames);
       } catch (gameError) {
         console.error('Error fetching games:', gameError);
@@ -160,7 +160,7 @@ export default function HomeScreen({ navigation }) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.greeting}>Welcome Test v2.18.12 🎯</Text>
+          <Text style={styles.greeting}>Welcome Test v2.18.15 🎯</Text>
           <View style={styles.balanceRow}>
             <Text>{user?.username || user?.idName || 'User'}</Text>
           </View>
@@ -257,7 +257,7 @@ export default function HomeScreen({ navigation }) {
         {/* 🛡️ THE IRON-CLAD AIRBAG: Triple-layer safety check */}
         {Array.isArray(games) && games.length > 0 ? (
           // Layer 1: Verify games is array
-          games.map((game, index) => {
+          (Array.isArray(games) ? games : []).map((game, index) => {
             // Layer 2: Verify each game object exists
             if (!game) return null;
 

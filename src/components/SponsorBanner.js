@@ -36,7 +36,7 @@ const SponsorBanner = ({ style, sponsor = null }) => {
 
             setSponsors(activeSponsors);
 
-            if (activeSponsors && activeSponsors.length > 0) {
+            if (Array.isArray(activeSponsors) && activeSponsors.length > 0) {
                 // Pick a random sponsor to start
                 const randomIndex = Math.floor(Math.random() * activeSponsors.length);
                 setCurrentSponsor(activeSponsors[randomIndex]);

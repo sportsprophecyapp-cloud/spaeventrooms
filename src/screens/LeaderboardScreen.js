@@ -287,7 +287,7 @@ const LeaderboardScreen = ({ navigation }) => {
                 </View>
             ) : (
                 <FlatList
-                    data={leaderboardData}
+                    data={(Array.isArray(leaderboardData) ? leaderboardData : [])}
                     renderItem={renderItem}
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.listContent}

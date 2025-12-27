@@ -227,7 +227,7 @@ const PrizeDrawsScreen = ({ navigation }) => {
                     {/* Upcoming Draws */}
                     <Text style={styles.sectionTitle}>Upcoming Draws</Text>
                     {upcomingDraws.length > 0 ? (
-                        upcomingDraws.map((draw) => (
+                        (Array.isArray(upcomingDraws) ? upcomingDraws : []).map((draw) => (
                             <View key={draw.id} style={styles.upcomingCard}>
                                 <View style={styles.upcomingInfo}>
                                     <Text style={styles.upcomingTitle}>{draw.title}</Text>

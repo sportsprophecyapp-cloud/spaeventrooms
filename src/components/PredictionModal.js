@@ -33,6 +33,7 @@ const CONFIDENCE_OPTIONS = [
 ];
 
 const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuccess, onLoadNextGame }) => {
+    if (!visible || !event || typeof event !== 'object' || !event.id) return null;
     const [selectedWinner, setSelectedWinner] = useState(null);
     const [confidenceLevel, setConfidenceLevel] = useState('normal');
     const [homeScore, setHomeScore] = useState('');
@@ -107,10 +108,6 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
             setAwayScore('');
         }
     }, [visible, event, initialTeam]);
-
-    if (!event) return null;
-
-    if (!event) return null;
 
     const selectedOption = CONFIDENCE_OPTIONS.find(o => o.id === confidenceLevel);
     const PREDICTION_COST = selectedOption ? selectedOption.tokenCost : 1;
@@ -284,7 +281,7 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                             {/* Confidence Selector */}
                             <Text style={styles.sectionTitle}>Confidence Level</Text>
                             <View style={styles.confidenceSelector}>
-                                {CONFIDENCE_OPTIONS.map((option) => (
+                                {(Array.isArray(CONFIDENCE_OPTIONS) ? CONFIDENCE_OPTIONS : []).map((option) => (
                                     <TouchableOpacity
                                         key={option.id}
                                         style={[
@@ -353,26 +350,26 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                                 <TouchableOpacity
                                     style={[
                                         styles.teamContainer,
-                                        selectedWinner && selectedWinner !== event.homeTeam && styles.teamUnselected
+                                        selectedWinner && event?.homeTeam && selectedWinner !== event.homeTeam && styles.teamUnselected
                                     ]}
-                                    onPress={() => setSelectedWinner(event.homeTeam)}
-                                    accessibilityLabel={`Select ${event.homeTeam} as Winner`}
+                                    onPress={() => event?.homeTeam && setSelectedWinner(event.homeTeam)}
+                                    accessibilityLabel={`Select ${event?.homeTeam || 'Home'} as Winner`}
                                     testID="prediction-select-home"
                                 >
                                     <View style={[
                                         styles.logoContainer,
                                         selectedWinner === event.homeTeam && styles.logoSelected
                                     ]}>
-                                        {getTeamLogo(event.homeTeam) ? (
+                                        {event?.homeTeam && getTeamLogo(event.homeTeam) ? (
                                             <Image
                                                 source={{ uri: getTeamLogo(event.homeTeam) }}
                                                 style={styles.logoImage}
                                                 resizeMode="contain"
                                             />
                                         ) : (
-                                            <Text style={styles.logoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
+                                            <Text style={styles.logoText}>{event?.homeTeam?.charAt(0) || 'H'}</Text>
                                         )}
-                                        {selectedWinner === event.homeTeam && (
+                                        {selectedWinner === event?.homeTeam && (
                                             <View style={styles.checkBadge}>
                                                 <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
                                             </View>
@@ -380,8 +377,8 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                                     </View>
                                     <Text style={[
                                         styles.teamName,
-                                        selectedWinner === event.homeTeam && styles.teamNameSelected
-                                    ]} numberOfLines={2}>{event.homeTeam || 'Home Team'}</Text>
+                                        selectedWinner === event?.homeTeam && styles.teamNameSelected
+                                    ]} numberOfLines={2}>{event?.homeTeam || 'Home Team'}</Text>
                                 </TouchableOpacity>
 
                                 <View style={styles.vsContainer}>
@@ -391,26 +388,26 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                                 <TouchableOpacity
                                     style={[
                                         styles.teamContainer,
-                                        selectedWinner && selectedWinner !== event.awayTeam && styles.teamUnselected
+                                        selectedWinner && event?.awayTeam && selectedWinner !== event.awayTeam && styles.teamUnselected
                                     ]}
-                                    onPress={() => setSelectedWinner(event.awayTeam)}
-                                    accessibilityLabel={`Select ${event.awayTeam} as Winner`}
+                                    onPress={() => event?.awayTeam && setSelectedWinner(event.awayTeam)}
+                                    accessibilityLabel={`Select ${event?.awayTeam || 'Away'} as Winner`}
                                     testID="prediction-select-away"
                                 >
                                     <View style={[
                                         styles.logoContainer,
                                         selectedWinner === event.awayTeam && styles.logoSelected
                                     ]}>
-                                        {getTeamLogo(event.awayTeam) ? (
+                                        {event?.awayTeam && getTeamLogo(event.awayTeam) ? (
                                             <Image
                                                 source={{ uri: getTeamLogo(event.awayTeam) }}
                                                 style={styles.logoImage}
                                                 resizeMode="contain"
                                             />
                                         ) : (
-                                            <Text style={styles.logoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
+                                            <Text style={styles.logoText}>{event?.awayTeam?.charAt(0) || 'A'}</Text>
                                         )}
-                                        {selectedWinner === event.awayTeam && (
+                                        {selectedWinner === event?.awayTeam && (
                                             <View style={styles.checkBadge}>
                                                 <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
                                             </View>
@@ -418,8 +415,8 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                                     </View>
                                     <Text style={[
                                         styles.teamName,
-                                        selectedWinner === event.awayTeam && styles.teamNameSelected
-                                    ]} numberOfLines={2}>{event.awayTeam || 'Away Team'}</Text>
+                                        selectedWinner === event?.awayTeam && styles.teamNameSelected
+                                    ]} numberOfLines={2}>{event?.awayTeam || 'Away Team'}</Text>
                                 </TouchableOpacity>
                             </View>
 

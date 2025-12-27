@@ -57,7 +57,7 @@ const WeeklyDrawScreen = ({ navigation }) => {
         try {
             const prizes = await apiService.getActivePrizeSponsors();
             // Transform API data to UI format
-            const formattedPrizes = prizes.map(p => ({
+            const formattedPrizes = (Array.isArray(prizes) ? prizes : []).map(p => ({
                 id: p._id,
                 sponsor: p.sponsorName,
                 prize: p.prizeDetails?.description || 'Prize Draw', // Use sponsor's prize description
@@ -195,7 +195,7 @@ const WeeklyDrawScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {displayDraws.map((draw) => {
+                {(Array.isArray(displayDraws) ? displayDraws : []).map((draw) => {
                     const isEntered = enteredDraws.includes(draw.id);
                     const isPending = pendingConfirmation === draw.id;
                     return (

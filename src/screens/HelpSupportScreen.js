@@ -119,7 +119,7 @@ const HelpSupportScreen = () => {
                         <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
                     </View>
 
-                    {faqs.map((faq) => (
+                    {(Array.isArray(faqs) ? faqs : []).map((faq) => (
                         <TouchableOpacity
                             key={faq.id}
                             style={styles.faqCard}

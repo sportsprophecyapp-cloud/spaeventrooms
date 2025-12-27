@@ -74,7 +74,7 @@ const GameCard = ({ game, onPress, style }) => {
             {/* Game Header */}
             <LinearGradient
                 // 🛡️ Force-Safe colors array
-                colors={COLORS?.gradients?.dark?.length >= 2 ? COLORS.gradients.dark : ['#0f172a', '#1e293b']}
+                colors={(Array.isArray(COLORS?.gradients?.dark) && COLORS.gradients.dark.length >= 2) ? COLORS.gradients.dark : ['#0f172a', '#1e293b']}
                 style={styles.gameHeader}
             >
                 <View style={styles.gameHeaderLeft}>

@@ -131,7 +131,8 @@ class SessionMonitor {
 
     printSummary() {
         const uptime = Date.now() - this.metrics.startTime;
-        const apiCalls = this.metrics.apiCalls.filter(c => c.endTime !== null);
+        const safeApiCalls = Array.isArray(this.metrics.apiCalls) ? this.metrics.apiCalls : [];
+        const apiCalls = (safeApiCalls || []).filter(c => c.endTime !== null);
         const avgApiDuration = apiCalls.length > 0
             ? (apiCalls.reduce((acc, c) => acc + c.duration, 0) / apiCalls.length).toFixed(0)
             : 0;
@@ -156,8 +157,8 @@ class SessionMonitor {
             apiCalls: {
                 count: apiCalls.length,
                 avgDuration: `${avgApiDuration}ms`,
-                maxDuration: `${Math.max(...apiCalls.map(c => c.duration), 0)}ms`,
-                successRate: `${apiCalls.filter(c => c.success).length}/${apiCalls.length}`,
+                maxDuration: `${Math.max(...(apiCalls || []).map(c => c.duration), 0)}ms`,
+                successRate: `${(apiCalls || []).filter(c => c.success).length}/${apiCalls.length}`,
                 slowCount: apiCalls.filter(c => c.duration > this.config.API_THRESHOLD_MS).length
             },
             platform: "react-native"

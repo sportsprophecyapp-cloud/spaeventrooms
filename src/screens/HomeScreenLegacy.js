@@ -30,11 +30,11 @@ const HomeScreen = ({ navigation }) => {
             ]);
 
             // Mark events that user has already predicted on
-            const backendPredictedIds = predictionsData.map(p => p.eventId);
+            const backendPredictedIds = (Array.isArray(predictionsData) ? predictionsData : []).map(p => p.eventId);
             const localPredictedIds = (user?.isGuest && user?.predictedGames) ? user.predictedGames : [];
             const allPredictedIds = new Set([...backendPredictedIds, ...localPredictedIds]);
 
-            const eventsWithStatus = (eventsData || []).map(event => ({
+            const eventsWithStatus = (Array.isArray(eventsData) ? eventsData : []).map(event => ({
                 ...event,
                 hasPredicted: allPredictedIds.has(event.id)
             }));
@@ -90,8 +90,8 @@ const HomeScreen = ({ navigation }) => {
 
     // Filter events by selected sport
     const filteredEvents = selectedSport === 'all'
-        ? events
-        : events.filter(event => event.sport?.toLowerCase() === selectedSport);
+        ? (Array.isArray(events) ? events : [])
+        : (Array.isArray(events) ? events : []).filter(event => event?.sport?.toLowerCase() === selectedSport);
 
     // Get upcoming events in next 48 hours
     const now = new Date();

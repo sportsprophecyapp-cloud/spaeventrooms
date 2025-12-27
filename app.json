@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sports Prophecy",
     "slug": "sportsprophecyapp",
-    "version": "2.17.1",
+    "version": "2.18.16",
     "scheme": "sportsprophecyapp",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,7 @@
       "supportsTablet": true,
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.sportsprophecy.app",
-      "buildNumber": "20",
+      "buildNumber": "21",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSFaceIDUsageDescription": "Allow Sports Prophecy to use FaceID for quick and secure login."
@@ -29,7 +29,7 @@
         "backgroundColor": "#0a1628"
       },
       "package": "com.sportsprophecy.app",
-      "versionCode": 20,
+      "versionCode": 21,
       "edgeToEdgeEnabled": true
     },
     "web": {
