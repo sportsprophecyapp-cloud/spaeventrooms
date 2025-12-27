@@ -140,8 +140,14 @@ export const getAvatarSource = (profilePicture) => {
         const badge = BADGE_AVATARS.find(b => b.id === profilePicture);
         if (badge) return badge;
 
-        // If not a badge ID, treat as URI
-        return { uri: profilePicture };
+        // SAFETY: Only treat as URI if it looks like a valid URL or base64 image
+        // This prevents creating fake URI objects for invalid badge IDs
+        if (profilePicture.startsWith('http') || profilePicture.startsWith('data:')) {
+            return { uri: profilePicture };
+        }
+
+        // Return null for invalid strings instead of creating a fake URI object
+        return null;
     }
 
     // If it's already a require number or object with uri

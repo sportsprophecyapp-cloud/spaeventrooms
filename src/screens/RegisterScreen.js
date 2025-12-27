@@ -8,7 +8,7 @@ import GoogleSignInButton from '../components/GoogleSignInButton';
 import AppleSignInButton from '../components/AppleSignInButton';
 import { BiometricService } from '../services/biometrics';
 
-const RegisterScreen = ({ navigation }) => {
+const RegisterScreen = ({ navigation, isEmbedded = false, onToggleMode }) => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -65,7 +65,7 @@ const RegisterScreen = ({ navigation }) => {
                 // Force navigation to Main with a slight delay
                 // Check for biometric support
                 const { hasHardware, isEnrolled } = await BiometricService.checkBiometricSupport();
-                if (hasHardware && isEnrolled) {
+                if (hasHardware && isEnrolled && !isEmbedded) {
                     Alert.alert(
                         'Enable Biometrics?',
                         'Would you like to enable FaceID/TouchID for faster login next time?',
@@ -105,6 +105,241 @@ const RegisterScreen = ({ navigation }) => {
         if (error) setError('');
     };
 
+    const renderForm = () => (
+        <View style={[styles.formContainer, isEmbedded && styles.embeddedFormContainer]}>
+            {!isEmbedded && (
+                <>
+                    <Text style={styles.title}>Create Account</Text>
+                    <Text style={styles.subtitle}>Join thousands of sports fans</Text>
+                </>
+            )}
+
+            <View style={styles.form}>
+                {/* Error Message */}
+                {error ? (
+                    <View style={styles.errorContainer}>
+                        <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                ) : null}
+
+                {/* Username Input */}
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Username</Text>
+                    <View style={[styles.inputWrapper, error && styles.inputError]}>
+                        <Ionicons name="person-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Choose a username"
+                            placeholderTextColor={COLORS.text.muted}
+                            value={username}
+                            onChangeText={(text) => { setUsername(text); clearError(); }}
+                            autoCapitalize="none"
+                            accessibilityLabel="Username Input"
+                            testID="register-username-input"
+                        />
+                    </View>
+                </View>
+
+                {/* Email Input */}
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Email</Text>
+                    <View style={[styles.inputWrapper, error && styles.inputError]}>
+                        <Ionicons name="mail-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter your email"
+                            placeholderTextColor={COLORS.text.muted}
+                            value={email}
+                            onChangeText={(text) => { setEmail(text); clearError(); }}
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                            accessibilityLabel="Email Input"
+                            testID="register-email-input"
+                        />
+                    </View>
+                </View>
+
+                {/* Password Input */}
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Password</Text>
+                    <View style={[styles.inputWrapper, error && styles.inputError]}>
+                        <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
+                        <TextInput
+                            style={[styles.input, { flex: 1 }]}
+                            placeholder="Create a password"
+                            placeholderTextColor={COLORS.text.muted}
+                            value={password}
+                            onChangeText={(text) => { setPassword(text); clearError(); }}
+                            secureTextEntry={!showPassword}
+                            accessibilityLabel="Password Input"
+                            testID="register-password-input"
+                        />
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)} accessibilityLabel="Toggle Password Visibility" testID="register-toggle-password">
+                            <Ionicons
+                                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                                size={20}
+                                color={COLORS.text.tertiary}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Confirm Password Input */}
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Confirm Password</Text>
+                    <View style={[styles.inputWrapper, error && styles.inputError]}>
+                        <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
+                        <TextInput
+                            style={[styles.input, { flex: 1 }]}
+                            placeholder="Confirm your password"
+                            placeholderTextColor={COLORS.text.muted}
+                            value={confirmPassword}
+                            onChangeText={(text) => { setConfirmPassword(text); clearError(); }}
+                            secureTextEntry={!showConfirmPassword}
+                            accessibilityLabel="Confirm Password Input"
+                            testID="register-confirm-password-input"
+                        />
+                        <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} accessibilityLabel="Toggle Confirm Password Visibility" testID="register-toggle-confirm-password">
+                            <Ionicons
+                                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                                size={20}
+                                color={COLORS.text.tertiary}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Referral Code (Optional) */}
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Referral Code (Optional)</Text>
+                    <View style={styles.inputWrapper}>
+                        <Ionicons name="gift-outline" size={20} color={COLORS.text.tertiary} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter friend's referral code"
+                            placeholderTextColor={COLORS.text.muted}
+                            value={referralCode}
+                            onChangeText={(text) => setReferralCode(text.toUpperCase())}
+                            autoCapitalize="characters"
+                            maxLength={10}
+                            accessibilityLabel="Referral Code Input"
+                            testID="register-referral-code-input"
+                        />
+                    </View>
+                </View>
+
+                {/* Age Verification Checkbox */}
+                <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() => setAgeVerified(!ageVerified)}
+                    accessibilityLabel="Age Verification Checkbox"
+                    testID="register-age-checkbox"
+                >
+                    <View style={[styles.checkbox, ageVerified && styles.checkboxChecked]}>
+                        {ageVerified && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
+                    </View>
+                    <Text style={styles.checkboxText}>
+                        I confirm that I am <Text style={{ color: COLORS.accent.cyan, fontWeight: 'bold' }}>18 years of age or older</Text>.
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Terms of Service Checkbox */}
+                <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() => setTosAccepted(!tosAccepted)}
+                    accessibilityLabel="Terms of Service Checkbox"
+                    testID="register-tos-checkbox"
+                >
+                    <View style={[styles.checkbox, tosAccepted && styles.checkboxChecked]}>
+                        {tosAccepted && (
+                            <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
+                        )}
+                    </View>
+                    <Text style={styles.checkboxText}>
+                        I accept the{' '}
+                        <Text
+                            style={styles.termsLink}
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                navigation.navigate('TermsOfService');
+                            }}
+                        >
+                            Terms of Service
+                        </Text>
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Privacy Policy Checkbox */}
+                <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() => setPrivacyPolicyAccepted(!privacyPolicyAccepted)}
+                    accessibilityLabel="Privacy Policy Checkbox"
+                    testID="register-privacy-checkbox"
+                >
+                    <View style={[styles.checkbox, privacyPolicyAccepted && styles.checkboxChecked]}>
+                        {privacyPolicyAccepted && (
+                            <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
+                        )}
+                    </View>
+                    <Text style={styles.checkboxText}>
+                        I accept the{' '}
+                        <Text
+                            style={styles.termsLink}
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                navigation.navigate('PrivacyPolicy');
+                            }}
+                        >
+                            Privacy Policy
+                        </Text>
+                    </Text>
+                </TouchableOpacity>
+
+
+
+                {/* Register Button */}
+                <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading} accessibilityLabel="Create Account Button" testID="register-submit-button">
+                    <LinearGradient
+                        colors={COLORS.gradients.primary}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.gradientButton}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color={COLORS.text.inverse} />
+                        ) : (
+                            <>
+                                <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
+                                <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />
+                            </>
+                        )}
+                    </LinearGradient>
+                </TouchableOpacity>
+
+
+
+                <GoogleSignInButton />
+                <AppleSignInButton />
+
+                {/* Login Link */}
+                <TouchableOpacity
+                    onPress={() => isEmbedded ? onToggleMode('login') : navigation.navigate('Login')}
+                    accessibilityLabel="Sign In Link"
+                    testID="register-login-link"
+                >
+                    <Text style={styles.linkText}>
+                        Already have an account? <Text style={styles.linkAccent}>Sign In</Text>
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+
+    if (isEmbedded) {
+        return renderForm();
+    }
+
     return (
         <View style={styles.container}>
             <LinearGradient
@@ -126,229 +361,10 @@ const RegisterScreen = ({ navigation }) => {
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    <View style={styles.formContainer}>
-                        <Text style={styles.title}>Create Account</Text>
-                        <Text style={styles.subtitle}>Join thousands of sports fans</Text>
-
-                        <View style={styles.form}>
-                            {/* Error Message */}
-                            {error ? (
-                                <View style={styles.errorContainer}>
-                                    <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
-                                    <Text style={styles.errorText}>{error}</Text>
-                                </View>
-                            ) : null}
-
-                            {/* Username Input */}
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Username</Text>
-                                <View style={[styles.inputWrapper, error && styles.inputError]}>
-                                    <Ionicons name="person-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Choose a username"
-                                        placeholderTextColor={COLORS.text.muted}
-                                        value={username}
-                                        onChangeText={(text) => { setUsername(text); clearError(); }}
-                                        autoCapitalize="none"
-                                        accessibilityLabel="Username Input"
-                                        testID="register-username-input"
-                                    />
-                                </View>
-                            </View>
-
-                            {/* Email Input */}
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Email</Text>
-                                <View style={[styles.inputWrapper, error && styles.inputError]}>
-                                    <Ionicons name="mail-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Enter your email"
-                                        placeholderTextColor={COLORS.text.muted}
-                                        value={email}
-                                        onChangeText={(text) => { setEmail(text); clearError(); }}
-                                        autoCapitalize="none"
-                                        keyboardType="email-address"
-                                        accessibilityLabel="Email Input"
-                                        testID="register-email-input"
-                                    />
-                                </View>
-                            </View>
-
-                            {/* Password Input */}
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Password</Text>
-                                <View style={[styles.inputWrapper, error && styles.inputError]}>
-                                    <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
-                                    <TextInput
-                                        style={[styles.input, { flex: 1 }]}
-                                        placeholder="Create a password"
-                                        placeholderTextColor={COLORS.text.muted}
-                                        value={password}
-                                        onChangeText={(text) => { setPassword(text); clearError(); }}
-                                        secureTextEntry={!showPassword}
-                                        accessibilityLabel="Password Input"
-                                        testID="register-password-input"
-                                    />
-                                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} accessibilityLabel="Toggle Password Visibility" testID="register-toggle-password">
-                                        <Ionicons
-                                            name={showPassword ? "eye-off-outline" : "eye-outline"}
-                                            size={20}
-                                            color={COLORS.text.tertiary}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-
-                            {/* Confirm Password Input */}
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Confirm Password</Text>
-                                <View style={[styles.inputWrapper, error && styles.inputError]}>
-                                    <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
-                                    <TextInput
-                                        style={[styles.input, { flex: 1 }]}
-                                        placeholder="Confirm your password"
-                                        placeholderTextColor={COLORS.text.muted}
-                                        value={confirmPassword}
-                                        onChangeText={(text) => { setConfirmPassword(text); clearError(); }}
-                                        secureTextEntry={!showConfirmPassword}
-                                        accessibilityLabel="Confirm Password Input"
-                                        testID="register-confirm-password-input"
-                                    />
-                                    <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} accessibilityLabel="Toggle Confirm Password Visibility" testID="register-toggle-confirm-password">
-                                        <Ionicons
-                                            name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
-                                            size={20}
-                                            color={COLORS.text.tertiary}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-
-                            {/* Referral Code (Optional) */}
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Referral Code (Optional)</Text>
-                                <View style={styles.inputWrapper}>
-                                    <Ionicons name="gift-outline" size={20} color={COLORS.text.tertiary} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Enter friend's referral code"
-                                        placeholderTextColor={COLORS.text.muted}
-                                        value={referralCode}
-                                        onChangeText={(text) => setReferralCode(text.toUpperCase())}
-                                        autoCapitalize="characters"
-                                        maxLength={10}
-                                        accessibilityLabel="Referral Code Input"
-                                        testID="register-referral-code-input"
-                                    />
-                                </View>
-                            </View>
-
-                            {/* Age Verification Checkbox */}
-                            <TouchableOpacity
-                                style={styles.checkboxContainer}
-                                onPress={() => setAgeVerified(!ageVerified)}
-                                accessibilityLabel="Age Verification Checkbox"
-                                testID="register-age-checkbox"
-                            >
-                                <View style={[styles.checkbox, ageVerified && styles.checkboxChecked]}>
-                                    {ageVerified && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
-                                </View>
-                                <Text style={styles.checkboxText}>
-                                    I confirm that I am <Text style={{ color: COLORS.accent.cyan, fontWeight: 'bold' }}>18 years of age or older</Text>.
-                                </Text>
-                            </TouchableOpacity>
-
-                            {/* Terms of Service Checkbox */}
-                            <TouchableOpacity
-                                style={styles.checkboxContainer}
-                                onPress={() => setTosAccepted(!tosAccepted)}
-                                accessibilityLabel="Terms of Service Checkbox"
-                                testID="register-tos-checkbox"
-                            >
-                                <View style={[styles.checkbox, tosAccepted && styles.checkboxChecked]}>
-                                    {tosAccepted && (
-                                        <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
-                                    )}
-                                </View>
-                                <Text style={styles.checkboxText}>
-                                    I accept the{' '}
-                                    <Text
-                                        style={styles.termsLink}
-                                        onPress={(e) => {
-                                            e.stopPropagation();
-                                            navigation.navigate('TermsOfService');
-                                        }}
-                                    >
-                                        Terms of Service
-                                    </Text>
-                                </Text>
-                            </TouchableOpacity>
-
-                            {/* Privacy Policy Checkbox */}
-                            <TouchableOpacity
-                                style={styles.checkboxContainer}
-                                onPress={() => setPrivacyPolicyAccepted(!privacyPolicyAccepted)}
-                                accessibilityLabel="Privacy Policy Checkbox"
-                                testID="register-privacy-checkbox"
-                            >
-                                <View style={[styles.checkbox, privacyPolicyAccepted && styles.checkboxChecked]}>
-                                    {privacyPolicyAccepted && (
-                                        <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
-                                    )}
-                                </View>
-                                <Text style={styles.checkboxText}>
-                                    I accept the{' '}
-                                    <Text
-                                        style={styles.termsLink}
-                                        onPress={(e) => {
-                                            e.stopPropagation();
-                                            navigation.navigate('PrivacyPolicy');
-                                        }}
-                                    >
-                                        Privacy Policy
-                                    </Text>
-                                </Text>
-                            </TouchableOpacity>
-
-
-
-                            {/* Register Button */}
-                            <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading} accessibilityLabel="Create Account Button" testID="register-submit-button">
-                                <LinearGradient
-                                    colors={COLORS.gradients.primary}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 0 }}
-                                    style={styles.gradientButton}
-                                >
-                                    {loading ? (
-                                        <ActivityIndicator color={COLORS.text.inverse} />
-                                    ) : (
-                                        <>
-                                            <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
-                                            <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />
-                                        </>
-                                    )}
-                                </LinearGradient>
-                            </TouchableOpacity>
-
-
-
-                            <GoogleSignInButton />
-                            <AppleSignInButton />
-
-                            {/* Login Link */}
-                            <TouchableOpacity onPress={() => navigation.navigate('Login')} accessibilityLabel="Sign In Link" testID="register-login-link">
-                                <Text style={styles.linkText}>
-                                    Already have an account? <Text style={styles.linkAccent}>Sign In</Text>
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                    {renderForm()}
                 </ScrollView>
-            </SafeAreaView >
-        </View >
+            </SafeAreaView>
+        </View>
     );
 };
 
@@ -526,6 +542,12 @@ const styles = StyleSheet.create({
     },
     inputError: {
         borderColor: COLORS.status.error,
+    },
+    embeddedFormContainer: {
+        padding: 0,
+        backgroundColor: 'transparent',
+        flex: 0,
+        justifyContent: 'flex-start',
     },
 });
 

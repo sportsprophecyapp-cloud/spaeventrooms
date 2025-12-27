@@ -136,7 +136,7 @@ const LeagueScreen = () => {
                     </TouchableOpacity>
                 </View>
             ) : (
-                leagues.map((league) => (
+                (leagues || []).map((league) => (
                     <TouchableOpacity
                         key={league._id}
                         style={styles.leagueCard}
@@ -312,7 +312,7 @@ const LeagueScreen = () => {
                             </View>
 
                             <Text style={styles.sectionTitle}>Leaderboard</Text>
-                            {leagueLeaderboard.map((player, index) => (
+                            {(leagueLeaderboard || []).map((player, index) => (
                                 <View key={player.uuid} style={styles.leaderboardRow}>
                                     <Text style={styles.rank}>#{index + 1}</Text>
                                     <View style={styles.playerInfo}>

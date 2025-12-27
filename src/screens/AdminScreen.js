@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import api, { apiService } from '../services/api';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 const PERMISSION_DESCRIPTIONS = {
     can_manage_users: "Allows searching for users and viewing their basic profile info.",
@@ -678,7 +679,7 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={styles.emptyText}>No users found. Try a different search.</Text>
                 </View>
             ) : (
-                allUsers.map((u) => (
+                (allUsers || []).map((u) => (
                     <LinearGradient key={u.uuid} colors={['#1e293b', '#0f172a']} style={styles.userCard}>
                         <View style={styles.userHeader}>
                             <View style={styles.userInfoMain}>
@@ -774,8 +775,8 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={styles.emptyText}>No winners history found.</Text>
                 </View>
             ) : (
-                winners.map((win) => (
-                    <LinearGradient key={win._id} colors={['#1e293b', '#0f172a']} style={styles.winnerCard}>
+                (winners || []).map((win) => (
+                    <View key={win._id} style={styles.winnerCard}>
                         <View style={styles.winnerInfo}>
                             <Text style={styles.winnerName}>{win.username}</Text>
                             <Text style={styles.winnerPrize}>{win.prizeName}</Text>
@@ -784,7 +785,7 @@ const AdminScreen = ({ navigation }) => {
                         <TouchableOpacity style={styles.deleteWinnerButton} onPress={() => handleDeleteWinner(win)}>
                             <Ionicons name="trash-outline" size={20} color="#ef4444" />
                         </TouchableOpacity>
-                    </LinearGradient>
+                    </View>
                 ))
             )}
         </View>
@@ -858,7 +859,7 @@ const AdminScreen = ({ navigation }) => {
                         <Text style={styles.emptyText}>No moderators assigned yet</Text>
                     </LinearGradient>
                 ) : (
-                    moderators.map((mod, index) => (
+                    (moderators || []).map((mod, index) => (
                         <LinearGradient key={index} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 10 }]}>
                             <View style={styles.modItem}>
                                 <View style={styles.modInfo}>
@@ -957,7 +958,7 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={styles.emptyText}>No pending applications</Text>
                 </LinearGradient>
             ) : (
-                pendingSponsors.map((sponsor) => (
+                (pendingSponsors || []).map((sponsor) => (
                     <LinearGradient key={sponsor._id} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 20 }]}>
                         <Image source={{ uri: sponsor.bannerUrl }} style={styles.sponsorBanner} resizeMode="cover" />
 
@@ -1050,7 +1051,7 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={{ color: '#94a3b8', textAlign: 'center' }}>No active prize draws</Text>
                 </View>
             ) : (
-                activeSponsors.map(sponsor => (
+                (activeSponsors || []).map(sponsor => (
                     <LinearGradient key={sponsor._id} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 15 }]}>
                         {sponsor.bannerUrl && (
                             <Image source={{ uri: sponsor.bannerUrl }} style={styles.sponsorBanner} resizeMode="cover" />
@@ -1086,7 +1087,7 @@ const AdminScreen = ({ navigation }) => {
             <Text style={styles.sectionTitle}>🔑 Role Permissions</Text>
             <Text style={styles.sectionSubtitle}>Configure what each role can do in the application.</Text>
 
-            {rolePermissions.map((rp) => (
+            {(rolePermissions || []).map((rp) => (
                 <LinearGradient key={rp.role} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 20 }]}>
                     <View style={styles.roleHeader}>
                         <View style={[styles.roleBadge, rp.role === 'admin' && styles.adminRoleBadge]}>
@@ -1102,7 +1103,7 @@ const AdminScreen = ({ navigation }) => {
                     </View>
 
                     <View style={styles.permissionList}>
-                        {Object.entries(rp.permissions).map(([perm, enabled]) => (
+                        {Object.entries(rp?.permissions || {}).map(([perm, enabled]) => (
                             <TouchableOpacity
                                 key={perm}
                                 style={styles.permissionItem}
@@ -1187,7 +1188,7 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={{ color: '#94a3b8' }}>No users found.</Text>
                 </View>
             ) : (
-                userAnalyticsData.map((usr) => (
+                (userAnalyticsData || []).map((usr) => (
                     <LinearGradient key={usr.uuid} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 10 }]}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                             <View>
@@ -1726,15 +1727,15 @@ const styles = StyleSheet.create({
     },
     searchInput: {
         flex: 1,
-        backgroundColor: 'rgba(30, 41, 49, 0.5)',
+        backgroundColor: COLORS.background.secondary,
         borderRadius: 12,
         padding: 12,
-        color: '#fff',
+        color: COLORS.text.primary,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: COLORS.border.secondary,
     },
     searchButton: {
-        backgroundColor: '#38bdf8',
+        backgroundColor: COLORS.accent.cyan,
         paddingHorizontal: 15,
         borderRadius: 12,
         justifyContent: 'center',
@@ -1743,15 +1744,21 @@ const styles = StyleSheet.create({
     emptyCard: {
         padding: 30,
         alignItems: 'center',
-        backgroundColor: 'rgba(30, 41, 59, 0.3)',
+        backgroundColor: COLORS.background.secondary,
         borderRadius: 16,
     },
     userCard: {
         padding: 15,
+        backgroundColor: '#FFFFFF',
         borderRadius: 16,
         marginBottom: 10,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: COLORS.border.secondary,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
     },
     userHeader: {
         flexDirection: 'row',
@@ -1765,22 +1772,22 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#fff',
+        color: COLORS.text.primary,
     },
     userEmail: {
-        fontSize: 12,
-        color: '#94a3b8',
+        fontSize: 13,
+        color: COLORS.text.secondary,
     },
     userUuid: {
-        fontSize: 10,
-        color: '#64748b',
+        fontSize: 11,
+        color: COLORS.text.tertiary,
         marginTop: 2,
     },
     userStatsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        padding: 10,
+        backgroundColor: COLORS.background.secondary,
+        padding: 12,
         borderRadius: 12,
         marginBottom: 15,
     },
@@ -1791,12 +1798,13 @@ const styles = StyleSheet.create({
     userStatValue: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#fff',
+        color: COLORS.text.primary,
         marginTop: 2,
     },
     userStatLabel: {
         fontSize: 10,
-        color: '#64748b',
+        color: COLORS.text.tertiary,
+        textTransform: 'uppercase',
     },
     userFooter: {
         flexDirection: 'row',
@@ -1804,17 +1812,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     userDate: {
-        fontSize: 10,
-        color: '#64748b',
+        fontSize: 11,
+        color: COLORS.text.tertiary,
     },
     editBalanceButton: {
         backgroundColor: 'rgba(56, 189, 248, 0.1)',
         paddingHorizontal: 12,
-        paddingVertical: 6,
+        paddingVertical: 8,
         borderRadius: 8,
     },
     editBalanceText: {
-        color: '#38bdf8',
+        color: COLORS.accent.cyan,
         fontSize: 12,
         fontWeight: 'bold',
     },
@@ -1824,93 +1832,99 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000,
         padding: 20,
     },
     modalContent: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#FFFFFF',
         borderRadius: 20,
-        padding: 20,
+        padding: 24,
         width: '100%',
         maxWidth: 400,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+        elevation: 10,
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 20,
+        color: COLORS.text.primary,
+        marginBottom: 24,
         textAlign: 'center',
     },
     modalLabel: {
-        color: '#94a3b8',
-        fontSize: 12,
-        marginBottom: 5,
-        marginTop: 15,
+        color: COLORS.text.secondary,
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8,
+        marginTop: SPACING.md,
     },
     modalInput: {
-        backgroundColor: '#0f172a',
-        borderRadius: 10,
+        backgroundColor: COLORS.background.secondary,
+        borderRadius: 12,
         padding: 12,
-        color: '#fff',
+        color: COLORS.text.primary,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: COLORS.border.secondary,
     },
     modalActions: {
         flexDirection: 'row',
-        gap: 10,
-        marginTop: 30,
+        gap: 12,
+        marginTop: 32,
     },
     modalButton: {
         flex: 1,
-        paddingVertical: 12,
+        paddingVertical: 14,
         borderRadius: 12,
         alignItems: 'center',
     },
     cancelButton: {
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: COLORS.background.secondary,
     },
     saveButton: {
-        backgroundColor: '#38bdf8',
+        backgroundColor: COLORS.accent.cyan,
     },
     modalButtonText: {
-        color: '#fff',
+        color: '#FFFFFF',
         fontWeight: 'bold',
+        fontSize: 16,
     },
     winnerCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 15,
+        padding: 16,
+        backgroundColor: '#FFFFFF',
         borderRadius: 16,
-        marginBottom: 10,
+        marginBottom: SPACING.md,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: COLORS.border.secondary,
     },
     winnerInfo: {
         flex: 1,
     },
     winnerName: {
-        color: '#fff',
+        color: COLORS.text.primary,
         fontWeight: 'bold',
-        fontSize: 15,
+        fontSize: 16,
     },
     winnerPrize: {
-        color: '#fbbf24',
-        fontSize: 13,
-        fontWeight: '600',
+        color: COLORS.accent.gold,
+        fontSize: 14,
+        fontWeight: '700',
         marginTop: 2,
     },
     winnerDate: {
-        color: '#64748b',
-        fontSize: 11,
+        color: COLORS.text.tertiary,
+        fontSize: 12,
         marginTop: 4,
     },
     deleteWinnerButton: {
-        padding: 10,
+        padding: 12,
     },
 });
 

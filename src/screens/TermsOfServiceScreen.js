@@ -106,16 +106,16 @@ const TermsOfServiceScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>9. User Conduct & Chat Rules</Text>
+                        <Text style={styles.sectionTitle}>9. User Conduct</Text>
                         <Text style={styles.paragraph}>
-                            You agree to behave respectfully in all public chat rooms. We enforce a zero-tolerance policy for:
+                            To keep Sports Prophecy fun and safe for everyone, we enforce a zero-tolerance policy for:
                         </Text>
                         <Text style={styles.bulletPoint}>• Hate speech, harassment, or bullying of any kind</Text>
                         <Text style={styles.bulletPoint}>• Spamming, scamming, or unauthorized self-promotion</Text>
                         <Text style={styles.bulletPoint}>• Impersonating staff or other users</Text>
                         <Text style={styles.bulletPoint}>• Sharing illegal content or promoting illegal activities</Text>
                         <Text style={styles.paragraph}>
-                            Administrators and Moderators have full authority to mute, kick, or ban any user who violates these rules or disrupts the community.
+                            Administrators and Moderators have full authority to suspend or ban any user who violates these rules or disrupts the community.
                         </Text>
                         <Text style={styles.paragraph}>
                             Additionally, you agree not to:

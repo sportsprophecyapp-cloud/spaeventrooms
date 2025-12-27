@@ -39,6 +39,9 @@ const PredictionHistoryScreen = () => {
     };
 
     const filteredPredictions = React.useMemo(() => {
+        // SAFETY: Guard against undefined/null predictions array
+        if (!Array.isArray(predictions)) return [];
+
         let result = [...predictions];
 
         if (activeFilter === 'won') {

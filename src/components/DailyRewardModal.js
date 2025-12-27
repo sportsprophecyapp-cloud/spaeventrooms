@@ -38,7 +38,7 @@ const DailyRewardModal = ({ visible, onClose, rewardData }) => {
             <View style={styles.overlay}>
                 <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
                     <LinearGradient
-                        colors={COLORS.gradients.gold}
+                        colors={COLORS.gradients?.gold || ['#FACC15', '#EAB308']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={styles.gradient}

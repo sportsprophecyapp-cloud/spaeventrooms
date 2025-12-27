@@ -47,8 +47,8 @@ const MainTabNavigator = () => {
                 },
             })}
         >
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Prizes" component={PrizeDrawsScreen} />
+            <Tab.Screen name="Home" component={HomeScreen} options={{}} />
+            <Tab.Screen name="Prizes" component={PrizeDrawsScreen} options={{}} />
             <Tab.Screen name="Leaderboard" component={LeaderboardScreen} options={{ tabBarLabel: 'Ranks', tabBarIcon: ({ color, size }) => (<Ionicons name="trophy-outline" size={size} color={color} />) }} />
             <Tab.Screen name="More" component={MoreScreen} />
         </Tab.Navigator>

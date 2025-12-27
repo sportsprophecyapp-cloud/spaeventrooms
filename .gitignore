@@ -53,5 +53,11 @@ optimized_events.json
 temp_events.json
 token.json
 
-# Backups
-backups_archive
+# Backups & Artifacts
+backups_archive/
+builds/
+*.zip
+*.tar.gz
+*.aab
+*.log
+

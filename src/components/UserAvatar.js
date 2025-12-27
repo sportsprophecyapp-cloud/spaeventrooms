@@ -7,10 +7,18 @@ import { COLORS, SHADOWS } from '../constants/theme';
 
 const UserAvatar = ({ size = 40, profilePicture, selectedBadge, fallbackName, style, showGlow = true, customBadgeSize }) => {
     const source = getAvatarSource(profilePicture);
-    const badgeSource = selectedBadge ? getAvatarSource(selectedBadge) : null;
+    // SAFETY: Only treat as badgeSource if it has all required badge properties
+    const rawBadgeSource = selectedBadge ? getAvatarSource(selectedBadge) : null;
+    const badgeSource = (rawBadgeSource && rawBadgeSource.icon && rawBadgeSource.color && rawBadgeSource.secondaryColor)
+        ? rawBadgeSource
+        : null;
 
     const renderBadge = (badgeObj, badgeSize, isFloating = false) => {
-        if (!badgeObj || !badgeObj.icon) return null;
+        // SAFETY: Ensure ALL required properties exist before rendering LinearGradient
+        // This prevents undefined colors from crashing the gradient's internal .map()
+        if (!badgeObj || !badgeObj.icon || !badgeObj.color || !badgeObj.secondaryColor) {
+            return null;
+        }
 
         return (
             <View style={[

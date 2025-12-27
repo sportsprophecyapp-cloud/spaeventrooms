@@ -77,7 +77,7 @@ const SponsorBanner = ({ style, sponsor = null }) => {
         return (
             <TouchableOpacity onPress={() => navigation.navigate('Sponsor')} style={[styles.container, style]}>
                 <LinearGradient
-                    colors={['#1e293b', '#0f172a']}
+                    colors={COLORS.gradients.dark}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.gradient}
@@ -109,16 +109,16 @@ const SponsorBanner = ({ style, sponsor = null }) => {
                         resizeMode="cover"
                     />
                     <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.7)']}
+                        colors={['transparent', 'rgba(0,0,0,0.8)']}
                         style={styles.imageOverlay}
                     >
-                        <Text style={styles.sponsoredTag}>SPONSORED</Text>
+                        <Text style={styles.sponsoredTag}>PROMOTED</Text>
                     </LinearGradient>
                 </View>
             ) : (
                 // Text/Gradient Banner Fallback (if no image provided, though unlikely for paid ads)
                 <LinearGradient
-                    colors={['#1e293b', '#0f172a']}
+                    colors={COLORS.gradients.dark}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.gradient}

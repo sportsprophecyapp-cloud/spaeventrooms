@@ -10,12 +10,26 @@ import AppleSignInButton from '../components/AppleSignInButton';
 
 import WinnerSpotlight from '../components/WinnerSpotlight';
 
-const { width } = Dimensions.get('window');
+import LoginScreen from './LoginScreen';
+import RegisterScreen from './RegisterScreen';
+import FirstTimeUserView from '../components/FirstTimeUserView';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { APP_VERSION } from '../constants/version';
+
+
+const { width, height } = Dimensions.get('window');
+const { Platform } = require('react-native');
+
 
 const LandingScreen = ({ navigation }) => {
     const { loginAsGuest } = useAuth();
     const [stats, setStats] = React.useState({ users: 0, predictions: 0 });
     const [featuredWinner, setFeaturedWinner] = React.useState(null);
+    const [authMode, setAuthMode] = React.useState('login'); // Default to login in the section
+    const [isFirstTime, setIsFirstTime] = React.useState(null); // null (loading), true, false
+    const scrollRef = React.useRef(null);
+    const authSectionY = React.useRef(0);
+
 
     React.useEffect(() => {
         // Fetch real stats
@@ -36,7 +50,21 @@ const LandingScreen = ({ navigation }) => {
                 if (winner) setFeaturedWinner(winner);
             })
             .catch(err => console.log('No featured winner found or error', err));
+
+        // Check for onboarding status
+        const checkOnboarding = async () => {
+            try {
+                const hasSeen = await AsyncStorage.getItem('hasSeenOnboarding');
+                setIsFirstTime(hasSeen !== 'true');
+            } catch (e) {
+                console.error('Failed to check onboarding', e);
+                setIsFirstTime(false);
+            }
+        };
+        checkOnboarding();
     }, []);
+
+
 
     // Format numbers for display (e.g., 1234 -> 1.2K)
     const formatNumber = (num) => {
@@ -60,22 +88,19 @@ const LandingScreen = ({ navigation }) => {
             </ImageBackground>
 
             <SafeAreaView style={styles.safeArea}>
-                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <View style={styles.logoContainer}>
-                            <Text style={styles.logoText}>SPORTS <Text style={styles.logoAccent}>PROPHECY</Text></Text>
-                        </View>
-                    </View>
+                <ScrollView
+                    ref={scrollRef}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
 
                     {/* Hero Section */}
+
                     <View style={styles.heroSection}>
 
                         <View style={styles.taglineContainer}>
                             <Text style={styles.topTagline}>FREE & ENTERTAINING</Text>
                         </View>
-
                         <Text style={styles.heroTitleMain}>
                             Sports Prophecy
                         </Text>
@@ -85,6 +110,7 @@ const LandingScreen = ({ navigation }) => {
                             <Text style={styles.forecastText}>FORECAST</Text>
                             <Ionicons name="trophy" size={28} color={COLORS.accent.gold} style={{ marginLeft: 8 }} />
                         </View>
+
                         <Text style={styles.forecastSubtext}>GAME OUTCOMES</Text>
 
                         <Text style={styles.heroSubtitle}>
@@ -115,7 +141,10 @@ const LandingScreen = ({ navigation }) => {
                         <View style={styles.actionButtons}>
                             <TouchableOpacity
                                 style={styles.primaryButton}
-                                onPress={() => navigation.navigate('Register')}
+                                onPress={() => {
+                                    setAuthMode('register');
+                                    scrollRef.current?.scrollTo({ y: authSectionY.current, animated: true });
+                                }}
                                 accessibilityLabel="Sign Up Free Button"
                                 testID="landing-signup-button"
                             >
@@ -130,17 +159,23 @@ const LandingScreen = ({ navigation }) => {
                                 </LinearGradient>
                             </TouchableOpacity>
 
-                            <GoogleSignInButton variant="standard" />
-                            <AppleSignInButton />
-
                             <TouchableOpacity
                                 style={styles.secondaryButton}
-                                onPress={() => navigation.navigate('Login')}
+                                onPress={() => {
+                                    setAuthMode('login');
+                                    scrollRef.current?.scrollTo({ y: authSectionY.current, animated: true });
+                                }}
                                 accessibilityLabel="Login Button"
                                 testID="landing-login-button"
                             >
                                 <Text style={styles.secondaryButtonText}>LOGIN</Text>
                             </TouchableOpacity>
+
+
+                            <View style={styles.socialButtons}>
+                                <GoogleSignInButton variant="standard" />
+                                <AppleSignInButton />
+                            </View>
 
                             <TouchableOpacity
                                 style={styles.secondaryButton}
@@ -201,35 +236,68 @@ const LandingScreen = ({ navigation }) => {
                     <View style={styles.howItWorksSection}>
                         <Text style={styles.sectionTitle}>How It Works</Text>
 
-                        <View style={styles.stepCard}>
-                            <View style={styles.stepNumber}>
-                                <Text style={styles.stepNumberText}>1</Text>
+                        <View style={styles.stepsGrid}>
+                            <View style={styles.stepCard}>
+                                <View style={styles.stepNumber}>
+                                    <Text style={styles.stepNumberText}>1</Text>
+                                </View>
+                                <View style={styles.stepContent}>
+                                    <Text style={styles.stepTitle}>Sign Up Free</Text>
+                                    <Text style={styles.stepDesc}>Create your account in seconds</Text>
+                                </View>
                             </View>
-                            <View style={styles.stepContent}>
-                                <Text style={styles.stepTitle}>Sign Up Free</Text>
-                                <Text style={styles.stepDesc}>Create your account in seconds</Text>
-                            </View>
-                        </View>
 
-                        <View style={styles.stepCard}>
-                            <View style={styles.stepNumber}>
-                                <Text style={styles.stepNumberText}>2</Text>
+                            <View style={styles.stepCard}>
+                                <View style={styles.stepNumber}>
+                                    <Text style={styles.stepNumberText}>2</Text>
+                                </View>
+                                <View style={styles.stepContent}>
+                                    <Text style={styles.stepTitle}>Make Predictions</Text>
+                                    <Text style={styles.stepDesc}>Pick winners for upcoming games</Text>
+                                </View>
                             </View>
-                            <View style={styles.stepContent}>
-                                <Text style={styles.stepTitle}>Make Predictions</Text>
-                                <Text style={styles.stepDesc}>Pick winners for upcoming games</Text>
-                            </View>
-                        </View>
 
-                        <View style={styles.stepCard}>
-                            <View style={styles.stepNumber}>
-                                <Text style={styles.stepNumberText}>3</Text>
-                            </View>
-                            <View style={styles.stepContent}>
-                                <Text style={styles.stepTitle}>Claim Rewards</Text>
-                                <Text style={styles.stepDesc}>Earn points and claim rewards</Text>
+                            <View style={styles.stepCard}>
+                                <View style={styles.stepNumber}>
+                                    <Text style={styles.stepNumberText}>3</Text>
+                                </View>
+                                <View style={styles.stepContent}>
+                                    <Text style={styles.stepTitle}>Claim Rewards</Text>
+                                    <Text style={styles.stepDesc}>Earn points and claim prizes</Text>
+                                </View>
                             </View>
                         </View>
+                    </View>
+
+                    {/* Integrated Auth Section */}
+                    <View
+                        style={styles.authSection}
+                        onLayout={(event) => {
+                            authSectionY.current = event.nativeEvent.layout.y;
+                        }}
+                    >
+                        <Text style={styles.sectionTitle} accessibilityRole="header">
+                            {authMode === 'login' ? 'Welcome Back' : 'Create Your Account'}
+                        </Text>
+                        <Text style={styles.sectionSubtitle}>
+                            {authMode === 'login'
+                                ? 'Sign in to manage your predictions and rewards'
+                                : 'Join thousands of fans and start winning today'}
+                        </Text>
+
+                        {authMode === 'login' ? (
+                            <LoginScreen
+                                isEmbedded={true}
+                                onToggleMode={() => setAuthMode('register')}
+                                navigation={navigation}
+                            />
+                        ) : (
+                            <RegisterScreen
+                                isEmbedded={true}
+                                onToggleMode={() => setAuthMode('login')}
+                                navigation={navigation}
+                            />
+                        )}
                     </View>
 
                     {/* Footer */}
@@ -244,11 +312,54 @@ const LandingScreen = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
                         <Text style={styles.copyright}>© 2025 Sports Prophecy. All rights reserved.</Text>
+                        <Text style={styles.versionDisplay}>v{APP_VERSION}</Text>
+                    </View>
+
+                    {/* Trust Section: Founder's Letter */}
+                    <View style={styles.letterContainer}>
+                        <View style={styles.letterBody}>
+                            <View style={styles.letterHeader}>
+                                <Text style={styles.companyName}>JUST ME MEDIA</Text>
+                                <Text style={styles.letterDate}>EST. 2025</Text>
+                            </View>
+
+                            <Text style={styles.letterText}>
+                                "I built <Text style={{ fontWeight: 'bold', color: COLORS.accent.gold }}>Sports Prophecy</Text> to give fans and sponsors a platform where both can equally benefit.
+                                {"\n\n"}
+                                I wanted to create more than just a game—I'm building a large-scale ecosystem of entertainment that rewards sports knowledge without financial risk.
+                                {"\n\n"}
+                                As a solo developer, your feedback during this beta is everything to me. This is a journey to build a community where everyone wins."
+                            </Text>
+
+                            <View style={styles.letterFooter}>
+                                <Text style={styles.letterSignature}>William</Text>
+                                <Text style={styles.letterTitle}>Founder, Just Me Media</Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Final Legal Summary */}
+                    <View style={styles.legalSummary}>
+                        <Ionicons name="shield-checkmark" size={16} color={COLORS.text.muted} />
+                        <Text style={styles.legalSummaryText}>
+                            100% Free to Play • No Deposits • No Gambling • Skill-Based Only
+                        </Text>
                     </View>
 
                 </ScrollView>
             </SafeAreaView>
+
+            {/* First Time User Onboarding Overlay */}
+            {isFirstTime === true && (
+                <View style={[StyleSheet.absoluteFill, { zIndex: 2000 }]}>
+                    <FirstTimeUserView
+                        navigation={navigation}
+                        onComplete={() => setIsFirstTime(false)}
+                    />
+                </View>
+            )}
         </View>
+
     );
 };
 
@@ -289,7 +400,7 @@ const styles = StyleSheet.create({
     logoText: {
         fontSize: TYPOGRAPHY.sizes.xl,
         fontWeight: TYPOGRAPHY.weights.black,
-        color: COLORS.text.primary,
+        color: COLORS.text.inverse,
         letterSpacing: 2,
     },
     logoAccent: {
@@ -312,7 +423,7 @@ const styles = StyleSheet.create({
     topTagline: {
         fontSize: TYPOGRAPHY.sizes.sm,
         fontWeight: TYPOGRAPHY.weights.bold,
-        color: COLORS.text.primary,
+        color: COLORS.text.inverse,
         letterSpacing: 2,
         textTransform: 'uppercase',
     },
@@ -336,14 +447,14 @@ const styles = StyleSheet.create({
     forecastText: {
         fontSize: TYPOGRAPHY.sizes.xxl,
         fontWeight: TYPOGRAPHY.weights.black,
-        color: COLORS.text.primary,
+        color: COLORS.text.inverse,
         fontStyle: 'italic',
         letterSpacing: 1,
     },
     forecastSubtext: {
         fontSize: TYPOGRAPHY.sizes.xl,
         fontWeight: TYPOGRAPHY.weights.black,
-        color: COLORS.text.primary,
+        color: COLORS.text.inverse,
         fontStyle: 'italic',
         marginBottom: SPACING.md,
         letterSpacing: 1,
@@ -550,6 +661,115 @@ const styles = StyleSheet.create({
     copyright: {
         color: COLORS.text.muted,
         fontSize: TYPOGRAPHY.sizes.xs,
+        marginBottom: SPACING.xs,
+    },
+    versionDisplay: {
+        color: COLORS.text.muted,
+        fontSize: 10,
+        opacity: 0.8,
+        marginBottom: SPACING.md,
+    },
+    letterContainer: {
+        paddingHorizontal: SPACING.lg,
+        paddingVertical: 40,
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    },
+    letterBody: {
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 4,
+        padding: 30,
+        // No box-shadow offset in RN without complex views, so using standard shadows
+        shadowColor: COLORS.accent.gold,
+        shadowOffset: { width: 5, height: 5 },
+        shadowOpacity: 0.1,
+        shadowRadius: 0,
+        elevation: 2,
+    },
+    letterHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+        marginBottom: 20,
+        paddingBottom: 10,
+    },
+    companyName: {
+        fontSize: 10,
+        letterSpacing: 2,
+        fontWeight: '900',
+        color: COLORS.accent.gold,
+    },
+    letterDate: {
+        fontSize: 10,
+        color: 'rgba(255, 255, 255, 0.4)',
+    },
+    letterText: {
+        fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+        fontStyle: 'italic',
+        fontSize: 15,
+        lineHeight: 24,
+        color: 'rgba(255, 255, 255, 0.85)',
+        marginBottom: 20,
+    },
+    letterFooter: {
+        marginTop: 10,
+    },
+    letterSignature: {
+        // Fallback for handwriting font if not loaded
+        fontSize: 28,
+        color: COLORS.accent.gold,
+        fontFamily: Platform.OS === 'ios' ? 'Snell Roundhand' : 'cursive',
+        marginTop: 10,
+    },
+    letterTitle: {
+        fontSize: 12,
+        color: 'rgba(255, 255, 255, 0.4)',
+        textTransform: 'uppercase',
+        marginTop: 5,
+    },
+    legalSummary: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.xs,
+        padding: SPACING.md,
+        backgroundColor: COLORS.background.secondary,
+        marginBottom: SPACING.xxxl,
+    },
+    legalSummaryText: {
+        fontSize: 10,
+        color: COLORS.text.muted,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    stepsGrid: {
+        gap: SPACING.md,
+    },
+    authSection: {
+        paddingHorizontal: SPACING.lg,
+        paddingVertical: SPACING.xxxl,
+        backgroundColor: COLORS.background.secondary,
+        marginHorizontal: SPACING.md,
+        borderRadius: BORDER_RADIUS.xl,
+        borderWidth: 1,
+        borderColor: COLORS.border.secondary,
+        marginVertical: SPACING.xxl,
+        ...SHADOWS.md,
+    },
+    sectionSubtitle: {
+        fontSize: TYPOGRAPHY.sizes.md,
+        color: COLORS.text.secondary,
+        textAlign: 'center',
+        marginBottom: SPACING.xl,
+        paddingHorizontal: SPACING.md,
+    },
+    socialButtons: {
+        width: '100%',
+        gap: SPACING.md,
+        marginTop: SPACING.xs,
     },
 });
 

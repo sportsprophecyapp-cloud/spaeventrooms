@@ -117,13 +117,16 @@ const ProfileScreen = () => {
                 id: `pred-${p.id}`,
                 type: 'win',
                 message: `You won your prediction on ${p.eventName || 'a game'}!`,
-                reward: p.exactScore ? '+4 tokens, +2 crowns' : '+3 tokens, +1 crown',
+                reward: p.exactScore ? '+10 tokens, +5 crowns' : '+5 tokens, +2 crowns',
                 timestamp: p.resolvedAt || p.timestamp,
                 read: false
             }));
 
             // Merge and sort
-            const allNotifs = [...realNotifications, ...predictionNotifs].sort((a, b) =>
+            // SAFETY: Ensure both arrays are defined before spreading
+            const safeRealNotifs = Array.isArray(realNotifications) ? realNotifications : [];
+            const safePredictionNotifs = Array.isArray(predictionNotifs) ? predictionNotifs : [];
+            const allNotifs = [...safeRealNotifs, ...safePredictionNotifs].sort((a, b) =>
                 new Date(b.timestamp) - new Date(a.timestamp)
             );
             setNotifications(allNotifs);
@@ -354,7 +357,9 @@ const ProfileScreen = () => {
             );
             return;
         }
-        const isFirstTime = !user?.idName || user.idName === user?.username;
+        const currentIdName = user?.idName?.trim().toLowerCase();
+        const currentUsername = user?.username?.trim().toLowerCase();
+        const isFirstTime = !user?.idName || currentIdName === currentUsername;
         const cost = isFirstTime ? 0 : 50;
 
         if (!newIdName || newIdName.length < 3) {
@@ -381,7 +386,8 @@ const ProfileScreen = () => {
             setNewIdName('');
             showAlert('Success', 'Your Unique ID Name has been updated!');
         } catch (error) {
-            showAlert('Error', error.error || 'Failed to update ID Name. Make sure the name is unique.');
+            const errorMsg = error.error || error.message || 'Failed to update ID Name.';
+            showAlert('Error', errorMsg);
         } finally {
             setUpdatingName(false);
         }
@@ -392,6 +398,9 @@ const ProfileScreen = () => {
     const winRate = totalPredictions > 0 ? Math.round((wonPredictions / totalPredictions) * 100) : 0;
 
     const filteredPredictions = React.useMemo(() => {
+        // SAFETY: Guard against undefined/null predictions array
+        if (!Array.isArray(predictions)) return [];
+
         let result = [...predictions];
 
         // Filter
@@ -641,7 +650,7 @@ const ProfileScreen = () => {
                             Choose a new unique ID Name. This will be displayed on the leaderboard and in chat.
                         </Text>
 
-                        {(!user?.idName || user.idName === user?.username) ? (
+                        {(!user?.idName || user.idName?.trim().toLowerCase() === user?.username?.trim().toLowerCase()) ? (
                             <View style={[styles.costBadge, { backgroundColor: 'rgba(52, 211, 153, 0.1)' }]}>
                                 <Text style={[styles.costText, { color: COLORS.status.success }]}>1st Time: FREE!</Text>
                                 <Ionicons name="sparkles" size={16} color={COLORS.status.success} />

@@ -2,73 +2,65 @@
 // Based on modern sports analytics platforms
 
 export const COLORS = {
-    // Primary Background Colors (Light Mode)
+    // Primary Backgrounds (Midnight Navy)
     background: {
-        primary: '#F9FAFB',      // Light Gray - main background
-        secondary: '#FFFFFF',    // White - Secondary/Surfaces
-        tertiary: '#F3F4F6',     // Gray-100 - Subtle dark
-        card: '#FFFFFF',         // Card background (White)
-        overlay: 'rgba(0, 0, 0, 0.5)', // Modal overlay
+        primary: '#0a1628',    // Deep base (Landing/App background)
+        secondary: '#111827',  // Card/Container background
+        tertiary: '#1f2937',   // Inactive inputs/Headers
+        card: '#111827',
+        overlay: 'rgba(0, 0, 0, 0.7)',
     },
 
-    // Accent Colors
+    // Brand Accents
     accent: {
-        cyan: '#0ea5e9',         // Sky-500 (Darker for light mode contrast)
-        cyanLight: '#38bdf8',    // Sky-400
-        cyanDark: '#0284c7',     // Sky-600
-        gold: '#d97706',         // Amber-600 (Darker for light mode)
-        goldLight: '#fbbf24',    // Amber-400
-        goldDark: '#b45309',     // Amber-700
-        purple: '#7c3aed',       // Violet-600
-        purpleLight: '#a78bfa',  // Violet-400
-        lime: '#65a30d',         // Lime-600
-        limeAlt: '#84cc16',      // Lime-500
+        gold: '#FACC15',       // Crowns, Winners, Trophies (The "Reward" color)
+        cyan: '#38bdf8',       // Active selections, Buttons, Primary actions
+        lime: '#a3e635',       // Positive stats, Token costs
     },
 
-    // Text Colors (Inverted for Light Mode)
-    text: {
-        primary: '#111827',      // Gray-900 (Nearly Black)
-        secondary: '#4B5563',    // Gray-600
-        tertiary: '#9CA3AF',     // Gray-400
-        muted: '#D1D5DB',        // Gray-300
-        inverse: '#FFFFFF',      // White (for dark buttons/badges)
-    },
-
-    // Border Colors
-    border: {
-        primary: '#0ea5e9',      // Cyan border
-        secondary: '#E5E7EB',    // Gray-200 (Light border)
-        tertiary: '#F3F4F6',     // Gray-100 (Subtle border)
-    },
-
-    // Status Colors
+    // UI Status
     status: {
-        success: '#10b981',      // Emerald-500
-        error: '#ef4444',        // Red-500
-        warning: '#f59e0b',      // Amber-500
-        info: '#3b82f6',         // Blue-500
-    },
-    // Alias for status
-    state: {
-        success: '#10b981',
-        error: '#ef4444',
-        warning: '#f59e0b',
+        success: '#10b981',    // Predicted/Locked
+        error: '#ef4444',      // Failed/Alert
+        warning: '#f59e0b',    // Live/Soon
         info: '#3b82f6',
+    },
+
+    // Typography
+    text: {
+        primary: '#ffffff',    // Main headings
+        secondary: '#94a3b8',  // Subtext/Labels
+        tertiary: '#64748b',   // Disabled/Placeholder
+        dark: '#0f172a',       // For text sitting on Gold/Cyan buttons
+        inverse: '#ffffff',
+    },
+
+    // Borders
+    border: {
+        primary: '#1e293b',
+        secondary: '#334155',
+        tertiary: '#475569',
+        glow: 'rgba(56, 189, 248, 0.5)', // Cyan glow for selection
     },
 
     // Gradient Combinations
     gradients: {
-        primary: ['#0ea5e9', '#2563eb'],      // Sky to Blue
-        secondary: ['#7c3aed', '#8b5cf6'],    // Violet gradient
-        gold: ['#d97706', '#fbbf24'],         // Gold gradient
-        dark: ['#1f2937', '#111827'],         // Dark gradient (for inverse elements)
-        lime: ['#65a30d', '#84cc16'],         // Lime gradient
-        disabled: ['#9CA3AF', '#D1D5DB'],     // Gray
-        card: ['#FFFFFF', '#F9FAFB'],         // Card gradient (Subtle)
+        primary: ['#38bdf8', '#0ea5e9'],      // Cyan gradient
+        gold: ['#FACC15', '#EAB308'],         // Gold gradient
+        dark: ['#1F2937', '#111827'],         // Dark gradient
+        lime: ['#a3e635', '#84cc16'],         // Lime gradient
     },
 };
 
 export const TYPOGRAPHY = {
+    weights: {
+        regular: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700',
+        extrabold: '800',
+        black: '900', // For team names and "VS"
+    },
     sizes: {
         xs: 10,
         sm: 12,
@@ -77,19 +69,9 @@ export const TYPOGRAPHY = {
         lg: 18,
         xl: 20,
         xxl: 24,
-        xxxl: 32,
+        giant: 32,
         display: 40,
     },
-
-    weights: {
-        regular: '400',
-        medium: '500',
-        semibold: '600',
-        bold: '700',
-        extrabold: '800',
-        black: '900',
-    },
-
     lineHeights: {
         tight: 1.2,
         normal: 1.5,
@@ -105,20 +87,33 @@ export const SPACING = {
     lg: 20,
     xl: 24,
     xxl: 32,
-    xxxl: 40,
-    huge: 48,
+    xxxl: 48,
 };
 
 export const BORDER_RADIUS = {
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 20,
-    xxl: 24,
+    sm: 4,
+    md: 8,
+    lg: 16, // Perfect for Game Cards
+    xl: 24,
     full: 9999,
 };
 
+// Tactical Glow Effect for selected teams
 export const SHADOWS = {
+    glow: {
+        shadowColor: COLORS.accent.cyan,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    card: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+        elevation: 8,
+    },
     sm: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -139,13 +134,6 @@ export const SHADOWS = {
         shadowOpacity: 0.37,
         shadowRadius: 7.49,
         elevation: 8,
-    },
-    cyan: {
-        shadowColor: '#00d4ff',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        elevation: 6,
     },
 };
 

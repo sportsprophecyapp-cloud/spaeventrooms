@@ -1,5 +1,93 @@
 # Changelog
 
+## [2.17.6] - 2025-12-27
+### Fixed
+- **Streak Messaging**: Shifted from "Broken Streak" terminology to "Streak Progress" terminology. Replaced "Start New Streak" with "Keep it Going!" for active runs.
+- **Improved Logic**: Modal now celebrated every 5 days of a streak and uses celebratory language for Day 1.
+
+## [2.17.5] - 2025-12-27
+### Fixed
+- **Service-Level Defense**: Refactored `api.js` to merge duplicate functions and force `Array.isArray` check on all list-based success paths.
+- **SportScreen Hardening**: Added explicit guards for event timestamps in sorting and filtering logic to prevent crashes on malformed backend data.
+- **UI Resilience**: Implemented optional chaining `?.map()` and fallback logic across primary screens.
+- **Improved UX**: Replaced red "warning" themes in the Broken Streak modal with a premium Cyan/Dark palette to match the "Prophet" aesthetic.
+
+## [2.17.4] - 2025-12-27
+### Fixed
+- Fixed persistent `.map()` error on `SportScreen` by adding ternary guards.
+- Corrected streak calculation and threshold in `HomeScreen.js`.
+- Removed negative streak messaging ("Sad face" flow) and added "Day 1 Success" messaging.
+- Deep defensive audit of all UI loops to prevent crashes from undefined backend data.
+
+## [2.17.3] - 2025-12-27
+### Fixed
+- Resolved `TypeError: Cannot read properties of undefined (reading 'map')` in `SportScreen.js`.
+- Added defensive null checks in `apiService` for events and predictions.
+- Fixed race condition in `PredictionModal` refreshing for guest users.
+
+## [2.17.2] - 2025-12-26
+### Added
+- **UX/UI Overhaul v2.0**: Global migration to "Prophet" Midnight Palette (`#0a1628`).
+- **Inline-First Interaction**: Redesigned `GameCard.js` for "Fast-Pick" predictions without modal friction.
+- **Haptic Feedback**: Medium-impact tactile confirmation on team selection.
+- **Spring Animations**: Smooth "Slide" transitions in `PredictionModal` between games.
+- **Skeleton Loaders**: Polished `GameCardSkeleton` shimmer effects for fetching states.
+- **Promoted Labels**: Micro-labels for `SponsorBanner` components.
+- **Coming Soon States**: Premium re-skin for disabled sports (MLB, Soccer).
+
+## [2.17.1] - 2025-12-26
+### Fixed
+- **Winner Spotlight Sync**: Synchronized featured winner "BenchWarmer" across all screens and backend, resolving persistent "JustMe" display.
+- **Reward UI Sync**: Updated daily login reward text (+5 tokens) and streak bonuses to match backend logic across all screens.
+- **Web Platform Fix**: Resolved `ReferenceError: Platform is not defined` in `App.js` preventing web application from loading.
+- **Branding**: Updated static meta-loader branding from "Just Me Media" to "Sports Prophecy" in `index.html`.
+- **Navigation**: Resolved `user` reference error in `HowToPlayScreen.js` that blocked navigation for some users.
+- **Versioning**: Synced application version across `package.json`, `app.json`, and UI screens for consistency.
+- **Landing Page**: Integrated application version display into the landing page footer.
+
+
+## [2.17.0] - 2025-12-26
+### Added
+- **Single-Route "Auth Portal" Architecture**: Consolidated the landing and authentication experience into a unified root route (`/`).
+- **Zero-Redirect Flow**: Removed all automatic client-side redirects to eliminate "flashes" and unwanted route changes on initial load.
+- **Hero-Integrated Social Login**: Restored Google and Apple sign-in buttons directly to the Hero section CTA area.
+- **Single-Page Navigation**: Implemented scroll-to-auth logic for a smoother, faster entry experience.
+
+### Changed
+- Refactored `App.js` to handle conditional rendering of public (Landing) and private (Main App) views from the root.
+- Optimized hydration sequence to ensure a flicker-free transition once the authentication state is determined.
+
+## [2.16.0] - 2025-12-26
+### Added
+- Single-page Landing & Auth integration: Login and Register forms are now embedded directly into the Landing Screen.
+- Smooth scrolling from Hero CTA buttons to the authentication section.
+- JSON-LD structured data for better SEO and search engine indexing.
+
+### Changed
+- Refined `LandingScreen` layout for a cleaner, more professional "storefront" feel.
+- Polished `LoginScreen` and `RegisterScreen` for seamless embedding (removed redundant headers/padding).
+- Enhanced SEO meta tags for Open Graph and Twitter.
+
+### Removed
+- Legacy "Our Premium Partners" section from `index.html` and `LandingScreen.js`.
+
+## [v2.15.0] - 2025-12-26
+### Unified Landing & SEO Optimization
+- **High-Impact SEO Landing**: Implemented a full static marketing page in `index.html` for instant loading and maximum search engine indexability.
+- **Unified Entry Page**: Login and Registration now handled via smooth overlays on the landing page, eliminating the "loading flash" and improving user trust.
+- **Visual Polish**: Added a themed "smart hydration" transition that gracefully reveals the interactive app once loaded.
+
+### Real-time Prize Draw Analytics
+- **Dynamic Entry Counts**: The Prize Draws page now fetches the user's actual weekly entries and total draw participation in real-time.
+- **Live Odds Calculation**: Implemented dynamic odds display based on real-time participation data.
+- **Backend API**: Added new endpoints to track and retrieve user-specific draw statistics.
+
+### User Notification Enhancements
+- **Deduplication Logic**: Implemented session-level caching to prevent repeating notification alerts.
+- **New User Filtering**: Global notifications are now filtered by user join date, so new users don't see old/irrelevant historical messages.
+- **Auto-Expiration**: Global notifications now automatically expire after 7 days to keep the experience fresh.
+
+
 ## [v2.14.0] - 2025-12-26
 ### Authentication & Navigation Refactor
 - **Age Verification**: Replaced birth year input with simple 18+ checkbox during registration

@@ -3,21 +3,27 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const PerformanceStats = ({ stats }) => {
+    // 🛡️ React 19 Guard: If stats is missing, use a safe empty object
+    const data = stats || {};
+
     return (
         <View style={styles.statsContainer}>
             <View style={styles.statCard}>
                 <Ionicons name="trending-up" size={24} color="#3B82F6" />
-                <Text style={styles.statValue}>{stats?.winRate || 0}%</Text>
+                {/* 🛡️ Ensure we always have a string/number, never undefined */}
+                <Text style={styles.statValue}>{data.winRate || 0}%</Text>
                 <Text style={styles.statLabel}>Win Rate</Text>
             </View>
             <View style={styles.statCard}>
                 <Ionicons name="target" size={24} color="#8B5CF6" />
-                <Text style={styles.statValue}>{stats?.weeklyPredictions || 0}</Text>
+                <Text style={styles.statValue}>{data.weeklyPredictions || 0}</Text>
                 <Text style={styles.statLabel}>This Week</Text>
             </View>
             <View style={styles.statCard}>
                 <Ionicons name="medal" size={24} color="#F59E0B" />
-                <Text style={styles.statValue}>#{stats?.rank || '—'}</Text>
+                <Text style={styles.statValue}>
+                    {data.rank ? `#${data.rank}` : '—'}
+                </Text>
                 <Text style={styles.statLabel}>Rank</Text>
             </View>
         </View>

@@ -107,12 +107,12 @@ const styles = StyleSheet.create({
     username: {
         fontSize: TYPOGRAPHY.sizes.lg,
         fontWeight: TYPOGRAPHY.weights.bold,
-        color: COLORS.text.primary,
+        color: COLORS.text.inverse,
         marginBottom: 2,
     },
     wonText: {
         fontSize: TYPOGRAPHY.sizes.sm,
-        color: COLORS.text.secondary,
+        color: 'rgba(255, 255, 255, 0.7)',
     },
     prize: {
         color: COLORS.accent.cyan,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     quoteText: {
         flex: 1,
         fontSize: TYPOGRAPHY.sizes.sm,
-        color: COLORS.text.primary,
+        color: COLORS.text.inverse,
         fontStyle: 'italic',
         lineHeight: 20,
     },

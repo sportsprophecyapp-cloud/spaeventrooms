@@ -1,53 +1,135 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useReducer } from 'react';
 import { Alert, Platform } from 'react-native';
 import * as Localization from 'expo-localization';
 import storage from '../utils/storage';
 import { apiService } from '../services/api';
+import { sessionMonitor } from '../utils/sessionMonitor'; // 🚀 Add this import
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [dailyReward, setDailyReward] = useState(null);
+const authReducer = (state, action) => {
+    switch (action.type) {
+        case 'HYDRATE_FROM_STORAGE':
+            return { ...state, user: action.payload, isLoading: false };
+        case 'FETCH_FRESH_USER':
+            return { ...state, user: action.payload };
+        case 'SET_USER':
+            return { ...state, user: action.payload };
+        case 'LOGOUT':
+            return { ...state, user: null };
+        case 'SET_LOADING':
+            return { ...state, isLoading: action.payload };
+        default:
+            return state;
+    }
+};
 
+export const AuthProvider = ({ children }) => {
+    const [authState, dispatch] = useReducer(authReducer, {
+        user: null,
+        isLoading: true
+    });
+
+    const [dailyReward, setDailyReward] = useState(null);
+    const [showingWarningIdx, setShowingWarningIdx] = useState(null);
+    const [lastAlertedNotifId, setLastAlertedNotifId] = useState(null);
+
+    // 🚀 OPTIMIZATION #3: Single useEffect for initialization with monitoring
     useEffect(() => {
-        loadUser();
-        apiService.setUnauthorizedCallback(logout);
+        const initializeAuth = async () => {
+            try {
+                // 🟢 START: Hydration timing
+                sessionMonitor.startHydration();
+
+                // Step 1: Load stored user IMMEDIATELY
+                const storedUser = await storage.getItem('userData');
+
+                if (storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
+
+                    // Dispatch immediately with stored user
+                    dispatch({ type: 'HYDRATE_FROM_STORAGE', payload: parsedUser });
+
+                    // 🟢 END: Hydration timing
+                    sessionMonitor.endHydration(parsedUser.uuid);
+
+                    // Step 2: Only fetch fresh data if NOT a guest
+                    // This happens in the BACKGROUND while UI renders
+                    if (!parsedUser.isGuest && parsedUser.uuid !== 'guest') {
+                        try {
+                            // 🔵 START: Background refresh timing
+                            sessionMonitor.startBackgroundRefresh(parsedUser.uuid);
+
+                            const freshUser = await apiService.getUserProfile(parsedUser.uuid);
+
+                            dispatch({ type: 'FETCH_FRESH_USER', payload: freshUser });
+                            await storage.setItem('userData', JSON.stringify(freshUser));
+                            checkDailyReward(freshUser.uuid, false);
+
+                            // 🔵 END: Background refresh timing (success)
+                            sessionMonitor.endBackgroundRefresh(true);
+
+                        } catch (err) {
+                            // 🔵 END: Background refresh timing (failed)
+                            sessionMonitor.endBackgroundRefresh(false, err);
+                            console.warn('Fresh user fetch failed, using stored user', err);
+                            // User stays loaded from storage, no re-render needed
+                        }
+                    } else {
+                        // Guest users don't need background refresh
+                        sessionMonitor.endBackgroundRefresh(true);
+                    }
+                } else {
+                    // No stored user found
+                    dispatch({ type: 'SET_LOADING', payload: false });
+                    sessionMonitor.endHydration(null);
+                }
+
+                // Setup apiService unauthorized callback
+                apiService.setUnauthorizedCallback(logout);
+
+            } catch (e) {
+                console.error('Auth initialization failed:', e);
+                dispatch({ type: 'SET_LOADING', payload: false });
+                sessionMonitor.endBackgroundRefresh(false, e);
+            }
+        };
+
+        initializeAuth();
     }, []);
 
-    // Flag to prevent duplicate alerts for the same session
-    const [showingWarningIdx, setShowingWarningIdx] = useState(null);
-
+    // Separate polling logic from hydration
     useEffect(() => {
         let interval;
-        if (user && user.uuid && !user.isGuest && user.uuid !== 'guest') {
-            checkNotifications();
-            // Regularly refresh user profile to catch mute/warning flags
-            // Reduced frequency to 30 seconds to support higher user concurrency (up to 1000 users/day)
-            interval = setInterval(refreshUser, 30000);
+        let notifInterval;
 
-            // Also poll notifications less frequently (60 seconds)
-            const notifInterval = setInterval(checkNotifications, 60000);
+        if (authState.user && authState.user.uuid && !authState.user.isGuest && authState.user.uuid !== 'guest') {
+            checkNotifications();
+
+            interval = setInterval(refreshUser, 30000);
+            notifInterval = setInterval(checkNotifications, 60000);
+
             return () => {
                 clearInterval(interval);
                 clearInterval(notifInterval);
             };
         }
+
         return () => {
             if (interval) clearInterval(interval);
+            if (notifInterval) clearInterval(notifInterval);
         };
-    }, [user?.uuid]);
+    }, [authState.user?.uuid]);
 
-    // Fail-safe warning trigger: Watch the user object itself
+    // Warning acknowledgement logic
     useEffect(() => {
-        if (user?.needsWarningAcknowledge && showingWarningIdx !== user.uuid) {
-            const warningMsg = user.pendingWarningMessage || "You have received an official warning. Please acknowledge to continue.";
+        if (authState.user?.needsWarningAcknowledge && showingWarningIdx !== authState.user.uuid) {
+            const warningMsg = authState.user.pendingWarningMessage || "You have received an official warning. Please acknowledge to continue.";
 
             const handleAcknowledge = async () => {
                 try {
                     await apiService.acknowledgeWarning();
-                    setShowingWarningIdx(null); // Reset local flag
+                    setShowingWarningIdx(null);
                     await refreshUser();
                 } catch (e) {
                     console.error('Failed to acknowledge warning:', e);
@@ -68,29 +150,32 @@ export const AuthProvider = ({ children }) => {
                     { cancelable: false }
                 );
             }
-            setShowingWarningIdx(user.uuid); // Mark as showing for this user
+            setShowingWarningIdx(authState.user.uuid);
         }
-    }, [user?.needsWarningAcknowledge, user?.pendingWarningMessage]);
+    }, [authState.user?.needsWarningAcknowledge, authState.user?.pendingWarningMessage]);
 
     const checkNotifications = async () => {
-        if (!user || user.isGuest || user.uuid === 'guest') return;
+        if (!authState.user || authState.user.isGuest || authState.user.uuid === 'guest') return;
+
         try {
-            const notifications = await apiService.getNotifications(user.uuid);
+            // 🟡 Track API call
+            const apiCallId = sessionMonitor.startAPICall('/notifications');
+
+            const notifications = await apiService.getNotifications(authState.user.uuid);
+            sessionMonitor.endAPICall(apiCallId, true);
+
             if (!notifications || !Array.isArray(notifications) || notifications.length === 0) {
                 return;
             }
 
-            const lastSeenId = await storage.getItem(`lastSeenNotif_${user.uuid}`);
-
-            // Filter for admin notifications (warnings)
+            const lastSeenId = await storage.getItem(`lastSeenNotif_${authState.user.uuid}`);
             const adminNotifs = notifications.filter(n => n.type === 'admin');
+
             if (adminNotifs.length === 0) return;
 
-            // Arrays from backend are sorted newest-first {timestamp: -1}
             const latestNotif = adminNotifs[0];
 
-            // If we haven't seen this specific message ID yet, show it
-            if (latestNotif._id !== lastSeenId) {
+            if (latestNotif._id !== lastSeenId && latestNotif._id !== lastAlertedNotifId) {
                 const handleAcknowledge = async () => {
                     try {
                         await apiService.acknowledgeWarning();
@@ -113,42 +198,48 @@ export const AuthProvider = ({ children }) => {
                         }]
                     );
                 }
-                // Mark as seen immediately to prevent duplicate alerts in the next cycle
-                await storage.setItem(`lastSeenNotif_${user.uuid}`, latestNotif._id);
+
+                setLastAlertedNotifId(latestNotif._id);
+                await storage.setItem(`lastSeenNotif_${authState.user.uuid}`, latestNotif._id);
             }
         } catch (error) {
             console.error('Error in notification poller:', error);
+            sessionMonitor.endAPICall(apiCallId, false, error);
         }
     };
 
-
-
     const checkDailyReward = async (userId, isGuest = false) => {
         if (!userId || isGuest || userId === 'guest') return;
+
         try {
+            // 🟡 Track API call
+            const apiCallId = sessionMonitor.startAPICall('/daily-login-reward');
+
             const result = await apiService.claimDailyLoginReward(userId);
+            sessionMonitor.endAPICall(apiCallId, true);
 
             if (result.claimed) {
-                // Set daily reward state to trigger the modal
                 setDailyReward(result);
 
-                // Update user state with new balance
                 if (result.balance) {
-                    setUser(prev => {
-                        if (!prev) return prev;
-                        const newUser = {
-                            ...prev,
+                    dispatch({
+                        type: 'SET_USER',
+                        payload: {
+                            ...authState.user,
                             tokens: result.balance.tokens,
                             crowns: result.balance.crowns
-                        };
-                        storage.setItem('userData', JSON.stringify(newUser));
-                        return newUser;
+                        }
                     });
+                    await storage.setItem('userData', JSON.stringify({
+                        ...authState.user,
+                        tokens: result.balance.tokens,
+                        crowns: result.balance.crowns
+                    }));
                 }
             }
         } catch (error) {
             console.error('Error checking daily reward:', error);
-            // Don't block app loading if daily reward check fails
+            sessionMonitor.endAPICall(apiCallId, false, error);
         }
     };
 
@@ -156,78 +247,61 @@ export const AuthProvider = ({ children }) => {
         setDailyReward(null);
     };
 
-    const loadUser = async () => {
-        try {
-            const storedUser = await storage.getItem('userData');
-            if (storedUser) {
-                const parsedUser = JSON.parse(storedUser);
-
-                // If it's a guest user, just load local state and skip backend fetch
-                if (parsedUser.isGuest || parsedUser.uuid === 'guest') {
-                    setUser(parsedUser);
-                    setIsLoading(false);
-                    return;
-                }
-
-                // Fetch fresh data from backend immediately
-                try {
-                    const freshUser = await apiService.getUserProfile(parsedUser.uuid);
-                    setUser(freshUser);
-                    await storage.setItem('userData', JSON.stringify(freshUser));
-                    checkDailyReward(freshUser.uuid, false);
-                } catch (err) {
-                    console.warn('Failed to fetch fresh user data, using stored data', err);
-                    setUser(parsedUser);
-                    checkDailyReward(parsedUser.uuid, false);
-                }
-            }
-        } catch (e) {
-            console.error('Failed to load user', e);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     const login = async (email, password, remember = true) => {
         try {
-            const data = await apiService.login(email, password);
-            if (data.user) {
-                setUser(data.user);
+            const apiCallId = sessionMonitor.startAPICall('/login');
 
-                // Store session data (persists across app restarts via AsyncStorage)
+            const data = await apiService.login(email, password);
+            sessionMonitor.endAPICall(apiCallId, true);
+
+            if (data.user) {
+                dispatch({ type: 'SET_USER', payload: data.user });
                 await storage.setItem('userData', JSON.stringify(data.user));
+
                 if (data.token) {
                     await storage.setItem('userToken', data.token);
                 }
 
-                // Check for daily reward
                 checkDailyReward(data.user.uuid);
                 return true;
             }
             return false;
         } catch (error) {
             console.error('Login failed', error);
+            sessionMonitor.endAPICall(apiCallId, false, error);
             throw error;
         }
     };
 
     const register = async (email, password, username, referralCode, ageVerified, tosAccepted, privacyPolicyAccepted, remember = true) => {
         try {
-            // Detect device language and region
-            const deviceLanguage = Localization.locale || null; // e.g., "en-US"
-            const deviceRegion = Localization.region || null; // e.g., "US"
+            const apiCallId = sessionMonitor.startAPICall('/register');
 
-            const data = await apiService.register(email, password, username, referralCode, deviceLanguage, deviceRegion, ageVerified, tosAccepted, privacyPolicyAccepted);
+            const deviceLanguage = Localization.locale || null;
+            const deviceRegion = Localization.region || null;
+
+            const data = await apiService.register(
+                email,
+                password,
+                username,
+                referralCode,
+                deviceLanguage,
+                deviceRegion,
+                ageVerified,
+                tosAccepted,
+                privacyPolicyAccepted
+            );
+
+            sessionMonitor.endAPICall(apiCallId, true);
+
             if (data.user) {
-                setUser(data.user);
-
-                // Always store data for the session
+                dispatch({ type: 'SET_USER', payload: data.user });
                 await storage.setItem('userData', JSON.stringify(data.user));
+
                 if (data.token) {
                     await storage.setItem('userToken', data.token);
                 }
 
-                // Show referral bonus message if applicable
                 if (data.referralBonus && data.referralBonus.applied) {
                     Alert.alert(
                         '🎉 Referral Bonus!',
@@ -236,54 +310,62 @@ export const AuthProvider = ({ children }) => {
                     );
                 }
 
-                // Check for daily reward (new users might get it too if configured)
                 checkDailyReward(data.user.uuid);
                 return true;
             }
             return false;
         } catch (error) {
             console.error('Registration failed', error);
+            sessionMonitor.endAPICall(apiCallId, false, error);
             throw error;
         }
     };
 
     const googleLogin = async (idToken) => {
         try {
-            // Detect device language and region
-            const deviceLanguage = Localization.locale || null; // e.g., "en-US"
-            const deviceRegion = Localization.region || null; // e.g., "US"
+            const apiCallId = sessionMonitor.startAPICall('/auth/google');
+
+            const deviceLanguage = Localization.locale || null;
+            const deviceRegion = Localization.region || null;
 
             const { token, user: userData } = await apiService.googleLogin(idToken, deviceLanguage, deviceRegion);
-            setUser(userData);
+            sessionMonitor.endAPICall(apiCallId, true);
+
+            dispatch({ type: 'SET_USER', payload: userData });
             await storage.setItem('userToken', token);
             await storage.setItem('userData', JSON.stringify(userData));
             return userData;
         } catch (error) {
             console.error('Google login context error:', error);
+            sessionMonitor.endAPICall(apiCallId, false, error);
             throw error;
         }
     };
 
     const appleLogin = async (identityToken, user) => {
         try {
+            const apiCallId = sessionMonitor.startAPICall('/auth/apple');
+
             const { token, user: userData } = await apiService.appleLogin(identityToken, user);
-            setUser(userData);
+            sessionMonitor.endAPICall(apiCallId, true);
+
+            dispatch({ type: 'SET_USER', payload: userData });
             await storage.setItem('userToken', token);
             await storage.setItem('userData', JSON.stringify(userData));
             return userData;
         } catch (error) {
             console.error('Apple login context error:', error);
+            sessionMonitor.endAPICall(apiCallId, false, error);
             throw error;
         }
     };
 
     const logout = async () => {
-        // 1. Immediate UI update to ensure responsiveness
-        setUser(null);
+        // Immediate UI update
+        dispatch({ type: 'LOGOUT' });
 
-        // 2. Cleanup storage
+        // Async cleanup (non-blocking)
         try {
-            // Direct cleanup for web if available (synchronous and safe)
             if (typeof window !== 'undefined' && window.localStorage) {
                 window.localStorage.removeItem('userData');
                 window.localStorage.removeItem('userToken');
@@ -291,8 +373,6 @@ export const AuthProvider = ({ children }) => {
                 window.localStorage.removeItem('React_Native_Async_Storage_userToken');
             }
 
-            // Standard cleanup via wrapper (for native or if wrapper handles other logic)
-            // We await this but it won't block the UI since we already updated state
             await storage.removeItem('userData');
             await storage.removeItem('userToken');
         } catch (e) {
@@ -302,24 +382,30 @@ export const AuthProvider = ({ children }) => {
 
     const refreshUser = async () => {
         try {
+            const apiCallId = sessionMonitor.startAPICall('/user/:uuid');
+
             const storedUser = await storage.getItem('userData');
             if (storedUser) {
                 const parsedUser = JSON.parse(storedUser);
-                // Fetch fresh data
                 const freshUser = await apiService.getUserProfile(parsedUser.uuid);
-                setUser(freshUser);
+                sessionMonitor.endAPICall(apiCallId, true);
+
+                dispatch({ type: 'FETCH_FRESH_USER', payload: freshUser });
                 await storage.setItem('userData', JSON.stringify(freshUser));
             }
         } catch (e) {
             console.error('Failed to refresh user', e);
+            sessionMonitor.endAPICall(apiCallId, false, e);
         }
     };
 
     const updateUser = async (updates) => {
         try {
-            const newUser = { ...user, ...updates };
-            setUser(newUser);
-            await storage.setItem('userData', JSON.stringify(newUser));
+            dispatch({
+                type: 'SET_USER',
+                payload: { ...authState.user, ...updates }
+            });
+            await storage.setItem('userData', JSON.stringify({ ...authState.user, ...updates }));
         } catch (e) {
             console.error('Failed to update user locally', e);
         }
@@ -335,9 +421,8 @@ export const AuthProvider = ({ children }) => {
                 crowns: 0,
                 predictedGames: []
             };
-            setUser(guestUser);
-            // We do NOT persist guest user to storage to keep it ephemeral
-            // unless requested otherwise.
+            dispatch({ type: 'SET_USER', payload: guestUser });
+            await storage.setItem('userData', JSON.stringify(guestUser));
             return true;
         } catch (error) {
             console.error('Guest login failed', error);
@@ -345,13 +430,30 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-
-
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout, loginAsGuest, googleLogin, appleLogin, refreshUser, updateUser, dailyReward, clearDailyReward }}>
+        <AuthContext.Provider value={{
+            user: authState.user,
+            isLoading: authState.isLoading,
+            login,
+            register,
+            logout,
+            loginAsGuest,
+            googleLogin,
+            appleLogin,
+            refreshUser,
+            updateUser,
+            dailyReward,
+            clearDailyReward
+        }}>
             {children}
         </AuthContext.Provider>
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};

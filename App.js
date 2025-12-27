@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Platform } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect } from 'react';
@@ -28,6 +28,7 @@ import AdminSponsorsScreen from './src/screens/AdminSponsorsScreen';
 import PredictionHistoryScreen from './src/screens/PredictionHistoryScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import SplashScreen from './src/components/SplashScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 
@@ -36,59 +37,71 @@ import { useState } from 'react';
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, loginAsGuest } = useAuth();
   const navigation = useNavigation();
 
   useEffect(() => {
-    if (user && !isLoading) {
-      // Only redirect if we are on an auth screen or HowToPlay screen
-      // Use setTimeout to ensure navigation state is ready
-      const route = navigation.getCurrentRoute();
-      const routeName = route?.name;
+    // Expose functions to window for the static index.html landing page
+    if (typeof window !== 'undefined') {
+      window.loginAsGuest = loginAsGuest;
 
-      if (!routeName || ['Login', 'Register', 'Landing'].includes(routeName)) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        });
+      // Hide the static landing overlay once the app is fully hydrated.
+      // This handles both guests (LandingScreen) and logged-in users (Main)
+      if (!isLoading && window.hideStaticLanding) {
+        window.hideStaticLanding();
+
+        // Handle pending auth actions from the static landing page
+        if (window.pendingAuthAction === 'guest') {
+          window.loginAsGuest();
+          window.pendingAuthAction = null;
+        }
       }
     }
-  }, [user, isLoading]);
+  }, [isLoading, loginAsGuest]);
 
 
-  // Handle logout - navigate back to Landing when user becomes null
-  useEffect(() => {
-    if (!user && !isLoading) {
-      const route = navigation.getCurrentRoute();
-      const routeName = route?.name;
 
-      // If we're on an authenticated screen, navigate to Landing
-      if (routeName && !['Login', 'Register', 'Landing', 'HowToPlay', 'TermsOfService', 'PrivacyPolicy'].includes(routeName)) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Landing' }],
-        });
-      }
-    }
-  }, [user, isLoading]);
+  // ... (other imports remain, but SplashScreen import added above)
 
+  // ...
+
+  // 🎯 OPTIMIZATION #4: Show branded SplashScreen during hydration
+  // This replaces the blank loading screen and provides visual feedback
   if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
-        <ActivityIndicator size="large" color="#38bdf8" />
-      </View>
-    );
+    // If we are on web, we don't show the secondary loading indicator
+    // because the static landing overlay is already visible.
+    if (Platform.OS === 'web') return null;
+
+    // On native, or if web behavior needs to match native
+    return <SplashScreen />;
   }
 
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
+    <Stack.Navigator screenOptions={{
+      headerShown: false,
+      // CRITICAL: Ensure options is NEVER null, as per React 19 fix
+      contentStyle: { backgroundColor: '#0a1628' }
+    }}>
+      {!user ? (
+        // Auth Portal (Landing)
+        <>
+          <Stack.Screen name="Landing" component={LandingScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+          <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
+          <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
+          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+        </>
+      ) : (
+        // Main App
         <>
           <Stack.Screen name="Main" component={MainTabNavigator} />
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
           <Stack.Screen name="WeeklyDraw" component={WeeklyDrawScreen} />
           <Stack.Screen name="Sport" component={SportScreen} />
-          <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
           <Stack.Screen name="Sponsor" component={SponsorScreen} />
@@ -100,20 +113,10 @@ const AppNavigator = () => {
           <Stack.Screen name="PredictionHistory" component={PredictionHistoryScreen} />
           <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+          <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
           {/* Allow guests to access Register/Login to upgrade/switch account */}
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
-        </>
-      ) : (
-        <>
-          <Stack.Screen name="Landing" component={LandingScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
-          <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
-          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         </>
       )}
     </Stack.Navigator>
@@ -121,11 +124,20 @@ const AppNavigator = () => {
 };
 
 export default function App() {
+  useEffect(() => {
+    // Standard cleanup or global listeners can go here
+  }, []);
+
+
+
+
+
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
         <AuthProvider>
           <NavigationContainer
+            fallback={<SplashScreen />}
             documentTitle={{
               formatter: (options, route) => options?.title ? `${options.title} | Sports Prophecy` : 'Sports Prophecy'
             }}
@@ -134,7 +146,7 @@ export default function App() {
           </NavigationContainer>
         </AuthProvider>
       </ErrorBoundary>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
     </SafeAreaProvider>
   );
 }
@@ -142,6 +154,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0a1628',
   },
 });

@@ -153,7 +153,7 @@ const SponsorScreen = ({ navigation }) => {
                         <Ionicons name="home" size={24} color={placement === 'main' ? COLORS.accent.cyan : COLORS.text.secondary} />
                         <Text style={[styles.placementTitle, placement === 'main' && styles.selectedPlacementText]}>Main Pages</Text>
                     </View>
-                    <Text style={styles.placementSubtext}>Home, Announcements, Chat Rooms</Text>
+                    <Text style={styles.placementSubtext}>Home & Announcements Screen</Text>
                     {placement === 'main' && <Ionicons name="checkmark-circle" size={24} color={COLORS.accent.cyan} style={styles.placementCheck} />}
                 </TouchableOpacity>
 
@@ -203,10 +203,10 @@ const SponsorScreen = ({ navigation }) => {
                 </View>
 
                 <View style={styles.benefitItem}>
-                    <Ionicons name="chatbubbles" size={20} color={COLORS.accent.cyan} />
+                    <Ionicons name="trending-up" size={20} color={COLORS.accent.cyan} />
                     <View style={styles.benefitTextContainer}>
-                        <Text style={styles.benefitText}>All Chat Rooms</Text>
-                        <Text style={styles.benefitSubtext}>Rotating with other sponsors (10s intervals)</Text>
+                        <Text style={styles.benefitText}>Growing Audience</Text>
+                        <Text style={styles.benefitSubtext}>New placements added regularly</Text>
                     </View>
                 </View>
 

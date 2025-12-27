@@ -8,7 +8,7 @@ import GoogleSignInButton from '../components/GoogleSignInButton';
 import AppleSignInButton from '../components/AppleSignInButton';
 import { BiometricService } from '../services/biometrics';
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation, isEmbedded = false, onToggleMode }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
@@ -19,8 +19,10 @@ const LoginScreen = ({ navigation }) => {
     const { login, user } = useAuth();
 
     React.useEffect(() => {
-        checkBiometricAvailability();
-    }, []);
+        if (!isEmbedded) {
+            checkBiometricAvailability();
+        }
+    }, [isEmbedded]);
 
     const checkBiometricAvailability = async () => {
         const { hasHardware, isEnrolled } = await BiometricService.checkBiometricSupport();
@@ -71,7 +73,7 @@ const LoginScreen = ({ navigation }) => {
                 // Force navigation to Main with a slight delay to ensure state updates
                 // Check for biometric support and ask to save credentials
                 const { hasHardware, isEnrolled } = await BiometricService.checkBiometricSupport();
-                if (hasHardware && isEnrolled) {
+                if (hasHardware && isEnrolled && !isEmbedded) {
                     Alert.alert(
                         'Enable Biometrics?',
                         'Would you like to enable FaceID/TouchID for faster login next time?',
@@ -116,6 +118,144 @@ const LoginScreen = ({ navigation }) => {
         if (error) setError('');
     };
 
+    const renderForm = () => (
+        <View style={[styles.formContainer, isEmbedded && styles.embeddedFormContainer]}>
+            {!isEmbedded && (
+                <>
+                    <Text style={styles.title}>Welcome Back</Text>
+                    <Text style={styles.subtitle}>Sign in to continue predicting</Text>
+                </>
+            )}
+
+            <View style={styles.form}>
+                {/* Error Message */}
+                {error ? (
+                    <View style={styles.errorContainer}>
+                        <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                ) : null}
+
+                {/* Email Input */}
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Email</Text>
+                    <View style={[styles.inputWrapper, error && styles.inputError]}>
+                        <Ionicons name="mail-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter your email"
+                            placeholderTextColor={COLORS.text.muted}
+                            value={email}
+                            onChangeText={handleEmailChange}
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                            accessibilityLabel="Email Input"
+                            testID="login-email-input"
+                        />
+                    </View>
+                </View>
+
+                {/* Password Input */}
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Password</Text>
+                    <View style={[styles.inputWrapper, error && styles.inputError]}>
+                        <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
+                        <TextInput
+                            style={[styles.input, { flex: 1 }]}
+                            placeholder="Enter your password"
+                            placeholderTextColor={COLORS.text.muted}
+                            value={password}
+                            onChangeText={handlePasswordChange}
+                            secureTextEntry={!showPassword}
+                            accessibilityLabel="Password Input"
+                            testID="login-password-input"
+                        />
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)} accessibilityLabel="Toggle Password Visibility" testID="login-toggle-password">
+                            <Ionicons
+                                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                                size={20}
+                                color={COLORS.text.tertiary}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Remember Me & Forgot Password */}
+                <View style={styles.optionsRow}>
+                    <TouchableOpacity
+                        style={styles.rememberMeContainer}
+                        onPress={() => setRememberMe(!rememberMe)}
+                        accessibilityLabel="Remember Me Checkbox"
+                        testID="login-remember-me"
+                    >
+                        <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+                            {rememberMe && (
+                                <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
+                            )}
+                        </View>
+                        <Text style={styles.rememberMeText}>Remember me</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('ForgotPassword')}
+                        accessibilityLabel="Forgot Password Button"
+                        testID="login-forgot-password"
+                    >
+                        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Login Button */}
+                <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading} accessibilityLabel="Sign In Button" testID="login-submit-button">
+                    <LinearGradient
+                        colors={COLORS.gradients.primary}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.gradientButton}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color={COLORS.text.inverse} />
+                        ) : (
+                            <>
+                                <Text style={styles.buttonText}>SIGN IN</Text>
+                                <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />
+                            </>
+                        )}
+                    </LinearGradient>
+                </TouchableOpacity>
+
+                {/* Biometric Login Button */}
+                {isBiometricsAvailable && (
+                    <TouchableOpacity style={[styles.button, styles.biometricButton]} onPress={handleBiometricLogin} disabled={loading} accessibilityLabel="Biometric Login Button">
+                        <View style={styles.biometricContent}>
+                            <Ionicons name="scan-outline" size={24} color={COLORS.accent.cyan} />
+                            <Text style={styles.biometricText}>Login with FaceID</Text>
+                        </View>
+                    </TouchableOpacity>
+                )}
+
+                <GoogleSignInButton variant="outline" />
+
+                <AppleSignInButton />
+
+                {/* Sign Up Link */}
+                <TouchableOpacity
+                    onPress={() => isEmbedded ? onToggleMode('register') : navigation.navigate('Register')}
+                    accessibilityLabel="Sign Up Link"
+                    testID="login-signup-link"
+                >
+                    <Text style={styles.linkText}>
+                        Don't have an account? <Text style={styles.linkAccent}>Sign Up</Text>
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+
+    if (isEmbedded) {
+        return renderForm();
+    }
+
     return (
         <View style={styles.container}>
             <LinearGradient
@@ -133,129 +273,7 @@ const LoginScreen = ({ navigation }) => {
                     <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
                 </TouchableOpacity>
 
-                <View style={styles.formContainer}>
-                    <Text style={styles.title}>Welcome Back</Text>
-                    <Text style={styles.subtitle}>Sign in to continue predicting</Text>
-
-                    <View style={styles.form}>
-                        {/* Error Message */}
-                        {error ? (
-                            <View style={styles.errorContainer}>
-                                <Ionicons name="alert-circle" size={20} color={COLORS.status.error} />
-                                <Text style={styles.errorText}>{error}</Text>
-                            </View>
-                        ) : null}
-
-                        {/* Email Input */}
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Email</Text>
-                            <View style={[styles.inputWrapper, error && styles.inputError]}>
-                                <Ionicons name="mail-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Enter your email"
-                                    placeholderTextColor={COLORS.text.muted}
-                                    value={email}
-                                    onChangeText={handleEmailChange}
-                                    autoCapitalize="none"
-                                    keyboardType="email-address"
-                                    accessibilityLabel="Email Input"
-                                    testID="login-email-input"
-                                />
-                            </View>
-                        </View>
-
-                        {/* Password Input */}
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Password</Text>
-                            <View style={[styles.inputWrapper, error && styles.inputError]}>
-                                <Ionicons name="lock-closed-outline" size={20} color={COLORS.text.tertiary} style={styles.inputIcon} />
-                                <TextInput
-                                    style={[styles.input, { flex: 1 }]}
-                                    placeholder="Enter your password"
-                                    placeholderTextColor={COLORS.text.muted}
-                                    value={password}
-                                    onChangeText={handlePasswordChange}
-                                    secureTextEntry={!showPassword}
-                                    accessibilityLabel="Password Input"
-                                    testID="login-password-input"
-                                />
-                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} accessibilityLabel="Toggle Password Visibility" testID="login-toggle-password">
-                                    <Ionicons
-                                        name={showPassword ? "eye-off-outline" : "eye-outline"}
-                                        size={20}
-                                        color={COLORS.text.tertiary}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-
-                        {/* Remember Me & Forgot Password */}
-                        <View style={styles.optionsRow}>
-                            <TouchableOpacity
-                                style={styles.rememberMeContainer}
-                                onPress={() => setRememberMe(!rememberMe)}
-                                accessibilityLabel="Remember Me Checkbox"
-                                testID="login-remember-me"
-                            >
-                                <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
-                                    {rememberMe && (
-                                        <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
-                                    )}
-                                </View>
-                                <Text style={styles.rememberMeText}>Remember me</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => navigation.navigate('ForgotPassword')}
-                                accessibilityLabel="Forgot Password Button"
-                                testID="login-forgot-password"
-                            >
-                                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Login Button */}
-                        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading} accessibilityLabel="Sign In Button" testID="login-submit-button">
-                            <LinearGradient
-                                colors={COLORS.gradients.primary}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                style={styles.gradientButton}
-                            >
-                                {loading ? (
-                                    <ActivityIndicator color={COLORS.text.inverse} />
-                                ) : (
-                                    <>
-                                        <Text style={styles.buttonText}>SIGN IN</Text>
-                                        <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />
-                                    </>
-                                )}
-                            </LinearGradient>
-                        </TouchableOpacity>
-
-                        {/* Biometric Login Button */}
-                        {isBiometricsAvailable && (
-                            <TouchableOpacity style={[styles.button, styles.biometricButton]} onPress={handleBiometricLogin} disabled={loading} accessibilityLabel="Biometric Login Button">
-                                <View style={styles.biometricContent}>
-                                    <Ionicons name="scan-outline" size={24} color={COLORS.accent.cyan} />
-                                    <Text style={styles.biometricText}>Login with FaceID</Text>
-                                </View>
-                            </TouchableOpacity>
-                        )}
-
-                        <GoogleSignInButton variant="outline" />
-
-                        <AppleSignInButton />
-
-                        {/* Sign Up Link */}
-                        <TouchableOpacity onPress={() => navigation.navigate('Register')} accessibilityLabel="Sign Up Link" testID="login-signup-link">
-                            <Text style={styles.linkText}>
-                                Don't have an account? <Text style={styles.linkAccent}>Sign Up</Text>
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                {renderForm()}
             </SafeAreaView>
         </View>
     );
@@ -434,6 +452,12 @@ const styles = StyleSheet.create({
     },
     inputError: {
         borderColor: COLORS.status.error,
+    },
+    embeddedFormContainer: {
+        padding: 0,
+        backgroundColor: 'transparent',
+        flex: 0, // Don't take up full screen
+        justifyContent: 'flex-start',
     },
 });
 

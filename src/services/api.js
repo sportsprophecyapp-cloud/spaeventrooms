@@ -46,6 +46,7 @@ export const apiService = {
         onUnauthorized = callback;
     },
 
+    // --- Authentication ---
     login: async (email, password) => {
         try {
             const response = await api.post('/login', { email, password });
@@ -78,22 +79,6 @@ export const apiService = {
         const response = await api.post('/auth/guest');
         return response.data;
     },
-    googleLogin: async (idToken) => {
-        const response = await api.post('/auth/google', { idToken });
-        return response.data;
-    },
-    appleLogin: async (identityToken, user) => {
-        const response = await api.post('/auth/apple', { identityToken, user });
-        return response.data;
-    },
-    getProfile: async () => {
-        try {
-            const response = await api.get('/profile');
-            return response.data;
-        } catch (error) {
-            throw error.response ? error.response.data : error;
-        }
-    },
 
     googleLogin: async (payload, deviceLanguage = null, deviceRegion = null) => {
         // Support both old (idToken string) and new ({ idToken, accessToken }) formats
@@ -105,63 +90,45 @@ export const apiService = {
         return response.data;
     },
 
+    appleLogin: async (identityToken, user) => {
+        const response = await api.post('/auth/apple', { identityToken, user });
+        return response.data;
+    },
+
+    getProfile: async () => {
+        try {
+            const response = await api.get('/profile');
+            return response.data;
+        } catch (error) {
+            throw error.response ? error.response.data : error;
+        }
+    },
+
+    // --- Events & Predictions (The Crash-Fixers) ---
+    // --- Events & Predictions (The Crash-Fixers) ---
     getEvents: async () => {
         try {
             const response = await api.get('/events');
-            return response.data;
+            // 🛡️ TRIPLE CHECK: Ensure response, response.data, and data-type are valid
+            if (response && response.data && Array.isArray(response.data)) {
+                return response.data;
+            }
+            return [];
         } catch (error) {
             console.error('Error fetching events:', error);
+            return []; // Always return empty array to prevent .map() crashes
+        }
+    },
+
+    getUserPredictions: async (userId) => {
+        if (!userId) return [];
+        try {
+            const response = await api.get(`/predictions/${userId}`);
+            // 🛡️ Force array return
+            return (response && response.data && Array.isArray(response.data)) ? response.data : [];
+        } catch (error) {
+            console.error('Error fetching user predictions:', error);
             return [];
-        }
-    },
-
-    getChat: async (roomId = null, userId = null) => {
-        try {
-            const params = { roomId };
-            if (userId) params.userId = userId;
-            const response = await api.get('/chat', { params });
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching chat:', error);
-            return [];
-        }
-    },
-
-    sendChat: async (messageData) => {
-        try {
-            const response = await api.post('/chat', messageData);
-            return response.data;
-        } catch (error) {
-            console.error('Error sending chat:', error);
-            throw error;
-        }
-    },
-
-    getRooms: async () => {
-        try {
-            const response = await api.get('/chat/rooms');
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching rooms:', error);
-            return [];
-        }
-    },
-
-    createRoom: async (roomData) => {
-        try {
-            const response = await api.post('/chat/rooms', roomData);
-            return response.data;
-        } catch (error) {
-            throw error.response ? error.response.data : error;
-        }
-    },
-
-    joinRoom: async (roomId, password) => {
-        try {
-            const response = await api.post('/chat/rooms/join', { roomId, password });
-            return response.data;
-        } catch (error) {
-            throw error.response ? error.response.data : error;
         }
     },
 
@@ -175,16 +142,7 @@ export const apiService = {
         }
     },
 
-    getUserPredictions: async (userId) => {
-        try {
-            const response = await api.get(`/predictions/${userId}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching user predictions:', error);
-            return [];
-        }
-    },
-
+    // --- Weekly Draw & stats ---
     enterWeeklyDraw: async (userId) => {
         try {
             const response = await api.post('/weekly-draw/enter', { userId });
@@ -197,17 +155,27 @@ export const apiService = {
     getWeeklyDrawStats: async () => {
         try {
             const response = await api.get('/weekly-draw/stats');
-            return response.data;
+            return response.data || { totalEntries: 0 };
         } catch (error) {
             console.error('Error fetching weekly draw stats:', error);
             return { totalEntries: 0 };
         }
     },
 
+    getUserWeeklyDrawEntries: async (userId) => {
+        try {
+            const response = await api.get(`/weekly-draw/user-entries/${userId}`);
+            return response.data || { count: 0 };
+        } catch (error) {
+            console.error('Error fetching user draw entries:', error);
+            return { count: 0 };
+        }
+    },
+
     getUserBalance: async (userId) => {
         try {
             const response = await api.get(`/balance/${userId}`);
-            return response.data;
+            return response.data || { tokens: 0, crowns: 0 };
         } catch (error) {
             console.error('Error fetching user balance:', error);
             return { tokens: 0, crowns: 0 };
@@ -227,13 +195,15 @@ export const apiService = {
     getLeaderboard: async (timeframe = 'all') => {
         try {
             const response = await api.get('/leaderboard', { params: { timeframe } });
-            return response.data;
+            // Ensure nested leaderboard key exists
+            return (response.data && response.data.leaderboard) ? response.data : { leaderboard: [] };
         } catch (error) {
             console.error('Error fetching leaderboard:', error);
             return { leaderboard: [] };
         }
     },
 
+    // --- User Profile & stats ---
     changeIdName: async (userId, newIdName) => {
         try {
             const response = await api.post('/user/change-idname', { userId, newIdName });
@@ -280,7 +250,6 @@ export const apiService = {
             return response.data;
         } catch (error) {
             console.error('Error fetching featured winner:', error);
-            // Return null instead of throwing to prevent landing page crash
             return null;
         }
     },
@@ -326,7 +295,7 @@ export const apiService = {
     getUserLeagues: async (userId) => {
         try {
             const response = await api.get(`/leagues/user/${userId}`);
-            return response.data;
+            return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
             console.error('Error fetching user leagues:', error);
             return [];
@@ -344,11 +313,25 @@ export const apiService = {
     },
 
     // --- Sponsor Methods ---
+    getActiveSponsors: async () => {
+        try {
+            const response = await api.get('/sponsors/active');
+            return Array.isArray(response.data) ? response.data : [];
+        } catch (error) {
+            console.error('Error fetching active sponsors:', error);
+            return [];
+        }
+    },
 
-
-
-
-
+    getPrizeDrawSponsors: async () => {
+        try {
+            const response = await api.get('/sponsors/prize-draws');
+            return Array.isArray(response.data) ? response.data : [];
+        } catch (error) {
+            console.error('Error fetching prize draw sponsors:', error);
+            return [];
+        }
+    },
 
     createSponsorCheckout: async (sponsorData) => {
         try {
@@ -391,20 +374,20 @@ export const apiService = {
     getAdminUserAnalytics: async (search = '') => {
         try {
             const response = await api.get('/admin/analytics/users', { params: { search } });
-            return response.data;
+            return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
             console.error('getAdminUserAnalytics error:', error);
-            throw error.response?.data || error;
+            return [];
         }
     },
 
     getPendingSponsors: async () => {
         try {
             const response = await api.get('/admin/sponsors/pending');
-            return response.data;
+            return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
             console.error('getPendingSponsors error:', error);
-            throw error.response?.data || error;
+            return [];
         }
     },
 
@@ -425,6 +408,7 @@ export const apiService = {
             throw error.response?.data || error;
         }
     },
+
     holdSponsor: async (id) => {
         try {
             const response = await api.post(`/admin/sponsors/${id}/hold`);
@@ -433,6 +417,7 @@ export const apiService = {
             throw error.response?.data || error;
         }
     },
+
     deleteSponsor: async (id) => {
         try {
             const response = await api.delete(`/admin/sponsors/${id}`);
@@ -441,14 +426,7 @@ export const apiService = {
             throw error.response?.data || error;
         }
     },
-    getActiveSponsors: async () => {
-        try {
-            const response = await api.get('/admin/sponsors/active');
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error;
-        }
-    },
+
     deactivateSponsor: async (id) => {
         try {
             const response = await api.post(`/admin/sponsors/${id}/deactivate`);
@@ -457,37 +435,16 @@ export const apiService = {
             throw error.response?.data || error;
         }
     },
+
     getActivePrizeSponsors: async () => {
         try {
             const response = await api.get('/sponsors/prizes');
-            return response.data;
+            return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
             console.error('Error fetching active prize sponsors:', error);
             return [];
         }
     },
-
-    getPrizeDrawSponsors: async () => {
-        try {
-            const response = await api.get('/sponsors/prize-draws');
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching prize draw sponsors:', error);
-            return [];
-        }
-    },
-
-    getActiveSponsors: async () => {
-        try {
-            const response = await api.get('/sponsors/active');
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching active sponsors:', error);
-            return [];
-        }
-    },
-
-
 
     toggleNotifications: async (userId, enabled) => {
         try {
@@ -502,7 +459,7 @@ export const apiService = {
     getNotifications: async (userId) => {
         try {
             const response = await api.get(`/notifications/${userId}`);
-            return response.data;
+            return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
             console.error('Error fetching notifications:', error);
             return [];
@@ -528,31 +485,16 @@ export const apiService = {
         }
     },
 
-    updateRoomCustomAd: async (roomId, adData) => {
-        try {
-            const response = await api.put(`/chat/rooms/${roomId}/custom-ad`, adData);
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
-    },
-
-    deleteRoom: async (roomId) => {
-        try {
-            const response = await api.delete(`/chat/rooms/${roomId}`);
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
-    },
     getRolePermissions: async () => {
         try {
             const response = await api.get('/admin/role-permissions');
-            return response.data;
+            return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
-            throw error.response?.data || error;
+            console.error('getRolePermissions error:', error);
+            return [];
         }
     },
+
     updateRolePermissions: async (role, permissions) => {
         try {
             const response = await api.post('/admin/role-permissions', { role, permissions });
@@ -561,25 +503,10 @@ export const apiService = {
             throw error.response?.data || error;
         }
     },
+
     setUserRole: async (newRole, targetEmail, targetUuid) => {
         try {
             const response = await api.post('/admin/set-role', { targetEmail, targetUuid, newRole });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error;
-        }
-    },
-    muteUser: async (targetEmail, muted, targetUuid) => {
-        try {
-            const response = await api.post('/admin/mute-user', { targetEmail, targetUuid, muted });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error;
-        }
-    },
-    kickUser: async (targetEmail, roomId, targetUuid) => {
-        try {
-            const response = await api.post('/admin/kick-user', { targetEmail, targetUuid, roomId });
             return response.data;
         } catch (error) {
             throw error.response?.data || error;
@@ -590,20 +517,20 @@ export const apiService = {
     getAllUsers: async (search = '') => {
         try {
             const response = await api.get(`/admin/users?search=${search}`);
-            return response.data;
+            return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
             console.error('Error fetching all users:', error);
-            throw error.response ? error.response.data : error;
+            return [];
         }
     },
 
     getAllWinners: async () => {
         try {
             const response = await api.get('/admin/winners');
-            return response.data;
+            return Array.isArray(response.data) ? response.data : [];
         } catch (error) {
             console.error('Error fetching winners:', error);
-            throw error.response ? error.response.data : error;
+            return [];
         }
     },
 

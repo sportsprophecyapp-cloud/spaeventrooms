@@ -168,7 +168,6 @@ const WeeklyDrawScreen = ({ navigation }) => {
                 </TouchableOpacity>
                 <View style={{ alignItems: 'center' }}>
                     <Text style={styles.headerTitle}>Prize Draws</Text>
-                    <Text style={styles.versionText}>v2025.12.19-STABLE</Text>
                 </View>
                 <View style={{ width: 24 }} />
             </View>

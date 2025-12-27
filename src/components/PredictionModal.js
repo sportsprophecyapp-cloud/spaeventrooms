@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, ScrollView, Image, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiService } from '../services/api';
@@ -32,19 +32,37 @@ const CONFIDENCE_OPTIONS = [
     },
 ];
 
-const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadNextGame }) => {
+const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuccess, onLoadNextGame }) => {
     const [selectedWinner, setSelectedWinner] = useState(null);
     const [confidenceLevel, setConfidenceLevel] = useState('normal');
     const [homeScore, setHomeScore] = useState('');
     const [awayScore, setAwayScore] = useState('');
     const [loading, setLoading] = useState(false);
     const { user, updateUser } = useAuth();
+
+    // 🛡️ Guard: Ensure we have a local safe reference for the UI
+    const currentUser = user || { tokens: 0, crowns: 0, isGuest: true };
+
     const [balance, setBalance] = useState({
-        tokens: user?.tokens || 0,
-        crowns: user?.crowns || 0
+        tokens: currentUser?.tokens || 0,
+        crowns: currentUser?.crowns || 0
     });
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const slideAnim = useRef(new Animated.Value(0)).current;
+
+    // Slide animation when event changes
+    useEffect(() => {
+        if (visible && event) {
+            slideAnim.setValue(400); // Slide in from right
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                tension: 50,
+                friction: 8,
+                useNativeDriver: false, // 🛡️ Change this to 'false' to support all environments
+            }).start();
+        }
+    }, [event?.id, visible]);
 
     // Update balance from context when user changes
     useEffect(() => {
@@ -69,7 +87,10 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
             try {
                 const userBalance = await apiService.getUserBalance(user.uuid);
                 if (userBalance && (userBalance.tokens !== undefined)) {
-                    setBalance(userBalance);
+                    setBalance({
+                        tokens: userBalance.tokens || 0,
+                        crowns: userBalance.crowns || 0
+                    });
                 }
             } catch (err) {
                 // Failed to fetch latest balance, use context
@@ -80,12 +101,12 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
     // Reset state when modal opens or event changes
     useEffect(() => {
         if (visible && event) {
-            setSelectedWinner(null);
+            setSelectedWinner(initialTeam || null);
             setConfidenceLevel('normal');
             setHomeScore('');
             setAwayScore('');
         }
-    }, [visible, event]);
+    }, [visible, event, initialTeam]);
 
     if (!event) return null;
 
@@ -96,76 +117,44 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
     const hasEnoughTokens = balance.tokens >= PREDICTION_COST;
 
     const handleSubmit = async () => {
-        // if (user.isGuest) {
-        //     Alert.alert(
-        //         'Sign Up Required',
-        //         'You must create an account to make predictions and win prizes!',
-        //         [
-        //             { text: 'Cancel', style: 'cancel' },
-        //             { text: 'Sign Up', onPress: () => onClose() } // Ideally navigate to Register, but modal close + separate nav is simpler for now, or we can assume user knows how to logout/signup
-        //         ]
-        //     );
-        //     return;
-        // }
+        // 🛡️ Use safe reference
+        if (!currentUser || !event) return;
 
         if (!selectedWinner) {
             setError('Please select a winner');
             return;
         }
 
-        if (!hasEnoughTokens) {
-            setError(`Insufficient tokens. Cost: ${PREDICTION_COST}, Balance: ${balance.tokens}`);
+        const PREDICTION_COST = selectedOption ? selectedOption.tokenCost : 1;
+        if (balance.tokens < PREDICTION_COST) {
+            setError(`Insufficient tokens. Need ${PREDICTION_COST}`);
             return;
-        }
-
-        // Validate that scores match the selected winner (if scores are provided)
-        const homeScoreNum = parseInt(homeScore) || 0;
-        const awayScoreNum = parseInt(awayScore) || 0;
-
-        // Only validate if both scores are entered
-        if (homeScore && awayScore) {
-            if (homeScoreNum > awayScoreNum && selectedWinner !== event.homeTeam) {
-                setError(`Score contradiction: You selected ${selectedWinner} to win, but entered a score where ${event.homeTeam} wins ${homeScoreNum}-${awayScoreNum}`);
-                return;
-            }
-            if (awayScoreNum > homeScoreNum && selectedWinner !== event.awayTeam) {
-                setError(`Score contradiction: You selected ${selectedWinner} to win, but entered a score where ${event.awayTeam} wins ${awayScoreNum}-${homeScoreNum}`);
-                return;
-            }
-            if (homeScoreNum === awayScoreNum) {
-                setError('Scores cannot be tied. Please predict a winner with a different score.');
-                return;
-            }
         }
 
         setError(null);
         setLoading(true);
 
         try {
-            if (user.isGuest) {
+            if (currentUser.isGuest) {
+                // ... guest logic ...
                 // Simulate network delay
                 await new Promise(resolve => setTimeout(resolve, 500));
 
                 // Deduct token locally and add to predicted games
-                const currentPredictedGames = user.predictedGames || [];
-                updateUser({
-                    tokens: user.tokens - PREDICTION_COST,
+                const currentPredictedGames = currentUser.predictedGames || [];
+                await updateUser({
+                    tokens: (currentUser.tokens || 0) - PREDICTION_COST,
                     predictedGames: [...currentPredictedGames, event.id]
                 });
-                setBalance(prev => ({ ...prev, tokens: prev.tokens - PREDICTION_COST }));
+                setBalance(prev => ({ ...prev, tokens: (prev.tokens || 0) - PREDICTION_COST }));
 
                 setSuccess(true);
 
-                setTimeout(async () => { // Async for consistency with main flow
-                    // Do NOT call onPredictionSuccess for guests here.
-                    // The updateUser call triggers a user change, which triggers useEffect in parent screens to refresh events.
-                    // Calling it here explicitly causes a race condition with a stale user object.
-
+                setTimeout(async () => {
                     // Try to load next game
                     if (onLoadNextGame) {
-                        const nextEvent = await onLoadNextGame(event.id); // Pass current ID to ignore
+                        const nextEvent = await onLoadNextGame(event.id);
                         if (nextEvent) {
-                            // Reset state for next game
                             setSuccess(false);
                             setSelectedWinner(null);
                             setHomeScore('');
@@ -184,13 +173,12 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                 return;
             }
 
+            // Standard User Submission
             const result = await apiService.submitPrediction({
-                userId: user.uuid,
+                userId: currentUser.uuid,
                 eventId: event.id,
                 predictedWinner: selectedWinner,
-                predictedScores: [homeScoreNum, awayScoreNum],
-                predictedWinner: selectedWinner,
-                predictedScores: [homeScoreNum, awayScoreNum],
+                predictedScores: [parseInt(homeScore) || 0, parseInt(awayScore) || 0],
                 eventType: 'matchup',
                 confidenceLevel: confidenceLevel,
             });
@@ -198,13 +186,13 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
             // Update balance from response or manual decrement
             const newTokens = (result.balance?.tokens !== undefined)
                 ? result.balance.tokens
-                : (user.tokens - PREDICTION_COST);
+                : (currentUser.tokens - PREDICTION_COST);
 
             const newCrowns = (result.balance?.crowns !== undefined)
                 ? result.balance.crowns
-                : user.crowns;
+                : currentUser.crowns;
 
-            // Update global user state to ensure header/other screens reflect change
+            // Update global user state
             await updateUser({ tokens: newTokens, crowns: newCrowns });
 
             // Update local state
@@ -215,19 +203,17 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
             // Auto-load next game or close after delay
             setTimeout(async () => {
                 // Refresh events first
-                if (onPredictionSuccess) onPredictionSuccess();
+                if (onPredictionSuccess && !currentUser.isGuest) onPredictionSuccess();
 
                 // Try to load next game
                 if (onLoadNextGame) {
-                    const nextEvent = await onLoadNextGame(event.id); // Pass current ID to ignore
+                    const nextEvent = await onLoadNextGame(event.id);
                     if (nextEvent) {
-                        // Reset state for next game
                         setSuccess(false);
                         setSelectedWinner(null);
                         setHomeScore('');
                         setAwayScore('');
                         setError(null);
-                        // Modal stays open with new event
                         return;
                     }
                 }
@@ -282,199 +268,201 @@ const PredictionModal = ({ visible, onClose, event, onPredictionSuccess, onLoadN
                         </View>
                     </View>
 
-                    <ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
-                        {/* Cost Info */}
-                        <View style={styles.costCard}>
-                            <View style={styles.costRow}>
-                                <Text style={styles.costLabel}>Prediction Cost:</Text>
-                                <View style={styles.costValue}>
-                                    <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
-                                    <Text style={styles.costText}>{PREDICTION_COST} Tokens</Text>
+                    <Animated.View style={[styles.contentWrapper, { transform: [{ translateX: slideAnim }] }]}>
+                        <ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
+                            {/* Cost Info */}
+                            <View style={styles.costCard}>
+                                <View style={styles.costRow}>
+                                    <Text style={styles.costLabel}>Prediction Cost:</Text>
+                                    <View style={styles.costValue}>
+                                        <Ionicons name="wallet-outline" size={16} color={COLORS.accent.lime} />
+                                        <Text style={styles.costText}>{PREDICTION_COST} Tokens</Text>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
 
-                        {/* Confidence Selector */}
-                        <Text style={styles.sectionTitle}>Confidence Level</Text>
-                        <View style={styles.confidenceSelector}>
-                            {CONFIDENCE_OPTIONS.map((option) => (
-                                <TouchableOpacity
-                                    key={option.id}
-                                    style={[
-                                        styles.confidenceOption,
-                                        confidenceLevel === option.id && styles.confidenceOptionSelected,
-                                    ]}
-                                    onPress={() => setConfidenceLevel(option.id)}
-                                >
-                                    <View style={styles.confidenceHeader}>
-                                        <Text style={[styles.confidenceLabel, confidenceLevel === option.id && styles.confidenceLabelSelected]}>
-                                            {option.label}
+                            {/* Confidence Selector */}
+                            <Text style={styles.sectionTitle}>Confidence Level</Text>
+                            <View style={styles.confidenceSelector}>
+                                {CONFIDENCE_OPTIONS.map((option) => (
+                                    <TouchableOpacity
+                                        key={option.id}
+                                        style={[
+                                            styles.confidenceOption,
+                                            confidenceLevel === option.id && styles.confidenceOptionSelected,
+                                        ]}
+                                        onPress={() => setConfidenceLevel(option.id)}
+                                    >
+                                        <View style={styles.confidenceHeader}>
+                                            <Text style={[styles.confidenceLabel, confidenceLevel === option.id && styles.confidenceLabelSelected]}>
+                                                {option.label}
+                                            </Text>
+                                            {option.badge && (
+                                                <View style={styles.badge}>
+                                                    <Text style={styles.badgeText}>{option.badge}</Text>
+                                                </View>
+                                            )}
+                                        </View>
+                                        <Text style={[styles.confidenceDesc, confidenceLevel === option.id && styles.confidenceDescSelected]}>
+                                            {option.description}
                                         </Text>
-                                        {option.badge && (
-                                            <View style={styles.badge}>
-                                                <Text style={styles.badgeText}>{option.badge}</Text>
+                                        <View style={styles.confidenceCost}>
+                                            <Text style={[styles.costLabelSmall, confidenceLevel === option.id && styles.costLabelSmallSelected]}>
+                                                Cost: {option.tokenCost}
+                                            </Text>
+                                            <Text style={[styles.rewardLabelSmall, confidenceLevel === option.id && styles.rewardLabelSmallSelected]}>
+                                                Win: {option.crownReward}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            {/* Rewards Info */}
+                            <View style={styles.rewardsCard}>
+                                <Text style={styles.rewardsTitle}>Potential Rewards</Text>
+                                <View style={styles.rewardRow}>
+                                    <Ionicons name="checkmark-circle" size={18} color={COLORS.status.success} />
+                                    <Text style={styles.rewardLabel}>Correct Winner:</Text>
+                                    <View style={styles.rewardValues}>
+                                        <View style={styles.rewardValue}>
+                                            <Ionicons name="wallet-outline" size={14} color={COLORS.accent.lime} />
+                                            <Text style={styles.rewardText}>3</Text>
+                                        </View>
+                                        <View style={styles.rewardValue}>
+                                            <Ionicons name="trophy" size={14} color="#FFD700" />
+                                            <Text style={styles.rewardText}>1</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={styles.rewardRow}>
+                                    <Ionicons name="star" size={18} color="#FFD700" />
+                                    <Text style={styles.rewardLabel}>Exact Score:</Text>
+                                    <View style={styles.rewardValues}>
+                                        <View style={styles.rewardValue}>
+                                            <Ionicons name="trophy" size={14} color="#FFD700" />
+                                            <Text style={styles.rewardText}>+1</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Matchup Card - Interactive for Selection */}
+                            <Text style={styles.sectionTitle}>Tap Team to Select Winner</Text>
+                            <View style={styles.matchupCard}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.teamContainer,
+                                        selectedWinner && selectedWinner !== event.homeTeam && styles.teamUnselected
+                                    ]}
+                                    onPress={() => setSelectedWinner(event.homeTeam)}
+                                    accessibilityLabel={`Select ${event.homeTeam} as Winner`}
+                                    testID="prediction-select-home"
+                                >
+                                    <View style={[
+                                        styles.logoContainer,
+                                        selectedWinner === event.homeTeam && styles.logoSelected
+                                    ]}>
+                                        {getTeamLogo(event.homeTeam) ? (
+                                            <Image
+                                                source={{ uri: getTeamLogo(event.homeTeam) }}
+                                                style={styles.logoImage}
+                                                resizeMode="contain"
+                                            />
+                                        ) : (
+                                            <Text style={styles.logoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
+                                        )}
+                                        {selectedWinner === event.homeTeam && (
+                                            <View style={styles.checkBadge}>
+                                                <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
                                             </View>
                                         )}
                                     </View>
-                                    <Text style={[styles.confidenceDesc, confidenceLevel === option.id && styles.confidenceDescSelected]}>
-                                        {option.description}
-                                    </Text>
-                                    <View style={styles.confidenceCost}>
-                                        <Text style={[styles.costLabelSmall, confidenceLevel === option.id && styles.costLabelSmallSelected]}>
-                                            Cost: {option.tokenCost}
-                                        </Text>
-                                        <Text style={[styles.rewardLabelSmall, confidenceLevel === option.id && styles.rewardLabelSmallSelected]}>
-                                            Win: {option.crownReward}
-                                        </Text>
-                                    </View>
+                                    <Text style={[
+                                        styles.teamName,
+                                        selectedWinner === event.homeTeam && styles.teamNameSelected
+                                    ]} numberOfLines={2}>{event.homeTeam || 'Home Team'}</Text>
                                 </TouchableOpacity>
-                            ))}
-                        </View>
 
-                        {/* Rewards Info */}
-                        <View style={styles.rewardsCard}>
-                            <Text style={styles.rewardsTitle}>Potential Rewards</Text>
-                            <View style={styles.rewardRow}>
-                                <Ionicons name="checkmark-circle" size={18} color={COLORS.status.success} />
-                                <Text style={styles.rewardLabel}>Correct Winner:</Text>
-                                <View style={styles.rewardValues}>
-                                    <View style={styles.rewardValue}>
-                                        <Ionicons name="wallet-outline" size={14} color={COLORS.accent.lime} />
-                                        <Text style={styles.rewardText}>3</Text>
+                                <View style={styles.vsContainer}>
+                                    <Text style={styles.vsText}>VS</Text>
+                                </View>
+
+                                <TouchableOpacity
+                                    style={[
+                                        styles.teamContainer,
+                                        selectedWinner && selectedWinner !== event.awayTeam && styles.teamUnselected
+                                    ]}
+                                    onPress={() => setSelectedWinner(event.awayTeam)}
+                                    accessibilityLabel={`Select ${event.awayTeam} as Winner`}
+                                    testID="prediction-select-away"
+                                >
+                                    <View style={[
+                                        styles.logoContainer,
+                                        selectedWinner === event.awayTeam && styles.logoSelected
+                                    ]}>
+                                        {getTeamLogo(event.awayTeam) ? (
+                                            <Image
+                                                source={{ uri: getTeamLogo(event.awayTeam) }}
+                                                style={styles.logoImage}
+                                                resizeMode="contain"
+                                            />
+                                        ) : (
+                                            <Text style={styles.logoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
+                                        )}
+                                        {selectedWinner === event.awayTeam && (
+                                            <View style={styles.checkBadge}>
+                                                <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
+                                            </View>
+                                        )}
                                     </View>
-                                    <View style={styles.rewardValue}>
-                                        <Ionicons name="trophy" size={14} color="#FFD700" />
-                                        <Text style={styles.rewardText}>1</Text>
-                                    </View>
+                                    <Text style={[
+                                        styles.teamName,
+                                        selectedWinner === event.awayTeam && styles.teamNameSelected
+                                    ]} numberOfLines={2}>{event.awayTeam || 'Away Team'}</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Predicted Score */}
+                            <Text style={styles.sectionTitle}>Predicted Score (Optional)</Text>
+                            <View style={styles.scoreContainer}>
+                                <View style={styles.scoreBox}>
+                                    <Text style={styles.scoreLabel}>{event.homeTeam || 'Home'}</Text>
+                                    <TextInput
+                                        style={styles.scoreInput}
+                                        keyboardType="numeric"
+                                        value={homeScore}
+                                        onChangeText={setHomeScore}
+                                        placeholder="0"
+                                        placeholderTextColor={COLORS.text.muted}
+                                        maxLength={3}
+                                        accessibilityLabel={`Score Input for ${event.homeTeam}`}
+                                        testID="prediction-score-home"
+                                    />
+                                </View>
+
+                                <View style={styles.scoreDivider}>
+                                    <Text style={styles.scoreDividerText}>-</Text>
+                                </View>
+
+                                <View style={styles.scoreBox}>
+                                    <Text style={styles.scoreLabel}>{event.awayTeam || 'Away'}</Text>
+                                    <TextInput
+                                        style={styles.scoreInput}
+                                        keyboardType="numeric"
+                                        value={awayScore}
+                                        onChangeText={setAwayScore}
+                                        placeholder="0"
+                                        placeholderTextColor={COLORS.text.muted}
+                                        maxLength={3}
+                                        accessibilityLabel={`Score Input for ${event.awayTeam}`}
+                                        testID="prediction-score-away"
+                                    />
                                 </View>
                             </View>
-                            <View style={styles.rewardRow}>
-                                <Ionicons name="star" size={18} color="#FFD700" />
-                                <Text style={styles.rewardLabel}>Exact Score:</Text>
-                                <View style={styles.rewardValues}>
-                                    <View style={styles.rewardValue}>
-                                        <Ionicons name="trophy" size={14} color="#FFD700" />
-                                        <Text style={styles.rewardText}>+1</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
 
-                        {/* Matchup Card - Interactive for Selection */}
-                        <Text style={styles.sectionTitle}>Tap Team to Select Winner</Text>
-                        <View style={styles.matchupCard}>
-                            <TouchableOpacity
-                                style={[
-                                    styles.teamContainer,
-                                    selectedWinner && selectedWinner !== event.homeTeam && styles.teamUnselected
-                                ]}
-                                onPress={() => setSelectedWinner(event.homeTeam)}
-                                accessibilityLabel={`Select ${event.homeTeam} as Winner`}
-                                testID="prediction-select-home"
-                            >
-                                <View style={[
-                                    styles.logoContainer,
-                                    selectedWinner === event.homeTeam && styles.logoSelected
-                                ]}>
-                                    {getTeamLogo(event.homeTeam) ? (
-                                        <Image
-                                            source={{ uri: getTeamLogo(event.homeTeam) }}
-                                            style={styles.logoImage}
-                                            resizeMode="contain"
-                                        />
-                                    ) : (
-                                        <Text style={styles.logoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
-                                    )}
-                                    {selectedWinner === event.homeTeam && (
-                                        <View style={styles.checkBadge}>
-                                            <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
-                                        </View>
-                                    )}
-                                </View>
-                                <Text style={[
-                                    styles.teamName,
-                                    selectedWinner === event.homeTeam && styles.teamNameSelected
-                                ]} numberOfLines={2}>{event.homeTeam || 'Home Team'}</Text>
-                            </TouchableOpacity>
-
-                            <View style={styles.vsContainer}>
-                                <Text style={styles.vsText}>VS</Text>
-                            </View>
-
-                            <TouchableOpacity
-                                style={[
-                                    styles.teamContainer,
-                                    selectedWinner && selectedWinner !== event.awayTeam && styles.teamUnselected
-                                ]}
-                                onPress={() => setSelectedWinner(event.awayTeam)}
-                                accessibilityLabel={`Select ${event.awayTeam} as Winner`}
-                                testID="prediction-select-away"
-                            >
-                                <View style={[
-                                    styles.logoContainer,
-                                    selectedWinner === event.awayTeam && styles.logoSelected
-                                ]}>
-                                    {getTeamLogo(event.awayTeam) ? (
-                                        <Image
-                                            source={{ uri: getTeamLogo(event.awayTeam) }}
-                                            style={styles.logoImage}
-                                            resizeMode="contain"
-                                        />
-                                    ) : (
-                                        <Text style={styles.logoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
-                                    )}
-                                    {selectedWinner === event.awayTeam && (
-                                        <View style={styles.checkBadge}>
-                                            <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
-                                        </View>
-                                    )}
-                                </View>
-                                <Text style={[
-                                    styles.teamName,
-                                    selectedWinner === event.awayTeam && styles.teamNameSelected
-                                ]} numberOfLines={2}>{event.awayTeam || 'Away Team'}</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Predicted Score */}
-                        <Text style={styles.sectionTitle}>Predicted Score (Optional)</Text>
-                        <View style={styles.scoreContainer}>
-                            <View style={styles.scoreBox}>
-                                <Text style={styles.scoreLabel}>{event.homeTeam || 'Home'}</Text>
-                                <TextInput
-                                    style={styles.scoreInput}
-                                    keyboardType="numeric"
-                                    value={homeScore}
-                                    onChangeText={setHomeScore}
-                                    placeholder="0"
-                                    placeholderTextColor={COLORS.text.muted}
-                                    maxLength={3}
-                                    accessibilityLabel={`Score Input for ${event.homeTeam}`}
-                                    testID="prediction-score-home"
-                                />
-                            </View>
-
-                            <View style={styles.scoreDivider}>
-                                <Text style={styles.scoreDividerText}>-</Text>
-                            </View>
-
-                            <View style={styles.scoreBox}>
-                                <Text style={styles.scoreLabel}>{event.awayTeam || 'Away'}</Text>
-                                <TextInput
-                                    style={styles.scoreInput}
-                                    keyboardType="numeric"
-                                    value={awayScore}
-                                    onChangeText={setAwayScore}
-                                    placeholder="0"
-                                    placeholderTextColor={COLORS.text.muted}
-                                    maxLength={3}
-                                    accessibilityLabel={`Score Input for ${event.awayTeam}`}
-                                    testID="prediction-score-away"
-                                />
-                            </View>
-                        </View>
-
-                    </ScrollView>
+                        </ScrollView>
+                    </Animated.View>
 
                     {/* Fixed Footer with Submit Button */}
                     <View style={styles.footerContainer}>
@@ -957,6 +945,9 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: COLORS.border.tertiary,
         backgroundColor: COLORS.background.primary,
+    },
+    contentWrapper: {
+        flex: 1,
     },
 });
 

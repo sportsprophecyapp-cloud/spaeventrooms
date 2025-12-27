@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, BORDER_RADIUS } from '../constants/theme';
 
 export const NoPredictionsYet = ({ onMakePrediction }) => (
     <View style={styles.emptyState}>
@@ -17,15 +18,19 @@ export const NoPredictionsYet = ({ onMakePrediction }) => (
 
 export const BrokenStreak = ({ streakLength, onContinue }) => (
     <View style={styles.streakBroken}>
-        <Text style={styles.streakBrokenEmoji}>😔</Text>
+        <Text style={styles.streakBrokenEmoji}>{streakLength > 1 ? '🔥' : '🚀'}</Text>
         <Text style={styles.streakBrokenTitle}>
-            Your {streakLength}-day streak ended
+            {streakLength > 1 ? `${streakLength} Day Streak!` : 'Streak Started!'}
         </Text>
         <Text style={styles.streakBrokenText}>
-            No worries! Start a new streak today and keep improving.
+            {streakLength > 1
+                ? "Your momentum is building! Log in daily to climb the leaderboard and earn more crowns."
+                : "Your first day was a success! Log in tomorrow to keep the flame alive."}
         </Text>
         <TouchableOpacity style={styles.streakBrokenCTA} onPress={onContinue}>
-            <Text style={styles.streakBrokenCTAText}>Start New Streak</Text>
+            <Text style={styles.streakBrokenCTAText}>
+                {streakLength > 1 ? 'Keep it Going!' : 'Continue'}
+            </Text>
         </TouchableOpacity>
     </View>
 );
@@ -88,10 +93,10 @@ const styles = StyleSheet.create({
     streakBroken: {
         alignItems: 'center',
         padding: 24,
-        backgroundColor: '#FEF2F2',
-        borderRadius: 16,
+        backgroundColor: 'rgba(10, 22, 40, 0.9)',
+        borderRadius: BORDER_RADIUS?.xl || 16,
         borderWidth: 1,
-        borderColor: '#FECACA',
+        borderColor: COLORS.accent?.cyan || '#0ea5e9',
         marginVertical: 16,
         marginHorizontal: 16,
     },
@@ -100,22 +105,24 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     streakBrokenTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: '#991B1B',
+        color: COLORS.accent?.cyan || '#0ea5e9',
         marginBottom: 8,
         textAlign: 'center',
+        letterSpacing: 1,
     },
     streakBrokenText: {
         fontSize: 14,
-        color: '#7F1D1D',
+        color: COLORS.text?.secondary || '#9ca3af',
         textAlign: 'center',
-        marginBottom: 16,
+        marginBottom: 20,
+        lineHeight: 20,
     },
     streakBrokenCTA: {
         paddingHorizontal: 20,
         paddingVertical: 10,
-        backgroundColor: '#EF4444',
+        backgroundColor: COLORS.accent.cyan || '#3B82F6',
         borderRadius: 8,
     },
     streakBrokenCTAText: {

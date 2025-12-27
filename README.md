@@ -1,4 +1,4 @@
-# Sports Prophecy App (v2.13.0)
+# Sports Prophecy App (v2.17.5)
 
 > **The Ultimate Free Sports Prediction Platform**
 
@@ -115,11 +115,17 @@ eas build --platform android --profile production
 
 See [CHANGELOG.md](./CHANGELOG.md) for the full history of changes.
 
-**Latest Update: v2.13.0 (December 2025)**
-- **Analytics**: Fixed analytics loading issues and referrer tracking.
-- **Security**: Implemented permanent admin rights for super-admin account.
-- **Enhancement**: Super-admin cannot be demoted or managed by other administrators.
-- **Admin Panel**: Super-admin excluded from moderator management list.
+**Latest Update: v2.17.5 (December 2025)**
+- **Hotfix 3 (Absolute Bulletproof)**: Refactored `api.js` to force array returns, hardened `SportScreen` sorting, and finalized Cyan Streak UX.
+- **v2.17.4**: Hotfix 2 - Defensive audit and positive streak reinforcement.
+- **v2.17.2**: UX/UI Overhaul (v2.0) - Prophet Midnight Palette migration.
+
+**v2.17.0 (December 2025)**
+- **Auth Portal Architecture**: Consolidated all entry flows into a single-route, zero-redirect experience.
+- **Hero Social Buttons**: Immediate access to Google/Apple sign-in from the main hero section.
+- **Flicker-Free Load**: Optimized hydration logic to eliminate flashes and route jumps.
+- **Winner Accuracy**: Updated hardcoded social proof references for factual consistency.
+
 
 ---
 

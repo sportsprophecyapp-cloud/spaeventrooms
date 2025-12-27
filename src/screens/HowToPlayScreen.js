@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 
 const HowToPlayScreen = () => {
     const navigation = useNavigation();
-    const { loginAsGuest } = useAuth();
+    const { loginAsGuest, user } = useAuth();
     const [isLoading, setIsLoading] = React.useState(false);
 
     const handleStartPlaying = async () => {
@@ -167,7 +167,7 @@ const HowToPlayScreen = () => {
                         </Text>
                         <View style={styles.infoList}>
                             <Text style={styles.infoItem}>• New users: 50 tokens</Text>
-                            <Text style={styles.infoItem}>• Daily login: +3 tokens</Text>
+                            <Text style={styles.infoItem}>• Daily login: +5 tokens</Text>
                             <Text style={styles.infoItem}>• Correct prediction: +3 tokens</Text>
                             <Text style={styles.infoItem}>• Prediction cost: -1 token</Text>
                         </View>
@@ -188,7 +188,7 @@ const HowToPlayScreen = () => {
                             <Text style={styles.infoItem}>• New users: 5 crowns</Text>
                             <Text style={styles.infoItem}>• Correct prediction: +1 crown</Text>
                             <Text style={styles.infoItem}>• Exact score: +1 bonus crown</Text>
-                            <Text style={styles.infoItem}>• 7-day login streak: +1 crown</Text>
+                            <Text style={styles.infoItem}>• 7-day login streak: +10 tokens, +5 crowns</Text>
                             <Text style={styles.infoItem}>• Prize draw entry: -1 crown</Text>
                         </View>
                     </LinearGradient>
@@ -207,7 +207,7 @@ const HowToPlayScreen = () => {
                         </Text>
                         <View style={styles.streakInfo}>
                             <Ionicons name="flame" size={20} color={COLORS.text.inverse} />
-                            <Text style={styles.streakText}>7-Day Streak = +1 Crown Bonus</Text>
+                            <Text style={styles.streakText}>7-Day Streak = +10 Tokens & +5 Crowns</Text>
                         </View>
                     </LinearGradient>
                 </View>
@@ -237,12 +237,6 @@ const HowToPlayScreen = () => {
                         <Ionicons name="bulb" size={20} color={COLORS.accent.cyan} />
                         <Text style={styles.tipText}>
                             Check the leaderboard to see how you rank against other players!
-                        </Text>
-                    </View>
-                    <View style={styles.tipCard}>
-                        <Ionicons name="chatbubbles" size={20} color="#FFD700" />
-                        <Text style={styles.tipText}>
-                            Respect others in chat! Public rooms are moderated to ensure a fun and safe community.
                         </Text>
                     </View>
                 </View>

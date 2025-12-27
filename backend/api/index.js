@@ -206,7 +206,7 @@ app.use(express.json({
 }));
 
 // Health Check
-app.get('/api/health', (req, res) => res.status(200).json({ status: 'ok', version: '2.9.10' }));
+app.get('/api/health', (req, res) => res.status(200).json({ status: 'ok', version: '2.17.6' }));
 
 // Debug Route
 app.get('/api/debug', (req, res) => {
@@ -1587,14 +1587,24 @@ app.post('/api/chat', async (req, res) => {
 app.post('/api/predictions', authenticateToken, async (req, res) => {
     try {
         await dbConnect();
-        const { userId, eventId, predictedWinner, predictedScores } = req.body;
+        const { userId, eventId, predictedWinner, predictedScores, confidenceLevel } = req.body;
 
         const user = await User.findOne({ uuid: userId });
-        if (!user || user.tokens < 1) {
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Determine token cost based on confidence level
+        let tokenCost = 1;
+        if (confidenceLevel === 'confident') tokenCost = 2;
+        if (confidenceLevel === 'lock') tokenCost = 5;
+
+        if (user.tokens < tokenCost) {
             return res.status(400).json({ error: 'Insufficient tokens' });
         }
 
-        await User.updateOne({ uuid: userId }, { $inc: { tokens: -1 } });
+        user.tokens -= tokenCost;
+        await user.save();
 
         const prediction = await Prediction.create({
             id: Date.now(),
@@ -1602,10 +1612,18 @@ app.post('/api/predictions', authenticateToken, async (req, res) => {
             eventId,
             predictedWinner,
             predictedScores,
+            confidenceLevel: confidenceLevel || 'normal',
             timestamp: new Date()
         });
 
-        res.json({ success: true, prediction });
+        res.json({
+            success: true,
+            prediction,
+            balance: {
+                tokens: user.tokens,
+                crowns: user.crowns
+            }
+        });
     } catch (error) {
         console.error('Prediction error:', error);
         res.status(500).json({ error: error.message });
@@ -1798,13 +1816,28 @@ app.post('/api/weekly-draw/enter', authenticateToken, async (req, res) => {
 app.get('/api/weekly-draw/stats', async (req, res) => {
     try {
         await dbConnect();
-        const totalEntries = await DrawEntry.countDocuments();
+        const drawId = `weekly-draw-${new Date().getFullYear()}-W${getWeekNumber(new Date())}`;
+        const totalEntries = await DrawEntry.countDocuments({ drawId });
         res.json({ totalEntries });
     } catch (error) {
         console.error('Draw stats error:', error);
         res.status(500).json({ error: error.message });
     }
 });
+
+app.get('/api/weekly-draw/user-entries/:userId', authenticateToken, async (req, res) => {
+    try {
+        await dbConnect();
+        const { userId } = req.params;
+        const drawId = `weekly-draw-${new Date().getFullYear()}-W${getWeekNumber(new Date())}`;
+        const userEntries = await DrawEntry.countDocuments({ userId, drawId });
+        res.json({ count: userEntries });
+    } catch (error) {
+        console.error('User entries error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 app.get('/api/winners/featured', async (req, res) => {
     try {
@@ -3308,13 +3341,30 @@ app.post('/api/user/change-idname', authenticateToken, async (req, res) => {
         const user = await User.findOne({ uuid: userId });
         if (!user) return res.status(404).json({ error: 'User not found' });
 
+        // First change is free if they haven't set an idName yet, or it's still their default username
+        const currentIdName = user.idName ? user.idName.trim().toLowerCase() : null;
+        const currentUsername = user.username ? user.username.trim().toLowerCase() : null;
+        const isFirstTime = !user.idName || currentIdName === currentUsername;
+        const cost = isFirstTime ? 0 : 50;
+
         // Check tokens
-        if (user.tokens < 50) {
+        if (user.tokens < cost) {
             return res.status(400).json({ error: 'Insufficient tokens' });
         }
 
+        // Check uniqueness of the new name
+        // idName should be case-insensitive for uniqueness check usually, but let's stick to exact match for now to avoid breaking existing users
+        const nameTaken = await User.findOne({
+            idName: { $regex: new RegExp(`^${newIdName}$`, 'i') },
+            uuid: { $ne: userId }
+        });
+
+        if (nameTaken) {
+            return res.status(400).json({ error: 'This ID Name is already taken' });
+        }
+
         user.idName = newIdName;
-        user.tokens -= 50;
+        user.tokens -= cost;
         await user.save();
 
         res.json({ success: true, user });
@@ -3544,16 +3594,36 @@ app.get('/api/notifications/:userId', authenticateToken, async (req, res) => {
         await dbConnect();
         const { userId } = req.params;
 
-        // simple fetch: all 'all' messages + user specific messages
+        // Fetch user to get their signup date
+        const user = await User.findOne({ uuid: userId });
+        const signupDate = user ? user.createdAt : new Date(0);
+
+        // Filter: global messages must be:
+        // 1. After user signed up
+        // 2. Created in the last 7 days (prevents old messages from hanging around)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
         const notifications = await Notification.find({
-            $or: [{ userId: 'all' }, { userId: userId }]
+            $or: [
+                { userId: userId },
+                {
+                    userId: 'all',
+                    timestamp: {
+                        $gte: signupDate,
+                        $gt: sevenDaysAgo
+                    }
+                }
+            ]
         }).sort({ timestamp: -1 }).limit(20);
+
 
         res.json(notifications);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // Conditional app.listen for local development
 if (process.env.NODE_ENV !== 'production') {

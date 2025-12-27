@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Image, Dimensions, Linking } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Image, Dimensions, Linking, Alert, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -10,12 +10,16 @@ import SocialProofCard from '../components/SocialProofCard';
 const { width } = Dimensions.get('window');
 
 const PrizeDrawsScreen = ({ navigation }) => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const [activeDraw, setActiveDraw] = useState(null);
     const [upcomingDraws, setUpcomingDraws] = useState([]);
     const [sponsors, setSponsors] = useState([]);
     const [currentAdIndex, setCurrentAdIndex] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [entering, setEntering] = useState(false);
+    const [userEntries, setUserEntries] = useState(0);
+    const [totalDrawEntries, setTotalDrawEntries] = useState(0);
+
 
     useEffect(() => {
         loadData();
@@ -35,30 +39,73 @@ const PrizeDrawsScreen = ({ navigation }) => {
         try {
             setLoading(true);
             const prizes = await apiService.getActivePrizeSponsors();
-            // Fetch sponsors for Prize Draws page
             const prizeDrawSponsors = await apiService.getPrizeDrawSponsors();
             setSponsors(prizeDrawSponsors || []);
 
-            // Assuming first is active, rest are upcoming for now (or mocked logic)
+            // Fetch real entry stats
+            const stats = await apiService.getWeeklyDrawStats();
+            setTotalDrawEntries(stats.totalEntries || 0);
+
+            if (user && user.uuid && !user.isGuest) {
+                const userStats = await apiService.getUserWeeklyDrawEntries(user.uuid);
+                setUserEntries(userStats.count || 0);
+            }
+
             if (prizes && prizes.length > 0) {
-                // Formatting helper
                 const format = (p) => ({
                     id: p._id,
                     title: p.prizeDetails?.description || 'Prize Draw',
                     sponsor: p.sponsorName,
-                    entries: Math.floor(Math.random() * 500) + 50, // Mock entries count if not in API
-                    endsIn: '2d 5h', // Mock time
+                    entries: stats.totalEntries || 0,
+                    endsIn: '2d 5h',
                     cost: 1,
                     image: p.bannerUrl
                 });
 
                 setActiveDraw(format(prizes[0]));
-                setUpcomingDraws(prizes.slice(1).map(format));
+                setUpcomingDraws((prizes || []).slice(1).map(format));
             }
         } catch (e) {
             console.error(e);
         } finally {
             setLoading(false);
+        }
+    };
+
+
+    const handleEnterDraw = async () => {
+        if (!user || user.isGuest) {
+            Alert.alert('Sign In Required', 'You need to create an account to enter prize draws.');
+            return;
+        }
+
+        if (user.crowns < 1) {
+            Alert.alert('Insufficient Crowns', 'Make more predictions to earn crowns!');
+            return;
+        }
+
+        try {
+            setEntering(true);
+            const result = await apiService.enterWeeklyDraw(user.uuid);
+
+            if (result.success) {
+                // Update local context
+                await updateUser({ crowns: result.crowns });
+
+                if (Platform.OS === 'web') {
+                    window.alert('🎉 Entry Confirmed! Good luck!');
+                } else {
+                    Alert.alert('🎉 Success!', 'Your entry has been recorded. Good luck!');
+                }
+
+                // Refresh draw stats if needed
+                loadData();
+            }
+        } catch (error) {
+            const errorMsg = error.response?.data?.error || 'Failed to enter draw. Please try again.';
+            Alert.alert('Error', errorMsg);
+        } finally {
+            setEntering(false);
         }
     };
 
@@ -86,7 +133,7 @@ const PrizeDrawsScreen = ({ navigation }) => {
                 </LinearGradient>
 
                 {/* Top Sponsor Banner */}
-                {sponsors.length > 0 && (
+                {sponsors && sponsors.length > 0 && sponsors[currentAdIndex] && (
                     <TouchableOpacity
                         onPress={() => Linking.openURL(sponsors[currentAdIndex].linkUrl)}
                         style={styles.sponsorBanner}
@@ -140,19 +187,32 @@ const PrizeDrawsScreen = ({ navigation }) => {
                                 {/* User Entries Box */}
                                 <View style={styles.userEntriesBox}>
                                     <Text style={styles.userEntriesLabel}>Your Entries</Text>
-                                    <Text style={styles.userEntriesValue}>3 entries</Text>
-                                    <Text style={styles.userEntriesSub}>Odds: ~1 in 114</Text>
+                                    <Text style={styles.userEntriesValue}>{userEntries} entries</Text>
+                                    <Text style={styles.userEntriesSub}>
+                                        Odds: ~1 in {totalDrawEntries > 0 ? Math.ceil(totalDrawEntries / Math.max(userEntries, 1)) : 1}
+                                    </Text>
                                 </View>
 
-                                <TouchableOpacity style={styles.enterButton}>
+
+                                <TouchableOpacity
+                                    style={[styles.enterButton, entering && { opacity: 0.7 }]}
+                                    onPress={handleEnterDraw}
+                                    disabled={entering}
+                                >
                                     <LinearGradient
                                         colors={['#FACC15', '#F97316']}
                                         style={styles.enterButtonGradient}
                                         start={{ x: 0, y: 0 }}
                                         end={{ x: 1, y: 0 }}
                                     >
-                                        <MaterialCommunityIcons name="crown" size={20} color="#FFF" />
-                                        <Text style={styles.enterButtonText}>Enter Draw (1 Crown)</Text>
+                                        {entering ? (
+                                            <ActivityIndicator size="small" color="#FFF" />
+                                        ) : (
+                                            <>
+                                                <MaterialCommunityIcons name="crown" size={20} color="#FFF" />
+                                                <Text style={styles.enterButtonText}>Enter Draw (1 Crown)</Text>
+                                            </>
+                                        )}
                                     </LinearGradient>
                                 </TouchableOpacity>
                             </View>
@@ -184,7 +244,7 @@ const PrizeDrawsScreen = ({ navigation }) => {
                     )}
 
                     {/* Mid-Page Sponsor Banner */}
-                    {sponsors.length > 0 && (
+                    {sponsors && sponsors.length > 0 && sponsors[currentAdIndex] && (
                         <TouchableOpacity
                             onPress={() => Linking.openURL(sponsors[currentAdIndex].linkUrl)}
                             style={[styles.sponsorBanner, { marginTop: 24, marginBottom: 8 }]}
@@ -204,9 +264,9 @@ const PrizeDrawsScreen = ({ navigation }) => {
                     {/* Recent Winners (Social Proof) */}
                     <Text style={styles.sectionTitle}>Recent Winners</Text>
                     <SocialProofCard
-                        user="Alex M."
-                        amount="$50 Gift Card"
-                        message="First time winning! Thanks Sports Prophecy!"
+                        user="BenchWarmer"
+                        amount="50 Google Gift Card"
+                        message="Still can't believe I won! This app is the real deal! 🔥"
                         type="winner"
                     />
 

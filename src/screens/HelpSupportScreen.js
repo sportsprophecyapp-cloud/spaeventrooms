@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { APP_VERSION } from '../constants/version';
+
 
 const HelpSupportScreen = () => {
     const navigation = useNavigation();
@@ -69,11 +71,6 @@ const HelpSupportScreen = () => {
             id: 12,
             question: "How do I claim my daily login reward?",
             answer: "Daily rewards are automatically checked when you log in. If you're eligible, you'll see a popup with your reward. You can claim once every 24 hours."
-        },
-        {
-            id: 13,
-            question: "What are the rules for public chat rooms?",
-            answer: "To keep Sports Prophecy fun and safe for everyone, we enforce common-sense rules: No hate speech, no harassment, no spamming, and no scamming. Administrators and Moderators have the authority to mute or ban users who violate these rules. Always be respectful and keep the competition friendly!"
         }
     ];
 
@@ -189,7 +186,6 @@ const HelpSupportScreen = () => {
                 {/* App Info */}
                 <View style={styles.appInfo}>
                     <Text style={styles.appName}>Sports Prophecy</Text>
-                    <Text style={styles.versionText}>Version 2.13.0</Text>
                     <Text style={styles.appTagline}>100% Free Sports Predictions</Text>
                 </View>
             </ScrollView>
