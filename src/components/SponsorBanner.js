@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Linking, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Linking, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { apiService } from '../services/api';
@@ -28,7 +28,7 @@ const SponsorBanner = ({ style, sponsor = null }) => {
         Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
         }).start();
     };
 

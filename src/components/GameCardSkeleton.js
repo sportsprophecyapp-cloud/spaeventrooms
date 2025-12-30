@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, View, Animated } from 'react-native';
+import { StyleSheet, View, Animated, Platform } from 'react-native';
 import { COLORS, BORDER_RADIUS, SPACING } from '../constants/theme';
 
 const GameCardSkeleton = () => {
@@ -11,12 +11,12 @@ const GameCardSkeleton = () => {
                 Animated.timing(shimmerValue, {
                     toValue: 1,
                     duration: 1000,
-                    useNativeDriver: true,
+                    useNativeDriver: Platform.OS !== 'web',
                 }),
                 Animated.timing(shimmerValue, {
                     toValue: 0,
                     duration: 1000,
-                    useNativeDriver: true,
+                    useNativeDriver: Platform.OS !== 'web',
                 }),
             ])
         );

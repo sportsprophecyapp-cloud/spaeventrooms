@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Modal, TouchableOpacity, Animated } from 'react-native';
+import { StyleSheet, Text, View, Modal, TouchableOpacity, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
@@ -17,7 +17,7 @@ const DailyRewardModal = ({ visible, onClose, rewardData }) => {
                 toValue: 1,
                 tension: 50,
                 friction: 7,
-                useNativeDriver: true,
+                useNativeDriver: Platform.OS !== 'web',
             }).start();
         } else {
             scaleAnim.setValue(0);
