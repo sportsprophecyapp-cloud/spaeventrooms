@@ -1,6 +1,15 @@
 import ChatScreen from '../screens/ChatScreen';
 
-/* ... imports ... */
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+import { View, Platform } from 'react-native';
+import { COLORS } from '../constants/theme';
+import HomeScreen from '../screens/HomeScreen';
+import PrizeDrawsScreen from '../screens/PrizeDrawsScreen';
+import LeaderboardScreen from '../screens/LeaderboardScreen';
+import MoreScreen from '../screens/MoreScreen';
+
+const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
     return (
