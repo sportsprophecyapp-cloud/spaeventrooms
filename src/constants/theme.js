@@ -15,6 +15,7 @@ export const COLORS = {
     accent: {
         gold: '#FACC15',       // Crowns, Winners, Trophies (The "Reward" color)
         cyan: '#38bdf8',       // Active selections, Buttons, Primary actions
+        cyanDark: '#0284c7',   // Darker cyan for gradients
         lime: '#a3e635',       // Positive stats, Token costs
     },
 
@@ -49,6 +50,7 @@ export const COLORS = {
         gold: ['#FACC15', '#EAB308'],         // Gold gradient
         dark: ['#1F2937', '#111827'],         // Dark gradient
         lime: ['#a3e635', '#84cc16'],         // Lime gradient
+        disabled: ['#9ca3af', '#cbd5e1'],     // Grey gradient
     },
 };
 

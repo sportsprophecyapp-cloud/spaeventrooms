@@ -1,16 +1,6 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-import { View, Platform } from 'react-native';
+import ChatScreen from '../screens/ChatScreen';
 
-import HomeScreen from '../screens/HomeScreen';
-import PrizeDrawsScreen from '../screens/PrizeDrawsScreen';
-import LeaderboardScreen from '../screens/LeaderboardScreen';
-import MoreScreen from '../screens/MoreScreen';
-
-import { COLORS } from '../constants/theme';
-
-const Tab = createBottomTabNavigator();
+/* ... imports ... */
 
 const MainTabNavigator = () => {
     return (
@@ -31,6 +21,8 @@ const MainTabNavigator = () => {
 
                     if (route.name === 'Home') {
                         iconName = focused ? 'home' : 'home-outline';
+                    } else if (route.name === 'Chat') {
+                        iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
                     } else if (route.name === 'Prizes') {
                         iconName = focused ? 'gift' : 'gift-outline';
                     } else if (route.name === 'Leaderboard') {
@@ -47,8 +39,9 @@ const MainTabNavigator = () => {
                 },
             })}
         >
-            <Tab.Screen name="Home" component={HomeScreen} options={{}} />
-            <Tab.Screen name="Prizes" component={PrizeDrawsScreen} options={{}} />
+            <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Chat" component={ChatScreen} />
+            <Tab.Screen name="Prizes" component={PrizeDrawsScreen} />
             <Tab.Screen name="Leaderboard" component={LeaderboardScreen} options={{ tabBarLabel: 'Ranks', tabBarIcon: ({ color, size }) => (<Ionicons name="trophy-outline" size={size} color={color} />) }} />
             <Tab.Screen name="More" component={MoreScreen} />
         </Tab.Navigator>

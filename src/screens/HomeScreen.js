@@ -25,66 +25,50 @@ import { COLORS } from '../constants/theme';
 import { APP_VERSION } from '../constants/version';
 import { apiService } from '../services/api';
 
+
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
-  const { user } = useAuth();
+  const { user } = useAuth(); // Get user from AuthContext
   const [games, setGames] = useState([]);
   const [prizeDraws, setPrizeDraws] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [showBrokenStreakModal, setShowBrokenStreakModal] = useState(false);
 
-  // 🛡️ OPTIMIZATION: Initialize loading as TRUE until user context is ready
   useEffect(() => {
-    if (!user) {
-      setLoading(true);
-      return;
-    }
-
     loadData();
-    console.log('HomeScreen - User data:', JSON.stringify(user, null, 2));
-  }, [user]);
+    // Debug: Log user data to see what we're getting
+    // Removed debug console.log
+  }, [user]); // Re-load when user changes
 
   const loadData = async () => {
     try {
       setLoading(true);
 
-      // 1. Check onboarding status
-      if (!user || typeof user !== 'object') {
-        console.warn('HomeScreen: user is not ready');
-        setGames([]);
-        setLoading(false);
-        return;
-      }
-
+      // Check onboarding status
       const hasSeenOnboarding = await AsyncStorage.getItem('hasSeenOnboarding');
       if (!hasSeenOnboarding && user && !user.isGuest) {
         setIsFirstTimeUser(true);
       }
 
-      // 2. Fetch games with explicit type checking
-      try {
-        const gamesData = await apiService.getEvents();
-        const safeGames = (Array.isArray(gamesData) ? gamesData : []).slice(0, 3);
-        setGames(safeGames);
-      } catch (gameError) {
-        console.error('Error fetching games:', gameError);
-        setGames([]);
-      }
+      // Fetch games from API
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const gamesResponse = await axios.get(`${API_URL}/events`);
+      setGames(Array.isArray(gamesResponse.data) ? gamesResponse.data.slice(0, 3) : []);
 
-      // 3. Fetch prize draws
+      // Fetch prize draw stats for banner
       try {
         const stats = await apiService.getWeeklyDrawStats();
         setPrizeDraws([{
           id: 'weekly-current',
           title: 'Weekly Prize Draw',
           prizeValue: '$50 Google Gift Card',
-          entriesCount: stats?.totalEntries || 0,
-          endsAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+          entriesCount: stats.totalEntries || 0,
+          endsAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) // Default to 2 days for banner
         }]);
-      } catch (prizeError) {
-        console.error('Error fetching prize draws:', prizeError);
+      } catch (e) {
+        // Using default prize info
         setPrizeDraws([{
           id: 'weekly-current',
           title: 'Weekly Prize Draw',
@@ -95,43 +79,29 @@ export default function HomeScreen({ navigation }) {
       }
 
     } catch (error) {
-      console.error('HomeScreen loadData error:', error);
-      setGames([]);
+      // Error loading data - silently handle
     } finally {
       setLoading(false);
     }
   };
 
-  // 🛡️ Streak check with explicit guards
   useEffect(() => {
-    if (!user || typeof user !== 'object') return;
-    if (!user?.lastLoginDate || !user?.loginStreak) return;
-
-    try {
+    if (user?.lastLoginDate) {
       const lastLogin = new Date(user.lastLoginDate);
       const today = new Date();
+      const diffTime = Math.abs(today - lastLogin);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      const lastDate = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate());
-      const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const diffTime = currentDate - lastDate;
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays > 1 || (user.loginStreak > 1 && user.loginStreak % 5 === 0)) {
+      if (diffDays > 1 && user.loginStreak > 0) {
         setShowBrokenStreakModal(true);
       }
-    } catch (e) {
-      console.error('Error calculating streak:', e);
     }
   }, [user]);
 
-  // 🛡️ GATE KEEPER: Show loading ONLY if no user yet
-  if (!user || typeof user !== 'object' || loading) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.accent.cyan} />
-        <Text style={{ color: COLORS.text.muted, marginTop: 12, fontSize: 12 }}>
-          Loading your prophecies...
-        </Text>
       </View>
     );
   }
@@ -143,7 +113,7 @@ export default function HomeScreen({ navigation }) {
         games={games}
         onComplete={() => {
           setIsFirstTimeUser(false);
-          loadData();
+          loadData(); // Refresh data
         }}
       />
     );
@@ -160,16 +130,16 @@ export default function HomeScreen({ navigation }) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.greeting}>Welcome Test v2.18.15 🎯</Text>
-          <View style={styles.balanceRow}>
-            <Text>{user?.username || user?.idName || 'User'}</Text>
+          <View>
+            <Text style={styles.welcomeText}>Welcome back,</Text>
+            <Text style={styles.usernameText}>{user?.username || user?.idName || 'User'}</Text>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
             <Ionicons name="notifications" size={24} color="#FFF" />
             {user?.unreadNotifications > 0 && (
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>
-                  {user?.unreadNotifications || 0}
+                  {user.unreadNotifications}
                 </Text>
               </View>
             )}
@@ -208,20 +178,17 @@ export default function HomeScreen({ navigation }) {
       {/* Broken Streak Modal/Banner */}
       {showBrokenStreakModal && (
         <BrokenStreak
-          streakLength={user?.loginStreak || 0}
+          streakLength={user?.loginStreak}
           onContinue={() => setShowBrokenStreakModal(false)}
         />
       )}
 
-      {/* Prize Draw Banner */}
+      {/* Prize Draw Banner - Negative margin handled in component or container */}
       <View style={styles.prizeDrawContainer}>
-        {/* 🛡️ IRON-CLAD: Check prizeDraws is array before mapping */}
-        {Array.isArray(prizeDraws) && prizeDraws.length > 0 ? (
-          <PrizeDrawBanner
-            draw={prizeDraws[0]}
-            onPress={() => navigation.navigate('Prizes')}
-          />
-        ) : null}
+        <PrizeDrawBanner
+          draw={prizeDraws?.[0]}
+          onPress={() => navigation.navigate('Prizes')}
+        />
       </View>
 
       {/* Social Proof - Live Activity */}
@@ -244,41 +211,25 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Games Today</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Sport', { sportId: 'all', sportName: 'Upcoming Games', _t: Date.now() })}>
+          <TouchableOpacity onPress={() => navigation.navigate('Sport')}>
             <Text style={styles.viewAllText}>View All →</Text>
           </TouchableOpacity>
         </View>
 
-        {/* 🛡️ Empty state for new users */}
-        {(user?.correctPredictions === 0 || !user) && (
-          <NoPredictionsYet onMakePrediction={() => navigation.navigate('Sport', { sportId: 'all', sportName: 'All Games', _t: Date.now() })} />
+        {user?.correctPredictions === 0 && (
+          <NoPredictionsYet onMakePrediction={() => navigation.navigate('Sport')} />
         )}
 
-        {/* 🛡️ THE IRON-CLAD AIRBAG: Triple-layer safety check */}
-        {Array.isArray(games) && games.length > 0 ? (
-          // Layer 1: Verify games is array
-          (Array.isArray(games) ? games : []).map((game, index) => {
-            // Layer 2: Verify each game object exists
-            if (!game) return null;
-
-            return (
-              <GameCard
-                // Layer 3: Safe key generation
-                key={game?.id || game?._id || `home-game-${index}`}
-                game={game}
-                onPress={() => navigation.navigate('Sport', {
-                  sportId: game?.sport_key || 'all',
-                  sportName: game?.sport_title || 'Game Details',
-                  _t: Date.now()
-                })}
-              />
-            );
-          })
-        ) : (
-          <Text style={{ textAlign: 'center', color: '#6B7280', marginVertical: 20 }}>
-            No games scheduled for today.
-          </Text>
-        )}
+        {(Array.isArray(games) ? games : []).map((game) => (
+          <GameCard
+            key={game.id}
+            game={game}
+            onPress={() => navigation.navigate('Sport', {
+              sportId: game.sport_key || 'all',
+              sportName: game.sport_title || 'Game Details'
+            })}
+          />
+        ))}
       </View>
 
       {/* Sponsors Section */}
@@ -294,16 +245,15 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.sponsorsCard}>
           <Text style={styles.sponsorsSubtext}>Trusted by leading sports brands</Text>
           <View style={styles.sponsorsGrid}>
-            {/* 🛡️ IRON-CLAD: Safe sponsor grid mapping */}
-            {Array.isArray([1, 2, 3]) ? (
-              [1, 2, 3].map((item, index) => (
-                <View key={`sponsor-${index}`} style={styles.sponsorItem}>
-                  <Text style={styles.sponsorText}>Partner Brand</Text>
-                </View>
-              ))
-            ) : (
-              <Text>No sponsors available</Text>
-            )}
+            <View style={styles.sponsorItem}>
+              <Text style={styles.sponsorText}>Partner Brand</Text>
+            </View>
+            <View style={styles.sponsorItem}>
+              <Text style={styles.sponsorText}>Partner Brand</Text>
+            </View>
+            <View style={styles.sponsorItem}>
+              <Text style={styles.sponsorText}>Partner Brand</Text>
+            </View>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Sponsor')}>
             <Text style={styles.viewPartnersText}>View All Partners →</Text>
@@ -318,7 +268,7 @@ export default function HomeScreen({ navigation }) {
 
       {/* Spacer for bottom tab */}
       <View style={{ height: 100 }} />
-    </ScrollView>
+    </ScrollView >
   );
 }
 
@@ -336,18 +286,13 @@ const styles = StyleSheet.create({
   heroSection: {
     padding: 24,
     paddingTop: 60,
-    paddingBottom: 40,
+    paddingBottom: 40, // Increased padding to account for overlap
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 24,
-  },
-  greeting: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFF',
   },
   welcomeText: {
     fontSize: 14,
@@ -416,7 +361,7 @@ const styles = StyleSheet.create({
   },
   prizeDrawContainer: {
     marginHorizontal: 16,
-    marginTop: -32,
+    marginTop: -32, // Negative margin to overlap hero
     marginBottom: 8,
     zIndex: 10,
   },
@@ -505,8 +450,5 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
     marginTop: 2,
     fontStyle: 'italic',
-  },
-  balanceRow: {
-    color: '#FFF',
   },
 });

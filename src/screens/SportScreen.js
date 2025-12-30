@@ -15,371 +15,210 @@ const SportScreen = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { user } = useAuth();
-
-    // 🛡️ FIX #1: Triple-layer parameter validation
-    const params = route?.params || {};
-    const { sportId = 'all', sportName = 'Upcoming Games' } = params;
-
-    // Guard against missing route entirely
-    if (!route || !route.params) {
-        console.warn('[SportScreen] Route params missing, using defaults');
-    }
+    const { sportId, sportName } = route.params || { sportId: 'all', sportName: 'All Games' };
 
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [initialTeam, setInitialTeam] = useState(null);
 
-    /**
-     * 🛡️ FIX #2: Bulletproof data fetching with comprehensive error handling
-     */
     const fetchEvents = async () => {
         try {
-            setLoading(true);
-            const userUuid = user?.uuid || null;
-
-            // Fetch with explicit fallbacks
             const [eventsData, predictionsData] = await Promise.all([
-                apiService.getEvents()
-                    .catch(err => {
-                        console.error('[SportScreen] getEvents failed:', err);
-                        return [];
-                    }),
-                userUuid
-                    ? apiService.getUserPredictions(userUuid)
-                        .catch(err => {
-                            console.error('[SportScreen] getUserPredictions failed:', err);
-                            return [];
-                        })
-                    : Promise.resolve([])
+                apiService.getEvents(),
+                user ? apiService.getUserPredictions(user.uuid) : Promise.resolve([])
             ]);
 
-            // 🛡️ FIX #2a: Force arrays - handle null, undefined, objects, strings
-            const safeEvents = Array.isArray(eventsData) ? eventsData : [];
-            const safePredictions = Array.isArray(predictionsData) ? predictionsData : [];
-
-            // 🛡️ FIX #2b: Safely extract prediction IDs with fallback
-            const backendPredictedIds = (Array.isArray(safePredictions) ? safePredictions : [])
-                .map(p => p?.eventId)
-                .filter(Boolean); // Remove null/undefined
-
-            // 🛡️ FIX #2c: Safe guest user check
-            const isGuest = user?.isGuest === true;
-            const localPredictedIds = (isGuest && Array.isArray(user?.predictedGames))
-                ? user.predictedGames
-                : [];
-
+            // Mark events that user has already predicted on
+            const backendPredictedIds = (Array.isArray(predictionsData) ? predictionsData : []).map(p => p.eventId);
+            const localPredictedIds = (user?.isGuest && user?.predictedGames) ? user.predictedGames : [];
             const allPredictedIds = new Set([...backendPredictedIds, ...localPredictedIds]);
 
-            // 🛡️ FIX #2d: Map with null checks on each event
-            const eventsWithStatus = (Array.isArray(safeEvents) ? safeEvents : []).map(event => {
-                if (!event || typeof event !== 'object') {
-                    return null; // Skip malformed events
-                }
-
-                return {
-                    ...event,
-                    hasPredicted: allPredictedIds.has(event?.id || event?._id)
-                };
-            }).filter(Boolean); // Remove null entries
+            const eventsWithStatus = (Array.isArray(eventsData) ? eventsData : []).map(event => ({
+                ...event,
+                hasPredicted: allPredictedIds.has(event.id)
+            }));
 
             setEvents(eventsWithStatus);
         } catch (error) {
-            console.error('[SportScreen] Critical failure in fetchEvents:', error);
-            setEvents([]);
+            console.error('Failed to fetch events', error);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
     };
 
-    // 🛡️ Dependency array guards
     useEffect(() => {
-        // Only fetch if we have user uuid or are guest
-        if (user && (user.uuid || user.isGuest)) {
-            fetchEvents();
-        }
-    }, [user?.uuid]);
+        fetchEvents();
+    }, [user]);
 
     const onRefresh = () => {
         setRefreshing(true);
         fetchEvents();
     };
 
+    const [initialTeam, setInitialTeam] = useState(null);
+
     const handleGamePress = (event, selectedTeam = null) => {
-        // 🛡️ Validate event before setting
-        if (event && typeof event === 'object' && event.id) {
-            setSelectedEvent(event);
-            setInitialTeam(selectedTeam);
-            setModalVisible(true);
-        } else {
-            console.warn('[SportScreen] Invalid event passed to handleGamePress');
-        }
+        setSelectedEvent(event);
+        setInitialTeam(selectedTeam);
+        setModalVisible(true);
     };
 
-    /**
-     * 🛡️ FIX #3: Defensive sport matching with fallbacks
-     */
+
+
+    // Helper to check if event matches selected sport
     const matchesSport = (event, selectedSportId) => {
-        // Guard against invalid inputs
-        if (!event || typeof event !== 'object') return false;
-        if (!selectedSportId) return true; // Default to 'all'
+        if (selectedSportId === 'all') return true;
 
-        const sport = (event.sport || '')?.toLowerCase() || '';
-        const league = (event.league || '')?.toLowerCase() || '';
-        const id = (selectedSportId || '').toLowerCase();
-
-        if (id === 'all') return true;
+        const sport = event.sport?.toLowerCase() || '';
+        const league = event.league?.toLowerCase() || '';
+        const id = selectedSportId.toLowerCase();
 
         // Direct match
         if (sport === id || league === id) return true;
 
-        // League mappings
-        const mappings = {
-            'nba': ['basketball', 'nba'],
-            'nfl': ['football', 'nfl'],
-            'nhl': ['hockey', 'nhl'],
-            'mlb': ['baseball', 'mlb'],
-            'soccer': ['soccer'],
-            'mma': ['mma', 'ufc'],
-        };
-
-        const validSports = mappings[id] || [];
-        return validSports.includes(sport) || validSports.includes(league);
-    };
-
-    /**
-     * 🛡️ FIX #3a: Filtered events with triple-layer array safety
-     */
-    const filteredEvents = (Array.isArray(events) && events.length > 0)
-        ? events
-            .filter(event => event && typeof event === 'object') // Skip malformed
-            .filter(event => matchesSport(event, sportId))
-        : [];
-
-    /**
-     * 🛡️ FIX #3b: Upcoming events with defensive date handling
-     */
-    const getUpcomingEvents = () => {
-        const now = new Date();
-        const futureWindow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
-        return filteredEvents
-            .filter(event => {
-                // Guard against missing times
-                const eventTime = event?.commence_time || event?.startTime;
-                if (!eventTime) return false;
-
-                try {
-                    const eventDate = new Date(eventTime);
-                    // Ensure valid date
-                    if (isNaN(eventDate.getTime())) return false;
-
-                    return eventDate >= now && eventDate <= futureWindow;
-                } catch (e) {
-                    console.warn('[SportScreen] Invalid event time:', eventTime);
-                    return false;
-                }
-            })
-            .sort((a, b) => {
-                // Priority 1: Unpredicted games first
-                if (a?.hasPredicted && !b?.hasPredicted) return 1;
-                if (!a?.hasPredicted && b?.hasPredicted) return -1;
-
-                // Priority 2: Sort by time (ascending)
-                const timeA = a?.commence_time || a?.startTime;
-                const timeB = b?.commence_time || b?.startTime;
-
-                if (!timeA && !timeB) return 0;
-                if (!timeA) return 1;
-                if (!timeB) return -1;
-
-                try {
-                    const dateA = new Date(timeA);
-                    const dateB = new Date(timeB);
-
-                    // Guard against invalid dates
-                    if (isNaN(dateA.getTime())) return 1;
-                    if (isNaN(dateB.getTime())) return -1;
-
-                    return dateA - dateB;
-                } catch (e) {
-                    console.warn('[SportScreen] Error sorting events by time');
-                    return 0;
-                }
-            });
-    };
-
-    const upcomingEvents = getUpcomingEvents();
-
-    /**
-     * 🛡️ Get next unpredicted game safely
-     */
-    const getNextUnpredictedGame = async (ignoreId = null) => {
-        // Guard against invalid inputs
-        if (!Array.isArray(upcomingEvents) || upcomingEvents.length === 0) {
-            return null;
+        // Mappings
+        switch (id) {
+            case 'nba':
+                return sport === 'basketball' || league === 'nba';
+            case 'nfl':
+                return sport === 'football' || league === 'nfl';
+            case 'nhl':
+                return sport === 'hockey' || league === 'nhl';
+            case 'mlb':
+                return sport === 'baseball' || league === 'mlb';
+            case 'soccer':
+                return sport === 'soccer';
+            case 'mma':
+                return sport === 'mma' || sport === 'ufc';
+            default:
+                return false;
         }
+    };
 
+    // Filter events by selected sport
+    const filteredEvents = events.filter(event => matchesSport(event, sportId));
+
+    // Get upcoming events in next 24 hours
+    const now = new Date();
+    const futureWindow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    const upcomingEvents = filteredEvents
+        .filter(event => {
+            const eventDate = new Date(event.commence_time || event.startTime);
+            return eventDate >= now && eventDate <= futureWindow;
+        })
+        .sort((a, b) => {
+            // Priority 1: Predicted games go to the bottom
+            if (a.hasPredicted && !b.hasPredicted) return 1;
+            if (!a.hasPredicted && b.hasPredicted) return -1;
+
+            // Priority 2: Sort by time (ascending)
+            const dateA = new Date(a.commence_time || a.startTime);
+            const dateB = new Date(b.commence_time || b.startTime);
+            return dateA - dateB;
+        });
+
+    const getNextUnpredictedGame = async (ignoreId = null) => {
+        // Find the next game that hasn't been predicted on
+        // Also exclude the game we just predicted on (ignoreId) to allow for immediate UI updates
         const unpredictedGames = upcomingEvents.filter(event =>
-            event &&
-            event?.hasPredicted !== true &&
-            event?.id !== ignoreId
+            !event.hasPredicted && event.id !== ignoreId
         );
 
         if (unpredictedGames.length > 0) {
             const nextGame = unpredictedGames[0];
-            if (nextGame && typeof nextGame === 'object') {
-                setSelectedEvent(nextGame);
-                return nextGame;
-            }
+            setSelectedEvent(nextGame);
+            return nextGame;
         }
 
-        return null;
+        return null; // No more unpredicted games
     };
 
-    /**
-     * 🛡️ Safe render method for game list
-     */
-    const renderGameList = () => {
-        // Loading state
-        if (loading) {
-            return (
-                <View style={styles.skeletonContainer}>
-                    {[1, 2, 3].map(i => (
-                        <GameCardSkeleton key={`skeleton-${i}`} />
-                    ))}
-                </View>
-            );
-        }
-
-        // Empty state
-        if (!Array.isArray(upcomingEvents) || upcomingEvents.length === 0) {
-            return (
-                <View style={styles.emptyState}>
-                    {['mlb', 'soccer', 'mma'].includes((sportId || '').toLowerCase()) ? (
-                        <View style={styles.comingSoonCard}>
-                            <LinearGradient
-                                colors={['rgba(14, 165, 233, 0.1)', 'transparent']}
-                                style={styles.comingSoonGradient}
-                            >
-                                <Ionicons name="time-outline" size={64} color={COLORS.accent.cyan} />
-                                <View style={styles.comingSoonBadge}>
-                                    <Text style={styles.comingSoonBadgeText}>V2.5 PREVIEW</Text>
-                                </View>
-                                <Text style={styles.comingSoonText}>{sportName} Coming Soon</Text>
-                                <Text style={styles.emptySubtext}>
-                                    Next-gen forecasting for {sportName} is in final testing.
-                                </Text>
-                                <TouchableOpacity
-                                    style={styles.notifyButton}
-                                    onPress={() => Linking.openURL('https://sportsprophecyapp.com')}
-                                >
-                                    <Text style={styles.notifyButtonText}>GET NOTIFIED</Text>
-                                </TouchableOpacity>
-                            </LinearGradient>
-                        </View>
-                    ) : (
-                        <>
-                            <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
-                            <Text style={styles.emptyText}>No games available</Text>
-                            <Text style={styles.emptySubtext}>
-                                New games are added daily.
-                            </Text>
-                        </>
-                    )}
-                </View>
-            );
-        }
-
-        // 🛡️ IRON-CLAD MAP: Triple-layer safety on games list
-        return (Array.isArray(upcomingEvents) && upcomingEvents.length > 0) ? (
-            (Array.isArray(upcomingEvents) ? upcomingEvents : []).map((event, index) => {
-                // Layer 1: Validate event exists and is object
-                if (!event || typeof event !== 'object') {
-                    return null;
-                }
-
-                // Layer 2: Ensure event has an ID
-                const eventId = event?.id || event?._id;
-                if (!eventId) {
-                    console.warn('[SportScreen] Event missing ID:', event);
-                    return null;
-                }
-
-                // Layer 3: Safe key generation and render
-                return (
-                    <GameCard
-                        key={eventId || `event-${index}`}
-                        game={event}
-                        onPress={(game, team) => handleGamePress(game, team)}
-                    />
-                );
-            }).filter(Boolean) // Remove null entries
-        ) : null;
-    };
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={styles.backButton}
-                    accessibilityLabel="Back Button"
-                    testID="sport-back-button"
-                >
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} accessibilityLabel="Back Button" testID="sport-back-button">
                     <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>{sportName || 'Games'}</Text>
+                <Text style={styles.headerTitle}>{sportName}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
-            {/* Sponsor Banner */}
+            {/* Fixed Sponsor Banner */}
             <SponsorBanner style={styles.sponsorBannerContainer} />
 
-            {/* 🛡️ Guard against undefined events array */}
-            {!loading && (!Array.isArray(events) || events.length === 0) && upcomingEvents.length === 0 ? (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color={COLORS.accent.cyan} />
-                </View>
-            ) : null}
-
-            {/* Scrollable Content */}
             <ScrollView
                 contentContainerStyle={styles.content}
                 refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        tintColor={COLORS.accent.cyan}
-                    />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent.cyan} />
                 }
             >
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Upcoming Games (Next 24 Hours)</Text>
-                    <Text style={styles.gameCount}>
-                        {Array.isArray(upcomingEvents) ? upcomingEvents.length : 0} games
-                    </Text>
+                    <Text style={styles.gameCount}>{upcomingEvents.length} games</Text>
                 </View>
 
-                {/* Safe render of game list */}
-                {renderGameList()}
+                {loading ? (
+                    <View style={styles.skeletonContainer}>
+                        {[1, 2, 3].map(i => <GameCardSkeleton key={i} />)}
+                    </View>
+                ) : upcomingEvents.length > 0 ? (
+                    (Array.isArray(upcomingEvents) ? upcomingEvents : []).map(event => (
+                        <GameCard
+                            key={event.id}
+                            game={event}
+                            onPress={handleGamePress}
+                        />
+                    ))
+                ) : (
+                    <View style={styles.emptyState}>
+                        {['mlb', 'soccer', 'mma'].includes(sportId.toLowerCase()) ? (
+                            <View style={styles.comingSoonCard}>
+                                <LinearGradient
+                                    colors={['rgba(14, 165, 233, 0.1)', 'transparent']}
+                                    style={styles.comingSoonGradient}
+                                >
+                                    <Ionicons name="time-outline" size={64} color={COLORS.accent.cyan} />
+                                    <View style={styles.comingSoonBadge}>
+                                        <Text style={styles.comingSoonBadgeText}>V2.5 PREVIEW</Text>
+                                    </View>
+                                    <Text style={styles.comingSoonText}>{sportName} Coming Soon</Text>
+                                    <Text style={styles.emptySubtext}>
+                                        Next-gen forecasting for {sportName} is in final testing.
+                                    </Text>
+                                    <TouchableOpacity
+                                        style={styles.notifyButton}
+                                        onPress={() => Linking.openURL('https://sportsprophecyapp.com')}
+                                    >
+                                        <Text style={styles.notifyButtonText}>GET NOTIFIED</Text>
+                                    </TouchableOpacity>
+                                </LinearGradient>
+                            </View>
+                        ) : (
+                            <>
+                                <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
+                                <Text style={styles.emptyText}>No games available</Text>
+                                <Text style={styles.emptySubtext}>
+                                    New games are added daily.
+                                </Text>
+                            </>
+                        )}
+                    </View>
+                )}
             </ScrollView>
 
-            {/* Prediction Modal */}
-            {selectedEvent && (
-                <PredictionModal
-                    visible={modalVisible}
-                    onClose={() => setModalVisible(false)}
-                    event={selectedEvent}
-                    initialTeam={initialTeam}
-                    onPredictionSuccess={fetchEvents}
-                    onLoadNextGame={getNextUnpredictedGame}
-                />
-            )}
+            <PredictionModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                event={selectedEvent}
+                initialTeam={initialTeam}
+                onPredictionSuccess={fetchEvents}
+                onLoadNextGame={getNextUnpredictedGame}
+            />
         </SafeAreaView>
     );
 };
@@ -410,10 +249,14 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: COLORS.border.tertiary,
         width: '100%',
-        borderRadius: 0,
+        borderRadius: 0, // Reset radius for full width bar look
         borderWidth: 0,
         marginVertical: 0,
         backgroundColor: COLORS.background.secondary,
+    },
+    contactText: {
+        color: COLORS.text.secondary,
+        fontSize: TYPOGRAPHY.sizes.xs,
     },
     content: {
         padding: SPACING.base,

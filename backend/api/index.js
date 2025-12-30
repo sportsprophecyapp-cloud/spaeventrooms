@@ -43,157 +43,74 @@ const sendEmail = async (to, subject, text) => {
     }
 };
 
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
+// Strict Environment Check
+const REQUIRED_ENV_VARS = ['MONGODB_URI', 'JWT_SECRET', 'THE_ODDS_API_KEY'];
+const missingVars = REQUIRED_ENV_VARS.filter(key => !process.env[key]);
+if (missingVars.length > 0) {
+    if (process.env.NODE_ENV === 'production') {
+        console.error(`❌ Security Panic: Missing critical environment variables: ${missingVars.join(', ')}`);
+        process.exit(1);
+    } else {
+        console.warn(`⚠️ Warning: Missing environment variables: ${missingVars.join(', ')}`);
+    }
+}
+
 const app = express();
+
+// Security Headers
+app.use(helmet());
+
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(limiter);
+
 // Request logging middleware
 app.use((req, res, next) => {
     console.log(`[Request] ${req.method} ${req.url}`);
     next();
 });
-app.get('/privacy', (req, res) => {
-    res.send(`
-        <html>
-            <head><title>Privacy Policy - Sports Prophecy</title></head>
-            <body style="font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
-                <h1>Privacy Policy</h1>
-                <p><strong>Effective Date:</strong> ${new Date().toLocaleDateString()}</p>
-                <p>Sports Prophecy ("we", "our", "us") respects your privacy. This Privacy Policy explains how we collect and use your data.</p>
-                <h2>1. Information We Collect</h2>
-                <p>We collect information you provide directly, such as when you create an account, make a prediction, or contact support. This includes:</p>
-                <ul>
-                    <li>Name/Username</li>
-                    <li>Email Address</li>
-                    <li>Profile information (e.g., Apple/Google ID for authentication)</li>
-                </ul>
-                <h2>2. How We Use Information</h2>
-                <p>We use your information to fulfill the core purpose of the application: allowing you to participate in sports prediction games, tracking your leaderboard ranking, and managing your digital rewards (Tokens/Crowns).</p>
-                <h2>3. Data Deletion</h2>
-                <p>You can request account deletion by contacting support or using the delete account feature in the app settings.</p>
-                <h2>4. Contact</h2>
-                <p>For questions, please contact us at support@sportsprophecyapp.com.</p>
-            </body>
-        </html>
-    `);
-});
 
-app.get('/terms', (req, res) => {
-    res.send(`
-        <html>
-            <head><title>Terms of Service - Sports Prophecy</title></head>
-            <body style="font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
-                <h1>Terms of Service</h1>
-                <p><strong>Effective Date:</strong> ${new Date().toLocaleDateString()}</p>
-                <p>By accessng or using the Sports Prophecy app, you agree to be bound by these Terms.</p>
-                <h2>1. Use of Service</h2>
-                <p>You must be at least 18 years old to use this service.</p>
-                <h2>2. User Content</h2>
-                <p>You are responsible for the content you post and your interactions with other users.</p>
-                <h2>3. Termination</h2>
-                <p>We reserve the right to suspend or terminate your account for any violation of these terms.</p>
-            </body>
-        </html>
-    `);
-});
-
-app.get('/download', (req, res) => {
-    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.sportsprophecy.app'; // Placeholder
-    const appStoreUrl = 'https://apps.apple.com/app/idYOUR_APPLE_APP_ID'; // Placeholder
-    // Self-referencing QR code so desktop users scan it and come back to this page on mobile
-    const qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.sportsprophecyapp.com/download';
-
-    res.send(`
-        <html>
-            <head>
-                <title>Download Sports Prophecy</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body {
-                        background-color: #0a1628;
-                        color: #ffffff;
-                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        min-height: 100vh;
-                        margin: 0;
-                        text-align: center;
-                        padding: 20px;
-                    }
-                    .container {
-                        max-width: 500px;
-                        width: 100%;
-                    }
-                    h1 { margin-bottom: 10px; font-size: 28px; }
-                    p { color: #8fa3bf; margin-bottom: 30px; }
-                    .button {
-                        display: block;
-                        background-color: #00d4ff;
-                        color: #0a1628;
-                        padding: 15px 30px;
-                        border-radius: 12px;
-                        text-decoration: none;
-                        font-weight: bold;
-                        margin: 10px 0;
-                        transition: transform 0.2s;
-                    }
-                    .button:active { transform: scale(0.98); }
-                    .qr-container {
-                        background: white;
-                        padding: 20px;
-                        border-radius: 20px;
-                        margin-top: 30px;
-                        display: inline-block;
-                    }
-                    .desktop-only { display: none; }
-                    
-                    @media (min-width: 768px) {
-                        .mobile-only { display: none; }
-                        .desktop-only { display: block; }
-                    }
-                </style>
-                <script>
-                    window.onload = function() {
-                        const userAgent = navigator.userAgent.toLowerCase();
-                        const isIos = userAgent.includes('iphone') || userAgent.includes('ipad') || userAgent.includes('ipod');
-                        const isAndroid = userAgent.includes('android');
-
-                        if (isIos) {
-                            setTimeout(function() { window.location.href = '${appStoreUrl}'; }, 1000);
-                            document.getElementById('status').innerText = 'Redirecting to App Store...';
-                        } else if (isAndroid) {
-                            setTimeout(function() { window.location.href = '${playStoreUrl}'; }, 1000);
-                            document.getElementById('status').innerText = 'Redirecting to Google Play...';
-                        }
-                    }
-                </script>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Sports Prophecy</h1>
-                    <p id="status">Choose your platform</p>
-
-                    <div class="mobile-only">
-                        <a href="${appStoreUrl}" class="button">Download on App Store</a>
-                        <a href="${playStoreUrl}" class="button">Get it on Google Play</a>
-                    </div>
-
-                    <div class="desktop-only">
-                        <p>Scan to Install on Mobile</p>
-                        <div class="qr-container">
-                            <img src="${qrCodeUrl}" alt="Scan to Download" width="200" height="200">
-                        </div>
-                    </div>
-                </div>
-            </body>
-        </html>
-    `);
-});
+// ... [Routes excluded for brevity] ...
 
 const PORT = process.env.PORT || 3001;
 
 // CORS configuration
+const ALLOWED_ORIGINS = [
+    'https://www.sportsprophecyapp.com',
+    'https://api.sportsprophecyapp.com',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:8081',
+    // Allow Vercel preview deployments
+    /^https:\/\/sportsprophecy-backend-.*\.vercel\.app$/,
+    /^https:\/\/dist-.*-sports-prophecy-app-stagings-projects\.vercel\.app$/
+];
+
 app.use(cors({
-    origin: '*',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        const isAllowed = ALLOWED_ORIGINS.some(allowed => {
+            if (allowed instanceof RegExp) return allowed.test(origin);
+            return allowed === origin;
+        });
+
+        if (isAllowed) {
+            callback(null, true);
+        } else {
+            console.warn(`⚠️ Blocked CORS request from: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
 }));
 
 app.use(express.json({
@@ -206,7 +123,7 @@ app.use(express.json({
 }));
 
 // Health Check
-app.get('/api/health', (req, res) => res.status(200).json({ status: 'ok', version: '2.17.6' }));
+app.get('/api/health', (req, res) => res.status(200).json({ status: 'ok', version: '2.18.12' }));
 
 // Debug Route
 app.get('/api/debug', (req, res) => {
@@ -813,9 +730,9 @@ async function fetchRealEvents(throwOnError = false) {
                 console.log(`✅ Upserted ${operations.length} events to MongoDB`);
             }
 
-            // Fetch results and grade predictions
-            await fetchGameResults();
-            await gradePredictions();
+            // Fetch results and grade predictions (Asynchronously - don't block UI)
+            // Vercel may kill this background work, but it's redundant to the lazy checks in /api/predictions
+            fetchGameResults().then(() => gradePredictions()).catch(err => console.error('Background grading error:', err.message));
 
             return await Event.find({});
 

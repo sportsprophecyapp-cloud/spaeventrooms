@@ -33,20 +33,15 @@ const CONFIDENCE_OPTIONS = [
 ];
 
 const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuccess, onLoadNextGame }) => {
-    if (!visible || !event || typeof event !== 'object' || !event.id) return null;
     const [selectedWinner, setSelectedWinner] = useState(null);
     const [confidenceLevel, setConfidenceLevel] = useState('normal');
     const [homeScore, setHomeScore] = useState('');
     const [awayScore, setAwayScore] = useState('');
     const [loading, setLoading] = useState(false);
     const { user, updateUser } = useAuth();
-
-    // 🛡️ Guard: Ensure we have a local safe reference for the UI
-    const currentUser = user || { tokens: 0, crowns: 0, isGuest: true };
-
     const [balance, setBalance] = useState({
-        tokens: currentUser?.tokens || 0,
-        crowns: currentUser?.crowns || 0
+        tokens: user?.tokens || 0,
+        crowns: user?.crowns || 0
     });
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -60,7 +55,7 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                 toValue: 0,
                 tension: 50,
                 friction: 8,
-                useNativeDriver: false, // 🛡️ Change this to 'false' to support all environments
+                useNativeDriver: false, // Set to false for web compatibility
             }).start();
         }
     }, [event?.id, visible]);
@@ -88,10 +83,7 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
             try {
                 const userBalance = await apiService.getUserBalance(user.uuid);
                 if (userBalance && (userBalance.tokens !== undefined)) {
-                    setBalance({
-                        tokens: userBalance.tokens || 0,
-                        crowns: userBalance.crowns || 0
-                    });
+                    setBalance(userBalance);
                 }
             } catch (err) {
                 // Failed to fetch latest balance, use context
@@ -109,49 +101,85 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
         }
     }, [visible, event, initialTeam]);
 
+    if (!event) return null;
+
+    if (!event) return null;
+
     const selectedOption = CONFIDENCE_OPTIONS.find(o => o.id === confidenceLevel);
     const PREDICTION_COST = selectedOption ? selectedOption.tokenCost : 1;
     const hasEnoughTokens = balance.tokens >= PREDICTION_COST;
 
     const handleSubmit = async () => {
-        // 🛡️ Use safe reference
-        if (!currentUser || !event) return;
+        // if (user.isGuest) {
+        //     Alert.alert(
+        //         'Sign Up Required',
+        //         'You must create an account to make predictions and win prizes!',
+        //         [
+        //             { text: 'Cancel', style: 'cancel' },
+        //             { text: 'Sign Up', onPress: () => onClose() } // Ideally navigate to Register, but modal close + separate nav is simpler for now, or we can assume user knows how to logout/signup
+        //         ]
+        //     );
+        //     return;
+        // }
 
         if (!selectedWinner) {
             setError('Please select a winner');
             return;
         }
 
-        const PREDICTION_COST = selectedOption ? selectedOption.tokenCost : 1;
-        if (balance.tokens < PREDICTION_COST) {
-            setError(`Insufficient tokens. Need ${PREDICTION_COST}`);
+        if (!hasEnoughTokens) {
+            setError(`Insufficient tokens. Cost: ${PREDICTION_COST}, Balance: ${balance.tokens}`);
             return;
+        }
+
+        // Validate that scores match the selected winner (if scores are provided)
+        const homeScoreNum = parseInt(homeScore) || 0;
+        const awayScoreNum = parseInt(awayScore) || 0;
+
+        // Only validate if both scores are entered
+        if (homeScore && awayScore) {
+            if (homeScoreNum > awayScoreNum && selectedWinner !== event.homeTeam) {
+                setError(`Score contradiction: You selected ${selectedWinner} to win, but entered a score where ${event.homeTeam} wins ${homeScoreNum}-${awayScoreNum}`);
+                return;
+            }
+            if (awayScoreNum > homeScoreNum && selectedWinner !== event.awayTeam) {
+                setError(`Score contradiction: You selected ${selectedWinner} to win, but entered a score where ${event.awayTeam} wins ${awayScoreNum}-${homeScoreNum}`);
+                return;
+            }
+            if (homeScoreNum === awayScoreNum) {
+                setError('Scores cannot be tied. Please predict a winner with a different score.');
+                return;
+            }
         }
 
         setError(null);
         setLoading(true);
 
         try {
-            if (currentUser.isGuest) {
-                // ... guest logic ...
+            if (user.isGuest) {
                 // Simulate network delay
                 await new Promise(resolve => setTimeout(resolve, 500));
 
                 // Deduct token locally and add to predicted games
-                const currentPredictedGames = currentUser.predictedGames || [];
-                await updateUser({
-                    tokens: (currentUser.tokens || 0) - PREDICTION_COST,
+                const currentPredictedGames = user.predictedGames || [];
+                updateUser({
+                    tokens: user.tokens - PREDICTION_COST,
                     predictedGames: [...currentPredictedGames, event.id]
                 });
-                setBalance(prev => ({ ...prev, tokens: (prev.tokens || 0) - PREDICTION_COST }));
+                setBalance(prev => ({ ...prev, tokens: prev.tokens - PREDICTION_COST }));
 
                 setSuccess(true);
 
-                setTimeout(async () => {
+                setTimeout(async () => { // Async for consistency with main flow
+                    // Do NOT call onPredictionSuccess for guests here.
+                    // The updateUser call triggers a user change, which triggers useEffect in parent screens to refresh events.
+                    // Calling it here explicitly causes a race condition with a stale user object.
+
                     // Try to load next game
                     if (onLoadNextGame) {
-                        const nextEvent = await onLoadNextGame(event.id);
+                        const nextEvent = await onLoadNextGame(event.id); // Pass current ID to ignore
                         if (nextEvent) {
+                            // Reset state for next game
                             setSuccess(false);
                             setSelectedWinner(null);
                             setHomeScore('');
@@ -170,12 +198,13 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                 return;
             }
 
-            // Standard User Submission
             const result = await apiService.submitPrediction({
-                userId: currentUser.uuid,
+                userId: user.uuid,
                 eventId: event.id,
                 predictedWinner: selectedWinner,
-                predictedScores: [parseInt(homeScore) || 0, parseInt(awayScore) || 0],
+                predictedScores: [homeScoreNum, awayScoreNum],
+                predictedWinner: selectedWinner,
+                predictedScores: [homeScoreNum, awayScoreNum],
                 eventType: 'matchup',
                 confidenceLevel: confidenceLevel,
             });
@@ -183,13 +212,13 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
             // Update balance from response or manual decrement
             const newTokens = (result.balance?.tokens !== undefined)
                 ? result.balance.tokens
-                : (currentUser.tokens - PREDICTION_COST);
+                : (user.tokens - PREDICTION_COST);
 
             const newCrowns = (result.balance?.crowns !== undefined)
                 ? result.balance.crowns
-                : currentUser.crowns;
+                : user.crowns;
 
-            // Update global user state
+            // Update global user state to ensure header/other screens reflect change
             await updateUser({ tokens: newTokens, crowns: newCrowns });
 
             // Update local state
@@ -200,17 +229,19 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
             // Auto-load next game or close after delay
             setTimeout(async () => {
                 // Refresh events first
-                if (onPredictionSuccess && !currentUser.isGuest) onPredictionSuccess();
+                if (onPredictionSuccess) onPredictionSuccess();
 
                 // Try to load next game
                 if (onLoadNextGame) {
-                    const nextEvent = await onLoadNextGame(event.id);
+                    const nextEvent = await onLoadNextGame(event.id); // Pass current ID to ignore
                     if (nextEvent) {
+                        // Reset state for next game
                         setSuccess(false);
                         setSelectedWinner(null);
                         setHomeScore('');
                         setAwayScore('');
                         setError(null);
+                        // Modal stays open with new event
                         return;
                     }
                 }
@@ -350,26 +381,26 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                                 <TouchableOpacity
                                     style={[
                                         styles.teamContainer,
-                                        selectedWinner && event?.homeTeam && selectedWinner !== event.homeTeam && styles.teamUnselected
+                                        selectedWinner && selectedWinner !== event.homeTeam && styles.teamUnselected
                                     ]}
-                                    onPress={() => event?.homeTeam && setSelectedWinner(event.homeTeam)}
-                                    accessibilityLabel={`Select ${event?.homeTeam || 'Home'} as Winner`}
+                                    onPress={() => setSelectedWinner(event.homeTeam)}
+                                    accessibilityLabel={`Select ${event.homeTeam} as Winner`}
                                     testID="prediction-select-home"
                                 >
                                     <View style={[
                                         styles.logoContainer,
                                         selectedWinner === event.homeTeam && styles.logoSelected
                                     ]}>
-                                        {event?.homeTeam && getTeamLogo(event.homeTeam) ? (
+                                        {getTeamLogo(event.homeTeam) ? (
                                             <Image
                                                 source={{ uri: getTeamLogo(event.homeTeam) }}
                                                 style={styles.logoImage}
                                                 resizeMode="contain"
                                             />
                                         ) : (
-                                            <Text style={styles.logoText}>{event?.homeTeam?.charAt(0) || 'H'}</Text>
+                                            <Text style={styles.logoText}>{event.homeTeam?.charAt(0) || 'H'}</Text>
                                         )}
-                                        {selectedWinner === event?.homeTeam && (
+                                        {selectedWinner === event.homeTeam && (
                                             <View style={styles.checkBadge}>
                                                 <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
                                             </View>
@@ -377,8 +408,8 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                                     </View>
                                     <Text style={[
                                         styles.teamName,
-                                        selectedWinner === event?.homeTeam && styles.teamNameSelected
-                                    ]} numberOfLines={2}>{event?.homeTeam || 'Home Team'}</Text>
+                                        selectedWinner === event.homeTeam && styles.teamNameSelected
+                                    ]} numberOfLines={2}>{event.homeTeam || 'Home Team'}</Text>
                                 </TouchableOpacity>
 
                                 <View style={styles.vsContainer}>
@@ -388,26 +419,26 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                                 <TouchableOpacity
                                     style={[
                                         styles.teamContainer,
-                                        selectedWinner && event?.awayTeam && selectedWinner !== event.awayTeam && styles.teamUnselected
+                                        selectedWinner && selectedWinner !== event.awayTeam && styles.teamUnselected
                                     ]}
-                                    onPress={() => event?.awayTeam && setSelectedWinner(event.awayTeam)}
-                                    accessibilityLabel={`Select ${event?.awayTeam || 'Away'} as Winner`}
+                                    onPress={() => setSelectedWinner(event.awayTeam)}
+                                    accessibilityLabel={`Select ${event.awayTeam} as Winner`}
                                     testID="prediction-select-away"
                                 >
                                     <View style={[
                                         styles.logoContainer,
                                         selectedWinner === event.awayTeam && styles.logoSelected
                                     ]}>
-                                        {event?.awayTeam && getTeamLogo(event.awayTeam) ? (
+                                        {getTeamLogo(event.awayTeam) ? (
                                             <Image
                                                 source={{ uri: getTeamLogo(event.awayTeam) }}
                                                 style={styles.logoImage}
                                                 resizeMode="contain"
                                             />
                                         ) : (
-                                            <Text style={styles.logoText}>{event?.awayTeam?.charAt(0) || 'A'}</Text>
+                                            <Text style={styles.logoText}>{event.awayTeam?.charAt(0) || 'A'}</Text>
                                         )}
-                                        {selectedWinner === event?.awayTeam && (
+                                        {selectedWinner === event.awayTeam && (
                                             <View style={styles.checkBadge}>
                                                 <Ionicons name="checkmark" size={16} color={COLORS.text.inverse} />
                                             </View>
@@ -415,8 +446,8 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                                     </View>
                                     <Text style={[
                                         styles.teamName,
-                                        selectedWinner === event?.awayTeam && styles.teamNameSelected
-                                    ]} numberOfLines={2}>{event?.awayTeam || 'Away Team'}</Text>
+                                        selectedWinner === event.awayTeam && styles.teamNameSelected
+                                    ]} numberOfLines={2}>{event.awayTeam || 'Away Team'}</Text>
                                 </TouchableOpacity>
                             </View>
 
@@ -479,7 +510,7 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                             testID="prediction-submit-button"
                         >
                             <LinearGradient
-                                colors={success ? [COLORS.status.success, COLORS.status.success] : (!selectedWinner || !hasEnoughTokens) ? COLORS.gradients.disabled : ['#2979FF', '#00B0FF']}
+                                colors={success ? [COLORS.status.success, COLORS.status.success] : (!selectedWinner || !hasEnoughTokens) ? ['#9ca3af', '#cbd5e1'] : ['#2979FF', '#00B0FF']}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                                 style={styles.submitGradient}

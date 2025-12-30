@@ -51,7 +51,7 @@ const PrizeDrawsScreen = ({ navigation }) => {
                 setUserEntries(userStats.count || 0);
             }
 
-            if (prizes && prizes.length > 0) {
+            if (Array.isArray(prizes) && prizes.length > 0) {
                 const format = (p) => ({
                     id: p._id,
                     title: p.prizeDetails?.description || 'Prize Draw',
@@ -63,7 +63,7 @@ const PrizeDrawsScreen = ({ navigation }) => {
                 });
 
                 setActiveDraw(format(prizes[0]));
-                setUpcomingDraws((prizes || []).slice(1).map(format));
+                setUpcomingDraws(prizes.slice(1).map(format));
             }
         } catch (e) {
             console.error(e);
@@ -133,7 +133,7 @@ const PrizeDrawsScreen = ({ navigation }) => {
                 </LinearGradient>
 
                 {/* Top Sponsor Banner */}
-                {sponsors && sponsors.length > 0 && sponsors[currentAdIndex] && (
+                {sponsors.length > 0 && (
                     <TouchableOpacity
                         onPress={() => Linking.openURL(sponsors[currentAdIndex].linkUrl)}
                         style={styles.sponsorBanner}
@@ -244,7 +244,7 @@ const PrizeDrawsScreen = ({ navigation }) => {
                     )}
 
                     {/* Mid-Page Sponsor Banner */}
-                    {sponsors && sponsors.length > 0 && sponsors[currentAdIndex] && (
+                    {sponsors.length > 0 && (
                         <TouchableOpacity
                             onPress={() => Linking.openURL(sponsors[currentAdIndex].linkUrl)}
                             style={[styles.sponsorBanner, { marginTop: 24, marginBottom: 8 }]}

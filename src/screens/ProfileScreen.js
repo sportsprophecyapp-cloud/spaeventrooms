@@ -98,7 +98,7 @@ const ProfileScreen = () => {
             setLoading(true);
             const userPredictions = await apiService.getUserPredictions(user.uuid);
             // Sort by timestamp descending to show newest first
-            const sortedPredictions = (userPredictions || []).sort((a, b) =>
+            const sortedPredictions = (Array.isArray(userPredictions) ? userPredictions : []).sort((a, b) =>
                 new Date(b.timestamp) - new Date(a.timestamp)
             );
             setPredictions(sortedPredictions);
@@ -112,7 +112,7 @@ const ProfileScreen = () => {
             }
 
             // Create fake notifications for resolved predictions (legacy/fallback)
-            const wonPredictions = (userPredictions || []).filter(p => p.resolved && p.won);
+            const wonPredictions = (Array.isArray(userPredictions) ? userPredictions : []).filter(p => p.resolved && p.won);
             const predictionNotifs = (Array.isArray(wonPredictions) ? wonPredictions : []).map(p => ({
                 id: `pred-${p.id}`,
                 type: 'win',
@@ -123,10 +123,7 @@ const ProfileScreen = () => {
             }));
 
             // Merge and sort
-            // SAFETY: Ensure both arrays are defined before spreading
-            const safeRealNotifs = Array.isArray(realNotifications) ? realNotifications : [];
-            const safePredictionNotifs = Array.isArray(predictionNotifs) ? predictionNotifs : [];
-            const allNotifs = [...safeRealNotifs, ...safePredictionNotifs].sort((a, b) =>
+            const allNotifs = [...realNotifications, ...predictionNotifs].sort((a, b) =>
                 new Date(b.timestamp) - new Date(a.timestamp)
             );
             setNotifications(allNotifs);
@@ -277,12 +274,11 @@ const ProfileScreen = () => {
     const isBadgeUnlocked = (badge) => {
         if (!user || user.isGuest) return false;
 
-        const safePredictions = Array.isArray(predictions) ? predictions : [];
-        const wins = safePredictions.filter(p => p && p.resolved && (p.result?.won || p.won)).length;
+        const wins = predictions.filter(p => p.resolved && (p.result?.won || p.won)).length;
 
         switch (badge.unlockType) {
             case 'predictions':
-                return safePredictions.length >= badge.unlockThreshold;
+                return predictions.length >= badge.unlockThreshold;
             case 'wins':
                 return wins >= badge.unlockThreshold;
             case 'roomsCreated':
@@ -394,23 +390,20 @@ const ProfileScreen = () => {
         }
     };
 
-    const totalPredictions = Array.isArray(predictions) ? predictions.length : 0;
-    const wonPredictions = (Array.isArray(predictions) ? predictions : []).filter(p => p && p.resolved && (p.result?.won || p.won)).length;
+    const totalPredictions = predictions.length;
+    const wonPredictions = predictions.filter(p => p.resolved && (p.result?.won || p.won)).length;
     const winRate = totalPredictions > 0 ? Math.round((wonPredictions / totalPredictions) * 100) : 0;
 
     const filteredPredictions = React.useMemo(() => {
-        // SAFETY: Guard against undefined/null predictions array
-        if (!Array.isArray(predictions)) return [];
-
         let result = [...predictions];
 
         // Filter
         if (activeFilter === 'won') {
-            result = result.filter(p => p && p.resolved && (p.result?.won || p.won));
+            result = result.filter(p => p.resolved && (p.result?.won || p.won));
         } else if (activeFilter === 'lost') {
-            result = result.filter(p => p && p.resolved && !(p.result?.won || p.won));
+            result = result.filter(p => p.resolved && !(p.result?.won || p.won));
         } else if (activeFilter === 'pending') {
-            result = result.filter(p => p && !p.resolved);
+            result = result.filter(p => !p.resolved);
         }
 
         // Sort
@@ -549,7 +542,7 @@ const ProfileScreen = () => {
                                     <Text style={styles.badgeEmoji}>🔥</Text>
                                     <Text style={styles.badgeLabel}>5 Streak</Text>
                                 </View>
-                                {user?.badges?.map((badge, idx) => (
+                                {(Array.isArray(user?.badges) ? user.badges : []).map((badge, idx) => (
                                     <View key={idx} style={styles.badgePill}>
                                         <Text style={styles.badgeLabel}>{badge}</Text>
                                     </View>
@@ -782,7 +775,7 @@ const ProfileScreen = () => {
                                         );
                                     })
                                 ) : PRESET_AVATARS[activeCategory]?.length > 0 ? (
-                                    PRESET_AVATARS[activeCategory].map((preset, index) => (
+                                    (Array.isArray(PRESET_AVATARS[activeCategory]) ? PRESET_AVATARS[activeCategory] : []).map((preset, index) => (
                                         <TouchableOpacity
                                             key={index}
                                             style={styles.presetItem}

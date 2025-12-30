@@ -37,14 +37,14 @@ const WinnerSpotlight = ({ winner }) => {
                     </View>
 
                     <View style={styles.info}>
-                        <Text style={styles.username}>{winner.username}</Text>
-                        <Text style={styles.wonText}>WON: <Text style={styles.prize}>{winner.prizeName}</Text></Text>
+                        <Text style={styles.username}>{typeof winner.username === 'string' ? winner.username : String(winner.username || 'Winner')}</Text>
+                        <Text style={styles.wonText}>WON: <Text style={styles.prize}>{typeof winner.prizeName === 'string' ? winner.prizeName : String(winner.prizeName || 'Prize')}</Text></Text>
                     </View>
                 </View>
 
                 <View style={styles.quoteContainer}>
                     <Ionicons name="chatquote" size={16} color={COLORS.accent.gold} style={styles.quoteIcon} />
-                    <Text style={styles.quoteText}>"{winner.quote}"</Text>
+                    <Text style={styles.quoteText}>"{typeof winner.quote === 'string' ? winner.quote : String(winner.quote || '')}"</Text>
                 </View>
             </LinearGradient>
         </View>

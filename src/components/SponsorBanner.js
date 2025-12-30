@@ -1,138 +1,133 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Linking, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Linking, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { apiService } from '../services/api';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { useNavigation } from '@react-navigation/native';
-
 import * as WebBrowser from 'expo-web-browser';
-
-// Import local asset for test banner
-// Note: In a real app, images are usually remote URLs. For local assets, we need to resolve them or use them directly in Image source.
-// However, the Image component 'source' prop handles both {uri} and require(). 
-// But our data structure expects 'bannerUrl' as a string URI.
-// For this test, we will handle the local asset specifically in the render.
-
 
 const SponsorBanner = ({ style, sponsor = null }) => {
     const navigation = useNavigation();
     const [sponsors, setSponsors] = useState([]);
     const [loading, setLoading] = useState(!sponsor);
     const [currentSponsor, setCurrentSponsor] = useState(sponsor);
+    const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         if (!sponsor) {
             fetchSponsors();
         } else {
             setCurrentSponsor(sponsor);
+            fadeIn();
             setLoading(false);
         }
     }, [sponsor]);
 
+    const fadeIn = () => {
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+        }).start();
+    };
+
     const fetchSponsors = async () => {
         try {
             const activeSponsors = await apiService.getActiveSponsors();
-
             setSponsors(activeSponsors);
-
-            if (Array.isArray(activeSponsors) && activeSponsors.length > 0) {
-                // Pick a random sponsor to start
+            if (activeSponsors && activeSponsors.length > 0) {
                 const randomIndex = Math.floor(Math.random() * activeSponsors.length);
                 setCurrentSponsor(activeSponsors[randomIndex]);
             } else {
-                // No sponsors - show placeholder
                 setCurrentSponsor(null);
             }
         } catch (error) {
             console.error('Failed to fetch sponsors:', error);
-            // Show placeholder on error
             setCurrentSponsor(null);
         } finally {
             setLoading(false);
+            fadeIn();
         }
     };
 
     const handlePress = async () => {
         if (currentSponsor && currentSponsor.linkUrl) {
             try {
-                // Open in in-app browser to keep user in the app
                 await WebBrowser.openBrowserAsync(currentSponsor.linkUrl);
             } catch (error) {
                 console.error("Failed to open browser:", error);
-                Linking.openURL(currentSponsor.linkUrl); // Fallback
+                Linking.openURL(currentSponsor.linkUrl);
             }
         } else {
-            // Navigate to SponsorScreen if it's the placeholder or no link
             navigation.navigate('Sponsor');
         }
     };
 
-    if (loading) {
-        return null; // Or a small skeleton loader if preferred
-    }
+    if (loading) return null;
 
     if (!currentSponsor) {
-        // Default "Advertise Here" Banner
         return (
-            <TouchableOpacity onPress={() => navigation.navigate('Sponsor')} style={[styles.container, style]}>
-                <LinearGradient
-                    colors={COLORS.gradients.dark}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.gradient}
-                >
-                    <View style={styles.iconContainer}>
-                        <Ionicons name="megaphone-outline" size={24} color={COLORS.accent.cyan} />
-                    </View>
-                    <View style={styles.content}>
-                        <Text style={styles.title}>YOUR BRAND HERE</Text>
-                        <Text style={styles.subtitle}>Reach thousands of sports fans!</Text>
-                    </View>
-                    <View style={styles.action}>
-                        <Text style={styles.actionText}>Advertise</Text>
-                        <Ionicons name="chevron-forward" size={16} color={COLORS.text.secondary} />
-                    </View>
-                </LinearGradient>
-            </TouchableOpacity>
+            <Animated.View style={[{ opacity: fadeAnim }, style]}>
+                <TouchableOpacity onPress={() => navigation.navigate('Sponsor')} style={[styles.container]}>
+                    <LinearGradient
+                        colors={COLORS.gradients.dark}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.gradient}
+                    >
+                        <View style={styles.iconContainer}>
+                            <Ionicons name="megaphone-outline" size={24} color={COLORS.accent.cyan} />
+                        </View>
+                        <View style={styles.content}>
+                            <Text style={styles.title}>YOUR BRAND HERE</Text>
+                            <Text style={styles.subtitle}>Reach thousands of sports fans!</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <Text style={styles.actionText}>Advertise</Text>
+                            <Ionicons name="chevron-forward" size={16} color={COLORS.text.secondary} />
+                        </View>
+                    </LinearGradient>
+                </TouchableOpacity>
+            </Animated.View>
         );
     }
 
     return (
-        <TouchableOpacity onPress={handlePress} style={[styles.container, style]}>
-            {currentSponsor.bannerUrl ? (
-                // Image Banner
-                <View style={styles.imageContainer}>
-                    <Image
-                        source={{ uri: currentSponsor.bannerUrl }}
-                        style={styles.bannerImage}
-                        resizeMode="cover"
-                    />
+        <Animated.View style={[{ opacity: fadeAnim }, style]}>
+            <TouchableOpacity onPress={handlePress} style={[styles.container]}>
+                {currentSponsor.bannerUrl ? (
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={{ uri: currentSponsor.bannerUrl }}
+                            style={styles.bannerImage}
+                            resizeMode="cover"
+                        />
+                        <LinearGradient
+                            colors={['transparent', 'rgba(0,0,0,0.8)']}
+                            style={styles.imageOverlay}
+                        >
+                            <Text style={styles.sponsoredTag}>PROMOTED</Text>
+                        </LinearGradient>
+                    </View>
+                ) : (
                     <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.8)']}
-                        style={styles.imageOverlay}
+                        colors={COLORS.gradients.dark}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.gradient}
                     >
-                        <Text style={styles.sponsoredTag}>PROMOTED</Text>
+                        <View style={styles.content}>
+                            <Text style={styles.title}>{currentSponsor.sponsorName}</Text>
+                            <Text style={styles.subtitle}>Tap to visit website</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <Ionicons name="open-outline" size={20} color={COLORS.accent.cyan} />
+                        </View>
                     </LinearGradient>
-                </View>
-            ) : (
-                // Text/Gradient Banner Fallback (if no image provided, though unlikely for paid ads)
-                <LinearGradient
-                    colors={COLORS.gradients.dark}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.gradient}
-                >
-                    <View style={styles.content}>
-                        <Text style={styles.title}>{currentSponsor.sponsorName}</Text>
-                        <Text style={styles.subtitle}>Tap to visit website</Text>
-                    </View>
-                    <View style={styles.action}>
-                        <Ionicons name="open-outline" size={20} color={COLORS.accent.cyan} />
-                    </View>
-                </LinearGradient>
-            )}
-        </TouchableOpacity>
+                )}
+            </TouchableOpacity>
+        </Animated.View>
     );
 };
 

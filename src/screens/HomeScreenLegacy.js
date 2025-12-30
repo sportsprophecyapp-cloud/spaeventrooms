@@ -34,7 +34,7 @@ const HomeScreen = ({ navigation }) => {
             const localPredictedIds = (user?.isGuest && user?.predictedGames) ? user.predictedGames : [];
             const allPredictedIds = new Set([...backendPredictedIds, ...localPredictedIds]);
 
-            const eventsWithStatus = (Array.isArray(eventsData) ? eventsData : []).map(event => ({
+            const eventsWithStatus = (eventsData || []).map(event => ({
                 ...event,
                 hasPredicted: allPredictedIds.has(event.id)
             }));
@@ -90,13 +90,13 @@ const HomeScreen = ({ navigation }) => {
 
     // Filter events by selected sport
     const filteredEvents = selectedSport === 'all'
-        ? (Array.isArray(events) ? events : [])
-        : (Array.isArray(events) ? events : []).filter(event => event?.sport?.toLowerCase() === selectedSport);
+        ? events
+        : (Array.isArray(events) ? events : []).filter(event => event.sport?.toLowerCase() === selectedSport);
 
     // Get upcoming events in next 48 hours
     const now = new Date();
     const fortyEightHoursLater = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-    const upcomingEvents = filteredEvents.filter(event => {
+    const upcomingEvents = (Array.isArray(filteredEvents) ? filteredEvents : []).filter(event => {
         const eventDate = new Date(event.commence_time || event.startTime);
         return eventDate >= now && eventDate <= fortyEightHoursLater;
     });
@@ -104,7 +104,7 @@ const HomeScreen = ({ navigation }) => {
     const getNextUnpredictedGame = async (ignoreId = null) => {
         // Find the next game that hasn't been predicted on
         // Also exclude the game we just predicted on (ignoreId) to allow for immediate UI updates
-        const unpredictedGames = upcomingEvents.filter(event =>
+        const unpredictedGames = (Array.isArray(upcomingEvents) ? upcomingEvents : []).filter(event =>
             !event.hasPredicted && event.id !== ignoreId
         );
 

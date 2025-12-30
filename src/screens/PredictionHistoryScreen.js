@@ -39,17 +39,14 @@ const PredictionHistoryScreen = () => {
     };
 
     const filteredPredictions = React.useMemo(() => {
-        // SAFETY: Guard against undefined/null predictions array
-        if (!Array.isArray(predictions)) return [];
-
         let result = [...predictions];
 
         if (activeFilter === 'won') {
-            result = result.filter(p => p && p.resolved && (p.result?.won || p.won));
+            result = result.filter(p => p.resolved && (p.result?.won || p.won));
         } else if (activeFilter === 'lost') {
-            result = result.filter(p => p && p.resolved && !(p.result?.won || p.won));
+            result = result.filter(p => p.resolved && !(p.result?.won || p.won));
         } else if (activeFilter === 'pending') {
-            result = result.filter(p => p && !p.resolved);
+            result = result.filter(p => !p.resolved);
         }
 
         result.sort((a, b) => {
@@ -91,7 +88,7 @@ const PredictionHistoryScreen = () => {
                                 styles.filterText,
                                 activeFilter === filter && styles.activeFilterText
                             ]}>
-                                {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                                {filter.charAt(0).toUpperCase() + (filter || '').slice(1)}
                             </Text>
                         </TouchableOpacity>
                     ))}
@@ -112,43 +109,44 @@ const PredictionHistoryScreen = () => {
                         <Text style={styles.emptyText}>No predictions found</Text>
                         <Text style={styles.emptySubtext}>Your game history will appear here.</Text>
                     </View>
-                ) : (Array.isArray(filteredPredictions) ? filteredPredictions : []).map((pred) => (
-                    <View key={pred.id || pred._id} style={styles.predictionCard}>
-                        <View style={styles.cardHeader}>
-                            <Text style={styles.eventLabel}>{pred.eventName || 'Game Prediction'}</Text>
-                            <Text style={styles.timestamp}>{new Date(pred.timestamp).toLocaleDateString()}</Text>
-                        </View>
-
-                        <View style={styles.cardBody}>
-                            <View style={styles.selectionInfo}>
-                                <Text style={styles.selectionLabel}>Picked:</Text>
-                                <Text style={styles.selectionValue}>{pred.predictedWinner}</Text>
+                ) : (
+                    (Array.isArray(filteredPredictions) ? filteredPredictions : []).map((pred) => (
+                        <View key={pred.id || pred._id} style={styles.predictionCard}>
+                            <View style={styles.cardHeader}>
+                                <Text style={styles.eventLabel}>{pred.eventName || 'Game Prediction'}</Text>
+                                <Text style={styles.timestamp}>{new Date(pred.timestamp).toLocaleDateString()}</Text>
                             </View>
 
-                            <View style={styles.statusSection}>
-                                {pred.resolved ? (
-                                    (pred.result?.won || pred.won) ? (
-                                        <View style={[styles.statusBadge, styles.wonBadge]}>
-                                            <Ionicons name="checkmark-circle" size={14} color="#fff" />
-                                            <Text style={styles.statusText}>WON</Text>
-                                        </View>
+                            <View style={styles.cardBody}>
+                                <View style={styles.selectionInfo}>
+                                    <Text style={styles.selectionLabel}>Picked:</Text>
+                                    <Text style={styles.selectionValue}>{pred.predictedWinner}</Text>
+                                </View>
+
+                                <View style={styles.statusSection}>
+                                    {pred.resolved ? (
+                                        (pred.result?.won || pred.won) ? (
+                                            <View style={[styles.statusBadge, styles.wonBadge]}>
+                                                <Ionicons name="checkmark-circle" size={14} color="#fff" />
+                                                <Text style={styles.statusText}>WON</Text>
+                                            </View>
+                                        ) : (
+                                            <View style={[styles.statusBadge, styles.lostBadge]}>
+                                                <Ionicons name="close-circle" size={14} color="#fff" />
+                                                <Text style={styles.statusText}>LOST</Text>
+                                            </View>
+                                        )
                                     ) : (
-                                        <View style={[styles.statusBadge, styles.lostBadge]}>
-                                            <Ionicons name="close-circle" size={14} color="#fff" />
-                                            <Text style={styles.statusText}>LOST</Text>
+                                        <View style={[styles.statusBadge, styles.pendingBadge]}>
+                                            <Ionicons name="time" size={14} color="#fff" />
+                                            <Text style={styles.statusText}>PENDING</Text>
                                         </View>
-                                    )
-                                ) : (
-                                    <View style={[styles.statusBadge, styles.pendingBadge]}>
-                                        <Ionicons name="time" size={14} color="#fff" />
-                                        <Text style={styles.statusText}>PENDING</Text>
-                                    </View>
-                                )}
+                                    )}
+                                </View>
                             </View>
                         </View>
-                    </View>
-                ))
-                }
+                    ))
+                )}
             </ScrollView>
         </SafeAreaView>
     );

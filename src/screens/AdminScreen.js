@@ -674,12 +674,12 @@ const AdminScreen = ({ navigation }) => {
             </View>
 
             {/* User List */}
-            {(Array.isArray(allUsers) ? allUsers : []).length === 0 ? (
+            {allUsers.length === 0 ? (
                 <View style={styles.emptyCard}>
                     <Text style={styles.emptyText}>No users found. Try a different search.</Text>
                 </View>
             ) : (
-                (allUsers || []).map((u) => (
+                (Array.isArray(allUsers) ? allUsers : []).map((u) => (
                     <LinearGradient key={u.uuid} colors={['#1e293b', '#0f172a']} style={styles.userCard}>
                         <View style={styles.userHeader}>
                             <View style={styles.userInfoMain}>
@@ -775,7 +775,7 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={styles.emptyText}>No winners history found.</Text>
                 </View>
             ) : (
-                (winners || []).map((win) => (
+                (Array.isArray(winners) ? winners : []).map((win) => (
                     <View key={win._id} style={styles.winnerCard}>
                         <View style={styles.winnerInfo}>
                             <Text style={styles.winnerName}>{win.username}</Text>
@@ -859,7 +859,7 @@ const AdminScreen = ({ navigation }) => {
                         <Text style={styles.emptyText}>No moderators assigned yet</Text>
                     </LinearGradient>
                 ) : (
-                    (moderators || []).map((mod, index) => (
+                    (Array.isArray(moderators) ? moderators : []).map((mod, index) => (
                         <LinearGradient key={index} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 10 }]}>
                             <View style={styles.modItem}>
                                 <View style={styles.modInfo}>
@@ -958,7 +958,7 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={styles.emptyText}>No pending applications</Text>
                 </LinearGradient>
             ) : (
-                (pendingSponsors || []).map((sponsor) => (
+                (Array.isArray(pendingSponsors) ? pendingSponsors : []).map((sponsor) => (
                     <LinearGradient key={sponsor._id} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 20 }]}>
                         <Image source={{ uri: sponsor.bannerUrl }} style={styles.sponsorBanner} resizeMode="cover" />
 
@@ -1051,7 +1051,7 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={{ color: '#94a3b8', textAlign: 'center' }}>No active prize draws</Text>
                 </View>
             ) : (
-                (activeSponsors || []).map(sponsor => (
+                (Array.isArray(activeSponsors) ? activeSponsors : []).map(sponsor => (
                     <LinearGradient key={sponsor._id} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 15 }]}>
                         {sponsor.bannerUrl && (
                             <Image source={{ uri: sponsor.bannerUrl }} style={styles.sponsorBanner} resizeMode="cover" />
@@ -1087,7 +1087,7 @@ const AdminScreen = ({ navigation }) => {
             <Text style={styles.sectionTitle}>🔑 Role Permissions</Text>
             <Text style={styles.sectionSubtitle}>Configure what each role can do in the application.</Text>
 
-            {(rolePermissions || []).map((rp) => (
+            {(Array.isArray(rolePermissions) ? rolePermissions : []).map((rp) => (
                 <LinearGradient key={rp.role} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 20 }]}>
                     <View style={styles.roleHeader}>
                         <View style={[styles.roleBadge, rp.role === 'admin' && styles.adminRoleBadge]}>
@@ -1103,7 +1103,7 @@ const AdminScreen = ({ navigation }) => {
                     </View>
 
                     <View style={styles.permissionList}>
-                        {Object.entries(rp?.permissions || {}).map(([perm, enabled]) => (
+                        {Object.entries(rp.permissions).map(([perm, enabled]) => (
                             <TouchableOpacity
                                 key={perm}
                                 style={styles.permissionItem}
@@ -1188,7 +1188,7 @@ const AdminScreen = ({ navigation }) => {
                     <Text style={{ color: '#94a3b8' }}>No users found.</Text>
                 </View>
             ) : (
-                (userAnalyticsData || []).map((usr) => (
+                (Array.isArray(userAnalyticsData) ? userAnalyticsData : []).map((usr) => (
                     <LinearGradient key={usr.uuid} colors={['#0f172a', '#1e293b']} style={[styles.card, { marginBottom: 10 }]}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                             <View>
