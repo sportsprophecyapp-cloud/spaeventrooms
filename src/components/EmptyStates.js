@@ -17,12 +17,12 @@ export const NoPredictionsYet = ({ onMakePrediction }) => (
 
 export const BrokenStreak = ({ streakLength, onContinue }) => (
     <View style={styles.streakBroken}>
-        <Text style={styles.streakBrokenEmoji}>😔</Text>
+        <Text style={styles.streakBrokenEmoji}>💪</Text>
         <Text style={styles.streakBrokenTitle}>
-            Your {streakLength}-day streak ended
+            Time to restart your streak!
         </Text>
         <Text style={styles.streakBrokenText}>
-            No worries! Start a new streak today and keep improving.
+            You had a great {streakLength}-day run. Let's beat that record starting today!
         </Text>
         <TouchableOpacity style={styles.streakBrokenCTA} onPress={onContinue}>
             <Text style={styles.streakBrokenCTAText}>Start New Streak</Text>
