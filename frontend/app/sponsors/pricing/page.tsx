@@ -62,7 +62,7 @@ export default function SponsorshipPricingPage() {
                 {/* Starter Tier */}
                 <div className={styles.card}>
                     <h2 className={styles.tierName}>Starter Display</h2>
-                    <div className={styles.price}>$99<span>/month</span></div>
+                    <div className={styles.price}>C$99<span>/month</span></div>
                     <ul className={styles.features}>
                         <li><span className={styles.check}>✓</span> Homepage Logo (Rotating)</li>
                         <li><span className={styles.check}>✓</span> Announcements Page Ad</li>
@@ -82,7 +82,7 @@ export default function SponsorshipPricingPage() {
                 <div className={`${styles.card} ${styles.featured}`}>
                     <div className={styles.popularBadge}>Most Popular</div>
                     <h2 className={styles.tierName}>Growth Display</h2>
-                    <div className={styles.price}>$299<span>/month</span></div>
+                    <div className={styles.price}>C$299<span>/month</span></div>
                     <ul className={styles.features}>
                         <li><span className={styles.check}>✓</span> <strong>All Starter Features</strong></li>
                         <li><span className={styles.check}>✓</span> Login Page Logo Strategy</li>
@@ -101,7 +101,7 @@ export default function SponsorshipPricingPage() {
                 {/* Premium Tier */}
                 <div className={styles.card}>
                     <h2 className={styles.tierName}>Premium Display</h2>
-                    <div className={styles.price}>$599<span>/month</span></div>
+                    <div className={styles.price}>C$599<span>/month</span></div>
                     <ul className={styles.features}>
                         <li><span className={styles.check}>✓</span> <strong>All Growth Features</strong></li>
                         <li><span className={styles.check}>✓</span> Hero Banner (Top of Homepage)</li>
