@@ -4,6 +4,7 @@ import authRoutes from './shared/auth/routes';
 import announcementRoutes from './shared/announcements/routes';
 import predictionRoutes from './shared/predictions/routes';
 import sponsorRoutes from './shared/sponsors/routes';
+import gamificationRoutes from './shared/gamification/routes';
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/rooms/:roomId/announcements', announcementRoutes);
 app.use('/api/rooms/:roomId/predictions', predictionRoutes);
 app.use('/api/rooms/:roomId/sponsors', sponsorRoutes);
+app.use('/api/gamification', gamificationRoutes);
 
 export default app;

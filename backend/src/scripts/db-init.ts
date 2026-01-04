@@ -86,6 +86,31 @@ const initDB = async () => {
                 is_active BOOLEAN DEFAULT TRUE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS user_stats (
+                user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+                total_points INTEGER DEFAULT 0,
+                current_level INTEGER DEFAULT 1,
+                points_to_next_level INTEGER DEFAULT 500,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS badges (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) UNIQUE NOT NULL,
+                icon VARCHAR(255),
+                description TEXT,
+                requirement_type VARCHAR(50),
+                requirement_value INTEGER,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS user_badges (
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                badge_id INTEGER REFERENCES badges(id) ON DELETE CASCADE,
+                earned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, badge_id)
+            );
         `;
         await client.query(schema);
         console.log('✅ Schema applied successfully.');
@@ -124,6 +149,24 @@ const initDB = async () => {
             VALUES ('soccer', 'live', 'Welcome to Phase 3!', 'Real-time announcements are now live. Check out the Admin Panel to post your own!', false, CURRENT_TIMESTAMP)
             ON CONFLICT DO NOTHING;
         `);
+
+        // Seed Initial Badges
+        console.log('🏅 Seeding initial badges...');
+        const initialBadges = [
+            { name: 'Early Bird', icon: '🐦', description: 'Be part of the first predictions!', req_type: 'submissions', req_val: 1 },
+            { name: 'Winner Circle', icon: '🏆', description: 'Get your first prediction correct!', req_type: 'wins', req_val: 1 },
+            { name: 'The Forecaster', icon: '🔮', description: 'Submit 10 predictions.', req_type: 'submissions', req_val: 10 },
+            { name: 'Oracle', icon: '👁️', description: 'Get 5 predictions correct.', req_type: 'wins', req_val: 5 },
+            { name: 'Social Butterfly', icon: '🦋', description: 'Join 3 different rooms.', req_type: 'rooms_joined', req_val: 3 },
+        ];
+
+        for (const badge of initialBadges) {
+            await client.query(`
+                INSERT INTO badges (name, icon, description, requirement_type, requirement_value)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT (name) DO NOTHING;
+            `, [badge.name, badge.icon, badge.description, badge.req_type, badge.req_val]);
+        }
 
         console.log('✅ Database initialization completed successfully.');
     } catch (err) {

@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { query } from '../database';
 import { AuthRequest } from '../auth/middleware';
 import { socketService } from '../socket/SocketService';
+import { gamificationService } from '../gamification/GamificationService';
 
 export const getPredictions = async (req: AuthRequest, res: Response) => {
     const { roomId } = req.params;
@@ -76,6 +77,11 @@ export const submitPrediction = async (req: AuthRequest, res: Response) => {
             [id, userId, option]
         );
 
+        // Award engagement points
+        if (userId) {
+            await gamificationService.awardPoints(userId, 10);
+        }
+
         res.json({ success: true, message: 'Prediction submitted' });
     } catch (err) {
         console.error('Error submitting prediction:', err);
@@ -106,6 +112,16 @@ export const revealAnswer = async (req: AuthRequest, res: Response) => {
              WHERE prediction_id = $2`,
             [correctAnswer, id]
         );
+
+        // Award points to winners
+        const winnersResult = await query(
+            'SELECT user_id FROM prediction_submissions WHERE prediction_id = $1 AND is_correct = true',
+            [id]
+        );
+
+        for (const row of winnersResult.rows) {
+            await gamificationService.awardPoints(row.user_id, 100);
+        }
 
         // Fetch roomId to emit event
         const roomInfo = await query('SELECT room_id FROM custom_predictions WHERE id = $1', [id]);

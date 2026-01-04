@@ -11,6 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { LoginModal } from '../../components/LoginModal';
 import { SocketProvider, useSocket } from '../../context/SocketContext';
 import { useEffect } from 'react';
+import UserTray from '../../components/UserTray';
+import Leaderboard from '../../components/Leaderboard';
 
 function RoomContent() {
     const params = useParams();
@@ -87,7 +89,7 @@ function RoomContent() {
                 <div className={styles.userSection}>
                     {isAuthenticated ? (
                         <>
-                            <span className={styles.userEmail}>{user?.email}</span>
+                            <UserTray />
                             <button onClick={logout} className={styles.authBtn}>Logout</button>
                         </>
                     ) : (
@@ -116,8 +118,7 @@ function RoomContent() {
                     <MatchList />
                 </div>
                 <div className={styles.card}>
-                    <h2 style={{ marginBottom: '1rem', fontWeight: 800 }}>Leaderboard</h2>
-                    <p style={{ color: '#888' }}>Rankings coming soon. Compete for the top spot!</p>
+                    <Leaderboard />
                 </div>
             </div>
 

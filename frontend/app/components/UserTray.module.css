@@ -1,0 +1,148 @@
+.container {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    min-width: 140px;
+}
+
+.container:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.minimal {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.levelBadge {
+    background: #0070f3;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 0 10px rgba(0, 112, 243, 0.3);
+}
+
+.progressContainer {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 40px;
+}
+
+.progressBar {
+    height: 100%;
+    background: linear-gradient(90deg, #0070f3, #00ff88);
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.points {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.pointsNum {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.pointsLabel {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #888;
+}
+
+.drawer {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    animation: slideDown 0.3s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.drawerTitle {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #666;
+    margin-bottom: 0.75rem;
+    font-weight: 800;
+}
+
+.badgeGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.badgeItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 6px;
+    width: 50px;
+    transition: transform 0.2s;
+}
+
+.badgeItem:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.badgeIcon {
+    font-size: 1.25rem;
+}
+
+.badgeName {
+    font-size: 0.5rem;
+    text-align: center;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    font-weight: 700;
+}
+
+.emptyMsg {
+    font-size: 0.7rem;
+    color: #555;
+    font-style: italic;
+    padding: 0.5rem 0;
+}
+
+@media (max-width: 480px) {
+    .container {
+        min-width: 120px;
+    }
+}
