@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './shared/auth/routes';
+import announcementRoutes from './shared/announcements/routes';
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.get('/health', (req, res) => {
 
 // Auth Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/rooms/:roomId/announcements', announcementRoutes);
 
 export default app;

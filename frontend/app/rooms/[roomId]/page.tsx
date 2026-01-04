@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import styles from './page.module.css';
 import MatchList from '../../components/MatchList';
+import AnnouncementsSection from '../../components/AnnouncementsSection';
 import { useAuth } from '../../context/AuthContext';
 import { LoginModal } from '../../components/LoginModal';
 
@@ -31,6 +32,7 @@ export default function RoomPage() {
 
             <div className={styles.grid}>
                 <div className={styles.card}>
+                    <AnnouncementsSection roomId={roomId} />
                     <MatchList />
                 </div>
                 <div className={styles.card}>

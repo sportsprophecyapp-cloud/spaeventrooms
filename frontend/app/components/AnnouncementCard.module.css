@@ -1,0 +1,65 @@
+.card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.typeHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.typeName {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    color: #fff;
+}
+
+.description {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+.timeTag {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #fff;
+}
+
+/* Specific Styles */
+.live {
+    border-left: 4px solid #ff4b4b;
+    background: linear-gradient(90deg, rgba(255, 75, 75, 0.1) 0%, transparent 100%);
+}
+
+.scheduled {
+    border-left: 4px solid #4bb8ff;
+}
+
+.sponsor {
+    border-left: 4px solid #ffd700;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.05) 0%, transparent 100%);
+}
