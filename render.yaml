@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sp-backend
+    name: spa-backend
     env: node
     plan: free
     buildCommand: cd backend && npm install && npm run build
@@ -21,7 +21,7 @@ services:
         value: 22
 
   - type: web
-    name: sp-frontend
+    name: spa-frontend
     env: node
     plan: free
     buildCommand: cd frontend && npm install && npm run build
@@ -29,7 +29,7 @@ services:
     branch: main
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: https://sp-backend.onrender.com
+        value: https://spa-backend.onrender.com
       - key: NODE_VERSION
         value: 22
 
