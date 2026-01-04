@@ -13,29 +13,41 @@ interface Match {
 
 interface MatchCardProps {
     match: Match;
+    onPredict: (match: Match) => void;
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
+const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
     return (
         <div className={styles.card}>
-            <div className={styles.teams}>
-                <span className={styles.team}>{match.home_team}</span>
-                <span className={styles.vs}>VS</span>
-                <span className={styles.team}>{match.away_team}</span>
-            </div>
-            <div className={styles.info}>
-                <span className={styles.status}>{match.status}</span>
-                {match.status !== 'scheduled' && (
-                    <span className={styles.score}>
-                        {match.score_home} - {match.score_away}
+            <div className={styles.teamsSection}>
+                <div className={styles.teams}>
+                    <span className={styles.team}>{match.home_team}</span>
+                    <span className={styles.vs}>VS</span>
+                    <span className={styles.team}>{match.away_team}</span>
+                </div>
+                <div className={styles.info}>
+                    <span className={styles.status}>{match.status}</span>
+                    <span className={styles.time}>
+                        {new Date(match.start_time).toLocaleString()}
                     </span>
+                </div>
+            </div>
+
+            <div className={styles.actions}>
+                {match.status === 'scheduled' && (
+                    <button onClick={() => onPredict(match)} className={styles.predictBtn}>
+                        Predict
+                    </button>
                 )}
-                <span className={styles.time}>
-                    {new Date(match.start_time).toLocaleString()}
-                </span>
+                {match.status !== 'scheduled' && (
+                    <div className={styles.score}>
+                        {match.score_home} - {match.score_away}
+                    </div>
+                )}
             </div>
         </div>
     );
 };
+
 
 export default MatchCard;

@@ -1,0 +1,97 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #111;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    border: 1px solid #333;
+    color: white;
+}
+
+.modal h3 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.4rem;
+}
+
+.options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.option {
+    padding: 1.2rem;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.option:hover {
+    background: #333;
+    border-color: #666;
+}
+
+.option.active {
+    background: #0070f3;
+    border-color: #0070f3;
+    box-shadow: 0 0 15px rgba(0, 112, 243, 0.4);
+}
+
+.error {
+    color: #ff4d4d;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.cancelBtn {
+    flex: 1;
+    padding: 0.8rem;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.submitBtn {
+    flex: 2;
+    padding: 0.8rem;
+    background: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.submitBtn:disabled {
+    background: #004085;
+    cursor: not-allowed;
+    opacity: 0.7;
+}

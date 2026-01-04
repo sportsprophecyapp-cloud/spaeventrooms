@@ -1,6 +1,7 @@
 import { BaseRoom } from '../roomFactory';
 import { Server } from 'socket.io';
 import { query } from '../../shared/database';
+import { authenticate, AuthRequest } from '../../shared/auth/middleware';
 
 export class SoccerRoom extends BaseRoom {
     constructor() {
@@ -21,9 +22,27 @@ export class SoccerRoom extends BaseRoom {
             }
         });
 
-        this.router.post('/predictions', async (req, res) => {
-            // TODO: Implement prediction submission with auth
-            res.json({ message: 'Submit prediction endpoint (Pending Auth)' });
+        this.router.post('/predictions', authenticate, async (req: AuthRequest, res) => {
+            const { matchId, pick } = req.body;
+            const userId = req.user.id;
+
+            if (!matchId || !pick) {
+                return res.status(400).json({ message: 'matchId and pick are required' });
+            }
+
+            try {
+                await query(`
+                    INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT (user_id, match_id) 
+                    DO UPDATE SET prediction_data = EXCLUDED.prediction_data, created_at = CURRENT_TIMESTAMP
+                `, [userId, matchId, JSON.stringify({ pick })]);
+
+                res.json({ success: true, message: 'Prediction saved' });
+            } catch (err) {
+                console.error('Error saving prediction:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
         });
     }
 

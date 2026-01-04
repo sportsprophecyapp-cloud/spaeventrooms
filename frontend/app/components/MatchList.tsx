@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MatchCard from './MatchCard';
+import { PredictionModal } from './PredictionModal';
 
 interface Match {
     match_id: string;
@@ -14,10 +15,10 @@ interface Match {
 const MatchList: React.FC = () => {
     const [matches, setMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        // Fetch matches from backend
-        // Note: Using localhost for dev, should be env var
         fetch('http://localhost:8000/api/rooms/soccer/matches')
             .then(res => res.json())
             .then(data => {
@@ -30,6 +31,11 @@ const MatchList: React.FC = () => {
             });
     }, []);
 
+    const handlePredictClick = (match: Match) => {
+        setSelectedMatch(match);
+        setIsModalOpen(true);
+    };
+
     if (loading) return <div>Loading matches...</div>;
 
     return (
@@ -39,8 +45,24 @@ const MatchList: React.FC = () => {
                 <p>No matches scheduled.</p>
             ) : (
                 matches.map(match => (
-                    <MatchCard key={match.match_id} match={match} />
+                    <MatchCard
+                        key={match.match_id}
+                        match={match}
+                        onPredict={handlePredictClick}
+                    />
                 ))
+            )}
+
+            {selectedMatch && (
+                <PredictionModal
+                    match={selectedMatch}
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSuccess={() => {
+                        // Optional: Refresh matches or show success toast
+                        console.log('Prediction success!');
+                    }}
+                />
             )}
         </div>
     );
