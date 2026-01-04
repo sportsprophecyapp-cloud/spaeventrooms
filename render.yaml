@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && node dist/scripts/migrate.js && node dist/scripts/seed.js && node dist/index.js
+    startCommand: cd backend && node dist/scripts/db-init.js && node dist/index.js
     branch: main
     envVars:
       - key: DATABASE_URL
