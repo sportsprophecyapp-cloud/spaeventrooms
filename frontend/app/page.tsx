@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
+import { APP_VERSION } from './version';
 
 const HomePage = () => {
   const rooms = [
@@ -65,7 +66,7 @@ const HomePage = () => {
       </main>
 
       <footer className={styles.footer}>
-        <p>&copy; 2026 Sports Prophecy Platform. All rights reserved.</p>
+        <p>&copy; 2026 Sports Prophecy Platform. All rights reserved. <span style={{ opacity: 0.5, fontSize: '0.8em', marginLeft: '10px' }}>v{APP_VERSION}</span></p>
       </footer>
     </div>
   );
