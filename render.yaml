@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: sportsprophecy-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    branch: main
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sportsprophecy-db
+          property: connectionString
+      - key: REDIS_URL
+        value: rediss://default:AUrLAAIncDJlYjkyNGE2YTFmOWY0OWQ5YjZjYWE2MWU0ZTA2NzAwN3AyMTkxNDc@helpful-basilisk-19147.upstash.io:6379
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+
+databases:
+  - name: sportsprophecy-db
+    plan: free
+    databaseName: sportsprophecy
+    user: sportsprophecy
+
+# Redis service (Render requires paid plan for Redis usually, or external provider)
+# This is a placeholder as Render YAML support for Redis varies by plan level
+# For free tier, might need external Redis or internal docker service

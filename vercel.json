@@ -1,38 +1,15 @@
 {
-    "buildCommand": "npx expo export -p web",
-    "outputDirectory": "dist",
-    "devCommand": "npx expo start --web",
-    "rewrites": [
+    "version": 2,
+    "builds": [
         {
-            "source": "/privacy",
-            "destination": "https://api.sportsprophecyapp.com/privacy"
-        },
-        {
-            "source": "/terms",
-            "destination": "https://api.sportsprophecyapp.com/terms"
-        },
-        {
-            "source": "/download",
-            "destination": "https://api.sportsprophecyapp.com/download"
-        },
-        {
-            "source": "/api/:path*",
-            "destination": "https://api.sportsprophecyapp.com/api/:path*"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "frontend/package.json",
+            "use": "@vercel/next"
         }
     ],
-    "headers": [
+    "routes": [
         {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "Cross-Origin-Opener-Policy",
-                    "value": "same-origin-allow-popups"
-                }
-            ]
+            "src": "/(.*)",
+            "dest": "/frontend/$1"
         }
     ]
 }
