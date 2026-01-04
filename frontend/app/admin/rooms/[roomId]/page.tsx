@@ -19,7 +19,13 @@ const AdminRoomPage = () => {
         setMessage('');
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
+
+        if (!token) {
+            setMessage('Error: You must be logged in to post announcements.');
+            setLoading(false);
+            return;
+        }
 
         try {
             const res = await fetch(`${apiUrl}/api/rooms/${roomId}/announcements`, {
