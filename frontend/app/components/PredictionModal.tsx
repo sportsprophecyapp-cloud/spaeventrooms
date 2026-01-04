@@ -36,7 +36,7 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
         try {
-            const res = await fetch(`${apiUrl}/api/rooms/soccer/predictions`, {
+            const res = await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -32,7 +32,7 @@ const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
         fetchSponsors();
     }, [roomId, apiUrl]);
 
-    if (sponsors.length === 0) return null;
+    if (!Array.isArray(sponsors) || sponsors.length === 0) return null;
 
     return (
         <div className={styles.container}>

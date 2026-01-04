@@ -4,6 +4,35 @@ import { AuthRequest } from '../auth/middleware';
 import { socketService } from '../socket/SocketService';
 import { gamificationService } from '../gamification/GamificationService';
 
+export const submitMatchPrediction = async (req: AuthRequest, res: Response) => {
+    const { matchId, pick } = req.body;
+    const userId = req.user?.id;
+
+    if (!matchId || !pick) {
+        return res.status(400).json({ message: 'Match ID and pick are required' });
+    }
+
+    try {
+        await query(
+            `INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (user_id, match_id) 
+             DO UPDATE SET prediction_data = EXCLUDED.prediction_data`,
+            [userId, matchId, { pick }]
+        );
+
+        // Award points for participation
+        if (userId) {
+            await gamificationService.awardPoints(userId, 10);
+        }
+
+        res.status(201).json({ success: true, message: 'Match prediction submitted' });
+    } catch (err) {
+        console.error('Error submitting match prediction:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 export const getPredictions = async (req: AuthRequest, res: Response) => {
     const { roomId } = req.params;
 

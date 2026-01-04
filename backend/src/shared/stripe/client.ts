@@ -6,9 +6,21 @@ if (!stripeSecretKey) {
     console.warn('⚠️  STRIPE_SECRET_KEY not set. Stripe integration will not work.');
 }
 
-export const stripe = new Stripe(stripeSecretKey, {
-    apiVersion: '2025-12-15.clover',
-});
+export const stripe = stripeSecretKey
+    ? new Stripe(stripeSecretKey, { apiVersion: '2025-12-15.clover' })
+    : {
+        checkout: {
+            sessions: {
+                create: async () => {
+                    console.warn('⚠️ Stripe is mocked. Using dummy checkout session.');
+                    return { url: 'http://localhost:3000/admin/sponsors/success?session_id=mock_session_123' };
+                }
+            }
+        },
+        webhooks: {
+            constructEvent: () => ({ type: 'mock_event', data: {} })
+        }
+    } as any;
 
 // Pricing tier configuration
 export const SPONSOR_TIERS = {
