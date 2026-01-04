@@ -44,6 +44,39 @@ export class SoccerRoom extends BaseRoom {
                 res.status(500).json({ error: 'Internal Server Error' });
             }
         });
+
+        this.router.patch('/matches/:matchId', authenticate, async (req: AuthRequest, res) => {
+            const { matchId } = req.params;
+            const { score_home, score_away, status } = req.body;
+
+            try {
+                const result = await query(`
+                    UPDATE soccer_matches 
+                    SET score_home = COALESCE($1, score_home),
+                        score_away = COALESCE($2, score_away),
+                        status = COALESCE($3, status),
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE match_id = $4
+                    RETURNING *
+                `, [score_home, score_away, status, matchId]);
+
+                if (result.rows.length === 0) {
+                    return res.status(404).json({ message: 'Match not found' });
+                }
+
+                const updatedMatch = result.rows[0];
+
+                // Emit socket event
+                if (this.ioNamespace) {
+                    this.ioNamespace.emit('match_update', updatedMatch);
+                }
+
+                res.json(updatedMatch);
+            } catch (err) {
+                console.error('Error updating match:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
     }
 
     initSocket(io: Server): void {

@@ -11,6 +11,7 @@ interface Match {
     status: string;
     score_home?: number;
     score_away?: number;
+    isPulsing?: boolean;
 }
 
 interface MatchCardProps {
@@ -20,7 +21,7 @@ interface MatchCardProps {
 
 const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
     return (
-        <div className={styles.card}>
+        <div className={`${styles.card} ${match.isPulsing ? styles.pulsar : ''}`}>
             <div className={styles.teamsSection}>
                 <div className={styles.teams}>
                     <span className={styles.team}>{match.home_team}</span>

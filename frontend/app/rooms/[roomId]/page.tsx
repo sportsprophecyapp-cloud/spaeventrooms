@@ -9,12 +9,14 @@ import CustomPollCard from '../../components/CustomPollCard';
 import SponsorWidget from '../../components/SponsorWidget';
 import { useAuth } from '../../context/AuthContext';
 import { LoginModal } from '../../components/LoginModal';
+import { SocketProvider, useSocket } from '../../context/SocketContext';
 import { useEffect } from 'react';
 
-export default function RoomPage() {
+function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
     const { user, logout, isAuthenticated } = useAuth();
+    const { socket } = useSocket();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [predictions, setPredictions] = useState<any[]>([]);
 
@@ -32,9 +34,28 @@ export default function RoomPage() {
 
     useEffect(() => {
         fetchPredictions();
-        const interval = setInterval(fetchPredictions, 30000); // Polling as fallback for socket
-        return () => clearInterval(interval);
     }, [roomId]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('prediction_new', (newPrediction: any) => {
+            console.log('Real-time prediction received:', newPrediction);
+            setPredictions(prev => [newPrediction, ...prev]);
+        });
+
+        socket.on('prediction_revealed', (data: { id: number, correctAnswer: string }) => {
+            console.log('Prediction revealed received:', data);
+            setPredictions(prev => prev.map(p =>
+                p.id === data.id ? { ...p, correct_answer: data.correctAnswer, revealed_at: new Date().toISOString() } : p
+            ));
+        });
+
+        return () => {
+            socket.off('prediction_new');
+            socket.off('prediction_revealed');
+        };
+    }, [socket]);
 
     const handleVote = async (predictionId: number, option: string) => {
         if (!isAuthenticated) {
@@ -102,5 +123,16 @@ export default function RoomPage() {
 
             <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
         </div>
+    );
+}
+
+export default function RoomPage() {
+    const params = useParams();
+    const roomId = params.roomId as string;
+
+    return (
+        <SocketProvider roomId={roomId}>
+            <RoomContent />
+        </SocketProvider>
     );
 }

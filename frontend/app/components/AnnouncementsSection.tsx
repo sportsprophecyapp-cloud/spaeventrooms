@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import AnnouncementCard from './AnnouncementCard';
 import styles from './AnnouncementsSection.module.css';
+import { useSocket } from '../context/SocketContext';
 
 interface Announcement {
     id: number;
@@ -20,6 +21,7 @@ interface Props {
 const AnnouncementsSection: React.FC<Props> = ({ roomId }) => {
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(true);
+    const { socket } = useSocket();
 
     useEffect(() => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -34,6 +36,19 @@ const AnnouncementsSection: React.FC<Props> = ({ roomId }) => {
                 setLoading(false);
             });
     }, [roomId]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('announcement_new', (newAnnouncement: Announcement) => {
+            console.log('Real-time announcement received:', newAnnouncement);
+            setAnnouncements(prev => [newAnnouncement, ...prev]);
+        });
+
+        return () => {
+            socket.off('announcement_new');
+        };
+    }, [socket]);
 
     if (loading) return <div className={styles.loading}>Loading announcements...</div>;
 

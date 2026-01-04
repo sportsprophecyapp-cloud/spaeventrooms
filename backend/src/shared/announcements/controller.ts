@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { query } from '../database';
 import { AuthRequest } from '../auth/middleware';
+import { socketService } from '../socket/SocketService';
 
 export const getAnnouncements = async (req: AuthRequest, res: Response) => {
     const { roomId } = req.params;
@@ -34,9 +35,10 @@ export const createAnnouncement = async (req: AuthRequest, res: Response) => {
             [roomId, type || 'general', title, description, scheduled_for, userId]
         );
 
-        // TODO: Emit socket event for real-time update
+        const announcement = result.rows[0];
+        socketService.emitToRoom(roomId, 'announcement_new', announcement);
 
-        res.status(201).json(result.rows[0]);
+        res.status(201).json(announcement);
     } catch (err) {
         console.error('Error creating announcement:', err);
         res.status(500).json({ error: 'Internal Server Error' });

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import MatchCard from './MatchCard';
 import { PredictionModal } from './PredictionModal';
+import { useSocket } from '../context/SocketContext';
 
 interface Match {
     match_id: string;
@@ -12,6 +13,7 @@ interface Match {
     status: string;
     score_home?: number;
     score_away?: number;
+    isPulsing?: boolean;
 }
 
 const MatchList: React.FC = () => {
@@ -19,6 +21,7 @@ const MatchList: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { socket } = useSocket();
 
     useEffect(() => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -33,6 +36,28 @@ const MatchList: React.FC = () => {
                 setLoading(false);
             });
     }, []);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('match_update', (updatedMatch: Match) => {
+            console.log('Real-time match update received:', updatedMatch);
+            setMatches(prev => prev.map(m =>
+                m.match_id === updatedMatch.match_id ? { ...m, ...updatedMatch, isPulsing: true } : m
+            ));
+
+            // Remove pulsing after 3 seconds
+            setTimeout(() => {
+                setMatches(prev => prev.map(m =>
+                    m.match_id === updatedMatch.match_id ? { ...m, isPulsing: false } : m
+                ));
+            }, 3000);
+        });
+
+        return () => {
+            socket.off('match_update');
+        };
+    }, [socket]);
 
     const handlePredictClick = (match: Match) => {
         setSelectedMatch(match);

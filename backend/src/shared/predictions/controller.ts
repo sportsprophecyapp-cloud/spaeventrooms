@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { query } from '../database';
 import { AuthRequest } from '../auth/middleware';
+import { socketService } from '../socket/SocketService';
 
 export const getPredictions = async (req: AuthRequest, res: Response) => {
     const { roomId } = req.params;
@@ -38,7 +39,10 @@ export const createPrediction = async (req: AuthRequest, res: Response) => {
             [roomId, question, JSON.stringify(options), closesAt, userId]
         );
 
-        res.status(201).json(result.rows[0]);
+        const prediction = result.rows[0];
+        socketService.emitToRoom(roomId, 'prediction_new', prediction);
+
+        res.status(201).json(prediction);
     } catch (err) {
         console.error('Error creating prediction:', err);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -102,6 +106,15 @@ export const revealAnswer = async (req: AuthRequest, res: Response) => {
              WHERE prediction_id = $2`,
             [correctAnswer, id]
         );
+
+        // Fetch roomId to emit event
+        const roomInfo = await query('SELECT room_id FROM custom_predictions WHERE id = $1', [id]);
+        if (roomInfo.rows.length > 0) {
+            socketService.emitToRoom(roomInfo.rows[0].room_id, 'prediction_revealed', {
+                id: parseInt(id),
+                correctAnswer
+            });
+        }
 
         res.json({ success: true, message: 'Answer revealed and scored' });
     } catch (err) {

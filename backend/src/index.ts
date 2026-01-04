@@ -2,6 +2,7 @@ import http from 'http';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
 import app from './app';
+import { socketService } from './shared/socket/SocketService';
 // import { initializeSocket } from './rooms/socket'; // To be implemented
 
 dotenv.config();
@@ -16,6 +17,8 @@ const io = new Server(server, {
         methods: ['GET', 'POST']
     }
 });
+
+socketService.init(io);
 
 import { roomRegistry } from './rooms/registry';
 import { connectRedis } from './shared/database/redis';
