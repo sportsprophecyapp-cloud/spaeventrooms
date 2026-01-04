@@ -119,6 +119,28 @@ const initDB = async () => {
                 content TEXT NOT NULL,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS sponsor_subscriptions (
+                id SERIAL PRIMARY KEY,
+                sponsor_id INTEGER REFERENCES room_sponsors(id) ON DELETE CASCADE,
+                tier VARCHAR(50) NOT NULL,
+                stripe_subscription_id VARCHAR(255),
+                stripe_customer_id VARCHAR(255),
+                status VARCHAR(50) DEFAULT 'active',
+                started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                expires_at TIMESTAMP WITH TIME ZONE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS sponsor_placements (
+                id SERIAL PRIMARY KEY,
+                sponsor_id INTEGER REFERENCES room_sponsors(id) ON DELETE CASCADE,
+                placement_type VARCHAR(50) NOT NULL,
+                page VARCHAR(100) NOT NULL,
+                position INTEGER DEFAULT 0,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
         console.log('✅ Schema applied successfully.');
