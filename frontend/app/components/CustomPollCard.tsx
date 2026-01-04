@@ -1,7 +1,6 @@
-'use client';
-
 import React, { useState } from 'react';
 import styles from './CustomPollCard.module.css';
+import CommentSection from './CommentSection';
 
 interface CustomPollCardProps {
     prediction: {
@@ -11,10 +10,11 @@ interface CustomPollCardProps {
         correct_answer: string | null;
         closes_at: string | null;
     };
+    roomId: string;
     onVote: (option: string) => void;
 }
 
-const CustomPollCard = ({ prediction, onVote }: CustomPollCardProps) => {
+const CustomPollCard = ({ prediction, roomId, onVote }: CustomPollCardProps) => {
     const [selected, setSelected] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -68,6 +68,8 @@ const CustomPollCard = ({ prediction, onVote }: CustomPollCardProps) => {
                     {selected === prediction.correct_answer ? 'Correct! +100 Points' : 'Better luck next time!'}
                 </div>
             )}
+
+            <CommentSection predictionId={prediction.id} roomId={roomId} />
         </div>
     );
 };

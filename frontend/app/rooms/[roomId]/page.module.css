@@ -54,6 +54,26 @@
     transform: scale(0.95);
 }
 
+.shareBtn {
+    padding: 0.5rem 1rem;
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.shareBtn:hover {
+    background: rgba(0, 255, 136, 0.2);
+}
+
+.shareBtn:active {
+    transform: scale(0.95);
+}
+
 .grid {
     display: flex;
     flex-direction: column;

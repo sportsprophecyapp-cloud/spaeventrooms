@@ -89,6 +89,17 @@ function RoomContent() {
                 <div className={styles.userSection}>
                     {isAuthenticated ? (
                         <>
+                            <button
+                                onClick={() => {
+                                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+                                    const url = `${window.location.origin}/rooms/${roomId}`;
+                                    navigator.clipboard.writeText(url);
+                                    alert('Room link copied! Share it with friends.');
+                                }}
+                                className={styles.shareBtn}
+                            >
+                                📤 Share
+                            </button>
                             <UserTray />
                             <button onClick={logout} className={styles.authBtn}>Logout</button>
                         </>
@@ -109,6 +120,7 @@ function RoomContent() {
                                 <CustomPollCard
                                     key={p.id}
                                     prediction={p}
+                                    roomId={roomId}
                                     onVote={(opt) => handleVote(p.id, opt)}
                                 />
                             ))}

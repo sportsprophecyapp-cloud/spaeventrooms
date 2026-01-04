@@ -111,6 +111,14 @@ const initDB = async () => {
                 earned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, badge_id)
             );
+
+            CREATE TABLE IF NOT EXISTS prediction_comments (
+                id SERIAL PRIMARY KEY,
+                prediction_id INTEGER REFERENCES custom_predictions(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                content TEXT NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
         console.log('✅ Schema applied successfully.');
