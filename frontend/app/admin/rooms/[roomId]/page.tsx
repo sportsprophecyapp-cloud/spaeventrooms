@@ -7,7 +7,7 @@ import styles from './page.module.css';
 const AdminRoomPage = () => {
     const params = useParams();
     const roomId = params.roomId as string;
-    const [activeTab, setActiveTab] = useState<'announcements' | 'predictions'>('announcements');
+    const [activeTab, setActiveTab] = useState<'announcements' | 'predictions' | 'sponsors'>('announcements');
 
     // Announcement State
     const [title, setTitle] = useState('');
@@ -23,8 +23,14 @@ const AdminRoomPage = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const [apiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000');
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+
+    // Sponsor State
+    const [sponsorName, setSponsorName] = useState('');
+    const [logoUrl, setLogoUrl] = useState('');
+    const [linkUrl, setLinkUrl] = useState('');
+    const [sponsors, setSponsors] = useState<any[]>([]);
 
     const fetchPredictions = async () => {
         try {
@@ -33,6 +39,16 @@ const AdminRoomPage = () => {
             setPredictions(data);
         } catch (err) {
             console.error('Error fetching predictions:', err);
+        }
+    };
+
+    const fetchSponsors = async () => {
+        try {
+            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/sponsors`);
+            const data = await res.json();
+            setSponsors(data);
+        } catch (err) {
+            console.error('Error fetching sponsors:', err);
         }
     };
 
@@ -120,6 +136,51 @@ const AdminRoomPage = () => {
         }
     };
 
+    const handleSponsorSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
+
+        try {
+            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/sponsors`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: sponsorName, logo_url: logoUrl, link_url: linkUrl })
+            });
+
+            if (!res.ok) throw new Error('Failed to add sponsor');
+
+            setMessage('Sponsor added successfully!');
+            setSponsorName('');
+            setLogoUrl('');
+            setLinkUrl('');
+            fetchSponsors();
+        } catch (err: any) {
+            setMessage(`Error: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSponsorDelete = async (id: number) => {
+        try {
+            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/sponsors/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) throw new Error('Failed to delete sponsor');
+            fetchSponsors();
+        } catch (err: any) {
+            alert(`Error: ${err.message}`);
+        }
+    };
+
     return (
         <div className={styles.container}>
             <header className={styles.header}>
@@ -139,6 +200,15 @@ const AdminRoomPage = () => {
                         }}
                     >
                         Predictions
+                    </button>
+                    <button
+                        className={activeTab === 'sponsors' ? styles.activeTab : ''}
+                        onClick={() => {
+                            setActiveTab('sponsors');
+                            fetchSponsors();
+                        }}
+                    >
+                        Sponsors
                     </button>
                 </div>
             </header>
@@ -184,7 +254,7 @@ const AdminRoomPage = () => {
                             {message && <p className={styles.feedback}>{message}</p>}
                         </form>
                     </section>
-                ) : (
+                ) : activeTab === 'predictions' ? (
                     <div className={styles.predictionsLayout}>
                         <section className={styles.editor}>
                             <h2>Create New Prediction</h2>
@@ -263,6 +333,68 @@ const AdminRoomPage = () => {
                                             ))}
                                         </div>
                                     </div>
+                                </div>
+                            ))}
+                        </section>
+                    </div>
+                ) : (
+                    <div className={styles.predictionsLayout}>
+                        <section className={styles.editor}>
+                            <h2>Add New Sponsor</h2>
+                            <form onSubmit={handleSponsorSubmit} className={styles.form}>
+                                <div className={styles.inputGroup}>
+                                    <label>Sponsor Name</label>
+                                    <input
+                                        type="text"
+                                        value={sponsorName}
+                                        onChange={e => setSponsorName(e.target.value)}
+                                        required
+                                        placeholder="e.g. Nike"
+                                    />
+                                </div>
+
+                                <div className={styles.inputGroup}>
+                                    <label>Logo URL (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={logoUrl}
+                                        onChange={e => setLogoUrl(e.target.value)}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+
+                                <div className={styles.inputGroup}>
+                                    <label>Link URL (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={linkUrl}
+                                        onChange={e => setLinkUrl(e.target.value)}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+
+                                <button type="submit" className={styles.submitBtn} disabled={loading}>
+                                    {loading ? 'Adding...' : 'Add Sponsor'}
+                                </button>
+                                {message && <p className={styles.feedback}>{message}</p>}
+                            </form>
+                        </section>
+
+                        <section className={styles.predictionsList}>
+                            <h2>Current Sponsors</h2>
+                            {sponsors.length === 0 && <p style={{ color: 'rgba(255,255,255,0.4)' }}>No sponsors active.</p>}
+                            {sponsors.map((s: any) => (
+                                <div key={s.id} className={styles.predictionCard}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <h4>{s.name}</h4>
+                                        <button
+                                            onClick={() => handleSponsorDelete(s.id)}
+                                            style={{ background: 'rgba(239,68,68,0.2)', color: '#ef4444', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                    {s.logo_url && <img src={s.logo_url} alt={s.name} style={{ maxHeight: '30px', marginTop: '0.5rem', opacity: 0.6 }} />}
                                 </div>
                             ))}
                         </section>

@@ -54,6 +54,38 @@ const initDB = async () => {
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 created_by INTEGER
             );
+
+            CREATE TABLE IF NOT EXISTS custom_predictions (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) REFERENCES rooms(room_id),
+                question TEXT NOT NULL,
+                options JSONB NOT NULL,
+                correct_answer VARCHAR(255),
+                closes_at TIMESTAMP WITH TIME ZONE,
+                revealed_at TIMESTAMP WITH TIME ZONE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER
+            );
+
+            CREATE TABLE IF NOT EXISTS prediction_submissions (
+                id SERIAL PRIMARY KEY,
+                prediction_id INTEGER REFERENCES custom_predictions(id),
+                user_id INTEGER REFERENCES users(id),
+                selected_option VARCHAR(255) NOT NULL,
+                is_correct BOOLEAN,
+                submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(prediction_id, user_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS room_sponsors (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) REFERENCES rooms(room_id),
+                name VARCHAR(100) NOT NULL,
+                logo_url TEXT,
+                link_url TEXT,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
         console.log('✅ Schema applied successfully.');

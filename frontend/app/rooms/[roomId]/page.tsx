@@ -6,6 +6,7 @@ import styles from './page.module.css';
 import MatchList from '../../components/MatchList';
 import AnnouncementsSection from '../../components/AnnouncementsSection';
 import CustomPollCard from '../../components/CustomPollCard';
+import SponsorWidget from '../../components/SponsorWidget';
 import { useAuth } from '../../context/AuthContext';
 import { LoginModal } from '../../components/LoginModal';
 import { useEffect } from 'react';
@@ -76,6 +77,7 @@ export default function RoomPage() {
 
             <div className={styles.grid}>
                 <div className={styles.card}>
+                    <SponsorWidget roomId={roomId} />
                     <AnnouncementsSection roomId={roomId} />
 
                     {predictions.length > 0 && (

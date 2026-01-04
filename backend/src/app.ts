@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRoutes from './shared/auth/routes';
 import announcementRoutes from './shared/announcements/routes';
 import predictionRoutes from './shared/predictions/routes';
+import sponsorRoutes from './shared/sponsors/routes';
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms/:roomId/announcements', announcementRoutes);
 app.use('/api/rooms/:roomId/predictions', predictionRoutes);
+app.use('/api/rooms/:roomId/sponsors', sponsorRoutes);
 
 export default app;
