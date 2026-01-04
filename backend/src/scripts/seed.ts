@@ -30,6 +30,13 @@ const seedData = async () => {
             `, [m.id, m.home, m.away, m.time, m.status, m.score_home || 0, m.score_away || 0]);
         }
 
+        // 3. Seed Sample Announcement
+        await client.query(`
+            INSERT INTO announcements (room_id, type, title, description, is_draft, published_at)
+            VALUES ('soccer', 'live', 'Welcome to Phase 3!', 'Real-time announcements are now live. Check out the Admin Panel to post your own!', false, CURRENT_TIMESTAMP)
+            ON CONFLICT DO NOTHING;
+        `);
+
         console.log('Seeding completed successfully.');
     } catch (err) {
         console.error('Seeding failed:', err);

@@ -7,17 +7,59 @@ const runMigrations = async () => {
     try {
         console.log('Running migrations...');
 
-        // Core Schema
-        const coreSchema = fs.readFileSync(path.join(__dirname, '../shared/database/schema.sql'), 'utf8');
-        await client.query(coreSchema);
-        console.log('Core schema applied.');
+        // Core & Phase 3 Schema
+        const schema = `
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
 
-        // Soccer Room Schema (In future, iterate over all rooms)
-        const soccerSchema = fs.readFileSync(path.join(__dirname, '../rooms/soccer/schema.sql'), 'utf8');
-        await client.query(soccerSchema);
-        console.log('Soccer schema applied.');
+            CREATE TABLE IF NOT EXISTS rooms (
+                room_id VARCHAR(50) PRIMARY KEY,
+                display_name VARCHAR(100) NOT NULL,
+                config JSONB DEFAULT '{}',
+                is_active BOOLEAN DEFAULT TRUE
+            );
 
-        console.log('All migrations completed successfully.');
+            CREATE TABLE IF NOT EXISTS soccer_matches (
+                match_id VARCHAR(50) PRIMARY KEY,
+                home_team VARCHAR(100) NOT NULL,
+                away_team VARCHAR(100) NOT NULL,
+                start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+                status VARCHAR(20) DEFAULT 'scheduled',
+                score_home INTEGER DEFAULT 0,
+                score_away INTEGER DEFAULT 0,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS soccer_predictions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                match_id VARCHAR(50) REFERENCES soccer_matches(match_id),
+                prediction_data JSONB NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, match_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS announcements (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) REFERENCES rooms(room_id),
+                type VARCHAR(50), 
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                is_draft BOOLEAN DEFAULT false,
+                scheduled_for TIMESTAMP WITH TIME ZONE,
+                published_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER
+            );
+        `;
+
+        await client.query(schema);
+        console.log('Schema applied successfully.');
+
     } catch (err) {
         console.error('Migration failed:', err);
     } finally {
