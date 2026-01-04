@@ -19,7 +19,8 @@ const MatchList: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/rooms/soccer/matches')
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        fetch(`${apiUrl}/api/rooms/soccer/matches`)
             .then(res => res.json())
             .then(data => {
                 setMatches(data);

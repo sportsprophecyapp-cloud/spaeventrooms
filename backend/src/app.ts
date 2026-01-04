@@ -4,7 +4,17 @@ import authRoutes from './shared/auth/routes';
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://sportsprophecyapp.com',
+    'https://www.sportsprophecyapp.com'
+];
+
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);

@@ -20,6 +20,19 @@ services:
       - key: NODE_VERSION
         value: 22
 
+  - type: web
+    name: sportsprophecy-frontend
+    env: node
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    branch: main
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://sportsprophecy-backend.onrender.com
+      - key: NODE_VERSION
+        value: 22
+
 databases:
   - name: sportsprophecy-db
     plan: free
