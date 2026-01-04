@@ -22,6 +22,7 @@ socketService.init(io);
 
 import { roomRegistry } from './rooms/registry';
 import { connectRedis } from './shared/database/redis';
+import { startKeepAlive } from './shared/cron/keepAlive';
 
 // ... other imports ...
 
@@ -29,6 +30,8 @@ import { connectRedis } from './shared/database/redis';
 
 (async () => {
     await connectRedis();
+
+    startKeepAlive();
 
     roomRegistry.initializeRooms(app, io);
 
