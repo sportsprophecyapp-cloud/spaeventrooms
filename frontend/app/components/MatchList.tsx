@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import MatchCard from './MatchCard';
 import { PredictionModal } from './PredictionModal';
 import { useSocket } from '../context/SocketContext';
+import SkeletonCard from './SkeletonCard';
 
 interface Match {
     match_id: string;
@@ -64,11 +65,19 @@ const MatchList: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    if (loading) return <div>Loading matches...</div>;
+    if (loading) {
+        return (
+            <div>
+                <h2 style={{ marginBottom: '1rem', fontWeight: 800 }}>Upcoming Matches</h2>
+                <SkeletonCard type="match" />
+                <SkeletonCard type="match" />
+            </div>
+        );
+    }
 
     return (
         <div>
-            <h2>Upcoming Matches</h2>
+            <h2 style={{ marginBottom: '1rem', fontWeight: 800 }}>Upcoming Matches</h2>
             {matches.length === 0 ? (
                 <p>No matches scheduled.</p>
             ) : (

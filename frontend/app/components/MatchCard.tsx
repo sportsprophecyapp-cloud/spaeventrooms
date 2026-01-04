@@ -38,7 +38,13 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
 
             <div className={styles.actions}>
                 {match.status === 'scheduled' && (
-                    <button onClick={() => onPredict(match)} className={styles.predictBtn}>
+                    <button
+                        onClick={() => {
+                            if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+                            onPredict(match);
+                        }}
+                        className={styles.predictBtn}
+                    >
                         Predict
                     </button>
                 )}

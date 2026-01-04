@@ -1,7 +1,7 @@
 .container {
     min-height: 100vh;
-    padding: 2rem;
-    background: #050505;
+    padding: 2rem 1rem;
+    background: radial-gradient(circle at top right, #111, #050505);
     color: white;
 }
 
@@ -9,42 +9,91 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 3rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #333;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
 }
 
 .title {
-    font-size: 2.5rem;
-    font-weight: 800;
+    font-size: 1.75rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, #fff, #888);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin: 0;
 }
 
 .userSection {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
+}
+
+.userEmail {
+    display: none;
+    /* Hide on mobile for space */
+    font-size: 0.85rem;
+    color: #888;
 }
 
 .authBtn {
-    padding: 0.6rem 1.2rem;
-    background: #0070f3;
-    color: white;
+    padding: 0.5rem 1rem;
+    background: #fff;
+    color: #000;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: transform 0.1s;
+}
+
+.authBtn:active {
+    transform: scale(0.95);
 }
 
 .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 1.5rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1.25rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.predictionsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+}
+
+/* Tablet + Desktop Refinements */
+@media (min-width: 768px) {
+    .container {
+        padding: 2rem 4rem;
+    }
+
+    .title {
+        font-size: 2.5rem;
+    }
+
+    .userEmail {
+        display: block;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        /* Fixed sidebar for desktop */
+        align-items: flex-start;
+    }
 }

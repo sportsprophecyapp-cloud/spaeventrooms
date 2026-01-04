@@ -27,6 +27,7 @@ const CustomPollCard = ({ prediction, onVote }: CustomPollCardProps) => {
 
     const handleVote = async (opt: string) => {
         if (isClosed || isRevealed || loading) return;
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
         setLoading(true);
         try {
             await onVote(opt);

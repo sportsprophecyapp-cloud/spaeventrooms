@@ -82,12 +82,12 @@ function RoomContent() {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
+            <header className={`${styles.header} animate-fade`}>
                 <h1 className={styles.title}>{roomId.toUpperCase()} Room</h1>
                 <div className={styles.userSection}>
                     {isAuthenticated ? (
                         <>
-                            <span>{user?.email}</span>
+                            <span className={styles.userEmail}>{user?.email}</span>
                             <button onClick={logout} className={styles.authBtn}>Logout</button>
                         </>
                     ) : (
@@ -96,7 +96,7 @@ function RoomContent() {
                 </div>
             </header>
 
-            <div className={styles.grid}>
+            <div className={`${styles.grid} animate-slide`}>
                 <div className={styles.card}>
                     <SponsorWidget roomId={roomId} />
                     <AnnouncementsSection roomId={roomId} />
@@ -116,8 +116,8 @@ function RoomContent() {
                     <MatchList />
                 </div>
                 <div className={styles.card}>
-                    <h2>Leaderboard</h2>
-                    <p>Rankings coming soon.</p>
+                    <h2 style={{ marginBottom: '1rem', fontWeight: 800 }}>Leaderboard</h2>
+                    <p style={{ color: '#888' }}>Rankings coming soon. Compete for the top spot!</p>
                 </div>
             </div>
 

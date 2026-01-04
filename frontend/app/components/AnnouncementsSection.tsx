@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import AnnouncementCard from './AnnouncementCard';
 import styles from './AnnouncementsSection.module.css';
 import { useSocket } from '../context/SocketContext';
+import SkeletonCard from './SkeletonCard';
 
 interface Announcement {
     id: number;
@@ -50,7 +51,21 @@ const AnnouncementsSection: React.FC<Props> = ({ roomId }) => {
         };
     }, [socket]);
 
-    if (loading) return <div className={styles.loading}>Loading announcements...</div>;
+    if (loading) {
+        return (
+            <section className={styles.section}>
+                <div className={styles.header}>
+                    <span className={styles.icon}>📢</span>
+                    <h2 className={styles.title}>Announcements</h2>
+                </div>
+                <div className={styles.list}>
+                    <SkeletonCard type="announcement" />
+                    <SkeletonCard type="announcement" />
+                    <SkeletonCard type="announcement" />
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className={styles.section}>
