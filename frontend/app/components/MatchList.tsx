@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import MatchCard from './MatchCard';
 import { PredictionModal } from './PredictionModal';
