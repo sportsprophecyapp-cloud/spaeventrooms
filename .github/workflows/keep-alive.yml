@@ -11,3 +11,5 @@ jobs:
     steps:
       - name: Ping Backend
         run: curl -s https://spa-backend-mvb1.onrender.com/health
+      - name: Ping Frontend
+        run: curl -s https://spa-frontend.onrender.com/
