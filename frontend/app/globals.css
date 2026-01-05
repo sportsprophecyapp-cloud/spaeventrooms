@@ -1,9 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 
 :root {
+  /* Design Brief 2.0 Palette */
   --background: #050505;
+  /* Deep Black */
   --foreground: #ffffff;
   --accent: #0070f3;
+  /* Electric Blue */
+  --accent-purple: #764ba2;
+  /* Accent Purple */
+  --success: #00ff41;
+  /* Neon Green */
+  --error: #ff0055;
+  /* Neon Red */
+  --neutral: #a0aec0;
+  /* Neutral Gray */
+
   --accent-glow: rgba(0, 112, 243, 0.3);
   --glass: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.08);

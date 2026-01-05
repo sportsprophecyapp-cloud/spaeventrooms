@@ -14,13 +14,16 @@ import { SocketProvider, useSocket } from '../../context/SocketContext';
 import { useEffect } from 'react';
 import UserTray from '../../components/UserTray';
 import Leaderboard from '../../components/Leaderboard';
+import EmptyStateWidget from '../../components/EmptyStateWidget';
 
 function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
     const { user, logout, isAuthenticated } = useAuth();
     const { socket } = useSocket();
+
     const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'predictions' | 'leaderboard'>('predictions');
     const [predictions, setPredictions] = useState<any[]>([]);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -97,7 +100,14 @@ function RoomContent() {
                         ← Lobby
                     </Link>
                 </div>
-                <h1 className={styles.title}>{roomId.toUpperCase()} Room</h1>
+                <div className={styles.roomHeader}>
+                    <h1 className={styles.title}>{roomId.toUpperCase()} Room</h1>
+                    {/* Sponsor Pill - Dynamic based on room */}
+                    <span className={styles.sponsorPill}>
+                        <span className={styles.pillLabel}>Sponsored by</span>
+                        <span className={styles.pillBrand}>CloudBet</span>
+                    </span>
+                </div>
                 <div className={styles.userSection}>
                     {isAuthenticated ? (
                         <>
@@ -121,12 +131,30 @@ function RoomContent() {
                 </div>
             </header>
 
+            {/* Mobile Tab Navigation */}
+            <div className={styles.mobileTabs}>
+                <button
+                    className={`${styles.tabBtn} ${activeTab === 'predictions' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('predictions')}
+                >
+                    Predictions
+                </button>
+                <button
+                    className={`${styles.tabBtn} ${activeTab === 'leaderboard' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('leaderboard')}
+                >
+                    Leaderboard
+                </button>
+            </div>
+
             <div className={`${styles.grid} animate-slide`}>
-                <div className={styles.card}>
+                {/* Predictions Column - Show if activeTab is 'predictions' OR if we are on desktop (CSS will handle desktop visibility) */}
+                <div className={`${styles.card} ${styles.leftColumn} ${activeTab !== 'predictions' ? styles.mobileHidden : ''}`}>
                     <SponsorWidget roomId={roomId} />
                     <AnnouncementsSection roomId={roomId} />
 
-                    {predictions.length > 0 && (
+
+                    {predictions.length > 0 ? (
                         <div className={styles.predictionsSection}>
                             {predictions.map(p => (
                                 <CustomPollCard
@@ -137,11 +165,24 @@ function RoomContent() {
                                 />
                             ))}
                         </div>
+                    ) : (
+                        <EmptyStateWidget
+                            onScrollToMatches={() => {
+                                document.getElementById('match-list-section')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            onViewLeaderboard={() => {
+                                setActiveTab('leaderboard');
+                            }}
+                        />
                     )}
 
-                    <MatchList />
+                    <div id="match-list-section">
+                        <MatchList />
+                    </div>
                 </div>
-                <div className={styles.card}>
+
+                {/* Leaderboard Column - Show if activeTab is 'leaderboard' OR if we are on desktop */}
+                <div className={`${styles.card} ${styles.rightColumn} ${activeTab !== 'leaderboard' ? styles.mobileHidden : ''}`}>
                     <Leaderboard />
                 </div>
             </div>

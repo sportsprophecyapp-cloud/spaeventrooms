@@ -1,178 +1,56 @@
 ---
-description: Deploy updates to production (www.sportsprophecyapp.com)
+description: Deploy updates to production (Render)
 ---
 
-# Deployment Workflow for Sports Prophecy
+# Deployment Procedure (Render)
 
-**CRITICAL**: This app uses **existing Vercel projects** with custom domains. Do NOT create new projects.
+We use **Render Blueprints** for deployment relative to the `render.yaml` configuration in the root directory.
 
-## Production Setup
-
-### Existing Vercel Projects
-- **Frontend**: `dist` → www.sportsprophecyapp.com
-- **Backend**: `sportsprophecy-backend` → api.sportsprophecyapp.com
-
-### Environment Variables
-- **Backend** (`backend/.env`):
-  - `MONGODB_URI`: MongoDB connection string
-  - `THE_ODDS_API_KEY`: The Odds API key
-  - `PORT`: 3001
-
-- **Frontend** (`.env.production`):
-  - `EXPO_PUBLIC_API_URL`: Backend API URL (update after backend deployment)
-
----
+## Architecture
+- **Repo**: `sportsprophecyapp-cloud/spaeventrooms`
+- **Branch**: `main`
+- **Services**:
+    - `spa-backend`: Node.js API (Backend)
+    - `spa-frontend`: Next.js Web App (Frontend)
+    - `sportsprophecy-db`: PostgreSQL Database
 
 ## Deployment Steps
 
-### Step 1: Deploy Backend First
+The deployment process is **Git-based and Automated**.
+
+### 1. Development & Testing
+- Make changes locally.
+- Run `npm run build` in `frontend` and `backend` to ensure no errors.
+- Test locally using `npm run dev`.
+
+### 2. Deployment
+- **Commit** your changes.
+- **Push** to the `main` branch.
 
 ```bash
-# Navigate to backend directory
-cd backend
-
-# Deploy to production (links to existing 'sportsprophecy-backend' project)
-npx vercel --prod
+git add .
+git commit -m "feat: your feature description"
+git push origin main
 ```
 
-**Expected Output**:
-- ✅ Should deploy to existing `sportsprophecy-backend` project
-- ✅ Will be accessible at `api.sportsprophecyapp.com`
-- 📝 Note the deployment URL (e.g., `sportsprophecy-backend-xxxxx.vercel.app`)
+### 3. Verification
+Render will automatically detect the push and start building both services defined in `render.yaml`.
 
-### Step 2: Update Frontend API URL
+- **Check Render Dashboard**: Verify build status.
+- **Backend URL**: `https://spa-backend-mvb1.onrender.com` (from `render.yaml` env var, confirmation required).
+- **Frontend URL**: `https://www.sportsprophecyapp.com` (mapped via Render custom domains).
 
-```bash
-# Return to project root
-cd ..
+## Database Migrations
 
-# Edit .env.production
-# Update EXPO_PUBLIC_API_URL with the new backend URL from Step 1
-```
-
-Example:
-```bash
-EXPO_PUBLIC_API_URL=https://sportsprophecy-backend-ga4vadwjo.vercel.app/api
-```
-
-### Step 3: Verify Frontend Link
-
-```bash
-# Check if .vercel directory exists and is linked to 'dist' project
-cat .vercel/project.json
-```
-
-**Expected Output**:
-```json
-{"projectId":"...","orgId":"...","projectName":"dist"}
-```
-
-**If NOT linked to 'dist' project**:
-```bash
-# Remove incorrect link
-rm -rf .vercel
-
-# Link to existing 'dist' project
-npx vercel link --project=dist --yes
-```
-
-### Step 4: Deploy Frontend
-
-```bash
-# Deploy to production (should use 'dist' project)
-npx vercel --prod
-```
-
-**Expected Output**:
-- ✅ Should deploy to existing `dist` project
-- ✅ Will be accessible at `www.sportsprophecyapp.com`
-
----
-
-## Verification Checklist
-
-After deployment, verify:
-
-- [ ] Backend is accessible at `api.sportsprophecyapp.com`
-- [ ] Frontend is accessible at `www.sportsprophecyapp.com`
-- [ ] Version number shows 2.1.0 (check Help & Support screen)
-- [ ] New features are visible:
-  - [ ] Player Profile (bell icon in header)
-  - [ ] Help & Support (More → Help & Support)
-  - [ ] How to Play (Landing page link, More menu)
-  - [ ] Crown balance in header
-- [ ] API calls work (test login, predictions, etc.)
-
----
+The backend `startCommand` automatically runs `dist/scripts/db-init.js` on every deployment.
+- This script handles `CREATE TABLE IF NOT EXISTS` and safe `ALTER TABLE` migrations.
+- **Note**: If you need to wipe/reset the DB, you must access the Render Shell or connect via external tool.
 
 ## Troubleshooting
 
-### Problem: Deployed to wrong project
+### Build Failures
+- Check `render.yaml` matches `package.json` scripts.
+- Ensure `tsconfig.json` correctly outputs to `dist/` (backend) or `.next/` (frontend).
 
-**Solution**:
-```bash
-# Remove .vercel directory
-rm -rf .vercel
-
-# Link to correct project
-npx vercel link --project=dist --yes  # for frontend
-# OR
-cd backend && npx vercel link --project=sportsprophecy-backend --yes  # for backend
-```
-
-### Problem: Custom domain not working
-
-**Solution**:
-1. Go to Vercel Dashboard
-2. Select the correct project (`dist` or `sportsprophecy-backend`)
-3. Go to Settings → Domains
-4. Verify custom domain is configured
-5. If missing, add the domain
-
-### Problem: Frontend can't connect to backend
-
-**Solution**:
-1. Check `.env.production` has correct `EXPO_PUBLIC_API_URL`
-2. Verify backend is deployed and accessible
-3. Redeploy frontend after updating API URL
-
----
-
-## Important Notes
-
-⚠️ **DO NOT**:
-- Create new Vercel projects
-- Answer "No" when asked to link to existing project
-- Deploy without checking `.vercel/project.json` first
-
-✅ **DO**:
-- Always deploy backend first
-- Update frontend API URL after backend deployment
-- Verify `.vercel` directory is linked to correct project
-- Test the live site after deployment
-
----
-
-## Quick Reference
-
-**Backend Deploy**:
-```bash
-cd backend && npx vercel --prod
-```
-
-**Frontend Deploy**:
-```bash
-# Ensure linked to 'dist' project first
-npx vercel link --project=dist --yes
-npx vercel --prod
-```
-
-**Check Current Link**:
-```bash
-cat .vercel/project.json
-```
-
-**Relink to Correct Project**:
-```bash
-rm -rf .vercel && npx vercel link --project=dist --yes
-```
+### "Table Not Found" Errors
+- The `db-init.js` script runs relative to the `dist` folder. Ensure your TS files in `src/scripts` are included in the build.

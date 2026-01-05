@@ -257,6 +257,28 @@ const initDB = async () => {
         await client.query(schema);
         console.log('✅ Schema applied successfully.');
 
+        // 1.1 Run Safe Migrations (Schema Updates)
+        console.log('🔄 Running Schema Updates...');
+        await client.query(`
+            -- Ensure room_sponsors has 'name' column (Phase 4 fix)
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS name VARCHAR(100);
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS logo_url TEXT;
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS link_url TEXT;
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+
+            -- Ensure sponsor_placements table exists (Phase 4 new table)
+            CREATE TABLE IF NOT EXISTS sponsor_placements (
+                id SERIAL PRIMARY KEY,
+                sponsor_id INTEGER REFERENCES room_sponsors(id) ON DELETE CASCADE,
+                placement_type VARCHAR(50) NOT NULL,
+                page VARCHAR(100) NOT NULL,
+                position INTEGER DEFAULT 0,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log('✅ Schema Updates applied.');
+
         // 2. Seed Data
         console.log('🌱 Seeding initial data...');
 

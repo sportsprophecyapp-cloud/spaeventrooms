@@ -1,0 +1,53 @@
+.container {
+    width: 100%;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid var(--glass-border);
+    padding: 1rem 0;
+    position: relative;
+}
+
+.track {
+    display: flex;
+    gap: 4rem;
+    width: max-content;
+    animation: scroll 40s linear infinite;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.item:hover {
+    opacity: 1;
+}
+
+.logo {
+    height: 30px;
+    width: auto;
+    filter: grayscale(100%);
+    transition: filter 0.3s ease;
+}
+
+.item:hover .logo {
+    filter: grayscale(0%);
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Pause animation on hover */
+.container:hover .track {
+    animation-play-state: paused;
+}

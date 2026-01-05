@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { APP_VERSION } from './version';
+import OnboardingModal from '@/app/components/OnboardingModal';
+import SponsorMarquee from '@/app/components/SponsorMarquee';
 
 const HomePage = () => {
   const rooms = [
@@ -32,6 +34,20 @@ const HomePage = () => {
       active: false
     }
   ];
+
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
+
+  React.useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingClose = () => {
+    setShowOnboarding(false);
+    localStorage.setItem('hasSeenOnboarding', 'true');
+  };
 
   return (
     <div className={styles.container}>
@@ -66,8 +82,11 @@ const HomePage = () => {
       </main>
 
       <footer className={styles.footer}>
-        <p>&copy; 2026 Sports Prophecy Platform. All rights reserved. <span style={{ opacity: 0.5, fontSize: '0.8em', marginLeft: '10px' }}>v{APP_VERSION}</span></p>
+        <SponsorMarquee />
+        <p style={{ marginTop: '1rem' }}>&copy; 2026 Sports Prophecy Platform. All rights reserved. <span style={{ opacity: 0.5, fontSize: '0.8em', marginLeft: '10px' }}>v{APP_VERSION}</span></p>
       </footer>
+
+      <OnboardingModal isOpen={showOnboarding} onClose={handleOnboardingClose} />
     </div>
   );
 };
