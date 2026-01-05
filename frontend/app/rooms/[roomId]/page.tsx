@@ -8,7 +8,7 @@ import AnnouncementsSection from '../../components/AnnouncementsSection';
 import CustomPollCard from '../../components/CustomPollCard';
 import SponsorWidget from '../../components/SponsorWidget';
 import { useAuth } from '../../context/AuthContext';
-import { LoginModal } from '../../components/LoginModal';
+import LoginModal from '../../components/LoginModal';
 import { SocketProvider, useSocket } from '../../context/SocketContext';
 import { useEffect } from 'react';
 import UserTray from '../../components/UserTray';
