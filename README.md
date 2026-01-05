@@ -58,6 +58,9 @@ A multi-room prediction platform architecture.
 - **Extraction**: To spinoff a room, copy the respective folders to a new repo.
 
 ## Deployment
+See [DEPLOYMENT_SETUP.md](./DEPLOYMENT_SETUP.md) for full details.
 
-- **Backend**: Ready for Render (see `render.yaml`) or Docker (`backend/Dockerfile`).
-- **Frontend**: Ready for Vercel (see `vercel.json`).
+- **Backend**: Hosted on Render.
+- **Frontend**: Hosted on Render.
+- **Database**: Hosted on Render (PostgreSQL).
+- **Testing**: Vercel is used for testing environments only.
