@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import styles from './page.module.css';
 import MatchList from '../../components/MatchList';
 import AnnouncementsSection from '../../components/AnnouncementsSection';
@@ -85,6 +86,17 @@ function RoomContent() {
     return (
         <div className={styles.container}>
             <header className={`${styles.header} animate-fade`}>
+                <div style={{ position: 'absolute', left: '2rem', top: '6rem', zIndex: 10 }}>
+                    <Link href="/" style={{
+                        color: 'rgba(255,255,255,0.6)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.9rem'
+                    }}>
+                        ← Lobby
+                    </Link>
+                </div>
                 <h1 className={styles.title}>{roomId.toUpperCase()} Room</h1>
                 <div className={styles.userSection}>
                     {isAuthenticated ? (

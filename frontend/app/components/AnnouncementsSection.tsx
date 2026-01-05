@@ -29,7 +29,14 @@ const AnnouncementsSection: React.FC<Props> = ({ roomId }) => {
         fetch(`${apiUrl}/api/rooms/${roomId}/announcements`)
             .then(res => res.json())
             .then(data => {
-                setAnnouncements(data);
+                // Deduplicate fetched announcements by ID AND Content (Title + Description)
+                // This handles cases where backend might send multiple entries for same "logical" announcement with different IDs
+                const uniqueData = data.filter((a: Announcement, index: number, self: Announcement[]) =>
+                    index === self.findIndex((t) => (
+                        t.id === a.id || (t.title === a.title && t.description === a.description)
+                    ))
+                );
+                setAnnouncements(uniqueData);
                 setLoading(false);
             })
             .catch(err => {
@@ -43,7 +50,11 @@ const AnnouncementsSection: React.FC<Props> = ({ roomId }) => {
 
         socket.on('announcement_new', (newAnnouncement: Announcement) => {
             console.log('Real-time announcement received:', newAnnouncement);
-            setAnnouncements(prev => [newAnnouncement, ...prev]);
+            setAnnouncements(prev => {
+                // Prevent duplicate if already exists
+                if (prev.some(a => a.id === newAnnouncement.id)) return prev;
+                return [newAnnouncement, ...prev];
+            });
         });
 
         return () => {
