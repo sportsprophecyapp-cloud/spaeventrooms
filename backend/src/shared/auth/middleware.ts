@@ -23,3 +23,12 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
         res.status(401).json({ message: 'Invalid token' });
     }
 };
+
+export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+    // TODO: Implement real role-based access control.
+    // For now, we assume if you are authenticated, you are an admin (MVP).
+    if (!req.user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+    next();
+};
