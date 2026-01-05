@@ -181,6 +181,78 @@ const initDB = async () => {
                 description TEXT,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- Sponsor Application & Management
+            CREATE TABLE IF NOT EXISTS sponsor_applications (
+                id SERIAL PRIMARY KEY,
+                company_name VARCHAR(255) NOT NULL,
+                contact_email VARCHAR(255) NOT NULL,
+                contact_name VARCHAR(255),
+                phone VARCHAR(50),
+                website_url VARCHAR(500),
+                product_description TEXT,
+                logo_url VARCHAR(500),
+                promo_code VARCHAR(50),
+                discount_description VARCHAR(255),
+                sponsor_type VARCHAR(20) NOT NULL, -- 'subscription' or 'commission'
+                tier VARCHAR(20), -- 'starter', 'growth', 'premium' (for subscription type)
+                placements TEXT[], -- ['homepage', 'login', 'footer']
+                message TEXT,
+                status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS sponsors (
+                id SERIAL PRIMARY KEY,
+                application_id INTEGER REFERENCES sponsor_applications(id),
+                company_name VARCHAR(255) NOT NULL,
+                contact_email VARCHAR(255) NOT NULL,
+                logo_url VARCHAR(500),
+                website_url VARCHAR(500),
+                promo_code VARCHAR(50) UNIQUE,
+                discount_description VARCHAR(255),
+                sponsor_type VARCHAR(20) NOT NULL, -- 'subscription' or 'commission'
+                tier VARCHAR(20), -- 'starter', 'growth', 'premium'
+                placements TEXT[] DEFAULT '{}',
+                monthly_fee DECIMAL(10, 2), -- For subscription sponsors
+                commission_rate DECIMAL(5, 2) DEFAULT 2.00, -- For commission sponsors (2%)
+                status VARCHAR(20) DEFAULT 'active', -- 'active', 'inactive', 'paused'
+                stripe_customer_id VARCHAR(255), -- For subscription sponsors
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                notes TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS sponsor_payments (
+                id SERIAL PRIMARY KEY,
+                sponsor_id INTEGER REFERENCES sponsors(id) ON DELETE CASCADE,
+                month_year VARCHAR(10) NOT NULL, -- '2026-01'
+                payment_type VARCHAR(20) NOT NULL, -- 'subscription' or 'commission'
+                sales_amount DECIMAL(10, 2), -- For commission sponsors
+                commission_amount DECIMAL(10, 2), -- Calculated commission
+                subscription_amount DECIMAL(10, 2), -- For subscription sponsors
+                total_amount DECIMAL(10, 2) NOT NULL,
+                payment_status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'paid', 'failed'
+                stripe_invoice_id VARCHAR(255),
+                stripe_payment_link VARCHAR(500),
+                payment_date TIMESTAMP WITH TIME ZONE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS promo_code_usage (
+                id SERIAL PRIMARY KEY,
+                sponsor_id INTEGER REFERENCES sponsors(id) ON DELETE CASCADE,
+                promo_code VARCHAR(50) NOT NULL,
+                user_id INTEGER REFERENCES users(id),
+                clicked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                conversion BOOLEAN DEFAULT FALSE,
+                sale_amount DECIMAL(10, 2),
+                commission_amount DECIMAL(10, 2),
+                recorded_at TIMESTAMP WITH TIME ZONE
+            );
         `;
         await client.query(schema);
         console.log('✅ Schema applied successfully.');
