@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { query as dbQuery } from '../database/db';
+import { query as dbQuery } from '../database';
 import { Request, Response } from 'express';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';

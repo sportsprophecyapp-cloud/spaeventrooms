@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { query as dbQuery } from '../database/db';
+import { query as dbQuery } from '../database';
 import { AuthRequest } from '../auth/middleware';
 
 // POST /api/gamification/daily-login
@@ -149,7 +149,7 @@ export const getShop = async (req: AuthRequest, res: Response) => {
             [userId]
         );
 
-        const ownedIds = new Set(ownedResult.rows.map((r) => r.cosmetic_id));
+        const ownedIds = new Set(ownedResult.rows.map((r: any) => r.cosmetic_id));
 
         // Fetch user's token balance
         const balanceResult = await dbQuery(
@@ -157,7 +157,7 @@ export const getShop = async (req: AuthRequest, res: Response) => {
             [userId]
         );
 
-        const cosmetics = cosmeticsResult.rows.map((c) => ({
+        const cosmetics = cosmeticsResult.rows.map((c: any) => ({
             id: c.id,
             name: c.name,
             type: c.type,
