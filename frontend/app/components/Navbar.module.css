@@ -1,0 +1,111 @@
+.navbar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.tokenBalance {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+    border: none;
+    border-radius: 20px;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tokenBalance:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+}
+
+.tokenIcon {
+    font-size: 18px;
+}
+
+.tokenAmount {
+    font-size: 14px;
+}
+
+.userMenu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.userEmail {
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.logoutBtn {
+    padding: 6px 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    color: #fca5a5;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logoutBtn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px 16px;
+    }
+
+    .userEmail {
+        display: none;
+    }
+
+    .logo {
+        font-size: 16px;
+    }
+
+    .tokenBalance {
+        padding: 6px 12px;
+    }
+}

@@ -141,6 +141,46 @@ const initDB = async () => {
                 is_active BOOLEAN DEFAULT TRUE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- Phase 11: Token Economy & Streaks
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER DEFAULT 0;
+
+            CREATE TABLE IF NOT EXISTS user_streaks (
+                user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+                current_streak INTEGER DEFAULT 0,
+                last_login_date TIMESTAMP WITH TIME ZONE,
+                longest_streak INTEGER DEFAULT 0,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS cosmetics (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                description TEXT,
+                type VARCHAR(50) NOT NULL, -- 'avatar', 'frame', 'badge'
+                cost INTEGER NOT NULL,
+                asset_url TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS user_cosmetics (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                cosmetic_id INTEGER REFERENCES cosmetics(id) ON DELETE CASCADE,
+                is_equipped BOOLEAN DEFAULT FALSE,
+                acquired_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, cosmetic_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS token_transactions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                amount INTEGER NOT NULL, -- Positive for earn, negative for spend
+                type VARCHAR(50) NOT NULL, -- 'daily_login', 'streak_bonus', 'purchase', 'referral'
+                description TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
         console.log('✅ Schema applied successfully.');
