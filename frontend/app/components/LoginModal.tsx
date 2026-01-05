@@ -75,15 +75,19 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
         setLoading(true);
 
         try {
-            const success = await login(email, password);
-            // login method from AuthContext usually returns void or Promise<void>, not boolean.
-            // But based on previous reads of LoginModal, it might have been calling login and assuming success if no error.
-            // Let's assume standard behavior: if login succeeds, we call onLoginSuccess. 
-            // Checking AuthContext usage in previous LoginModal provided: 
-            // "login(data.token, data.user); onClose();"
-            // The new code tries to use `const success = await login(...)`. 
-            // I'll stick close to the provided code but ensure it works with the likely AuthContext implementation.
-            // If login throws, it goes to catch.
+            const res = await fetch(`${apiUrl}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Login failed');
+            }
+
+            login(data.token, data.user);
             onLoginSuccess?.();
             onClose();
         } catch (err) {
