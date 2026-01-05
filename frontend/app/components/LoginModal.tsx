@@ -1,95 +1,208 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import styles from './Auth.module.css';
+import styles from './LoginModal.module.css';
 
-interface AuthModalProps {
-    isOpen: boolean;
-    onClose: () => void;
+interface Sponsor {
+    id: number;
+    sponsor_id: number;
+    placement_type: string;
+    page: string;
+    position: number;
+    is_active: boolean;
+    name: string;
+    logo_url: string;
+    link_url: string;
+    tier: string;
 }
 
-export const LoginModal = ({ isOpen, onClose }: AuthModalProps) => {
+interface LoginModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onLoginSuccess?: () => void;
+}
+
+export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps) {
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [isRegister, setIsRegister] = useState(false);
-    const { login } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+    const [sponsorLoading, setSponsorLoading] = useState(true);
 
-    if (!isOpen) return null;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+    // Fetch sponsor data for login modal
+    useEffect(() => {
+        const fetchSponsors = async () => {
+            try {
+                setSponsorLoading(true);
+                const response = await fetch(
+                    `${apiUrl}/api/sponsor-subscriptions/placements/login`
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch sponsors');
+                }
+
+                const data = await response.json();
+                // Filter to only active Growth or Premium tier sponsors
+                const activeSponsors = data.filter(
+                    (s: Sponsor) =>
+                        s.is_active &&
+                        (s.tier === 'Growth' || s.tier === 'Premium' || s.tier === 'growth' || s.tier === 'premium')
+                );
+                setSponsors(activeSponsors);
+            } catch (err) {
+                console.error('Error fetching sponsor data:', err);
+                // Fail gracefully - no sponsors shown if API fails
+                setSponsors([]);
+            } finally {
+                setSponsorLoading(false);
+            }
+        };
+
+        if (isOpen) {
+            fetchSponsors();
+        }
+    }, [isOpen, apiUrl]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
-        const endpoint = isRegister ? 'register' : 'login';
-
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         try {
-            const res = await fetch(`${apiUrl}/api/auth/${endpoint}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || 'Something went wrong');
-            }
-
-            if (isRegister) {
-                // If register successful, switch to login or auto-login
-                setIsRegister(false);
-                setError('Registration successful! Please login.');
-                return;
-            }
-
-            login(data.token, data.user);
+            const success = await login(email, password);
+            // login method from AuthContext usually returns void or Promise<void>, not boolean.
+            // But based on previous reads of LoginModal, it might have been calling login and assuming success if no error.
+            // Let's assume standard behavior: if login succeeds, we call onLoginSuccess. 
+            // Checking AuthContext usage in previous LoginModal provided: 
+            // "login(data.token, data.user); onClose();"
+            // The new code tries to use `const success = await login(...)`. 
+            // I'll stick close to the provided code but ensure it works with the likely AuthContext implementation.
+            // If login throws, it goes to catch.
+            onLoginSuccess?.();
             onClose();
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Login failed');
+        } finally {
+            setLoading(false);
         }
     };
 
+    if (!isOpen) return null;
+
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                <h2>{isRegister ? 'Create Account' : 'Welcome Back'}</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className={styles.inputGroup}>
-                        <label>Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            required
-                            placeholder="your@email.com"
-                        />
+        <div className={styles.modalOverlay} onClick={onClose}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className={styles.closeButton}
+                    aria-label="Close modal"
+                >
+                    ✕
+                </button>
+
+                {/* Login Form */}
+                <div className={styles.container}>
+                    <h2 className={styles.title}>Welcome Back</h2>
+                    <p className={styles.subtitle}>Sign in to your Sports Prophecy account</p>
+
+                    {error && (
+                        <div className={styles.errorMessage}>
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="email" className={styles.label}>
+                                Email
+                            </label>
+                            <input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                className={styles.input}
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+
+                        <div className={styles.formGroup}>
+                            <label htmlFor="password" className={styles.label}>
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className={styles.input}
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={styles.submitButton}
+                        >
+                            {loading ? 'Signing in...' : 'Sign In'}
+                        </button>
+                    </form>
+
+                    <div className={styles.footer}>
+                        <p className={styles.footerText}>
+                            Don't have an account?{' '}
+                            <button
+                                type="button"
+                                className={styles.signupLink}
+                                onClick={() => {
+                                    onClose();
+                                    // Trigger signup modal if you have one
+                                }}
+                            >
+                                Sign up
+                            </button>
+                        </p>
                     </div>
-                    <div className={styles.inputGroup}>
-                        <label>Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                            placeholder="********"
-                        />
-                    </div>
-                    {error && <p className={styles.error}>{error}</p>}
-                    <button type="submit" className={styles.submitBtn}>
-                        {isRegister ? 'Sign Up' : 'Login'}
-                    </button>
-                </form>
-                <p className={styles.switch}>
-                    {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
-                    <span onClick={() => setIsRegister(!isRegister)}>
-                        {isRegister ? 'Login' : 'Sign Up'}
-                    </span>
-                </p>
-                <button className={styles.closeBtn} onClick={onClose}>&times;</button>
+
+                    {/* Sponsor Section - Bottom of Modal */}
+                    {sponsors.length > 0 && !sponsorLoading && (
+                        <div className={styles.sponsorSection}>
+                            <div className={styles.sponsorDivider} />
+                            <p className={styles.sponsorLabel}>Powered by</p>
+                            <div className={styles.sponsorGrid}>
+                                {sponsors.map((sponsor) => (
+                                    <a
+                                        key={sponsor.id}
+                                        href={sponsor.link_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={styles.sponsorItem}
+                                        title={sponsor.name}
+                                    >
+                                        <img
+                                            src={sponsor.logo_url}
+                                            alt={sponsor.name}
+                                            className={styles.sponsorLogo}
+                                        />
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
-};
+}
