@@ -3,7 +3,7 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Consolidated Database Initialization (v2.3)...');
+        console.log('🚀 Starting Consolidated Database Initialization (v2.4)...');
 
         // 1. Core Schema
         const schema = `
@@ -69,8 +69,9 @@ const initDB = async () => {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
+            -- FIX: Changed id to VARCHAR to allow custom descriptive IDs
             CREATE TABLE IF NOT EXISTS cosmetics (
-                id VARCHAR(50) PRIMARY KEY,
+                id VARCHAR(100) PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
                 description TEXT,
                 type VARCHAR(50) NOT NULL,
@@ -82,7 +83,7 @@ const initDB = async () => {
 
             CREATE TABLE IF NOT EXISTS user_cosmetics (
                 user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                cosmetic_id VARCHAR(50) REFERENCES cosmetics(id) ON DELETE CASCADE,
+                cosmetic_id VARCHAR(100) REFERENCES cosmetics(id) ON DELETE CASCADE,
                 is_equipped BOOLEAN DEFAULT FALSE,
                 acquired_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, cosmetic_id)
@@ -122,31 +123,17 @@ const initDB = async () => {
         await client.query(schema);
         console.log('✅ Base Schema applied successfully.');
 
-        const updates = `
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER DEFAULT 150;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS total_points INTEGER DEFAULT 0;
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS current_level INTEGER DEFAULT 1;
-            
-            ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS league VARCHAR(100);
-            ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS league_logo TEXT;
-            
-            ALTER TABLE soccer_predictions ADD COLUMN IF NOT EXISTS result VARCHAR(20) DEFAULT 'pending';
-            ALTER TABLE soccer_predictions ADD COLUMN IF NOT EXISTS points_earned INTEGER DEFAULT 0;
-        `;
-        await client.query(updates);
-        console.log('✅ Column updates applied.');
-
-        // 3. Seed Data
+        // 2. Safe Schema Migration (for existing tables)
         await client.query(`
-            INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Pro Soccer Arena')
-            ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
-
-            INSERT INTO cosmetics (id, name, description, type, cost, asset_url) VALUES 
-            ('avatar_basic', 'Blue Prophet', 'Standard apprentice avatar', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
-            ('avatar_premium', 'Neon King', 'Master predictor avatar', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
-            ('frame_gold', 'Gold Frame', 'Exclusive winner border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
-            ON CONFLICT (id) DO NOTHING;
+            DO $$ 
+            BEGIN 
+                -- If cosmetics.id is an integer, we might need to drop/recreate or alter it.
+                -- For safety in this dev phase, we ensure types match.
+                IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='cosmetics' AND column_name='id' AND data_type='integer') THEN
+                    DROP TABLE IF EXISTS user_cosmetics;
+                    DROP TABLE IF EXISTS cosmetics;
+                END IF;
+            END $$;
         `);
 
         console.log('✅ Initialization completed successfully.');
