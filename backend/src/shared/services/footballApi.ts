@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { query } from '../database';
 
-// Configuration
+// Configuration - Focused solely on Soccer for now
 const SPORTS = [
     'soccer_epl',
     'soccer_spain_la_liga',
@@ -47,6 +47,7 @@ const getActiveKey = () => {
  * Moves to the next key if the current one fails
  */
 const rotateKey = () => {
+    if (API_KEYS.length <= 1) return;
     currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
     console.log(`🔄 Rotating to API Key Index: ${currentKeyIndex}`);
 };
@@ -68,8 +69,9 @@ export const fetchLiveMatches = async () => {
                 });
                 return { key: sportKey, data: response.data };
             } catch (err: any) {
+                // If unauthorized (401) or limit reached (429), try rotating
                 if (err.response?.status === 401 || err.response?.status === 429) {
-                    rotateKey(); // Switch key on auth or limit error
+                    rotateKey();
                 }
                 console.error(`⚠️ Failed to fetch ${sportKey}: ${err.message}`);
                 return { key: sportKey, data: [] };

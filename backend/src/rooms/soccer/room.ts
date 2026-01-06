@@ -2,6 +2,7 @@ import { BaseRoom } from '../roomFactory';
 import { Server } from 'socket.io';
 import { query } from '../../shared/database';
 import { authenticate, AuthRequest } from '../../shared/auth/middleware';
+import { fetchLiveMatches } from '../../shared/services/footballApi';
 
 export class SoccerRoom extends BaseRoom {
     constructor() {
@@ -12,10 +13,11 @@ export class SoccerRoom extends BaseRoom {
     }
 
     initRoutes(): void {
+        // GET /api/rooms/soccer/matches
         this.router.get('/matches', async (req, res) => {
             try {
-                const result = await query('SELECT * FROM soccer_matches ORDER BY league ASC, start_time ASC');
-                // Return flat array of matches to fix frontend map() crash
+                // Fetch matches from the last 24 hours to ensure the lobby is populated
+                const result = await query('SELECT * FROM soccer_matches WHERE start_time > NOW() - INTERVAL \'24 hours\' ORDER BY start_time ASC');
                 res.json(result.rows);
             } catch (err) {
                 console.error('Error fetching matches:', err);
@@ -23,7 +25,8 @@ export class SoccerRoom extends BaseRoom {
             }
         });
 
-        this.router.post('/predictions', authenticate, async (req: AuthRequest, res) => {
+        // POST /api/rooms/soccer/predictions/match (Aligned with Frontend)
+        this.router.post('/predictions/match', authenticate, async (req: AuthRequest, res) => {
             const { matchId, pick } = req.body;
             const userId = req.user?.id;
 
@@ -32,6 +35,7 @@ export class SoccerRoom extends BaseRoom {
             }
 
             try {
+                // Save or update user prediction
                 await query(`
                     INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
                     VALUES ($1, $2, $3)
@@ -39,66 +43,28 @@ export class SoccerRoom extends BaseRoom {
                     DO UPDATE SET prediction_data = EXCLUDED.prediction_data, created_at = CURRENT_TIMESTAMP
                 `, [userId, matchId, JSON.stringify({ pick })]);
 
-                res.json({ success: true, message: 'Prediction saved' });
+                res.json({ success: true, message: 'Prediction saved successfully!' });
             } catch (err) {
                 console.error('Error saving prediction:', err);
                 res.status(500).json({ error: 'Internal Server Error' });
             }
         });
 
-        this.router.patch('/matches/:matchId', authenticate, async (req: AuthRequest, res) => {
-            const { matchId } = req.params;
-            const { score_home, score_away, status } = req.body;
-
+        // POST /api/rooms/soccer/refresh (Admin tool)
+        this.router.post('/refresh', async (req, res) => {
             try {
-                const result = await query(`
-                    UPDATE soccer_matches 
-                    SET score_home = COALESCE($1, score_home),
-                        score_away = COALESCE($2, score_away),
-                        status = COALESCE($3, status),
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE match_id = $4
-                    RETURNING *
-                `, [score_home, score_away, status, matchId]);
-
-                if (result.rows.length === 0) {
-                    return res.status(404).json({ message: 'Match not found' });
-                }
-
-                const updatedMatch = result.rows[0];
-
-                if (this.ioNamespace) {
-                    this.ioNamespace.emit('match_update', updatedMatch);
-                }
-
-                res.json(updatedMatch);
+                await fetchLiveMatches();
+                res.json({ success: true, message: 'Data refresh triggered' });
             } catch (err) {
-                console.error('Error updating match:', err);
-                res.status(500).json({ error: 'Internal Server Error' });
+                res.status(500).json({ error: 'Refresh failed' });
             }
         });
     }
 
     initSocket(io: Server): void {
         this.ioNamespace = io.of(`/rooms/${this.roomId}`);
-
         this.ioNamespace.on('connection', (socket) => {
-            console.log(`User connected to ${this.displayName} room`);
-
-            socket.on('join_room', (room) => {
-                socket.join(room);
-            });
-
-            socket.on('disconnect', () => {
-                console.log('User disconnected from soccer room');
-            });
+            socket.on('join_room', (room) => socket.join(room));
         });
-    }
-
-    onSponsorUpdate(data: any): void {
-        console.log('Sponsor update received', data);
-        if (this.ioNamespace) {
-            this.ioNamespace.emit('sponsor_update', data);
-        }
     }
 }

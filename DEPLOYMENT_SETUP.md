@@ -6,25 +6,18 @@ This project is deployed on **Render** using a full-stack blueprint configuratio
 The project uses a custom deployment script to ensure all changes are staged, committed, and pushed to Render in a single, consistent step.
 
 ### How to Deploy:
-1. Open your terminal in the root folder.
-2. Run the following command:
+1. Open your terminal in the root folder (`/Users/williamcommu/Desktop/mobile`).
+2. Ensure you are at the main prompt (e.g., `192:mobile williamcommu$`).
+3. Run the following command:
    ```bash
    bash deploy.sh "Your descriptive commit message"
    ```
+
+**⚠️ Troubleshooting:**
+If you type `sh` or `bash` before running the command, you will enter a sub-shell and the deploy won't start until you type `exit`. **Always run the command directly.**
 
 ## 🏗 Infrastructure (Render Blueprints)
 Defined in `render.yaml`:
 1. **Database (`sportsprophecy-db`)**: PostgreSQL.
 2. **Backend (`spa-backend`)**: Node.js/Express.
-   - Build: `cd backend && npm install && npm run build`
-   - Start: `cd backend && npm start`
 3. **Frontend (`spa-frontend`)**: Next.js.
-   - Build: `cd frontend && npm install && npm run build`
-   - Start: `cd frontend && npm start`
-
-## 🔑 Environment Variables
-Must be configured in the Render Dashboard:
-- `DATABASE_URL`: Postgres connection string.
-- `REDIS_URL`: External Redis connection.
-- `THE_ODDS_API_KEY`: Can be a single key or a comma-separated list (`key1,key2`).
-- `NEXT_PUBLIC_API_URL`: Points to the backend service URL.
