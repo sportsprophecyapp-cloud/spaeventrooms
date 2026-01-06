@@ -58,14 +58,15 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
             // Trigger Animation
             setShowAnim(true);
             
-            // Wait for animation to finish before closing
+            // Success: Wait for animation to finish before closing modal
             setTimeout(() => {
                 onSuccess();
                 onClose();
             }, 1200);
 
         } catch (err: any) {
-            setError(err.message);
+            console.error('Prediction Error:', err);
+            setError(err.message || 'Transmission failed. Try again.');
             setLoading(false);
         }
     };
@@ -79,24 +80,30 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
             />
             
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                <h3 className={styles.title}>Predict: {match.home_team} vs {match.away_team}</h3>
+                <h3 className={styles.title}>Predict Outcome</h3>
+                <p style={{ color: 'var(--neutral)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                    {match.home_team} vs {match.away_team}
+                </p>
 
                 <div className={styles.options}>
                     <button
                         className={`${styles.option} ${pick === 'home' ? styles.active : ''}`}
                         onClick={() => setPick('home')}
+                        disabled={showAnim}
                     >
                         {match.home_team}
                     </button>
                     <button
                         className={`${styles.option} ${pick === 'draw' ? styles.active : ''}`}
                         onClick={() => setPick('draw')}
+                        disabled={showAnim}
                     >
                         DRAW
                     </button>
                     <button
                         className={`${styles.option} ${pick === 'away' ? styles.active : ''}`}
                         onClick={() => setPick('away')}
+                        disabled={showAnim}
                     >
                         {match.away_team}
                     </button>
@@ -105,7 +112,7 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
                 {error && <p className={styles.error}>{error}</p>}
 
                 <div className={styles.actions}>
-                    <button className={styles.cancelBtn} onClick={onClose}>CANCEL</button>
+                    <button className={styles.cancelBtn} onClick={onClose} disabled={loading}>CANCEL</button>
                     <button
                         className={styles.submitBtn}
                         onClick={handleSubmit}
