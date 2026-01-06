@@ -23,10 +23,24 @@ const LoginPage = () => {
         setIsLoading(true);
 
         try {
-            await login(formData.email, formData.password);
-            router.push('/');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${apiUrl}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // Correctly call context login with token and user object
+                login(data.token, data.user);
+                router.push('/');
+            } else {
+                setError(data.message || 'Login failed. Check your credentials.');
+            }
         } catch (err: any) {
-            setError(err.message || 'Login failed. Check your credentials.');
+            setError('Connection error. Please try again.');
         } finally {
             setIsLoading(false);
         }

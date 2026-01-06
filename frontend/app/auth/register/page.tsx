@@ -24,7 +24,6 @@ const RegisterContent = () => {
     useEffect(() => {
         const refId = searchParams.get('ref');
         if (refId) {
-            // Fetch referrer name for UX
             fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/public-profile/${refId}`)
                 .then(res => res.json())
                 .then(data => setRefName(data.username))
@@ -57,8 +56,8 @@ const RegisterContent = () => {
 
             const data = await res.json();
             if (res.ok) {
-                // Automatically log them in
-                await login(formData.email, formData.password);
+                // Correctly call context login with token and user object
+                login(data.token, data.user);
                 router.push('/');
             } else {
                 setError(data.message || 'Registration failed');
