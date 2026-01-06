@@ -4,9 +4,10 @@ import React, { useEffect, useState } from 'react';
 import styles from './Leaderboard.module.css';
 
 interface LeaderboardEntry {
-    email: string;
-    total_points: number;
-    current_level: number;
+    username: string;
+    points: number;
+    level: number;
+    rank: number;
 }
 
 const Leaderboard: React.FC = () => {
@@ -20,7 +21,12 @@ const Leaderboard: React.FC = () => {
                 const res = await fetch(`${apiUrl}/api/gamification/leaderboard`);
                 if (res.ok) {
                     const data = await res.json();
-                    setEntries(data);
+                    // FIX: Extract the array from the new { success, leaderboard } structure
+                    if (data && Array.isArray(data.leaderboard)) {
+                        setEntries(data.leaderboard);
+                    } else if (Array.isArray(data)) {
+                        setEntries(data);
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching leaderboard:', err);
@@ -32,23 +38,25 @@ const Leaderboard: React.FC = () => {
         fetchLeaderboard();
     }, []);
 
-    if (loading) return <div className={styles.loading}>Loading rankings...</div>;
+    if (loading) return <div className={styles.loading}>Accessing Prophet Records...</div>;
 
     return (
-        <div className={styles.container}>
-            <h2 className={styles.title}>Leaderboard</h2>
+        <div className={`${styles.container} glass`}>
+            <h2 className={styles.title}>ARENA RANKINGS</h2>
             <div className={styles.list}>
                 {entries.length === 0 ? (
-                    <p className={styles.empty}>No rankings yet. Start predicting!</p>
+                    <p className={styles.empty}>No prophecies recorded yet.</p>
                 ) : (
                     entries.map((entry, index) => (
-                        <div key={entry.email} className={styles.row}>
-                            <div className={styles.rank}>{index + 1}</div>
-                            <div className={styles.userInfo}>
-                                <span className={styles.email}>{entry.email.split('@')[0]}</span>
-                                <span className={styles.level}>Lvl {entry.current_level}</span>
+                        <div key={`${entry.username}-${index}`} className={styles.row}>
+                            <div className={styles.rank}>
+                                {entry.rank <= 3 ? ['🥇', '🥈', '🥉'][entry.rank - 1] : `#${entry.rank}`}
                             </div>
-                            <div className={styles.points}>{entry.total_points}</div>
+                            <div className={styles.userInfo}>
+                                <span className={styles.username}>@{entry.username}</span>
+                                <span className={styles.levelBadge}>Lvl {entry.level || 1}</span>
+                            </div>
+                            <div className={styles.points}>{entry.points}</div>
                         </div>
                     ))
                 )}

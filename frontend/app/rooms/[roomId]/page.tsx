@@ -19,7 +19,7 @@ import RoomChat from '../../components/RoomChat';
 function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
-    const { logout, isAuthenticated, token } = useAuth(); // Consistent token from context
+    const { logout, isAuthenticated, token } = useAuth();
     const { socket } = useSocket();
 
     const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -32,8 +32,14 @@ function RoomContent() {
         try {
             const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions`);
             const data = await res.json();
-            // Safety check: ensure data is an array
-            setPredictions(Array.isArray(data) ? data : []);
+            // FIX: Ensure we extract the array if nested, or fallback to empty array
+            if (Array.isArray(data)) {
+                setPredictions(data);
+            } else if (data && Array.isArray(data.predictions)) {
+                setPredictions(data.predictions);
+            } else {
+                setPredictions([]);
+            }
         } catch (err) {
             console.error('Error fetching predictions:', err);
             setPredictions([]);
@@ -74,7 +80,7 @@ function RoomContent() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Use context token
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ option })
             });
@@ -105,6 +111,7 @@ function RoomContent() {
                 </div>
             </header>
 
+            {/* Mobile Tab Navigation */}
             <div className={styles.mobileTabs}>
                 <button
                     className={`${styles.tabBtn} ${activeTab === 'predictions' ? styles.activeTab : ''}`}
@@ -127,6 +134,7 @@ function RoomContent() {
             </div>
 
             <div className={styles.mainLayout}>
+                {/* Predictions Column */}
                 <div className={`${styles.column} ${activeTab !== 'predictions' ? styles.mobileHidden : ''}`}>
                     <SponsorWidget roomId={roomId} />
                     <AnnouncementsSection roomId={roomId} />
@@ -154,10 +162,12 @@ function RoomContent() {
                     </div>
                 </div>
 
+                {/* Leaderboard Column */}
                 <div className={`${styles.column} ${styles.middleColumn} ${activeTab !== 'leaderboard' ? styles.mobileHidden : ''}`}>
                     <Leaderboard />
                 </div>
 
+                {/* Chat Column */}
                 <div className={`${styles.column} ${styles.rightColumn} ${activeTab !== 'chat' ? styles.mobileHidden : ''}`}>
                     <RoomChat roomId={roomId} />
                 </div>
