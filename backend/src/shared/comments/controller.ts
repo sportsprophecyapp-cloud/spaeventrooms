@@ -8,7 +8,7 @@ export const getComments = async (req: AuthRequest, res: Response) => {
 
     try {
         const result = await query(`
-            SELECT c.*, u.email 
+            SELECT c.*, u.username 
             FROM prediction_comments c
             JOIN users u ON c.user_id = u.id
             WHERE c.prediction_id = $1
@@ -32,18 +32,19 @@ export const createComment = async (req: AuthRequest, res: Response) => {
     }
 
     try {
+        // Fetch user handle for socket and display
+        const userResult = await query('SELECT username FROM users WHERE id = $1', [userId]);
+        const username = userResult.rows[0].username;
+
         const result = await query(
             'INSERT INTO prediction_comments (prediction_id, user_id, content) VALUES ($1, $2, $3) RETURNING *',
             [predictionId, userId, content]
         );
 
         const newComment = result.rows[0];
-        // Fetch user email for the socket event
-        const userResult = await query('SELECT email FROM users WHERE id = $1', [userId]);
-        newComment.email = userResult.rows[0].email;
+        newComment.username = username;
 
-        // Emit socket event to the room
-        // We need the roomId to emit to the correct namespace
+        // Emit socket event to the correct room namespace
         const predResult = await query('SELECT room_id FROM custom_predictions WHERE id = $1', [predictionId]);
         if (predResult.rows.length > 0) {
             const roomId = predResult.rows[0].room_id;

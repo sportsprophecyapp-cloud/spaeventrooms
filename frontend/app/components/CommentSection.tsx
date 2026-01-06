@@ -9,7 +9,7 @@ interface Comment {
     id: number;
     prediction_id: number;
     user_id: number;
-    username: string; // Updated to use username
+    username: string; 
     content: string;
     created_at: string;
 }
@@ -23,7 +23,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [loading, setLoading] = useState(true);
-    const { isAuthenticated, token } = useAuth(); // Use token from context
+    const { isAuthenticated, token } = useAuth();
     const { socket } = useSocket();
 
     useEffect(() => {
@@ -49,7 +49,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
         if (!socket) return;
 
         socket.on('comment_new', (comment: Comment) => {
-            if (comment.prediction_id === predictionId) {
+            if (Number(comment.prediction_id) === predictionId) {
                 setComments(prev => [...prev, comment]);
             }
         });
@@ -69,7 +69,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Context token is already auth_token
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ content: newComment })
             });
@@ -84,12 +84,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
 
     return (
         <div className={styles.container}>
-            <h4 className={styles.title}>Discussion ({comments.length})</h4>
             <div className={styles.list}>
                 {loading ? (
-                    <p className={styles.loading}>Loading comments...</p>
+                    <p className={styles.loading}>Accessing records...</p>
                 ) : comments.length === 0 ? (
-                    <p className={styles.empty}>Be the first to comment!</p>
+                    <p className={styles.empty}>The discussion is empty. Be the first to prophesy.</p>
                 ) : (
                     comments.map(comment => (
                         <div key={comment.id} className={styles.comment}>
@@ -108,8 +107,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Add your thoughts..."
                         className={styles.input}
+                        maxLength={150}
                     />
-                    <button type="submit" className={styles.submitBtn}>Post</button>
+                    <button type="submit" className={styles.submitBtn}>POST</button>
                 </form>
             )}
         </div>
