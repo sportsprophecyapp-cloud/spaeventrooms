@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import styles from './SponsorWidget.module.css';
 
 interface Sponsor {
@@ -16,27 +17,43 @@ interface SponsorWidgetProps {
 
 const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
     const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+    const [loading, setLoading] = useState(true);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
     useEffect(() => {
         const fetchSponsors = async () => {
             try {
-                const res = await fetch(`${apiUrl}/api/rooms/${roomId}/sponsors`);
+                const res = await fetch(`${apiUrl}/api/sponsor-subscriptions/placements/${roomId}`);
                 const data = await res.json();
-                setSponsors(data);
+                if (Array.isArray(data)) {
+                    setSponsors(data);
+                }
             } catch (err) {
                 console.error('Error fetching sponsors:', err);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchSponsors();
     }, [roomId, apiUrl]);
 
-    if (!Array.isArray(sponsors) || sponsors.length === 0) return null;
+    if (loading) return <div className={styles.loading}>Accessing Sponsor...</div>;
+
+    // If no sponsors, show the "Your Ad Here" placeholder
+    if (sponsors.length === 0) {
+        return (
+            <Link href={`/sponsors/pricing?ref=${roomId}`} className={`${styles.placeholderContainer} glass`}>
+                <div className={styles.placeholderLabel}>SPONSOR THIS ARENA</div>
+                <p className={styles.placeholderText}>Reach 5,000+ local prophets daily.</p>
+                <div className={styles.placeholderBtn}>SECURE SPOT</div>
+            </Link>
+        );
+    }
 
     return (
-        <div className={styles.container}>
-            <p className={styles.label}>POWERED BY</p>
+        <div className={`${styles.container} glass`}>
+            <p className={styles.label}>OFFICIAL ROOM SPONSOR</p>
             <div className={styles.logoGrid}>
                 {sponsors.map(sponsor => (
                     <a
