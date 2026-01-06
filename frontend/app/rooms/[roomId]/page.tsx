@@ -19,7 +19,7 @@ import RoomChat from '../../components/RoomChat';
 function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
-    const { logout, isAuthenticated } = useAuth();
+    const { logout, isAuthenticated, token } = useAuth(); // Consistent token from context
     const { socket } = useSocket();
 
     const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -32,9 +32,11 @@ function RoomContent() {
         try {
             const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions`);
             const data = await res.json();
-            setPredictions(data);
+            // Safety check: ensure data is an array
+            setPredictions(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error('Error fetching predictions:', err);
+            setPredictions([]);
         }
     };
 
@@ -62,18 +64,17 @@ function RoomContent() {
     }, [socket]);
 
     const handleVote = async (predictionId: number, option: string) => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !token) {
             setIsLoginOpen(true);
             return;
         }
 
-        const token = localStorage.getItem('auth_token');
         try {
             const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions/${predictionId}/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}` // Use context token
                 },
                 body: JSON.stringify({ option })
             });
@@ -104,7 +105,6 @@ function RoomContent() {
                 </div>
             </header>
 
-            {/* Mobile Tab Navigation */}
             <div className={styles.mobileTabs}>
                 <button
                     className={`${styles.tabBtn} ${activeTab === 'predictions' ? styles.activeTab : ''}`}
@@ -127,7 +127,6 @@ function RoomContent() {
             </div>
 
             <div className={styles.mainLayout}>
-                {/* Predictions Column */}
                 <div className={`${styles.column} ${activeTab !== 'predictions' ? styles.mobileHidden : ''}`}>
                     <SponsorWidget roomId={roomId} />
                     <AnnouncementsSection roomId={roomId} />
@@ -155,12 +154,10 @@ function RoomContent() {
                     </div>
                 </div>
 
-                {/* Leaderboard Column */}
                 <div className={`${styles.column} ${styles.middleColumn} ${activeTab !== 'leaderboard' ? styles.mobileHidden : ''}`}>
                     <Leaderboard />
                 </div>
 
-                {/* Chat Column */}
                 <div className={`${styles.column} ${styles.rightColumn} ${activeTab !== 'chat' ? styles.mobileHidden : ''}`}>
                     <RoomChat roomId={roomId} />
                 </div>

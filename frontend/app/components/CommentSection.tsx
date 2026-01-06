@@ -9,7 +9,7 @@ interface Comment {
     id: number;
     prediction_id: number;
     user_id: number;
-    email: string;
+    username: string; // Updated to use username
     content: string;
     created_at: string;
 }
@@ -23,7 +23,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [loading, setLoading] = useState(true);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, token } = useAuth(); // Use token from context
     const { socket } = useSocket();
 
     useEffect(() => {
@@ -33,7 +33,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
                 const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions/${predictionId}/comments`);
                 if (res.ok) {
                     const data = await res.json();
-                    setComments(data);
+                    setComments(Array.isArray(data) ? data : []);
                 }
             } catch (err) {
                 console.error('Error fetching comments:', err);
@@ -61,7 +61,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newComment.trim()) return;
+        if (!newComment.trim() || !token) return;
 
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -69,7 +69,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${token}` // Context token is already auth_token
                 },
                 body: JSON.stringify({ content: newComment })
             });
@@ -93,7 +93,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
                 ) : (
                     comments.map(comment => (
                         <div key={comment.id} className={styles.comment}>
-                            <div className={styles.author}>{comment.email.split('@')[0]}</div>
+                            <div className={styles.author}>@{comment.username || 'Prophet'}</div>
                             <div className={styles.content}>{comment.content}</div>
                         </div>
                     ))

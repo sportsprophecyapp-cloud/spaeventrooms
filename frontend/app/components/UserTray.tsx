@@ -19,20 +19,20 @@ interface Badge {
 }
 
 const UserTray: React.FC = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, token } = useAuth(); // Use token from context
     const [stats, setStats] = useState<UserStats | null>(null);
     const [badges, setBadges] = useState<Badge[]>([]);
     const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
-        if (!isAuthenticated) return;
+        if (!isAuthenticated || !token) return;
 
         const fetchStats = async () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                 const res = await fetch(`${apiUrl}/api/gamification/me`, {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${token}` // Context token is already correct
                     }
                 });
                 if (res.ok) {
@@ -46,12 +46,12 @@ const UserTray: React.FC = () => {
         };
 
         fetchStats();
-    }, [isAuthenticated]);
+    }, [isAuthenticated, token]);
 
     if (!isAuthenticated || !stats) return null;
 
     const levelProgress = stats.points_to_next_level > 0
-        ? (stats.total_points % 500) / 5 // Simplified math for demo level thresholds
+        ? (stats.total_points % 500) / 5 
         : 100;
 
     return (
