@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useGamification } from '../hooks/useGamification';
+import { useAuth } from '../context/AuthContext';
 import styles from './TokenShop.module.css';
 
 interface TokenShopProps {
@@ -10,7 +11,9 @@ interface TokenShopProps {
 
 export default function TokenShop({ onClose }: TokenShopProps) {
     const { cosmetics, tokenBalance, purchaseCosmetic, loading } = useGamification();
+    const { user } = useAuth();
     const [purchasing, setPurchasing] = useState<number | null>(null);
+    const [previewItem, setPreviewItem] = useState<any>(null);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const handlePurchase = async (cosmeticId: number, cost: number) => {
@@ -24,9 +27,9 @@ export default function TokenShop({ onClose }: TokenShopProps) {
         const success = await purchaseCosmetic(cosmeticId);
 
         if (success) {
-            setMessage({ type: 'success', text: 'Purchase successful!' });
+            setMessage({ type: 'success', text: 'Prophecy Gear Acquired!' });
         } else {
-            setMessage({ type: 'error', text: 'Purchase failed. Try again.' });
+            setMessage({ type: 'error', text: 'Acquisition Failed. Try again.' });
         }
 
         setTimeout(() => setMessage(null), 3000);
@@ -35,73 +38,83 @@ export default function TokenShop({ onClose }: TokenShopProps) {
 
     return (
         <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <button className={styles.closeBtn} onClick={onClose}>
-                    ✕
-                </button>
+            <div className={`${styles.modal} glass`} onClick={(e) => e.stopPropagation()}>
+                <button className={styles.closeBtn} onClick={onClose}>✕</button>
 
-                <div className={styles.header}>
-                    <h2>Token Shop</h2>
-                    <div className={styles.balance}>
-                        <span className={styles.balanceIcon}>🪙</span>
-                        <span className={styles.balanceAmount}>{tokenBalance.toLocaleString()}</span>
+                <div className={styles.layout}>
+                    {/* Left: Preview Area */}
+                    <div className={styles.previewSection}>
+                        <h2 className={styles.title}>Cosmetic Lab</h2>
+                        <div className={styles.previewContainer}>
+                            <div className={styles.avatarWrapper} style={{ 
+                                borderColor: previewItem?.type === 'frame' ? 'var(--accent)' : 'var(--glass-border)' 
+                            }}>
+                                <div className={styles.previewAvatar}>
+                                    {user?.username?.charAt(0).toUpperCase() || 'P'}
+                                </div>
+                            </div>
+                            <p className={styles.previewName}>@{user?.username || 'Prophet'}</p>
+                            <span className={styles.previewStatus}>
+                                {previewItem ? `PREVIEWING: ${previewItem.name}` : 'Select gear to try on'}
+                            </span>
+                        </div>
+                        
+                        <div className={styles.balance}>
+                            <span className={styles.balanceLabel}>YOUR TOKENS</span>
+                            <span className={styles.balanceAmount}>{tokenBalance.toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    {/* Right: Items Grid */}
+                    <div className={styles.itemsSection}>
+                        <div className={styles.grid}>
+                            {loading ? (
+                                <div className={styles.loading}>Accessing Gear...</div>
+                            ) : (
+                                cosmetics.map((item) => (
+                                    <div 
+                                        key={item.id} 
+                                        className={`${styles.card} ${previewItem?.id === item.id ? styles.activePreview : ''}`}
+                                        onClick={() => setPreviewItem(item)}
+                                    >
+                                        <div className={styles.cardImage}>
+                                            <span className={styles.itemIcon}>
+                                                {item.type === 'avatar' ? '👤' : '🖼️'}
+                                            </span>
+                                        </div>
+
+                                        <div className={styles.cardContent}>
+                                            <h3>{item.name}</h3>
+                                            <div className={styles.cardFooter}>
+                                                <span className={styles.cost}>{item.cost} PTS</span>
+                                                {item.owned ? (
+                                                    <span className={styles.ownedBadge}>OWNED</span>
+                                                ) : (
+                                                    <button
+                                                        className={styles.buyBtn}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handlePurchase(item.id, item.cost);
+                                                        }}
+                                                        disabled={purchasing === item.id || tokenBalance < item.cost}
+                                                    >
+                                                        {purchasing === item.id ? '...' : 'BUY'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 {message && (
-                    <div className={`${styles.message} ${styles[message.type]}`}>
+                    <div className={`${styles.toast} ${styles[message.type]}`}>
                         {message.text}
                     </div>
                 )}
-
-                <div className={styles.grid}>
-                    {loading ? (
-                        <div className={styles.loading}>Loading shop...</div>
-                    ) : cosmetics.length === 0 ? (
-                        <div className={styles.empty}>No cosmetics available yet.</div>
-                    ) : (
-                        cosmetics.map((item) => (
-                            <div key={item.id} className={styles.card}>
-                                <div className={styles.cardImage}>
-                                    {item.imageUrl ? (
-                                        <img src={item.imageUrl} alt={item.name} />
-                                    ) : (
-                                        <div className={styles.placeholder}>
-                                            {item.type === 'avatar' ? '👤' : item.type === 'frame' ? '🖼️' : '🎨'}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className={styles.cardContent}>
-                                    <h3>{item.name}</h3>
-                                    <p className={styles.type}>{item.type}</p>
-                                    {item.description && (
-                                        <p className={styles.description}>{item.description}</p>
-                                    )}
-
-                                    <div className={styles.cardFooter}>
-                                        <span className={styles.cost}>
-                                            <span className={styles.costIcon}>🪙</span>
-                                            {item.cost}
-                                        </span>
-
-                                        {item.owned ? (
-                                            <span className={styles.ownedBadge}>Owned</span>
-                                        ) : (
-                                            <button
-                                                className={styles.buyBtn}
-                                                onClick={() => handlePurchase(item.id, item.cost)}
-                                                disabled={purchasing === item.id || tokenBalance < item.cost}
-                                            >
-                                                {purchasing === item.id ? 'Buying...' : 'Buy'}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
             </div>
         </div>
     );
