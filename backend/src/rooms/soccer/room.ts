@@ -15,29 +15,8 @@ export class SoccerRoom extends BaseRoom {
         this.router.get('/matches', async (req, res) => {
             try {
                 const result = await query('SELECT * FROM soccer_matches ORDER BY league ASC, start_time ASC');
-
-                // Group by league
-                const matches = result.rows;
-                const grouped: Record<string, any[]> = {};
-
-                matches.forEach(match => {
-                    const leagueName = match.league || 'Unknown League';
-                    if (!grouped[leagueName]) {
-                        grouped[leagueName] = [];
-                    }
-                    grouped[leagueName].push(match);
-                });
-
-                // Transform to array of sections for easier frontend rendering if needed, 
-                // OR just return the object. User asked "setup into sections".
-                // Let's return a list where each item is { title: "Premier League", matches: [...] }
-                const sections = Object.keys(grouped).map(league => ({
-                    title: league,
-                    logo: grouped[league][0]?.league_logo,
-                    matches: grouped[league]
-                }));
-
-                res.json(sections);
+                // Return flat array of matches to fix frontend map() crash
+                res.json(result.rows);
             } catch (err) {
                 console.error('Error fetching matches:', err);
                 res.status(500).json({ error: 'Internal Server Error' });
@@ -46,7 +25,7 @@ export class SoccerRoom extends BaseRoom {
 
         this.router.post('/predictions', authenticate, async (req: AuthRequest, res) => {
             const { matchId, pick } = req.body;
-            const userId = req.user.id;
+            const userId = req.user?.id;
 
             if (!matchId || !pick) {
                 return res.status(400).json({ message: 'matchId and pick are required' });
@@ -88,7 +67,6 @@ export class SoccerRoom extends BaseRoom {
 
                 const updatedMatch = result.rows[0];
 
-                // Emit socket event
                 if (this.ioNamespace) {
                     this.ioNamespace.emit('match_update', updatedMatch);
                 }

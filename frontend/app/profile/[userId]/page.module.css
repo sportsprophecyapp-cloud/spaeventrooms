@@ -1,0 +1,183 @@
+.container {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--background);
+}
+
+.header {
+    margin-bottom: 3rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.avatarWrapper {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--accent);
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    background: var(--glass);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--foreground);
+}
+
+.username {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+}
+
+.badges {
+    display: flex;
+    gap: 10px;
+}
+
+.levelBadge, .streakBadge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.levelBadge {
+    color: var(--accent);
+}
+
+.streakBadge {
+    color: #ffd700;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.statCard {
+    padding: 1.5rem;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.statCard:hover {
+    transform: translateY(-5px);
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    color: var(--neutral);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.statValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--foreground);
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: var(--foreground);
+}
+
+.historyList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.historyCard {
+    padding: 1.25rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.historyInfo h3 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.historyInfo p {
+    font-size: 0.85rem;
+    color: var(--neutral);
+    margin-bottom: 8px;
+}
+
+.predictionText {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.status {
+    font-weight: 900;
+    font-size: 1rem;
+}
+
+.correct {
+    color: var(--success);
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+.incorrect {
+    color: var(--error);
+}
+
+.pending {
+    color: var(--neutral);
+}
+
+.loading, .error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.2rem;
+    color: var(--neutral);
+}
+
+@media (max-width: 600px) {
+    .profileHeader {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+}

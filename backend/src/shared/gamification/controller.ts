@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { query as dbQuery } from '../database';
+import { AuthRequest } from '../auth/middleware';
 
 interface CosmeticRow {
     id: string;
@@ -13,7 +14,71 @@ interface CosmeticRow {
 interface UserCosmeticRow {
     cosmetic_id: string;
 }
-import { AuthRequest } from '../auth/middleware';
+
+// GET /api/gamification/me
+export const handleGetMe = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+        const userResult = await dbQuery(
+            `SELECT token_balance, total_points, current_level FROM users WHERE id = $1`,
+            [userId]
+        );
+
+        if (userResult.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+
+        const badgesResult = await dbQuery(
+            `SELECT c.id, c.name, c.icon, c.description, uc.acquired_at 
+             FROM cosmetics c 
+             JOIN user_cosmetics uc ON c.id = uc.cosmetic_id 
+             WHERE uc.user_id = $1 AND c.type = 'badge'`,
+            [userId]
+        );
+
+        res.json({
+            success: true,
+            stats: {
+                total_points: userResult.rows[0].total_points || 0,
+                current_level: userResult.rows[0].current_level || 1,
+                token_balance: userResult.rows[0].token_balance || 0,
+                points_to_next_level: 500 // Threshold example
+            },
+            badges: badgesResult.rows
+        });
+    } catch (error) {
+        console.error('Error fetching user gamification stats:', error);
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+};
+
+// GET /api/gamification/leaderboard
+export const handleGetLeaderboard = async (req: Request, res: Response) => {
+    try {
+        const { sport } = req.query;
+        // In a real scenario, you might filter by sport. For now, we return global rankings.
+        const leaderboardResult = await dbQuery(
+            `SELECT username, total_points as points, current_level, 
+             (SELECT COUNT(*) FROM soccer_predictions WHERE user_id = users.id AND result = 'correct') as correct_predictions
+             FROM users 
+             ORDER BY total_points DESC 
+             LIMIT 100`
+        );
+
+        const leaderboard = leaderboardResult.rows.map((row, index) => ({
+            rank: index + 1,
+            username: row.username,
+            points: row.points || 0,
+            correct_predictions: parseInt(row.correct_predictions) || 0,
+            level: row.current_level
+        }));
+
+        res.json({ success: true, leaderboard });
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+};
 
 // POST /api/gamification/daily-login
 export const handleDailyLogin = async (req: AuthRequest, res: Response) => {
@@ -80,8 +145,6 @@ export const handleDailyLogin = async (req: AuthRequest, res: Response) => {
                     bonusTriggered = true;
                     bonusMessage = '🏆 30-Day Streak! +500 tokens + Entry Ticket badge!';
 
-                    // Award 30-day badge (assuming cosmetic id for 'Entry Ticket Badge' exists or logic to create/find it is standard)
-                    // For robustness, we check if it exists first.
                     const cosmeticResult = await dbQuery(
                         `SELECT id FROM cosmetics WHERE name = 'Entry Ticket Badge' LIMIT 1`
                     );
@@ -164,7 +227,6 @@ export const getShop = async (req: AuthRequest, res: Response) => {
 
         const ownedIds = new Set(ownedResult.rows.map((r: UserCosmeticRow) => r.cosmetic_id));
 
-        // Fetch user's token balance
         const balanceResult = await dbQuery(
             `SELECT token_balance FROM users WHERE id = $1`,
             [userId]
@@ -175,8 +237,7 @@ export const getShop = async (req: AuthRequest, res: Response) => {
             name: c.name,
             type: c.type,
             cost: c.cost,
-            // rarity: c.rarity, // Rarity not in DB schema yet, omitting
-            imageUrl: c.asset_url, // Mapped to asset_url
+            imageUrl: c.asset_url,
             description: c.description,
             owned: ownedIds.has(c.id),
         }));
@@ -205,7 +266,6 @@ export const purchaseCosmetic = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ success: false, error: 'cosmeticId required' });
         }
 
-        // Fetch cosmetic details
         const cosmeticResult = await dbQuery(
             `SELECT id, name, cost FROM cosmetics WHERE id = $1`,
             [cosmeticId]
@@ -217,7 +277,6 @@ export const purchaseCosmetic = async (req: AuthRequest, res: Response) => {
 
         const cosmetic = cosmeticResult.rows[0];
 
-        // Check if user already owns it
         const ownershipResult = await dbQuery(
             `SELECT id FROM user_cosmetics WHERE user_id = $1 AND cosmetic_id = $2`,
             [userId, cosmeticId]
@@ -227,7 +286,6 @@ export const purchaseCosmetic = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ success: false, error: 'Already owned' });
         }
 
-        // Check balance
         const userResult = await dbQuery(
             `SELECT token_balance FROM users WHERE id = $1`,
             [userId]
@@ -242,19 +300,16 @@ export const purchaseCosmetic = async (req: AuthRequest, res: Response) => {
             });
         }
 
-        // Deduct tokens
         await dbQuery(
             `UPDATE users SET token_balance = token_balance - $1 WHERE id = $2`,
             [cosmetic.cost, userId]
         );
 
-        // Add to inventory
         await dbQuery(
             `INSERT INTO user_cosmetics (user_id, cosmetic_id, acquired_at) VALUES ($1, $2, NOW())`,
             [userId, cosmeticId]
         );
 
-        // Log transaction
         await dbQuery(
             `INSERT INTO token_transactions (user_id, amount, type, description, created_at)
        VALUES ($1, $2, 'purchase', $3, NOW())`,
@@ -295,7 +350,6 @@ export const equipCosmetic = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ success: false, error: 'Invalid slotType' });
         }
 
-        // Check ownership
         const ownershipResult = await dbQuery(
             `SELECT id FROM user_cosmetics WHERE user_id = $1 AND cosmetic_id = $2`,
             [userId, cosmeticId]
@@ -305,12 +359,6 @@ export const equipCosmetic = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ success: false, error: 'Cosmetic not owned' });
         }
 
-        // Update equipped status (Logic: unequip others in same slot, equip this one)
-        // NOTE: Current DB Schema has `is_equipped` BOOLEAN in `user_cosmetics`.
-        // It doesn't explicitly store `slotType` there. Ideally, `cosmetics` table has `type` which matches `slotType`.
-        // We should assume `cosmetics.type` == `slotType`.
-
-        // 1. Unequip any item of this type/slot for this user
         await dbQuery(
             `UPDATE user_cosmetics uc
          SET is_equipped = false
@@ -319,7 +367,6 @@ export const equipCosmetic = async (req: AuthRequest, res: Response) => {
             [userId, slotType]
         );
 
-        // 2. Equip the new item
         await dbQuery(
             `UPDATE user_cosmetics SET is_equipped = true
        WHERE user_id = $1 AND cosmetic_id = $2`,
@@ -348,9 +395,7 @@ export const shareRoom = async (req: AuthRequest, res: Response) => {
         }
 
         const { roomId } = req.body;
-        // roomId optional or required logic? Let's assume passed for logging.
 
-        // Check if already shared in last 24 hours
         const shareCheckResult = await dbQuery(
             `SELECT created_at FROM token_transactions 
        WHERE user_id = $1 AND description LIKE 'Room Share%' AND created_at > NOW() - INTERVAL '24 hours'`,
@@ -368,13 +413,11 @@ export const shareRoom = async (req: AuthRequest, res: Response) => {
             });
         }
 
-        // Award tokens
         await dbQuery(
             `UPDATE users SET token_balance = token_balance + 50 WHERE id = $1`,
             [userId]
         );
 
-        // Log transaction
         await dbQuery(
             `INSERT INTO token_transactions (user_id, amount, type, description, created_at)
        VALUES ($1, 50, 'referral', $2, NOW())`,

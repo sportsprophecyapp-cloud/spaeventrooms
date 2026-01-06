@@ -29,7 +29,13 @@ const MatchList: React.FC = () => {
         fetch(`${apiUrl}/api/rooms/soccer/matches`)
             .then(res => res.json())
             .then(data => {
-                setMatches(data);
+                // Safety check: ensure data is an array before setting state
+                if (Array.isArray(data)) {
+                    setMatches(data);
+                } else {
+                    console.error('Expected array of matches, got:', data);
+                    setMatches([]);
+                }
                 setLoading(false);
             })
             .catch(err => {
@@ -47,7 +53,6 @@ const MatchList: React.FC = () => {
                 m.match_id === updatedMatch.match_id ? { ...m, ...updatedMatch, isPulsing: true } : m
             ));
 
-            // Remove pulsing after 3 seconds
             setTimeout(() => {
                 setMatches(prev => prev.map(m =>
                     m.match_id === updatedMatch.match_id ? { ...m, isPulsing: false } : m
@@ -68,7 +73,7 @@ const MatchList: React.FC = () => {
     if (loading) {
         return (
             <div>
-                <h2 style={{ marginBottom: '1rem', fontWeight: 800 }}>Upcoming Matches</h2>
+                <h2 style={{ marginBottom: '1rem', fontWeight: 800, color: 'var(--neutral)' }}>Upcoming Matches</h2>
                 <SkeletonCard type="match" />
                 <SkeletonCard type="match" />
             </div>
@@ -77,9 +82,11 @@ const MatchList: React.FC = () => {
 
     return (
         <div>
-            <h2 style={{ marginBottom: '1rem', fontWeight: 800 }}>Upcoming Matches</h2>
+            <h2 style={{ marginBottom: '1rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Upcoming Matches</h2>
             {matches.length === 0 ? (
-                <p>No matches scheduled.</p>
+                <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--glass)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
+                    <p style={{ color: 'var(--neutral)' }}>No matches scheduled for the next 24 hours.</p>
+                </div>
             ) : (
                 matches.map(match => (
                     <MatchCard
@@ -96,7 +103,6 @@ const MatchList: React.FC = () => {
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     onSuccess={() => {
-                        // Optional: Refresh matches or show success toast
                         console.log('Prediction success!');
                     }}
                 />
