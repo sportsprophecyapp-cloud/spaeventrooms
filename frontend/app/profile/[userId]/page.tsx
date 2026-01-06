@@ -10,90 +10,115 @@ interface UserProfile {
     username: string;
     email: string;
     tokens: number;
-    crowns: number;
+    points: number;
     level: number;
     total_predictions: number;
     correct_predictions: number;
     streak: number;
-    avatar_url?: string;
     frame_url?: string;
-}
-
-interface PredictionHistory {
-    id: number;
-    match_name: string;
-    question: string;
-    prediction: string;
-    result: 'correct' | 'incorrect' | 'pending';
-    points_earned: number;
-    created_at: string;
 }
 
 const ProfilePage = () => {
     const { userId } = useParams();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, token, login } = useAuth(); // Destructure login to update local state
     const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [history, setHistory] = useState<PredictionHistory[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    
+    // Identity Edit State
+    const [isEditing, setIsEditing] = useState(false);
+    const [newName, setNewName] = useState('');
+    const [editError, setEditError] = useState('');
+
+    const fetchProfileData = async () => {
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${apiUrl}/api/auth/profile/${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setProfile(data.user);
+                setNewName(data.user.username);
+            }
+        } catch (err) {
+            console.error('Error fetching profile data:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchProfileData = async () => {
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const token = localStorage.getItem('token');
-                
-                // Fetch profile
-                const profileRes = await fetch(`${apiUrl}/api/auth/profile/${userId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                // Fetch prediction history
-                const historyRes = await fetch(`${apiUrl}/api/rooms/all/predictions/user/${userId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (profileRes.ok) {
-                    const profileData = await profileRes.json();
-                    setProfile(profileData.user);
-                }
-
-                if (historyRes.ok) {
-                    const historyData = await historyRes.json();
-                    setHistory(historyData.predictions || []);
-                }
-            } catch (err) {
-                console.error('Error fetching profile data:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        if (isAuthenticated) {
+        if (isAuthenticated && token) {
             fetchProfileData();
         }
-    }, [userId, isAuthenticated]);
+    }, [userId, isAuthenticated, token]);
 
-    if (isLoading) return <div className={styles.loading}>Loading Prophet Data...</div>;
+    const handleUpdateIdentity = async () => {
+        setEditError('');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        try {
+            const res = await fetch(`${apiUrl}/api/auth/username`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ newUsername: newName })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Update local profile
+                setProfile(prev => prev ? { ...prev, username: data.user.username } : null);
+                // Update AuthContext so chat/header updates too
+                login(token!, data.user);
+                setIsEditing(false);
+            } else {
+                setEditError(data.error || 'Name already taken');
+            }
+        } catch (err) {
+            setEditError('Connection failed.');
+        }
+    };
+
+    if (isLoading) return <div className={styles.loading}>Accessing Prophet Records...</div>;
     if (!profile) return <div className={styles.error}>Prophet not found.</div>;
 
-    const accuracy = profile.total_predictions > 0 
-        ? ((profile.correct_predictions / profile.total_predictions) * 100).toFixed(1) 
-        : '0';
+    const isOwnProfile = user?.id.toString() === userId;
 
     return (
         <div className={styles.container}>
             <header className={styles.header}>
                 <div className={styles.profileHeader}>
-                    <div className={styles.avatarWrapper} style={{ borderColor: profile.frame_url || 'var(--accent)' }}>
+                    <div className={styles.avatarWrapper} style={{ borderColor: 'var(--accent)' }}>
                         <div className={styles.avatar}>
                             {profile.username.charAt(0).toUpperCase()}
                         </div>
                     </div>
                     <div className={styles.userInfo}>
-                        <h1 className={styles.username}>@{profile.username}</h1>
+                        {isOwnProfile && isEditing ? (
+                            <div className={styles.editArea}>
+                                <input 
+                                    className={styles.nameInput}
+                                    value={newName}
+                                    onChange={(e) => setNewName(e.target.value)}
+                                    placeholder="Enter UUID/Handle"
+                                    maxLength={15}
+                                />
+                                <button className={styles.saveBtn} onClick={handleUpdateIdentity}>SAVE</button>
+                                <button className={styles.cancelBtn} onClick={() => setIsEditing(false)}>✕</button>
+                                {editError && <p className={styles.editError}>{editError}</p>}
+                            </div>
+                        ) : (
+                            <div className={styles.nameDisplay}>
+                                <h1 className={styles.username}>@{profile.username}</h1>
+                                {isOwnProfile && (
+                                    <button className={styles.editBtn} onClick={() => setIsEditing(true)}>✎ Edit Identity</button>
+                                )}
+                            </div>
+                        )}
                         <div className={styles.badges}>
-                            <span className={styles.levelBadge}>Level {profile.level}</span>
-                            <span className={styles.streakBadge}>⭐ {profile.streak} Day Streak</span>
+                            <span className={styles.levelBadge}>Level {profile.level || 1}</span>
+                            <span className={styles.pointsBadge}>💎 {profile.points || 0} PTS</span>
                         </div>
                     </div>
                 </div>
@@ -102,38 +127,16 @@ const ProfilePage = () => {
             <div className={styles.content}>
                 <section className={styles.statsGrid}>
                     <div className={`${styles.statCard} glass`}>
-                        <span className={styles.statLabel}>Accuracy</span>
-                        <span className={styles.statValue}>{accuracy}%</span>
-                    </div>
-                    <div className={`${styles.statCard} glass`}>
-                        <span className={styles.statLabel}>Predictions</span>
-                        <span className={styles.statValue}>{profile.total_predictions}</span>
-                    </div>
-                    <div className={`${styles.statCard} glass`}>
                         <span className={styles.statLabel}>Tokens</span>
                         <span className={styles.statValue}>{profile.tokens}</span>
                     </div>
-                </section>
-
-                <section className={styles.historySection}>
-                    <h2 className={styles.sectionTitle}>Prediction History</h2>
-                    <div className={styles.historyList}>
-                        {history.length === 0 ? (
-                            <p className={styles.emptyMsg}>No prophecies recorded yet.</p>
-                        ) : (
-                            history.map(item => (
-                                <div key={item.id} className={`${styles.historyCard} glass`}>
-                                    <div className={styles.historyInfo}>
-                                        <h3>{item.match_name}</h3>
-                                        <p>{item.question}</p>
-                                        <span className={styles.predictionText}>Predicted: {item.prediction}</span>
-                                    </div>
-                                    <div className={`${styles.status} ${styles[item.result]}`}>
-                                        {item.result === 'pending' ? '...' : (item.result === 'correct' ? `+${item.points_earned} PTS` : '✗')}
-                                    </div>
-                                </div>
-                            ))
-                        )}
+                    <div className={`${styles.statCard} glass`}>
+                        <span className={styles.statLabel}>Rank</span>
+                        <span className={styles.statValue}>#{profile.level > 1 ? '12' : '---'}</span>
+                    </div>
+                    <div className={`${styles.statCard} glass`}>
+                        <span className={styles.statLabel}>Experience</span>
+                        <span className={styles.statValue}>{profile.points} XP</span>
                     </div>
                 </section>
             </div>

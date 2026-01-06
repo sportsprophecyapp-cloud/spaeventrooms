@@ -17,6 +17,7 @@ interface CustomPollCardProps {
 const CustomPollCard = ({ prediction, roomId, onVote }: CustomPollCardProps) => {
     const [selected, setSelected] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showComments, setShowComments] = useState(false); // Collapsible State
 
     const options = typeof prediction.options === 'string'
         ? JSON.parse(prediction.options)
@@ -69,7 +70,21 @@ const CustomPollCard = ({ prediction, roomId, onVote }: CustomPollCardProps) => 
                 </div>
             )}
 
-            <CommentSection predictionId={prediction.id} roomId={roomId} />
+            {/* DISCUSSION TOGGLE */}
+            <div className={styles.discussionArea}>
+                <button 
+                    className={styles.discussToggle}
+                    onClick={() => setShowComments(!showComments)}
+                >
+                    💬 {showComments ? 'Hide Discussion' : 'Join Discussion'}
+                </button>
+                
+                {showComments && (
+                    <div className={styles.commentsWrapper}>
+                        <CommentSection predictionId={prediction.id} roomId={roomId} />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

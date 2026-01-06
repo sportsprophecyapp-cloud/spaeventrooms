@@ -32,7 +32,6 @@ function RoomContent() {
         try {
             const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions`);
             const data = await res.json();
-            // FIX: Ensure we extract the array if nested, or fallback to empty array
             if (Array.isArray(data)) {
                 setPredictions(data);
             } else if (data && Array.isArray(data.predictions)) {
@@ -57,15 +56,8 @@ function RoomContent() {
             setPredictions(prev => [newPrediction, ...prev]);
         });
 
-        socket.on('prediction_revealed', (data: { id: number, correctAnswer: string }) => {
-            setPredictions(prev => prev.map(p =>
-                p.id === data.id ? { ...p, correct_answer: data.correctAnswer, revealed_at: new Date().toISOString() } : p
-            ));
-        });
-
         return () => {
             socket.off('prediction_new');
-            socket.off('prediction_revealed');
         };
     }, [socket]);
 
@@ -111,7 +103,6 @@ function RoomContent() {
                 </div>
             </header>
 
-            {/* Mobile Tab Navigation */}
             <div className={styles.mobileTabs}>
                 <button
                     className={`${styles.tabBtn} ${activeTab === 'predictions' ? styles.activeTab : ''}`}
@@ -134,7 +125,6 @@ function RoomContent() {
             </div>
 
             <div className={styles.mainLayout}>
-                {/* Predictions Column */}
                 <div className={`${styles.column} ${activeTab !== 'predictions' ? styles.mobileHidden : ''}`}>
                     <SponsorWidget roomId={roomId} />
                     <AnnouncementsSection roomId={roomId} />
@@ -162,12 +152,10 @@ function RoomContent() {
                     </div>
                 </div>
 
-                {/* Leaderboard Column */}
                 <div className={`${styles.column} ${styles.middleColumn} ${activeTab !== 'leaderboard' ? styles.mobileHidden : ''}`}>
                     <Leaderboard />
                 </div>
 
-                {/* Chat Column */}
                 <div className={`${styles.column} ${styles.rightColumn} ${activeTab !== 'chat' ? styles.mobileHidden : ''}`}>
                     <RoomChat roomId={roomId} />
                 </div>
