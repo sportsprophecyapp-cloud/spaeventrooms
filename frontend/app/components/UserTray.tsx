@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import styles from './UserTray.module.css';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,19 +11,12 @@ interface UserStats {
     points_to_next_level: number;
 }
 
-interface Badge {
-    id: number;
-    name: string;
-    icon: string;
-    description: string;
-    earned_at: string;
-}
-
 const UserTray: React.FC = () => {
-    const { isAuthenticated, token } = useAuth(); // Use token from context
+    const { isAuthenticated, token, user } = useAuth();
     const [stats, setStats] = useState<UserStats | null>(null);
-    const [badges, setBadges] = useState<Badge[]>([]);
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const isAdmin = user?.email === 'sportsprophecyapp@gmail.com';
 
     useEffect(() => {
         if (!isAuthenticated || !token) return;
@@ -31,14 +25,11 @@ const UserTray: React.FC = () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                 const res = await fetch(`${apiUrl}/api/gamification/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}` // Context token is already correct
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
                     const data = await res.json();
                     setStats(data.stats);
-                    setBadges(data.badges);
                 }
             } catch (err) {
                 console.error('Error fetching gamification stats:', err);
@@ -50,9 +41,7 @@ const UserTray: React.FC = () => {
 
     if (!isAuthenticated || !stats) return null;
 
-    const levelProgress = stats.points_to_next_level > 0
-        ? (stats.total_points % 500) / 5 
-        : 100;
+    const levelProgress = (stats.total_points % 500) / 5;
 
     return (
         <div className={`${styles.container} ${isExpanded ? styles.expanded : ''}`}>
@@ -70,19 +59,22 @@ const UserTray: React.FC = () => {
             </div>
 
             {isExpanded && (
-                <div className={styles.drawer}>
-                    <h4 className={styles.drawerTitle}>Achievements</h4>
-                    <div className={styles.badgeGrid}>
-                        {badges.length === 0 ? (
-                            <p className={styles.emptyMsg}>Predict to earn badges!</p>
-                        ) : (
-                            badges.map(badge => (
-                                <div key={badge.id} className={styles.badgeItem} title={badge.description}>
-                                    <span className={styles.badgeIcon}>{badge.icon}</span>
-                                    <span className={styles.badgeName}>{badge.name}</span>
-                                </div>
-                            ))
+                <div className={`${styles.drawer} glass`}>
+                    <h4 className={styles.drawerTitle}>PROPHET COMMAND</h4>
+                    <div className={styles.menuLinks}>
+                        <Link href={`/profile/${user?.id}`} className={styles.menuLink}>
+                            👤 VIEW PROFILE
+                        </Link>
+                        
+                        {isAdmin && (
+                            <Link href="/admin" className={`${styles.menuLink} ${styles.adminLink}`}>
+                                🛡️ ADMIN PANEL
+                            </Link>
                         )}
+                        
+                        <Link href="/sponsors/pricing" className={styles.menuLink}>
+                            💎 BECOME A SPONSOR
+                        </Link>
                     </div>
                 </div>
             )}

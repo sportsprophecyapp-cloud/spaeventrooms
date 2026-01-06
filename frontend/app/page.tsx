@@ -15,7 +15,7 @@ const HomePage = () => {
     {
       id: 'soccer',
       name: 'Soccer Arena',
-      description: 'Predict match winners and events from the world\'s top leagues.',
+      description: 'Forecast match winners and events from the world\'s top leagues.',
       icon: '⚽',
       color: 'var(--accent)',
       active: true
@@ -23,7 +23,7 @@ const HomePage = () => {
     {
       id: 'nfl',
       name: 'NFL Hub',
-      description: 'Touchdown predictions and game scripts. Coming for the playoffs!',
+      description: 'Pro predictions and game scripts. Coming for the playoffs!',
       icon: '🏈',
       color: '#ff4b4b',
       active: false
@@ -58,7 +58,6 @@ const HomePage = () => {
     if (isAuthenticated) {
       router.push(`/rooms/${roomId}`);
     } else {
-      // FIX: Pass the intended room as a redirect parameter
       router.push(`/auth/login?redirect=/rooms/${roomId}`);
     }
   };
@@ -113,6 +112,10 @@ const HomePage = () => {
         <SponsorMarquee />
         <div className={styles.footerInfo}>
           <p>&copy; 2026 Sports Prophecy Platform. All rights reserved.</p>
+          <p className={styles.disclaimer}>
+            Sports Prophecy is a social platform for entertainment purposes only. 
+            No real money can be won or wagered on this site.
+          </p>
           <span className={styles.version}>v{APP_VERSION}</span>
         </div>
       </footer>

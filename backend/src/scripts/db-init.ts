@@ -3,7 +3,7 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Robust Database Initialization (v2.6)...');
+        console.log('🚀 Starting Robust Database Initialization (v2.7 - Compliance Update)...');
 
         const schema = `
             CREATE TABLE IF NOT EXISTS users (
@@ -95,36 +95,50 @@ const initDB = async () => {
                 acquired_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, cosmetic_id)
             );
+
+            CREATE TABLE IF NOT EXISTS token_transactions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                amount INTEGER NOT NULL,
+                type VARCHAR(50) NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS room_sponsors (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) REFERENCES rooms(room_id),
+                name VARCHAR(100) NOT NULL,
+                logo_url TEXT,
+                link_url TEXT,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS announcements (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) REFERENCES rooms(room_id),
+                type VARCHAR(50), 
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                is_draft BOOLEAN DEFAULT false,
+                published_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER REFERENCES users(id)
+            );
         `;
         await client.query(schema);
         console.log('✅ Schema applied successfully.');
 
-        // 2. Fix Missing Usernames (Critical for UI)
-        console.log('🔧 Fixing missing usernames...');
+        // 2. Seed Data (Compliant Wording)
         await client.query(`
-            UPDATE users 
-            SET username = split_part(email, '@', 1) 
-            WHERE username IS NULL OR username = '';
-        `);
-
-        // 3. Seed Essential Data
-        console.log('🌱 Seeding starter content...');
-        await client.query(`
-            INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Pro Soccer Arena')
+            INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Soccer Room')
             ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
 
-            -- Starter Polls
-            INSERT INTO custom_predictions (room_id, question, options, closes_at) VALUES 
-            ('soccer', 'Will there be a Red Card in any match today?', '["YES", "NO"]', NOW() + INTERVAL '24 hours'),
-            ('soccer', 'Which league will have the most goals today?', '["Premier League", "La Liga", "MLS"]', NOW() + INTERVAL '24 hours'),
-            ('soccer', 'Will any goalkeeper keep a clean sheet today?', '["YES", "NO"]', NOW() + INTERVAL '24 hours')
-            ON CONFLICT DO NOTHING;
-
-            -- Starter Cosmetics
             INSERT INTO cosmetics (id, name, description, type, cost, asset_url) VALUES 
-            ('avatar_basic', 'Blue Prophet', 'Standard apprentice avatar', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
-            ('avatar_premium', 'Neon King', 'Master predictor avatar', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
-            ('frame_gold', 'Gold Frame', 'Exclusive winner border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
+            ('avatar_basic', 'Prophet Apprentice', 'Standard path entry', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
+            ('avatar_premium', 'Master Seer', 'Expert level prophet', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
+            ('frame_gold', 'Gilded Aura', 'Exclusive level border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
             ON CONFLICT (id) DO NOTHING;
         `);
 

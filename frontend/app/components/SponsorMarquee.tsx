@@ -1,41 +1,25 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styles from './SponsorMarquee.module.css';
 
-interface Sponsor {
-    id: number;
-    name: string;
-    logo_url: string;
-    link_url: string;
-}
-
 const SponsorMarquee = () => {
-    // Mock data for immediate visual verification (replace with API later if needed)
-    const [partners, setPartners] = useState<Sponsor[]>([
-        { id: 1, name: 'CloudBet', logo_url: 'https://placehold.co/100x40/222/999?text=CloudBet', link_url: '#' },
-        { id: 2, name: 'SportData', logo_url: 'https://placehold.co/100x40/222/999?text=SportData', link_url: '#' },
-        { id: 3, name: 'ArenaX', logo_url: 'https://placehold.co/100x40/222/999?text=ArenaX', link_url: '#' },
-        { id: 4, name: 'GigaStream', logo_url: 'https://placehold.co/100x40/222/999?text=GigaStream', link_url: '#' },
-        { id: 5, name: 'BetSync', logo_url: 'https://placehold.co/100x40/222/999?text=BetSync', link_url: '#' },
-    ]);
-
-    // Duplicate list for seamless loop
-    const displayPartners = [...partners, ...partners, ...partners];
+    // UPDATED: Removed any mention of "Bet" to ensure app store compliance
+    const sponsors = [
+        { id: 1, name: 'ArenaX', logo_url: 'https://placehold.co/100x40/222/999?text=ArenaX' },
+        { id: 2, name: 'ProphetGear', logo_url: 'https://placehold.co/100x40/222/999?text=ProphetGear' },
+        { id: 3, name: 'FanCentral', logo_url: 'https://placehold.co/100x40/222/999?text=FanCentral' },
+        { id: 4, name: 'SportsHub', logo_url: 'https://placehold.co/100x40/222/999?text=SportsHub' },
+        { id: 5, name: 'Velocity', logo_url: 'https://placehold.co/100x40/222/999?text=Velocity' }
+    ];
 
     return (
-        <div className={styles.container}>
-            <div className={styles.track}>
-                {displayPartners.map((partner, index) => (
-                    <a
-                        key={`${partner.id}-${index}`}
-                        href={partner.link_url}
-                        className={styles.item}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <img src={partner.logo_url} alt={partner.name} className={styles.logo} />
-                    </a>
+        <div className={styles.marqueeContainer}>
+            <div className={styles.marquee}>
+                {[...sponsors, ...sponsors].map((s, idx) => (
+                    <div key={`${s.id}-${idx}`} className={styles.sponsorItem}>
+                        <img src={s.logo_url} alt={s.name} className={styles.logo} />
+                    </div>
                 ))}
             </div>
         </div>

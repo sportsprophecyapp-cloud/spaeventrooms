@@ -1,148 +1,126 @@
 .container {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    min-width: 140px;
-}
-
-.container:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.2);
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 .minimal {
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: 30px;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.minimal:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 .levelBadge {
-    background: #0070f3;
-    color: white;
+    background: var(--accent);
     padding: 2px 8px;
-    border-radius: 6px;
+    border-radius: 10px;
+}
+
+.levelNum {
     font-size: 0.7rem;
     font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    box-shadow: 0 0 10px rgba(0, 112, 243, 0.3);
+    color: white;
 }
 
 .progressContainer {
-    flex: 1;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
+    width: 60px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
     overflow: hidden;
-    min-width: 40px;
 }
 
 .progressBar {
     height: 100%;
-    background: linear-gradient(90deg, #0070f3, #00ff88);
-    border-radius: 10px;
-    transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.points {
-    display: flex;
-    align-items: baseline;
-    gap: 2px;
+    background: var(--success);
+    box-shadow: 0 0 10px var(--success);
 }
 
 .pointsNum {
-    font-weight: 800;
+    font-weight: 900;
     font-size: 0.9rem;
-    color: #fff;
 }
 
 .pointsLabel {
     font-size: 0.6rem;
     font-weight: 700;
-    color: #888;
+    color: var(--neutral);
+    margin-left: 4px;
 }
 
+/* DRAWER SYSTEM */
 .drawer {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    animation: slideDown 0.3s ease-out forwards;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    margin-top: 10px;
+    width: 220px;
+    padding: 1.5rem;
+    border-radius: 20px;
+    animation: slideIn 0.3s ease-out;
 }
 
 .drawerTitle {
     font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #666;
-    margin-bottom: 0.75rem;
-    font-weight: 800;
+    font-weight: 900;
+    color: var(--neutral);
+    letter-spacing: 2px;
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
-.badgeGrid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.badgeItem {
+.menuLinks {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 6px;
-    width: 50px;
-    transition: transform 0.2s;
+    gap: 10px;
 }
 
-.badgeItem:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.08);
+.menuLink {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    transition: all 0.2s;
+    text-decoration: none;
 }
 
-.badgeIcon {
-    font-size: 1.25rem;
+.menuLink:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--accent);
 }
 
-.badgeName {
-    font-size: 0.5rem;
-    text-align: center;
-    color: #888;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-    font-weight: 700;
+.adminLink {
+    color: #ffd700; /* Gold for Admin */
+    border: 1px solid rgba(255, 215, 0, 0.2);
 }
 
-.emptyMsg {
-    font-size: 0.7rem;
-    color: #555;
-    font-style: italic;
-    padding: 0.5rem 0;
+.adminLink:hover {
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
 }
 
-@media (max-width: 480px) {
-    .container {
-        min-width: 120px;
-    }
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .container { top: 0.5rem; right: 0.5rem; }
+    .minimal { padding: 6px 12px; }
 }
