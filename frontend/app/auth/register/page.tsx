@@ -56,7 +56,6 @@ const RegisterContent = () => {
 
             const data = await res.json();
             if (res.ok) {
-                // Correctly call context login with token and user object
                 login(data.token, data.user);
                 router.push('/');
             } else {
@@ -83,9 +82,12 @@ const RegisterContent = () => {
 
                 <form onSubmit={handleRegister} className={styles.form}>
                     <div className={styles.inputGroup}>
-                        <label>Username</label>
+                        <label htmlFor="username">Username</label>
                         <input 
+                            id="username"
+                            name="username"
                             type="text" 
+                            autoComplete="username"
                             required 
                             placeholder="prophet_name"
                             value={formData.username}
@@ -93,9 +95,12 @@ const RegisterContent = () => {
                         />
                     </div>
                     <div className={styles.inputGroup}>
-                        <label>Email</label>
+                        <label htmlFor="email">Email</label>
                         <input 
+                            id="email"
+                            name="email"
                             type="email" 
+                            autoComplete="email"
                             required 
                             placeholder="your@email.com"
                             value={formData.email}
@@ -103,9 +108,12 @@ const RegisterContent = () => {
                         />
                     </div>
                     <div className={styles.inputGroup}>
-                        <label>Password</label>
+                        <label htmlFor="password">Password</label>
                         <input 
+                            id="password"
+                            name="password"
                             type="password" 
+                            autoComplete="new-password"
                             required 
                             placeholder="••••••••"
                             value={formData.password}
@@ -113,9 +121,12 @@ const RegisterContent = () => {
                         />
                     </div>
                     <div className={styles.inputGroup}>
-                        <label>Confirm Password</label>
+                        <label htmlFor="confirmPassword">Confirm Password</label>
                         <input 
+                            id="confirmPassword"
+                            name="confirmPassword"
                             type="password" 
+                            autoComplete="new-password"
                             required 
                             placeholder="••••••••"
                             value={formData.confirmPassword}

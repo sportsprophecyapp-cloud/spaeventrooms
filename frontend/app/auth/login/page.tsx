@@ -35,8 +35,6 @@ const LoginContent = () => {
 
             if (res.ok) {
                 login(data.token, data.user);
-                
-                // FIX: Check if there's a redirect destination, otherwise go to home
                 const destination = searchParams.get('redirect') || '/';
                 router.push(destination);
             } else {
@@ -57,9 +55,12 @@ const LoginContent = () => {
                 
                 <form onSubmit={handleLogin} className={styles.form}>
                     <div className={styles.inputGroup}>
-                        <label>Email</label>
+                        <label htmlFor="email">Email</label>
                         <input 
+                            id="email"
+                            name="email"
                             type="email" 
+                            autoComplete="email"
                             required 
                             placeholder="your@email.com"
                             value={formData.email}
@@ -67,9 +68,12 @@ const LoginContent = () => {
                         />
                     </div>
                     <div className={styles.inputGroup}>
-                        <label>Password</label>
+                        <label htmlFor="password">Password</label>
                         <input 
+                            id="password"
+                            name="password"
                             type="password" 
+                            autoComplete="current-password"
                             required 
                             placeholder="••••••••"
                             value={formData.password}
@@ -95,7 +99,6 @@ const LoginContent = () => {
     );
 };
 
-// Next.js requires Suspense for useSearchParams in static-rendered pages
 const LoginPage = () => (
     <Suspense fallback={<div>Loading...</div>}>
         <LoginContent />
