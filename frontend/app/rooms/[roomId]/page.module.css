@@ -1,8 +1,7 @@
 .container {
     min-height: 100vh;
-    padding: 2rem 1rem;
-    background: radial-gradient(circle at top right, #111, #050505);
-    color: white;
+    padding: 1.5rem;
+    background: var(--background);
 }
 
 .header {
@@ -10,110 +9,122 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    padding: 1rem 0;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.backBtn {
+    color: var(--neutral);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .title {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 900;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    background: linear-gradient(to bottom, #fff, #888);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
     margin: 0;
 }
 
 .userSection {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-}
-
-.userEmail {
-    display: none;
-    /* Hide on mobile for space */
-    font-size: 0.85rem;
-    color: #888;
+    gap: 1.5rem;
 }
 
 .authBtn {
-    padding: 0.5rem 1rem;
-    background: #fff;
-    color: #000;
+    background: var(--accent);
+    color: white;
     border: none;
-    border-radius: 8px;
+    padding: 8px 20px;
+    border-radius: 10px;
+    font-weight: 800;
     cursor: pointer;
-    font-weight: 700;
-    font-size: 0.85rem;
-    transition: transform 0.1s;
 }
 
-.authBtn:active {
-    transform: scale(0.95);
+/* MAIN LAYOUT: 3 COLUMNS */
+.mainLayout {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 1.5rem;
+    align-items: flex-start;
 }
 
-.shareBtn {
-    padding: 0.5rem 1rem;
-    background: rgba(0, 255, 136, 0.1);
-    color: #00ff88;
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.85rem;
-    transition: transform 0.1s, background 0.2s;
-}
-
-.shareBtn:hover {
-    background: rgba(0, 255, 136, 0.2);
-}
-
-.shareBtn:active {
-    transform: scale(0.95);
-}
-
-.grid {
+.column {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 1.25rem;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
 .predictionsSection {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
-    margin: 1.5rem 0;
+    gap: 1rem;
 }
 
-/* Tablet + Desktop Refinements */
-@media (min-width: 768px) {
-    .container {
-        padding: 2rem 4rem;
+/* MOBILE SYSTEM */
+.mobileTabs {
+    display: none;
+    background: var(--glass);
+    padding: 6px;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+.tabBtn {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: var(--neutral);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.activeTab {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+@media (max-width: 1100px) {
+    .mainLayout {
+        grid-template-columns: 1fr 1fr;
+    }
+    .rightColumn {
+        display: none; /* Hide chat on tablet or use a toggle? UX Doc says 3-col on Desktop */
+    }
+}
+
+@media (max-width: 768px) {
+    .mainLayout {
+        display: block;
+    }
+    
+    .mobileTabs {
+        display: flex;
+    }
+
+    .mobileHidden {
+        display: none !important;
     }
 
     .title {
-        font-size: 2.5rem;
+        font-size: 1.5rem;
     }
-
-    .userEmail {
-        display: block;
-    }
-
-    .grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        /* Fixed sidebar for desktop */
-        align-items: flex-start;
+    
+    .headerLeft {
+        gap: 1rem;
     }
 }

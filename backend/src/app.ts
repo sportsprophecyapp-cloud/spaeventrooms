@@ -7,6 +7,7 @@ import sponsorRoutes from './shared/sponsors/routes';
 import gamificationRoutes from './shared/gamification/routes';
 import sponsorSubscriptionRoutes from './shared/sponsor-subscriptions/routes';
 import sponsorApplicationRoutes from './shared/sponsor-applications/routes';
+import chatRoutes from './shared/chat/routes';
 
 const app = express();
 
@@ -26,11 +27,12 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Auth Routes
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms/:roomId/announcements', announcementRoutes);
 app.use('/api/rooms/:roomId/predictions', predictionRoutes);
 app.use('/api/rooms/:roomId/sponsors', sponsorRoutes);
+app.use('/api/rooms/:roomId/chat', chatRoutes); // Added Chat Routes
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/sponsor-subscriptions', sponsorSubscriptionRoutes);
 app.use('/api/sponsor-applications', sponsorApplicationRoutes);

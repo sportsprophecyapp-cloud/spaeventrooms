@@ -3,7 +3,7 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Consolidated Database Initialization (v2.2)...');
+        console.log('🚀 Starting Consolidated Database Initialization (v2.3)...');
 
         // 1. Core Schema
         const schema = `
@@ -49,6 +49,17 @@ const initDB = async () => {
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(user_id, match_id)
             );
+
+            CREATE TABLE IF NOT EXISTS room_messages (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) NOT NULL REFERENCES rooms(room_id),
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                username VARCHAR(50),
+                content TEXT NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_room_messages_room_id ON room_messages(room_id);
 
             CREATE TABLE IF NOT EXISTS user_streaks (
                 user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
@@ -111,7 +122,6 @@ const initDB = async () => {
         await client.query(schema);
         console.log('✅ Base Schema applied successfully.');
 
-        // 2. Column Updates
         const updates = `
             ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER DEFAULT 150;
@@ -128,7 +138,6 @@ const initDB = async () => {
         console.log('✅ Column updates applied.');
 
         // 3. Seed Data
-        console.log('🌱 Seeding essential data...');
         await client.query(`
             INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Pro Soccer Arena')
             ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;

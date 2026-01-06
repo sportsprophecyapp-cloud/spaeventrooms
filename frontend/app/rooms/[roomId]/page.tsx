@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.css';
@@ -11,19 +11,19 @@ import SponsorWidget from '../../components/SponsorWidget';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '@/app/components/LoginModal';
 import { SocketProvider, useSocket } from '../../context/SocketContext';
-import { useEffect } from 'react';
 import UserTray from '../../components/UserTray';
 import Leaderboard from '../../components/Leaderboard';
 import EmptyStateWidget from '../../components/EmptyStateWidget';
+import RoomChat from '../../components/RoomChat';
 
 function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
-    const { user, logout, isAuthenticated } = useAuth();
+    const { logout, isAuthenticated } = useAuth();
     const { socket } = useSocket();
 
     const [isLoginOpen, setIsLoginOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'predictions' | 'leaderboard'>('predictions');
+    const [activeTab, setActiveTab] = useState<'predictions' | 'leaderboard' | 'chat'>('predictions');
     const [predictions, setPredictions] = useState<any[]>([]);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -46,12 +46,10 @@ function RoomContent() {
         if (!socket) return;
 
         socket.on('prediction_new', (newPrediction: any) => {
-            console.log('Real-time prediction received:', newPrediction);
             setPredictions(prev => [newPrediction, ...prev]);
         });
 
         socket.on('prediction_revealed', (data: { id: number, correctAnswer: string }) => {
-            console.log('Prediction revealed received:', data);
             setPredictions(prev => prev.map(p =>
                 p.id === data.id ? { ...p, correct_answer: data.correctAnswer, revealed_at: new Date().toISOString() } : p
             ));
@@ -88,40 +86,15 @@ function RoomContent() {
 
     return (
         <div className={styles.container}>
-            <header className={`${styles.header} animate-fade`}>
-                <div style={{ position: 'absolute', left: '2rem', top: '6rem', zIndex: 10 }}>
-                    <Link href="/" style={{
-                        color: 'rgba(255,255,255,0.6)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.9rem'
-                    }}>
-                        ← Lobby
-                    </Link>
+            <header className={styles.header}>
+                <div className={styles.headerLeft}>
+                    <Link href="/" className={styles.backBtn}>← Lobby</Link>
+                    <h1 className={styles.title}>{roomId.toUpperCase()}</h1>
                 </div>
-                <div className={styles.roomHeader}>
-                    <h1 className={styles.title}>{roomId.toUpperCase()} Room</h1>
-                    {/* Sponsor Pill - Dynamic based on room */}
-                    <span className={styles.sponsorPill}>
-                        <span className={styles.pillLabel}>Sponsored by</span>
-                        <span className={styles.pillBrand}>CloudBet</span>
-                    </span>
-                </div>
+                
                 <div className={styles.userSection}>
                     {isAuthenticated ? (
                         <>
-                            <button
-                                onClick={() => {
-                                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-                                    const url = `${window.location.origin}/rooms/${roomId}`;
-                                    navigator.clipboard.writeText(url);
-                                    alert('Room link copied! Share it with friends.');
-                                }}
-                                className={styles.shareBtn}
-                            >
-                                📤 Share
-                            </button>
                             <UserTray />
                             <button onClick={logout} className={styles.authBtn}>Logout</button>
                         </>
@@ -137,22 +110,27 @@ function RoomContent() {
                     className={`${styles.tabBtn} ${activeTab === 'predictions' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('predictions')}
                 >
-                    Predictions
+                    Predict
                 </button>
                 <button
                     className={`${styles.tabBtn} ${activeTab === 'leaderboard' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('leaderboard')}
                 >
-                    Leaderboard
+                    Ranks
+                </button>
+                <button
+                    className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('chat')}
+                >
+                    Chat
                 </button>
             </div>
 
-            <div className={`${styles.grid} animate-slide`}>
-                {/* Predictions Column - Show if activeTab is 'predictions' OR if we are on desktop (CSS will handle desktop visibility) */}
-                <div className={`${styles.card} ${styles.leftColumn} ${activeTab !== 'predictions' ? styles.mobileHidden : ''}`}>
+            <div className={styles.mainLayout}>
+                {/* Predictions Column */}
+                <div className={`${styles.column} ${activeTab !== 'predictions' ? styles.mobileHidden : ''}`}>
                     <SponsorWidget roomId={roomId} />
                     <AnnouncementsSection roomId={roomId} />
-
 
                     {predictions.length > 0 ? (
                         <div className={styles.predictionsSection}>
@@ -167,12 +145,8 @@ function RoomContent() {
                         </div>
                     ) : (
                         <EmptyStateWidget
-                            onScrollToMatches={() => {
-                                document.getElementById('match-list-section')?.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            onViewLeaderboard={() => {
-                                setActiveTab('leaderboard');
-                            }}
+                            onScrollToMatches={() => document.getElementById('match-list-section')?.scrollIntoView({ behavior: 'smooth' })}
+                            onViewLeaderboard={() => setActiveTab('leaderboard')}
                         />
                     )}
 
@@ -181,9 +155,14 @@ function RoomContent() {
                     </div>
                 </div>
 
-                {/* Leaderboard Column - Show if activeTab is 'leaderboard' OR if we are on desktop */}
-                <div className={`${styles.card} ${styles.rightColumn} ${activeTab !== 'leaderboard' ? styles.mobileHidden : ''}`}>
+                {/* Leaderboard Column */}
+                <div className={`${styles.column} ${styles.middleColumn} ${activeTab !== 'leaderboard' ? styles.mobileHidden : ''}`}>
                     <Leaderboard />
+                </div>
+
+                {/* Chat Column */}
+                <div className={`${styles.column} ${styles.rightColumn} ${activeTab !== 'chat' ? styles.mobileHidden : ''}`}>
+                    <RoomChat roomId={roomId} />
                 </div>
             </div>
 

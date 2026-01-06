@@ -1,0 +1,133 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 500px;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header h3 {
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--neutral);
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--success);
+    animation: pulse 2s infinite;
+}
+
+.feed {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.message {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.level {
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: var(--accent);
+    background: rgba(0, 112, 243, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 112, 243, 0.2);
+}
+
+.username {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--foreground);
+}
+
+.content {
+    font-size: 0.95rem;
+    color: var(--neutral);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.inputArea {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    gap: 10px;
+}
+
+.input {
+    flex: 1;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.sendBtn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+}
+
+.loginPrompt {
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--neutral);
+    font-style: italic;
+}
+
+.loading, .empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--neutral);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
