@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import styles from './PredictionModal.module.css';
+import ScoreAnimation from './ScoreAnimation';
 
 interface PredictionModalProps {
     match: any;
@@ -15,6 +16,7 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
     const [pick, setPick] = useState<'home' | 'draw' | 'away' | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showAnim, setShowAnim] = useState(false);
     const { token, isAuthenticated } = useAuth();
 
     if (!isOpen || !match) return null;
@@ -53,51 +55,63 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
                 throw new Error(data.message || 'Failed to save prediction');
             }
 
-            onSuccess();
-            onClose();
+            // Trigger Animation
+            setShowAnim(true);
+            
+            // Wait for animation to finish before closing
+            setTimeout(() => {
+                onSuccess();
+                onClose();
+            }, 1200);
+
         } catch (err: any) {
             setError(err.message);
-        } finally {
             setLoading(false);
         }
     };
 
     return (
         <div className={styles.overlay} onClick={onClose}>
+            <ScoreAnimation 
+                value="+10 PTS" 
+                trigger={showAnim} 
+                onComplete={() => setShowAnim(false)} 
+            />
+            
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                <h3>Predict: {match.home_team} vs {match.away_team}</h3>
+                <h3 className={styles.title}>Predict: {match.home_team} vs {match.away_team}</h3>
 
                 <div className={styles.options}>
                     <button
                         className={`${styles.option} ${pick === 'home' ? styles.active : ''}`}
                         onClick={() => setPick('home')}
                     >
-                        {match.home_team} Win
+                        {match.home_team}
                     </button>
                     <button
                         className={`${styles.option} ${pick === 'draw' ? styles.active : ''}`}
                         onClick={() => setPick('draw')}
                     >
-                        Draw
+                        DRAW
                     </button>
                     <button
                         className={`${styles.option} ${pick === 'away' ? styles.active : ''}`}
                         onClick={() => setPick('away')}
                     >
-                        {match.away_team} Win
+                        {match.away_team}
                     </button>
                 </div>
 
                 {error && <p className={styles.error}>{error}</p>}
 
                 <div className={styles.actions}>
-                    <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
+                    <button className={styles.cancelBtn} onClick={onClose}>CANCEL</button>
                     <button
                         className={styles.submitBtn}
                         onClick={handleSubmit}
-                        disabled={loading || !pick}
+                        disabled={loading || !pick || showAnim}
                     >
-                        {loading ? 'Saving...' : 'Confirm Selection'}
+                        {loading ? 'TRANSMITTING...' : 'CONFIRM PROPHECY'}
                     </button>
                 </div>
             </div>

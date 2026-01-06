@@ -67,4 +67,14 @@ export class SoccerRoom extends BaseRoom {
             socket.on('join_room', (room) => socket.join(room));
         });
     }
+
+    /**
+     * Handles real-time updates for sponsor content
+     * Required by BaseRoom abstract class
+     */
+    onSponsorUpdate(data: any): void {
+        if (this.ioNamespace) {
+            this.ioNamespace.emit('sponsor_update', data);
+        }
+    }
 }
