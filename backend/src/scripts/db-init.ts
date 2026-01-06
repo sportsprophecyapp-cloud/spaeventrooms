@@ -3,9 +3,16 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Consolidated Database Initialization (v2.4)...');
+        console.log('🚀 Starting Robust Database Initialization (v2.5)...');
 
-        // 1. Core Schema
+        // 1. Force Reset problematic tables to fix type mismatches
+        console.log('🔄 Cleaning up type-mismatched tables...');
+        await client.query(`
+            DROP TABLE IF EXISTS user_cosmetics CASCADE;
+            DROP TABLE IF EXISTS cosmetics CASCADE;
+        `);
+
+        // 2. Full Schema
         const schema = `
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -69,7 +76,6 @@ const initDB = async () => {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
-            -- FIX: Changed id to VARCHAR to allow custom descriptive IDs
             CREATE TABLE IF NOT EXISTS cosmetics (
                 id VARCHAR(100) PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
@@ -121,19 +127,19 @@ const initDB = async () => {
             );
         `;
         await client.query(schema);
-        console.log('✅ Base Schema applied successfully.');
+        console.log('✅ Full Schema applied successfully.');
 
-        // 2. Safe Schema Migration (for existing tables)
+        // 3. Seed Essential Data
+        console.log('🌱 Seeding initial room and gear...');
         await client.query(`
-            DO $$ 
-            BEGIN 
-                -- If cosmetics.id is an integer, we might need to drop/recreate or alter it.
-                -- For safety in this dev phase, we ensure types match.
-                IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='cosmetics' AND column_name='id' AND data_type='integer') THEN
-                    DROP TABLE IF EXISTS user_cosmetics;
-                    DROP TABLE IF EXISTS cosmetics;
-                END IF;
-            END $$;
+            INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Pro Soccer Arena')
+            ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
+
+            INSERT INTO cosmetics (id, name, description, type, cost, asset_url) VALUES 
+            ('avatar_basic', 'Blue Prophet', 'Standard apprentice avatar', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
+            ('avatar_premium', 'Neon King', 'Master predictor avatar', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
+            ('frame_gold', 'Gold Frame', 'Exclusive winner border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
+            ON CONFLICT (id) DO NOTHING;
         `);
 
         console.log('✅ Initialization completed successfully.');
