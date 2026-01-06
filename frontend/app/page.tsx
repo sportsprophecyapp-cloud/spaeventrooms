@@ -2,6 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/context/AuthContext';
+import LoginModal from '@/app/components/LoginModal';
 import styles from './page.module.css';
 import { APP_VERSION } from './version';
 import OnboardingModal from '@/app/components/OnboardingModal';
@@ -35,6 +38,10 @@ const HomePage = () => {
     }
   ];
 
+  const { user } = useAuth();
+  const router = useRouter();
+  const [showLoginModal, setShowLoginModal] = React.useState(false);
+  const [pendingRoomId, setPendingRoomId] = React.useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = React.useState(false);
 
   React.useEffect(() => {
@@ -47,6 +54,22 @@ const HomePage = () => {
   const handleOnboardingClose = () => {
     setShowOnboarding(false);
     localStorage.setItem('hasSeenOnboarding', 'true');
+  };
+
+  const handleEnterRoom = (roomId: string) => {
+    if (user) {
+      router.push(`/rooms/${roomId}`);
+    } else {
+      setPendingRoomId(roomId);
+      setShowLoginModal(true);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    if (pendingRoomId) {
+      router.push(`/rooms/${pendingRoomId}`);
+      setPendingRoomId(null);
+    }
   };
 
   return (
@@ -70,9 +93,12 @@ const HomePage = () => {
               <h3>{room.name}</h3>
               <p>{room.description}</p>
               {room.active ? (
-                <Link href={`/rooms/${room.id}`} className={styles.enterBtn}>
+                <button
+                  onClick={() => handleEnterRoom(room.id)}
+                  className={styles.enterBtn}
+                >
                   Enter Room
-                </Link>
+                </button>
               ) : (
                 <span className={styles.comingSoon}>Coming Soon</span>
               )}
@@ -87,6 +113,11 @@ const HomePage = () => {
       </footer>
 
       <OnboardingModal isOpen={showOnboarding} onClose={handleOnboardingClose} />
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 };
