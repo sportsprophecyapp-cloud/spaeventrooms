@@ -23,6 +23,7 @@ socketService.init(io);
 import { roomRegistry } from './rooms/registry';
 import { connectRedis } from './shared/database/redis';
 import { startKeepAlive } from './shared/cron/keepAlive';
+import { startSoccerScheduler } from './rooms/soccer/scheduler';
 
 // ... other imports ...
 
@@ -32,6 +33,7 @@ import { startKeepAlive } from './shared/cron/keepAlive';
     await connectRedis();
 
     startKeepAlive();
+    startSoccerScheduler();
 
     roomRegistry.initializeRooms(app, io);
 

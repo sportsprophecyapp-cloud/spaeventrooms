@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS soccer_matches (
     away_team VARCHAR(100) NOT NULL,
     start_time TIMESTAMP WITH TIME ZONE,
     status VARCHAR(50), -- scheduled, live, finished
+    league VARCHAR(100),
+    league_logo VARCHAR(255),
     score_home INT,
     score_away INT,
     data JSONB -- full match data from API
