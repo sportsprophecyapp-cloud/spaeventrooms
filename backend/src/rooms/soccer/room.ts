@@ -16,16 +16,17 @@ export class SoccerRoom extends BaseRoom {
         // GET /api/rooms/soccer/matches
         this.router.get('/matches', async (req, res) => {
             try {
-                // Fetch matches from the last 24 hours to ensure the lobby is populated
                 const result = await query('SELECT * FROM soccer_matches WHERE start_time > NOW() - INTERVAL \'24 hours\' ORDER BY start_time ASC');
-                res.json(result.rows);
+                // Always return an array to prevent frontend map() crash
+                res.json(Array.isArray(result.rows) ? result.rows : []);
             } catch (err) {
                 console.error('Error fetching matches:', err);
-                res.status(500).json({ error: 'Internal Server Error' });
+                // Return empty array instead of 500 error
+                res.json([]);
             }
         });
 
-        // POST /api/rooms/soccer/predictions/match (Aligned with Frontend)
+        // POST /api/rooms/soccer/predictions/match
         this.router.post('/predictions/match', authenticate, async (req: AuthRequest, res) => {
             const { matchId, pick } = req.body;
             const userId = req.user?.id;
@@ -35,7 +36,6 @@ export class SoccerRoom extends BaseRoom {
             }
 
             try {
-                // Save or update user prediction
                 await query(`
                     INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
                     VALUES ($1, $2, $3)
@@ -68,10 +68,6 @@ export class SoccerRoom extends BaseRoom {
         });
     }
 
-    /**
-     * Handles real-time updates for sponsor content
-     * Required by BaseRoom abstract class
-     */
     onSponsorUpdate(data: any): void {
         if (this.ioNamespace) {
             this.ioNamespace.emit('sponsor_update', data);
