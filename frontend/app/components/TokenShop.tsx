@@ -16,6 +16,10 @@ export default function TokenShop({ onClose }: TokenShopProps) {
     const [previewItem, setPreviewItem] = useState<any>(null);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+    // Safe username access for TS
+    const displayUsername = user?.username || 'Prophet';
+    const displayInitial = displayUsername.charAt(0).toUpperCase();
+
     const handlePurchase = async (cosmeticId: number, cost: number) => {
         if (tokenBalance < cost) {
             setMessage({ type: 'error', text: 'Insufficient tokens!' });
@@ -50,10 +54,10 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                                 borderColor: previewItem?.type === 'frame' ? 'var(--accent)' : 'var(--glass-border)' 
                             }}>
                                 <div className={styles.previewAvatar}>
-                                    {user?.username?.charAt(0).toUpperCase() || 'P'}
+                                    {displayInitial}
                                 </div>
                             </div>
-                            <p className={styles.previewName}>@{user?.username || 'Prophet'}</p>
+                            <p className={styles.previewName}>@{displayUsername}</p>
                             <span className={styles.previewStatus}>
                                 {previewItem ? `PREVIEWING: ${previewItem.name}` : 'Select gear to try on'}
                             </span>
