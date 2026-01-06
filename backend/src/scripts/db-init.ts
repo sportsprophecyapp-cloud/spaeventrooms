@@ -3,10 +3,10 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Consolidated Database Initialization (v2.1)...');
+        console.log('🚀 Starting Consolidated Database Initialization (v2.2)...');
 
+        // 1. Core Schema
         const schema = `
-            -- 1. USERS & AUTH
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 email VARCHAR(255) UNIQUE NOT NULL,
@@ -18,7 +18,6 @@ const initDB = async () => {
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
-            -- 2. ROOMS & MATCHES
             CREATE TABLE IF NOT EXISTS rooms (
                 room_id VARCHAR(50) PRIMARY KEY,
                 display_name VARCHAR(100) NOT NULL,
@@ -40,19 +39,17 @@ const initDB = async () => {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
-            -- 3. PREDICTIONS
             CREATE TABLE IF NOT EXISTS soccer_predictions (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                 match_id VARCHAR(50) REFERENCES soccer_matches(match_id) ON DELETE CASCADE,
                 prediction_data JSONB NOT NULL,
-                result VARCHAR(20) DEFAULT 'pending', -- 'correct', 'incorrect', 'pending'
+                result VARCHAR(20) DEFAULT 'pending',
                 points_earned INTEGER DEFAULT 0,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(user_id, match_id)
             );
 
-            -- 4. GAMIFICATION (STREAKS, COSMETICS, TRANSACTIONS)
             CREATE TABLE IF NOT EXISTS user_streaks (
                 user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
                 current_streak INTEGER DEFAULT 0,
@@ -65,7 +62,7 @@ const initDB = async () => {
                 id VARCHAR(50) PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
                 description TEXT,
-                type VARCHAR(50) NOT NULL, -- 'avatar', 'frame', 'badge'
+                type VARCHAR(50) NOT NULL,
                 cost INTEGER NOT NULL,
                 asset_url TEXT NOT NULL,
                 is_active BOOLEAN DEFAULT TRUE,
@@ -84,12 +81,11 @@ const initDB = async () => {
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                 amount INTEGER NOT NULL,
-                type VARCHAR(50) NOT NULL, -- 'daily_login', 'streak_bonus', 'purchase', 'referral'
+                type VARCHAR(50) NOT NULL,
                 description TEXT,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
-            -- 5. SPONSORS & ANNOUNCEMENTS
             CREATE TABLE IF NOT EXISTS room_sponsors (
                 id SERIAL PRIMARY KEY,
                 room_id VARCHAR(50) REFERENCES rooms(room_id),
@@ -115,8 +111,8 @@ const initDB = async () => {
         await client.query(schema);
         console.log('✅ Base Schema applied successfully.');
 
-        // 6. Safe Column/Table Updates (for existing databases)
-        await client.query(\`
+        // 2. Column Updates
+        const updates = `
             ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER DEFAULT 150;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS total_points INTEGER DEFAULT 0;
@@ -127,23 +123,22 @@ const initDB = async () => {
             
             ALTER TABLE soccer_predictions ADD COLUMN IF NOT EXISTS result VARCHAR(20) DEFAULT 'pending';
             ALTER TABLE soccer_predictions ADD COLUMN IF NOT EXISTS points_earned INTEGER DEFAULT 0;
-        \`);
-        console.log('✅ Schema Updates applied.');
+        `;
+        await client.query(updates);
+        console.log('✅ Column updates applied.');
 
-        // 7. Seed Data
+        // 3. Seed Data
         console.log('🌱 Seeding essential data...');
-
-        await client.query(\`
+        await client.query(`
             INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Pro Soccer Arena')
             ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
 
-            -- Seed Initial Cosmetics
             INSERT INTO cosmetics (id, name, description, type, cost, asset_url) VALUES 
             ('avatar_basic', 'Blue Prophet', 'Standard apprentice avatar', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
             ('avatar_premium', 'Neon King', 'Master predictor avatar', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
             ('frame_gold', 'Gold Frame', 'Exclusive winner border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
             ON CONFLICT (id) DO NOTHING;
-        \`);
+        `);
 
         console.log('✅ Initialization completed successfully.');
     } catch (err) {

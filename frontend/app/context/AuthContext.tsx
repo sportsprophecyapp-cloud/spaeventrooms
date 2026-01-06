@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface User {
     id: number;
     email: string;
+    username?: string; // Added username field
 }
 
 interface AuthContextType {
@@ -26,8 +27,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const savedUser = localStorage.getItem('auth_user');
 
         if (savedToken && savedUser) {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
+            try {
+                setToken(savedToken);
+                setUser(JSON.parse(savedUser));
+            } catch (err) {
+                console.error("Auth hydration failed", err);
+            }
         }
     }, []);
 
