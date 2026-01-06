@@ -5,15 +5,24 @@
 **PATH:** `/Users/williamcommu/Desktop/mobile`
 
 ## ⚠️ CRITICAL: PROJECT ISOLATION ⚠️
-This project is part of a portfolio but must remain **100% ISOLATED**.
-
-- **DO NOT** access, cross-reference, or assume context from other projects (e.g., "SaaspriceDB", "Saas-landing").
+- **DO NOT** access, cross-reference, or assume context from other projects.
 - **DO NOT** attempt to edit files outside this directory.
-- **DO NOT** hallucinate files from previous conversation history if they are not present in `find_by_name` or `ls` in THIS directory. (e.g., `dashboard.html` does NOT exist here).
 
-## Current Project Status
-- **Frontend**: Next.js (in `frontend/`)
-- **Backend**: Node/Express (in `backend/`)
-- **Deployment**: Render
+## 🚀 Current Status (January 2026 Phase)
+- **Frontend**: Next.js (Tailwind + CSS Modules). High-end Dark/Neon aesthetic.
+- **Backend**: Node/Express with TypeScript.
+- **Database**: PostgreSQL on Render + Redis.
+- **Data Layer**: Smart Caching + Odds API Key Rotation implemented.
+- **Deployment**: Live via `bash deploy.sh`.
 
-This file serves as a persistent reminder to all AI agents to respect these boundaries.
+## ✅ Completed Recently:
+- Profile Page (`/profile/[userId]`)
+- Global Leaderboard Page (`/leaderboard`)
+- Dedicated Auth Pages (`/auth/login`, `/auth/register`)
+- 404/500 Route and Data Structure Fixes.
+
+## 🔜 Next Up:
+- UI Skinning (Glassmorphism & Neon refinements).
+- Floating Score Animations.
+- Token Shop "Try-on" Cosmetic Preview.
+- Phone OTP (Later Phase).

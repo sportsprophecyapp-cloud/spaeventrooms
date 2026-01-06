@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 import styles from './page.module.css';
 
-const LoginPage = () => {
+const LoginContent = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { login } = useAuth();
     
     const [formData, setFormData] = useState({
@@ -33,9 +34,11 @@ const LoginPage = () => {
             const data = await res.json();
 
             if (res.ok) {
-                // Correctly call context login with token and user object
                 login(data.token, data.user);
-                router.push('/');
+                
+                // FIX: Check if there's a redirect destination, otherwise go to home
+                const destination = searchParams.get('redirect') || '/';
+                router.push(destination);
             } else {
                 setError(data.message || 'Login failed. Check your credentials.');
             }
@@ -91,5 +94,12 @@ const LoginPage = () => {
         </div>
     );
 };
+
+// Next.js requires Suspense for useSearchParams in static-rendered pages
+const LoginPage = () => (
+    <Suspense fallback={<div>Loading...</div>}>
+        <LoginContent />
+    </Suspense>
+);
 
 export default LoginPage;

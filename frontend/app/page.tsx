@@ -58,7 +58,8 @@ const HomePage = () => {
     if (isAuthenticated) {
       router.push(`/rooms/${roomId}`);
     } else {
-      router.push('/auth/login');
+      // FIX: Pass the intended room as a redirect parameter
+      router.push(`/auth/login?redirect=/rooms/${roomId}`);
     }
   };
 
