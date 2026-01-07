@@ -23,10 +23,12 @@ interface LeagueSection {
     title: string;
     logo: string;
     matches: Match[];
+    hasLive: boolean;
 }
 
 const MatchList: React.FC = () => {
     const [sections, setSections] = useState<LeagueSection[]>([]);
+    const [expandedLeagues, setExpandedLeagues] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(true);
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,22 +41,37 @@ const MatchList: React.FC = () => {
             const data = await res.json();
             
             if (Array.isArray(data)) {
-                // Group matches by league
                 const grouped: Record<string, LeagueSection> = {};
+                const seenMatches = new Set(); // For Deduplication
                 
                 data.forEach((match: Match) => {
+                    // DEDUPLICATION: Use normalized names to prevent "Wolves" vs "Wolverhampton"
+                    const matchKey = `${match.home_team.substring(0,5)}-${match.away_team.substring(0,5)}-${match.start_time}`;
+                    if (seenMatches.has(matchKey)) return;
+                    seenMatches.add(matchKey);
+
                     const leagueName = match.league || 'International';
                     if (!grouped[leagueName]) {
                         grouped[leagueName] = {
                             title: leagueName,
                             logo: match.league_logo || '',
-                            matches: []
+                            matches: [],
+                            hasLive: false
                         };
                     }
                     grouped[leagueName].matches.push(match);
+                    if (match.status === 'live') grouped[leagueName].hasLive = true;
                 });
 
-                setSections(Object.values(grouped));
+                const sortedSections = Object.values(grouped);
+                setSections(sortedSections);
+
+                // AUTO-EXPAND: Expand sections that have live matches
+                const initialExpanded: Record<string, boolean> = {};
+                sortedSections.forEach(s => {
+                    if (s.hasLive) initialExpanded[s.title] = true;
+                });
+                setExpandedLeagues(prev => ({ ...initialExpanded, ...prev }));
             }
         } catch (err) {
             console.error('Failed to fetch matches:', err);
@@ -67,11 +84,12 @@ const MatchList: React.FC = () => {
         fetchMatches();
     }, []);
 
-    useEffect(() => {
-        if (!socket) return;
-        socket.on('match_update', () => fetchMatches());
-        return () => { socket.off('match_update'); };
-    }, [socket]);
+    const toggleLeague = (title: string) => {
+        setExpandedLeagues(prev => ({
+            ...prev,
+            [title]: !prev[title]
+        }));
+    };
 
     const handlePredictClick = (match: Match) => {
         setSelectedMatch(match);
@@ -96,20 +114,32 @@ const MatchList: React.FC = () => {
             ) : (
                 sections.map(section => (
                     <div key={section.title} className={styles.leagueBlock}>
-                        <div className={styles.leagueHeader}>
+                        <div 
+                            className={styles.leagueHeader} 
+                            onClick={() => toggleLeague(section.title)}
+                        >
                             {section.logo && <img src={section.logo} alt="" className={styles.leagueLogo} />}
                             <h3 className={styles.leagueTitle}>{section.title}</h3>
-                            <span className={styles.matchCount}>{section.matches.length} EVENTS</span>
+                            <div className={styles.headerRight}>
+                                {section.hasLive && <span className={styles.liveBadge}>LIVE</span>}
+                                <span className={styles.matchCount}>{section.matches.length} GAMES</span>
+                                <span className={styles.chevron}>
+                                    {expandedLeagues[section.title] ? '▴' : '▾'}
+                                </span>
+                            </div>
                         </div>
-                        <div className={styles.matchGrid}>
-                            {section.matches.map(match => (
-                                <MatchCard
-                                    key={match.match_id}
-                                    match={match}
-                                    onPredict={() => handlePredictClick(match)}
-                                />
-                            ))}
-                        </div>
+                        
+                        {expandedLeagues[section.title] && (
+                            <div className={`${styles.matchGrid} animate-fade-in`}>
+                                {section.matches.map(match => (
+                                    <MatchCard
+                                        key={match.match_id}
+                                        match={match}
+                                        onPredict={() => handlePredictClick(match)}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ))
             )}
@@ -119,7 +149,7 @@ const MatchList: React.FC = () => {
                     match={selectedMatch}
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    onSuccess={() => console.log('Call Confirmed!')}
+                    onSuccess={() => {}}
                 />
             )}
         </div>
