@@ -67,11 +67,14 @@ const HomePage = () => {
       {isAuthenticated && <UserTray />}
       
       <header className={styles.header}>
+        {/* BRAND BRIDGE MESSAGE */}
+        <p className={styles.welcomeBridge}>Sports Prophecy welcomes you to the</p>
+        
         <div className={styles.logo}>
           <span className={styles.icon}>🎯</span>
           <h1>EVENTS <span style={{color: 'var(--accent)'}}>ARENA</span></h1>
         </div>
-        <p className={styles.tagline}>The Ultimate Prediction Arena</p>
+        <p className={styles.tagline}>The Ultimate Prediction Experience</p>
         
         <div className={styles.quickNav}>
           <Link href="/leaderboard" className={styles.navLink}>🏆 Standings</Link>
@@ -84,7 +87,7 @@ const HomePage = () => {
       </header>
 
       <main className={styles.main}>
-        <h2 className={styles.sectionTitle}>Select Your Arena</h2>
+        <h2 className={styles.sectionTitle}>Select Your Room</h2>
         <div className={styles.roomGrid}>
           {rooms.map(room => (
             <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`}>
@@ -111,7 +114,7 @@ const HomePage = () => {
       <footer className={styles.footer}>
         <SponsorMarquee />
         <div className={styles.footerInfo}>
-          <p>&copy; 2026 Events Arena Platform. All rights reserved.</p>
+          <p>&copy; 2026 Events Arena | Powered by Sports Prophecy</p>
           <p className={styles.disclaimer}>
             Events Arena is a social platform for entertainment purposes only. 
             No real money can be won or wagered on this site.
