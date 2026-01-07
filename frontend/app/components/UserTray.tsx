@@ -8,7 +8,8 @@ import { useAuth } from '../context/AuthContext';
 interface UserStats {
     total_points: number;
     current_level: number;
-    points_to_next_level: number;
+    progress_xp: number;
+    next_level_xp: number;
 }
 
 const UserTray: React.FC = () => {
@@ -41,11 +42,11 @@ const UserTray: React.FC = () => {
 
     if (!isAuthenticated || !stats) return null;
 
-    const levelProgress = (stats.total_points % 500) / 5;
+    // Use backend-provided progress math
+    const levelProgress = (stats.progress_xp / stats.next_level_xp) * 100;
 
     return (
         <div className={`${styles.container} ${isExpanded ? styles.expanded : ''}`}>
-            {/* Visual hint that it's clickable */}
             <div className={styles.minimal} onClick={() => setIsExpanded(!isExpanded)}>
                 <div className={styles.levelBadge}>
                     <span className={styles.levelNum}>Lvl {stats.current_level}</span>
@@ -55,7 +56,7 @@ const UserTray: React.FC = () => {
                 </div>
                 <div className={styles.points}>
                     <span className={styles.pointsNum}>{stats.total_points}</span>
-                    <span className={styles.pointsLabel}>PTS</span>
+                    <span className={styles.pointsLabel}>XP</span>
                 </div>
                 <span className={styles.arrow}>{isExpanded ? '▴' : '▾'}</span>
             </div>
