@@ -17,6 +17,7 @@ interface SponsorWidgetProps {
 
 const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
     const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -25,7 +26,7 @@ const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
             try {
                 const res = await fetch(`${apiUrl}/api/sponsor-subscriptions/placements/${roomId}`);
                 const data = await res.json();
-                if (Array.isArray(data)) {
+                if (Array.isArray(data) && data.length > 0) {
                     setSponsors(data);
                 }
             } catch (err) {
@@ -37,6 +38,17 @@ const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
 
         fetchSponsors();
     }, [roomId, apiUrl]);
+
+    // ROTATION LOGIC: 10 Seconds
+    useEffect(() => {
+        if (sponsors.length <= 1) return;
+
+        const interval = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % sponsors.length);
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, [sponsors]);
 
     if (loading) return <div className={styles.loading}>Accessing Sponsor...</div>;
 
@@ -50,27 +62,36 @@ const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
         );
     }
 
+    const currentSponsor = sponsors[currentIndex];
+
     return (
         <div className={`${styles.container} glass`}>
             <p className={styles.label}>OFFICIAL ROOM SPONSOR</p>
-            <div className={styles.logoGrid}>
-                {sponsors.map(sponsor => (
-                    <a
-                        key={sponsor.id}
-                        href={sponsor.link_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.sponsorLink}
-                        title={sponsor.name}
-                    >
-                        {sponsor.logo_url ? (
-                            <img src={sponsor.logo_url} alt={sponsor.name} className={styles.logo} />
-                        ) : (
-                            <span className={styles.nameOnly}>{sponsor.name}</span>
-                        )}
-                    </a>
-                ))}
+            <div className={styles.carouselFrame}>
+                <a
+                    key={currentSponsor.id}
+                    href={currentSponsor.link_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${styles.sponsorLink} animate-fade-in`}
+                    title={currentSponsor.name}
+                >
+                    {currentSponsor.logo_url ? (
+                        <img src={currentSponsor.logo_url} alt={currentSponsor.name} className={styles.logo} />
+                    ) : (
+                        <span className={styles.nameOnly}>{currentSponsor.name}</span>
+                    )}
+                </a>
             </div>
+            
+            {/* INDICATOR DOTS */}
+            {sponsors.length > 1 && (
+                <div className={styles.dots}>
+                    {sponsors.map((_, idx) => (
+                        <div key={idx} className={`${styles.dot} ${idx === currentIndex ? styles.activeDot : ''}`} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
