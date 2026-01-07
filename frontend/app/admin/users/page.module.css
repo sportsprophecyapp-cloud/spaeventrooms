@@ -1,0 +1,178 @@
+.container {
+    min-height: 100vh;
+    padding: 3rem 2rem;
+    background: var(--background);
+    color: white;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: -2px;
+}
+
+.subtitle {
+    color: var(--neutral);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.8rem;
+}
+
+.main {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* SEARCH BOX */
+.searchBox {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+}
+
+.input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0 1rem;
+}
+
+.input:focus { outline: none; }
+
+.searchBtn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+/* TABLE */
+.tableCard {
+    border-radius: 24px;
+    overflow: hidden;
+    margin-bottom: 4rem;
+}
+
+.tableHeader {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 2fr;
+    padding: 1.5rem 2rem;
+    background: rgba(255,255,255,0.05);
+    font-weight: 900;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--neutral);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 2fr;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    align-items: center;
+}
+
+.username {
+    display: block;
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.email {
+    font-size: 0.8rem;
+    color: var(--neutral);
+}
+
+.roleBadge {
+    font-size: 0.7rem;
+    font-weight: 900;
+    background: rgba(255,255,255,0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.actions button {
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--glass-border);
+}
+
+.creatorBtn { background: var(--success); color: black; }
+.adminBtn { background: #ffd700; color: black; }
+.resetBtn { background: var(--glass); color: white; }
+
+/* ROOM GRID */
+.sectionTitle {
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.roomGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.roomCard {
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.roomCard h3 { margin-bottom: 1rem; }
+.roomCard p { font-size: 0.85rem; color: var(--neutral); margin-bottom: 1.5rem; }
+.roomCard span { color: var(--accent); font-weight: 800; }
+
+.assignBtn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.error {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: var(--error);
+}
+
+.toast {
+    background: var(--success);
+    color: black;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    text-align: center;
+}

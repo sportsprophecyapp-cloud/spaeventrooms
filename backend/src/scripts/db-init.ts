@@ -3,7 +3,7 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Robust Database Initialization (v2.7 - Compliance Update)...');
+        console.log('🚀 Starting Robust Database Initialization (v2.8 - Role & Permissions)...');
 
         const schema = `
             CREATE TABLE IF NOT EXISTS users (
@@ -11,6 +11,7 @@ const initDB = async () => {
                 email VARCHAR(255) UNIQUE NOT NULL,
                 username VARCHAR(50) UNIQUE,
                 password_hash VARCHAR(255) NOT NULL,
+                role VARCHAR(20) DEFAULT 'prophet', -- 'super_admin', 'admin', 'creator', 'prophet'
                 token_balance INTEGER DEFAULT 150,
                 total_points INTEGER DEFAULT 0,
                 current_level INTEGER DEFAULT 1,
@@ -21,7 +22,8 @@ const initDB = async () => {
                 room_id VARCHAR(50) PRIMARY KEY,
                 display_name VARCHAR(100) NOT NULL,
                 config JSONB DEFAULT '{}',
-                is_active BOOLEAN DEFAULT TRUE
+                is_active BOOLEAN DEFAULT TRUE,
+                owner_id INTEGER REFERENCES users(id) -- Link room to a Creator/Admin
             );
 
             CREATE TABLE IF NOT EXISTS soccer_matches (
@@ -47,7 +49,7 @@ const initDB = async () => {
                 closes_at TIMESTAMP WITH TIME ZONE,
                 revealed_at TIMESTAMP WITH TIME ZONE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                created_by INTEGER
+                created_by INTEGER REFERENCES users(id)
             );
 
             CREATE TABLE IF NOT EXISTS prediction_submissions (
@@ -96,15 +98,6 @@ const initDB = async () => {
                 PRIMARY KEY (user_id, cosmetic_id)
             );
 
-            CREATE TABLE IF NOT EXISTS token_transactions (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                amount INTEGER NOT NULL,
-                type VARCHAR(50) NOT NULL,
-                description TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
             CREATE TABLE IF NOT EXISTS room_sponsors (
                 id SERIAL PRIMARY KEY,
                 room_id VARCHAR(50) REFERENCES rooms(room_id),
@@ -114,23 +107,21 @@ const initDB = async () => {
                 is_active BOOLEAN DEFAULT TRUE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
-
-            CREATE TABLE IF NOT EXISTS announcements (
-                id SERIAL PRIMARY KEY,
-                room_id VARCHAR(50) REFERENCES rooms(room_id),
-                type VARCHAR(50), 
-                title VARCHAR(255) NOT NULL,
-                description TEXT,
-                is_draft BOOLEAN DEFAULT false,
-                published_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                created_by INTEGER REFERENCES users(id)
-            );
         `;
         await client.query(schema);
         console.log('✅ Schema applied successfully.');
 
-        // 2. Seed Data (Compliant Wording)
+        // 2. Safe Role Upgrades
+        await client.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'prophet';
+            ALTER TABLE rooms ADD COLUMN IF NOT EXISTS owner_id INTEGER REFERENCES users(id);
+            
+            -- Set Primary Super Admin
+            UPDATE users SET role = 'super_admin' WHERE email = 'sportsprophecyapp@gmail.com';
+        `);
+        console.log('✅ Roles and Super Admin initialized.');
+
+        // 3. Seed Content
         await client.query(`
             INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Soccer Room')
             ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
