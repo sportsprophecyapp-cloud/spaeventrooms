@@ -15,6 +15,7 @@ import UserTray from '../../components/UserTray';
 import Leaderboard from '../../components/Leaderboard';
 import EmptyStateWidget from '../../components/EmptyStateWidget';
 import RoomChat from '../../components/RoomChat';
+import FlashCallAlerter from '../../components/FlashCallAlerter'; // New Import
 
 function RoomContent() {
     const params = useParams();
@@ -85,6 +86,9 @@ function RoomContent() {
 
     return (
         <div className={styles.container}>
+            {/* Real-time Creator Alerts */}
+            <FlashCallAlerter />
+
             <header className={styles.header}>
                 <div className={styles.headerLeft}>
                     <Link href="/" className={styles.backBtn}>← Lobby</Link>
@@ -114,7 +118,7 @@ function RoomContent() {
                     className={`${styles.tabBtn} ${activeTab === 'leaderboard' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('leaderboard')}
                 >
-                    Ranks
+                    Standings
                 </button>
                 <button
                     className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.activeTab : ''}`}
