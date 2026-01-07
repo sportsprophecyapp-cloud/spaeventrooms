@@ -1,39 +1,40 @@
 # Events Arena - UX Design Document
-**Version 2.10 | January 2026**
+**Version 2.11 | January 2026**
 
 ## 🎯 Overview
-Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. It is build-stabilized, branding-unified, and mobile-organized for global pre-launch.
+Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. It is build-stabilized, branding-unified, and integrity-locked for global pre-launch.
 
 ### Core Philosophy:
+- **Fair Play Integrity:** Prediction inputs are locked the moment an event begins. Users must "Make their call" before the official start time.
+- **Time-Priority Organization:** The arena surface prioritizes the most immediate opportunities, sorting events by "Time to Start" (Soonest first).
 - **Room Isolation Strategy:** Dedicated UI for different event types. Pure Soccer Arena focuses on data; Creator Rooms focus on interactive stream engagement.
-- **User-First Lean Strategy:** Prioritizes immediate value (200 Welcome Tokens) over intrusive installation prompts or distracting banners.
-- **Resilient Reliability:** Implementation of AbortControllers and state reset logic ensure the platform never "gets stuck" during critical user actions.
 
 ---
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
 - **Dual-Sync Data Layer:** API-Football (15m) + The Odds API (30m) with 4-key sequential rotation.
-- **Transmission Layer:** Resilient Fetch logic with 10-second safety timeouts, dynamic API URL detection, and explicit state reset on every interaction.
-- **Auto-Resolution Engine:** 15-minute automated checks for Match Calls, XP, and Prize Tickets.
+- **Economy Integrity:** Cross-table synchronization ensures XP and Prize Tickets are awarded only for correct, locked-in calls.
+- **Auto-Resolution Engine:** 15-minute automated checks for Match Results, XP, and Prize Tickets.
 
 ---
 
 ## 🛠️ USER ROLES & HIERARCHY
 1. **Supporter (User):** Earns status and rewards through accurate "Calls."
 2. **Creator (Partner):** Owns rooms, triggers Flash Calls, uses OBS Overlays.
-3. **Admin (Moderator):** Full system oversight with interactive match deletion and "Nuclear" debug tools.
+3. **Admin (Moderator):** Full system oversight with interactive match deletion and categorized Debug tools.
 
 ---
 
 ## 📱 MOBILE UX STANDARDS
-### 2.1 Ultra-Compact Navigation
-- **Dynamic Header:** 60px height limitation. Text logos hide on mobile to prioritize the 🎯 Icon, Language Picker, and User Tray.
-- **Sticky Tabs:** Persistent `Calls | Standings | Fan Arena` navigation for instant section jumping.
-
-### 2.2 Organized Match List
+### 2.1 The Intelligent Match List
 - **League Accordions:** Collapsible blocks grouped by official league headers.
 - **Auto-Expand:** Sections containing **LIVE** events automatically expand for immediate engagement.
-- **Direct Rewards:** Every card features a golden `🎫 EARN 1 TICKET` tag and explicit `Make your call` instructions.
+- **Chronological Sorting:** Matches within each league are sorted by start time (Soonest first).
+- **Kick-off Lock:** The "Predict" button is replaced by live scores/status once the event starts.
+
+### 2.2 Ultra-Compact Navigation
+- **Dynamic Header:** 60px height. Redundant text is hidden on mobile to prioritize the 🎯 Icon and Language Picker.
+- **Sticky Tabs:** Persistent social and prediction navigation.
 
 ---
 
