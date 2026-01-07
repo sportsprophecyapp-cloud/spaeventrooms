@@ -11,6 +11,7 @@ interface Match {
     status: string;
     score_home?: number;
     score_away?: number;
+    league?: string;
     isPulsing?: boolean;
 }
 
@@ -60,6 +61,11 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
                         <span className={styles.scoreNum}>{match.score_away}</span>
                     </div>
                 )}
+            </div>
+
+            {/* SPONSOR INTEGRATION LABEL */}
+            <div className={styles.cardFooter}>
+                <span className={styles.prizeTag}>🎫 EARN 1 TICKET</span>
             </div>
         </div>
     );

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext'; // Fixed path: only 2 levels up
 import styles from './page.module.css';
 
 interface Prophet {

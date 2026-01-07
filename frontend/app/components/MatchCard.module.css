@@ -4,9 +4,13 @@
     border-radius: 20px;
     padding: 1.5rem 2rem;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    gap: 1.5rem;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .card:hover {
@@ -18,6 +22,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex: 1;
 }
 
 .teams {
@@ -90,7 +95,6 @@
 
 .predictBtn:hover {
     box-shadow: 0 0 15px var(--accent-glow);
-    transform: scale(1.05);
 }
 
 .btnHint {
@@ -122,6 +126,24 @@
     opacity: 0.5;
 }
 
+/* FOOTER / PRIZE TAG */
+.cardFooter {
+    width: 100%;
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 10px;
+}
+
+.prizeTag {
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+}
+
 @keyframes blink {
     0% { opacity: 1; }
     50% { opacity: 0.4; }
@@ -129,6 +151,6 @@
 }
 
 @media (max-width: 600px) {
-    .card { padding: 1.2rem; }
+    .card { padding: 1.2rem; gap: 1rem; }
     .team { font-size: 0.95rem; }
 }
