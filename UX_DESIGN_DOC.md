@@ -1,81 +1,75 @@
 # Sports Prophecy - UX Design Document
-**Version 1.0 | January 2026**
+**Version 1.1 | January 2026**
 
 ## 🎯 Overview
-This document details every major screen and user interaction in Sports Prophecy, from onboarding through active gameplay.
+Sports Prophecy is a full-stack, high-energy sports engagement platform designed for **entertainment and social competition**. It is strictly **NOT a gambling site**. Users "prophesy" (forecast) live game outcomes to earn status and rewards, while sponsors gain highly targeted brand exposure.
 
-### Design Principles:
-- Dark mode (gaming aesthetic)
-- Fast, responsive interactions
-- Clear information hierarchy
-- Mobile-first responsive design
-- Progressive disclosure (hide complexity)
+### Core Philosophy:
+- **Mutual Benefit:** Users get a 100% free, gamified second-screen experience. Sponsors get automated, high-visibility ad placements.
+- **Skill over Luck:** Everything is framed as "Prophecy" and "Knowledge," avoiding all gambling terminology.
+- **Gaming Aesthetic:** A high-end Dark/Neon "Esports" vibe with Glassmorphism and real-time responsiveness.
 
 ---
 
-## 1. AUTHENTICATION FLOW
-### 1.1 Login Screen (`/auth/login`)
-- **Purpose:** Entry point for existing users.
-- **Interactions:** Tab between fields, "SIGN UP" and "RESET" links.
-- **States:** Loading spinner on button, error highlights.
-
-### 1.2 Signup Screen (`/auth/register`)
-- **Purpose:** New user registration.
-- **Features:** Real-time validation, password strength indicator, Terms checkbox.
-- **Referral Integration:** Automatic +50 tokens for referrers via `?ref=USER_ID`.
+## 🛠️ USER ROLES & HIERARCHY
+1. **Prophet (User):** Regular user. Can chat, forecast, and buy gear.
+2. **Creator (Partner):** Room Owners (e.g., TaylorMade, PGA, Twitch Streamers). Can moderate their own rooms.
+3. **Admin (Moderator):** Platform-wide support and moderation.
+4. **Super Admin:** Full platform control (sportsprophecyapp@gmail.com).
 
 ---
 
-## 2. ONBOARDING FLOW (FTUE)
-- **Step 1: Welcome:** Quick 2-min tour intro.
-- **Step 2: Tokens:** Explains earning (Daily login, Sharing, Referral).
-- **Step 3: First Prediction:** Guided practice prediction with YES/NO toggle.
-- **Step 4: Leaderboard:** Shows user's rank relative to others.
-- **Step 5: Token Shop:** Preview of cosmetic items (Avatars, Frames, Badges).
+## 1. AUTHENTICATION & IDENTITY
+### 1.1 Custom Prophet Handles (UUID)
+- Users can choose a unique **Prophet Handle** (e.g., @GamerPro).
+- Default: Email prefix (e.g., @sportsprophecyapp).
+- Editing: High-energy identity edit field on the Profile Page with availability checks.
+
+### 1.2 Auth Flow
+- Dedicated `/auth/login` and `/auth/register` pages.
+- Smart Redirects: "Enter Room -> Login -> Auto-return to Room."
+- Compliance: Forms include all necessary attributes for accessibility and autofill.
 
 ---
 
-## 3. MAIN APP SCREENS
-### 3.1 Homepage / Lobby (`/`)
-- Header with Menu, Token Bar, Shop link.
-- **Sponsor Placements:** Premium Banner + Footer Carousel.
-- **Sections:** Live Now, Upcoming (24h), Global Leaderboard Preview.
-- **Bottom Nav:** [HOME] [LIVE] [LEADERBOARD] [PROFILE].
+## 2. MAIN APP SCREENS
+### 2.1 Homepage / Lobby (`/`)
+- **Compact Mobile Header:** Shrunk logo/tagline to show rooms "above the fold."
+- **Quick Nav:** Mobile-optimized rankings and profile buttons.
+- **Legal Disclaimer:** Persistent footer stating: *"Sports Prophecy is a social platform for entertainment purposes only. No real money can be won or wagered."*
 
-### 3.2 Room Page (`/rooms/[roomId]`)
-- **Active Gameplay:** Question card with live vote % (YES/NO).
-- **Social:** Live Chat + Share Room button (+50 tokens).
-- **Competition:** Room-specific Top 5 Leaderboard.
-- **Mobile:** Collapsible Leaderboard and Chat sections.
-
-### 3.3 Token Shop (Modal)
-- Filter by Avatars, Frames, Badges.
-- Affordability indicators (grayed out if insufficient funds).
-- "✓ OWNED" status and "Preview on Avatar" functionality.
-
-### 3.4 User Profile (`/profile/[userId]`)
-- Showcase equipped cosmetics (Avatar/Frame).
-- Stats: Accuracy, Streak, Level, Total Predictions.
-- History: Recent results (✓ CORRECT / ✗ INCORRECT).
-
-### 3.5 Daily Login & Rewards
-- Navbar button to claim daily tokens.
-- Streak bonuses: Day 7 (+100), Day 30 (+500).
+### 2.2 Room Page (`/rooms/[roomId]`)
+- **3-Column Layout (Desktop):** [Predictions] | [Ranks] | [Live Chat].
+- **Tab System (Mobile):** Sticky `Predict | Ranks | Chat` bar for native app feel.
+- **Official Sponsor Widget:** Real-time injection of active Stripe-verified sponsors.
 
 ---
 
-## 4. INTERACTION PATTERNS
-- **Prediction Loop:** Click -> Glow -> Countdown -> Resolve -> Score Animation.
-- **Cosmetic Purchase:** Preview -> Confirm -> Animate Balance Change -> Equip Prompt.
-- **Share & Earn:** Generate Link -> Copy -> Animate Token Gain -> Cooldown Timer.
+## 3. SPONSOR ECOSYSTEM (Monetization)
+### 3.1 Automated Ad Slots
+- **Placeholder System:** Empty slots show "SPONSOR THIS ARENA" cards that link to pricing.
+- **Tiered Packages:** Starter, Growth, and Premium tiers via Stripe.
+- **Auto-Activation:** Ad is instantly LIVE the moment Stripe confirms payment.
+- **Admin Alerts:** Automatic email notifications to `sportsprophecyapp@gmail.com` for checkouts and payments.
 
 ---
 
-## 5. TECHNICAL & DESIGN SPECS
-- **Colors:** Background `#050505`, Cards `#1a1a2e`, Accent `Electric Blue`, Success `Neon Green`.
-- **Glassmorphism:** `rgba(255, 255, 255, 0.05)` with `backdrop-filter: blur(10px)`.
-- **Responsive:** 3-col (Desktop), 2-col (Tablet), 1-col (Mobile with Tabs).
-- **Performance:** Load time <3s, 60fps animations.
+## 4. GAMIFICATION & ENGAGEMENT
+### 4.1 Token Shop & Cosmetic Lab
+- **"Try-on" Preview:** Users see gear on their avatar before spending tokens.
+- **Prophecy Gear:** High-end titles like "Master Seer" and "Gilded Aura."
+- **Animations:** High-energy `+10 PTS` floating score animations on successful prophecies.
+
+### 4.2 Social & Discussion
+- **Live Arena Chat:** Real-time room-wide communication with user level badges.
+- **Poll Discussions:** Collapsible comment sections under every specific forecast.
 
 ---
-*Document stored for AI/Developer reference.*
+
+## 5. COMPLIANCE & SAFETY
+- **Non-Gambling:** No "Bets," "Wagers," or "Payouts." Only "Prophecies," "XP," and "Rewards."
+- **Age Gating:** 13+ only (Enforced in terms).
+- **Data Privacy:** Full transparency on data handling and deletion.
+
+---
+*This document serves as the master blueprint for the Sports Prophecy platform.*
