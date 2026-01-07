@@ -36,7 +36,7 @@
     color: white;
 }
 
-.fileInput { font-size: 0.7rem; padding: 10px ! from; }
+.fileInput { font-size: 0.7rem; padding: 10px; } /* FIXED: Removed '! from' typo */
 
 /* PREVIEW COLUMN */
 .previewColumn {
