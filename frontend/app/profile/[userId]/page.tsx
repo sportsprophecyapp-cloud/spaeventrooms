@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import styles from './page.module.css';
 
@@ -20,34 +20,34 @@ interface UserProfile {
 
 const ProfilePage = () => {
     const { userId } = useParams();
-    const { user, isAuthenticated, token, login } = useAuth(); // Destructure login to update local state
+    const router = useRouter();
+    const { user, isAuthenticated, token, login } = useAuth(); 
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     
-    // Identity Edit State
     const [isEditing, setIsEditing] = useState(false);
     const [newName, setNewName] = useState('');
     const [editError, setEditError] = useState('');
 
-    const fetchProfileData = async () => {
-        try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const res = await fetch(`${apiUrl}/api/auth/profile/${userId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setProfile(data.user);
-                setNewName(data.user.username);
-            }
-        } catch (err) {
-            console.error('Error fetching profile data:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchProfileData = async () => {
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                const res = await fetch(`${apiUrl}/api/auth/profile/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setProfile(data.user);
+                    setNewName(data.user.username);
+                }
+            } catch (err) {
+                console.error('Error fetching profile data:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         if (isAuthenticated && token) {
             fetchProfileData();
         }
@@ -67,9 +67,7 @@ const ProfilePage = () => {
             });
             const data = await res.json();
             if (res.ok) {
-                // Update local profile
                 setProfile(prev => prev ? { ...prev, username: data.user.username } : null);
-                // Update AuthContext so chat/header updates too
                 login(token!, data.user);
                 setIsEditing(false);
             } else {
@@ -87,6 +85,13 @@ const ProfilePage = () => {
 
     return (
         <div className={styles.container}>
+            {/* BACK BUTTON */}
+            <div className={styles.navBar}>
+                <button onClick={() => router.back()} className={styles.backBtn}>
+                    ← RETURN TO ARENA
+                </button>
+            </div>
+
             <header className={styles.header}>
                 <div className={styles.profileHeader}>
                     <div className={styles.avatarWrapper} style={{ borderColor: 'var(--accent)' }}>

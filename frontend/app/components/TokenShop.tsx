@@ -16,7 +16,6 @@ export default function TokenShop({ onClose }: TokenShopProps) {
     const [previewItem, setPreviewItem] = useState<any>(null);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-    // Safe username access for TS
     const displayUsername = user?.username || 'Prophet';
     const displayInitial = displayUsername.charAt(0).toUpperCase();
 
@@ -41,6 +40,7 @@ export default function TokenShop({ onClose }: TokenShopProps) {
     };
 
     return (
+        // FIX: Added onClick to the overlay to allow closing by clicking outside
         <div className={styles.overlay} onClick={onClose}>
             <div className={`${styles.modal} glass`} onClick={(e) => e.stopPropagation()}>
                 <button className={styles.closeBtn} onClick={onClose}>✕</button>

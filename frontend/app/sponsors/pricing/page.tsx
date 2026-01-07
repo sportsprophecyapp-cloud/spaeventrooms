@@ -1,8 +1,8 @@
-
 'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from './page.module.css';
 import { useAuth } from '../../context/AuthContext';
 
@@ -13,7 +13,6 @@ export default function SponsorshipPricingPage() {
 
     const handleSubscribe = async (tier: string) => {
         if (!isAuthenticated) {
-            // Encode the return URL so after login they come back here
             router.push(`/auth/login?redirect=${encodeURIComponent('/sponsors/pricing')}`);
             return;
         }
@@ -35,7 +34,6 @@ export default function SponsorshipPricingPage() {
                 throw new Error(data.message || 'Failed to start checkout');
             }
 
-            // Redirect to Stripe Checkout
             if (data.url) {
                 window.location.href = data.url;
             } else {
@@ -51,72 +49,79 @@ export default function SponsorshipPricingPage() {
 
     return (
         <div className={styles.container}>
+            {/* BACK BUTTON */}
+            <div className={styles.navBar}>
+                <button onClick={() => router.back()} className={styles.backBtn}>
+                    ← RETURN TO ARENA
+                </button>
+            </div>
+
             <header className={styles.header}>
-                <h1 className={styles.title}>Become a Platform Sponsor</h1>
+                <h1 className={styles.title}>Secure Your Placement</h1>
                 <p className={styles.subtitle}>
-                    Reach thousands of sports fans daily. Choose a placement that fits your brand.
+                    Promote your brand to thousands of active sports prophets. 
+                    Choose your impact level below.
                 </p>
             </header>
 
             <div className={styles.grid}>
-                {/* Starter Tier */}
-                <div className={styles.card}>
+                {/* Tiers kept as is, but UI will be polished in CSS */}
+                <div className={`${styles.card} glass`}>
                     <h2 className={styles.tierName}>Starter Display</h2>
-                    <div className={styles.price}>C$99<span>/month</span></div>
+                    <div className={styles.price}>$99<span>/mo</span></div>
                     <ul className={styles.features}>
-                        <li><span className={styles.check}>✓</span> Homepage Logo (Rotating)</li>
-                        <li><span className={styles.check}>✓</span> Announcements Page Ad</li>
+                        <li><span className={styles.check}>✓</span> Homepage Logo</li>
                         <li><span className={styles.check}>✓</span> Footer Placement</li>
                         <li><span className={styles.check}>✓</span> Basic Analytics</li>
                     </ul>
                     <button
-                        className={`${styles.button} ${styles.buttonSecondary}`}
+                        className={styles.buttonSecondary}
                         onClick={() => handleSubscribe('starter')}
                         disabled={!!loadingTier}
                     >
-                        {loadingTier === 'starter' ? 'Processing...' : 'Select Starter'}
+                        {loadingTier === 'starter' ? '...' : 'SELECT STARTER'}
                     </button>
                 </div>
 
-                {/* Growth Tier */}
-                <div className={`${styles.card} ${styles.featured}`}>
-                    <div className={styles.popularBadge}>Most Popular</div>
+                <div className={`${styles.card} ${styles.featured} glass`}>
+                    <div className={styles.popularBadge}>BEST VALUE</div>
                     <h2 className={styles.tierName}>Growth Display</h2>
-                    <div className={styles.price}>C$299<span>/month</span></div>
+                    <div className={styles.price}>$299<span>/mo</span></div>
                     <ul className={styles.features}>
-                        <li><span className={styles.check}>✓</span> <strong>All Starter Features</strong></li>
-                        <li><span className={styles.check}>✓</span> Login Page Logo Strategy</li>
-                        <li><span className={styles.check}>✓</span> Room Selection Page Ad</li>
-                        <li><span className={styles.check}>✓</span> 2 Monthly Custom Announcements</li>
+                        <li><span className={styles.check}>✓</span> Everything in Starter</li>
+                        <li><span className={styles.check}>✓</span> Room Selection Ad</li>
+                        <li><span className={styles.check}>✓</span> 2 Custom Announcements</li>
                     </ul>
                     <button
-                        className={`${styles.button} ${styles.buttonPrimary}`}
+                        className={styles.buttonPrimary}
                         onClick={() => handleSubscribe('growth')}
                         disabled={!!loadingTier}
                     >
-                        {loadingTier === 'growth' ? 'Processing...' : 'Select Growth'}
+                        {loadingTier === 'growth' ? '...' : 'SELECT GROWTH'}
                     </button>
                 </div>
 
-                {/* Premium Tier */}
-                <div className={styles.card}>
+                <div className={`${styles.card} glass`}>
                     <h2 className={styles.tierName}>Premium Display</h2>
-                    <div className={styles.price}>C$599<span>/month</span></div>
+                    <div className={styles.price}>$599<span>/mo</span></div>
                     <ul className={styles.features}>
-                        <li><span className={styles.check}>✓</span> <strong>All Growth Features</strong></li>
-                        <li><span className={styles.check}>✓</span> Hero Banner (Top of Homepage)</li>
-                        <li><span className={styles.check}>✓</span> Dedicated Sponsor Page</li>
+                        <li><span className={styles.check}>✓</span> Everything in Growth</li>
+                        <li><span className={styles.check}>✓</span> Homepage Hero Banner</li>
                         <li><span className={styles.check}>✓</span> Unlimited Announcements</li>
                     </ul>
                     <button
-                        className={`${styles.button} ${styles.buttonSecondary}`}
+                        className={styles.buttonSecondary}
                         onClick={() => handleSubscribe('premium')}
                         disabled={!!loadingTier}
                     >
-                        {loadingTier === 'premium' ? 'Processing...' : 'Select Premium'}
+                        {loadingTier === 'premium' ? '...' : 'SELECT PREMIUM'}
                     </button>
                 </div>
             </div>
+            
+            <p className={styles.footerContact}>
+                Need a custom partnership? <Link href="mailto:sportsprophecyapp@gmail.com">Contact our team</Link>
+            </p>
         </div>
     );
 }

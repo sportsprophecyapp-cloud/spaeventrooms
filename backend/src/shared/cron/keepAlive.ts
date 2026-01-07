@@ -1,26 +1,32 @@
-
 import https from 'https';
 
-const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes (Render sleeps after 15)
+// 14 minutes (Render free tier sleeps after 15 mins of inactivity)
+const PING_INTERVAL = 14 * 60 * 1000; 
 
 export const startKeepAlive = () => {
-    // Only run if we have a URL to ping
-    const url = process.env.RENDER_EXTERNAL_URL
-        ? `${process.env.RENDER_EXTERNAL_URL}/health`
-        : null;
+    // Backend URL (Self)
+    const backendUrl = process.env.RENDER_EXTERNAL_URL || 'https://spa-backend-mvb1.onrender.com';
+    
+    // Frontend URL (User Facing)
+    const frontendUrl = 'https://www.sportsprophecyapp.com';
 
-    if (!url) {
-        console.log('ℹ️ Keep-alive skipped: RENDER_EXTERNAL_URL not set (running locally?)');
-        return;
-    }
-
-    console.log(`🚀 Keep-alive service started. Pinging ${url} every 14 minutes.`);
+    console.log(`🚀 Mutual Keep-alive started.`);
+    console.log(`📡 Targets: ${backendUrl}/health AND ${frontendUrl}`);
 
     setInterval(() => {
-        https.get(url, (res) => {
-            console.log(`💓 Keep-alive ping sent. Status: ${res.statusCode}`);
+        // Ping Backend
+        https.get(`${backendUrl}/health`, (res) => {
+            console.log(`💓 Backend ping: ${res.statusCode}`);
         }).on('error', (err) => {
-            console.error('⚠️ Keep-alive ping failed:', err.message);
+            console.error('⚠️ Backend keep-alive failed:', err.message);
         });
+
+        // Ping Frontend (Keep the UI snappy!)
+        https.get(frontendUrl, (res) => {
+            console.log(`💓 Frontend ping: ${res.statusCode}`);
+        }).on('error', (err) => {
+            console.error('⚠️ Frontend keep-alive failed:', err.message);
+        });
+
     }, PING_INTERVAL);
 };

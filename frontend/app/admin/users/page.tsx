@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import styles from './page.module.css';
 
@@ -20,6 +21,7 @@ interface Room {
 
 const AdminUsersPage = () => {
     const { token, user } = useAuth();
+    const router = useRouter();
     const [searchTerm, setSearchTerm] = useState('');
     const [prophets, setProphets] = useState<Prophet[]>([]);
     const [rooms, setRooms] = useState<Room[]>([]);
@@ -77,13 +79,19 @@ const AdminUsersPage = () => {
 
     return (
         <div className={styles.container}>
+            {/* BACK BUTTON */}
+            <div className={styles.navBar}>
+                <button onClick={() => router.back()} className={styles.backBtn}>
+                    ← RETURN TO COMMAND
+                </button>
+            </div>
+
             <header className={styles.header}>
                 <h1 className={styles.title}>PROPHET MANAGEMENT</h1>
                 <p className={styles.subtitle}>Control the hierarchy and assign room ownership.</p>
             </header>
 
             <main className={styles.main}>
-                {/* Search Section */}
                 <section className={`${styles.searchBox} glass`}>
                     <input 
                         className={styles.input}
@@ -97,7 +105,6 @@ const AdminUsersPage = () => {
 
                 {message && <div className={styles.toast}>{message}</div>}
 
-                {/* Results Table */}
                 <div className={`${styles.tableCard} glass`}>
                     <div className={styles.tableHeader}>
                         <span>Prophet</span>
@@ -125,7 +132,6 @@ const AdminUsersPage = () => {
                     </div>
                 </div>
 
-                {/* Room Ownership Section */}
                 <h2 className={styles.sectionTitle}>ROOM ASSIGNMENTS</h2>
                 <div className={styles.roomGrid}>
                     {rooms.map(room => (

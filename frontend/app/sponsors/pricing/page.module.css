@@ -1,151 +1,160 @@
 .container {
+    min-height: 100vh;
+    padding: 2rem;
+    background: var(--background);
+    color: white;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 4rem 1rem;
-    font-family: var(--font-outfit), sans-serif;
-    color: #fff;
+}
+
+.navBar {
+    margin-bottom: 3rem;
+}
+
+.backBtn {
+    background: transparent;
+    border: none;
+    color: var(--neutral);
+    font-weight: 900;
+    font-size: 0.8rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+.backBtn:hover {
+    color: var(--accent);
 }
 
 .header {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 5rem;
 }
 
 .title {
-    font-size: 3rem;
-    font-weight: 700;
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: -2px;
     margin-bottom: 1rem;
-    background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-    font-size: 1.25rem;
-    color: #94a3b8;
-    max-width: 600px;
-    margin: 0 auto;
+    color: var(--neutral);
+    font-size: 1.1rem;
 }
 
+/* PRICING GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
-    padding: 0 1rem;
+    margin-bottom: 5rem;
 }
 
 .card {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 2rem;
+    padding: 3rem 2rem;
+    border-radius: 30px;
+    text-align: center;
+    border: 1px solid var(--glass-border);
+    transition: transform 0.3s ease;
     display: flex;
     flex-direction: column;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    transform: translateY(-10px);
+    border-color: var(--accent);
 }
 
-.card.featured {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.5);
+.featured {
+    border-color: var(--accent);
+    background: rgba(0, 112, 243, 0.05);
+    position: relative;
 }
 
 .popularBadge {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: #3b82f6;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 1px;
 }
 
 .tierName {
     font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #fff;
+    font-weight: 900;
+    margin-bottom: 1rem;
 }
 
 .price {
     font-size: 3rem;
-    font-weight: 700;
+    font-weight: 900;
     margin-bottom: 2rem;
-    color: #fff;
-    display: flex;
-    align-items: baseline;
 }
 
 .price span {
     font-size: 1rem;
-    color: #94a3b8;
-    margin-left: 0.5rem;
-    font-weight: 400;
+    color: var(--neutral);
 }
 
 .features {
     list-style: none;
-    padding: 0;
-    margin: 0 0 2rem 0;
+    text-align: left;
+    margin-bottom: 3rem;
     flex-grow: 1;
 }
 
 .features li {
-    display: flex;
-    align-items: center;
     margin-bottom: 1rem;
-    color: #cbd5e1;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    color: var(--neutral);
 }
 
 .check {
-    color: #4ade80;
-    margin-right: 0.75rem;
-    font-weight: bold;
+    color: var(--success);
+    margin-right: 10px;
+    font-weight: 900;
 }
 
-.button {
+.buttonPrimary, .buttonSecondary {
     width: 100%;
-    padding: 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
+    padding: 1.2rem;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
+    transition: all 0.3s ease;
     border: none;
 }
 
 .buttonPrimary {
-    background: #3b82f6;
+    background: var(--accent);
     color: white;
-}
-
-.buttonPrimary:hover {
-    background: #2563eb;
 }
 
 .buttonSecondary {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
     color: white;
 }
 
-.buttonSecondary:hover {
-    background: rgba(255, 255, 255, 0.2);
+.footerContact {
+    text-align: center;
+    color: var(--neutral);
+    font-size: 0.9rem;
 }
 
-.button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+.footerContact a {
+    color: var(--accent);
+    font-weight: 800;
+}
+
+@media (max-width: 768px) {
+    .title { font-size: 2.5rem; }
+    .grid { grid-template-columns: 1fr; }
 }
