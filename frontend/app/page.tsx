@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
-import { useLanguage } from '@/app/context/LanguageContext'; // New Hook
+import { useLanguage } from '@/app/context/LanguageContext';
 import styles from './page.module.css';
 import { APP_VERSION } from './version';
 import OnboardingModal from '@/app/components/OnboardingModal';
@@ -68,12 +68,6 @@ const HomePage = () => {
     <div className={styles.container}>
       {isAuthenticated && <UserTray />}
       
-      <div className={styles.promoBanner}>
-        <span className={styles.fire}>🔥</span>
-        <p>{t('welcome_bonus')}</p>
-        <Link href="/auth/register" className={styles.promoBtn}>{t('claim_now')}</Link>
-      </div>
-
       <header className={styles.header}>
         <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
         <div className={styles.logo}>
