@@ -7,7 +7,7 @@ const ODDS_API_INTERVAL = 30 * 60 * 1000;    // 30 Minutes (48/day)
 const FOOTBALL_API_INTERVAL = 15 * 60 * 1000; // 15 Minutes (96/day)
 
 export const startSoccerScheduler = () => {
-    console.log('⚽️ Soccer Data Scheduler: HIGH-SPEED MODE (15m / 30m Dual-Interval)');
+    console.log('🎯 Arena Data Scheduler: HIGH-SPEED MODE (15m / 30m Dual-Interval)');
 
     // 1. Immediate Initial Sync
     const initialRun = async () => {

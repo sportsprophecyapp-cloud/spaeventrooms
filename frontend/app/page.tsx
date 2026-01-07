@@ -16,7 +16,7 @@ const HomePage = () => {
       id: 'soccer',
       name: 'Soccer Arena',
       description: 'Forecast match winners and events from the world\'s top leagues.',
-      icon: '⚽',
+      icon: '🎯',
       color: 'var(--accent)',
       active: true
     },
@@ -66,7 +66,6 @@ const HomePage = () => {
     <div className={styles.container}>
       {isAuthenticated && <UserTray />}
       
-      {/* QUICK WIN 1: DOPAMINE BANNER */}
       <div className={styles.promoBanner}>
         <span className={styles.fire}>🔥</span>
         <p>JOIN 500+ SUPPORTERS! GET <strong>200 WELCOME TOKENS</strong> TODAY.</p>
@@ -92,7 +91,6 @@ const HomePage = () => {
       </header>
 
       <main className={styles.main}>
-        {/* ROOM SELECTOR */}
         <h2 className={styles.sectionTitle}>Select Your Arena</h2>
         <div className={styles.roomGrid}>
           {rooms.map(room => (
@@ -116,7 +114,6 @@ const HomePage = () => {
           ))}
         </div>
 
-        {/* QUICK WIN 2: ECONOMY PREVIEW */}
         <section className={styles.economyPreview}>
           <div className={`${styles.ecoCard} glass`}>
             <span className={styles.ecoIcon}>🎫</span>
@@ -135,7 +132,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* QUICK WIN 3: PWA NUDGE */}
         <section className={`${styles.pwaNudge} glass`}>
           <div className={styles.pwaContent}>
             <h3>📲 INSTANT APP ACCESS</h3>

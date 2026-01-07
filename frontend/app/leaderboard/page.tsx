@@ -1,90 +1,96 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
-interface LeaderboardEntry {
+interface Standing {
     rank: number;
     username: string;
     points: number;
-    correct_predictions: number;
-    accuracy: number;
-    avatar_url?: string;
+    level: number;
 }
 
-const LeaderboardPage = () => {
-    const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+const LeaderboardContent = () => {
+    const [standings, setStandings] = useState<Standing[]>([]);
+    const [filter, setFilter] = useState<'global' | 'soccer'>('global');
     const [isLoading, setIsLoading] = useState(true);
-    const [filter, setFilter] = useState('soccer');
+    const router = useRouter();
 
     useEffect(() => {
-        const fetchLeaderboard = async () => {
+        const fetchStandings = async () => {
+            setIsLoading(true);
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${apiUrl}/api/gamification/leaderboard?sport=${filter}`);
+                const res = await fetch(`${apiUrl}/api/gamification/leaderboard`);
                 if (res.ok) {
                     const data = await res.json();
-                    setEntries(data.leaderboard);
+                    setStandings(data.leaderboard || []);
                 }
             } catch (err) {
-                console.error('Error fetching leaderboard:', err);
+                console.error('Failed to fetch standings');
             } finally {
                 setIsLoading(false);
             }
         };
-
-        fetchLeaderboard();
+        fetchStandings();
     }, [filter]);
 
     return (
         <div className={styles.container}>
             <header className={styles.header}>
-                <h1 className={styles.title}>Global Rankings</h1>
-                <div className={styles.filters}>
-                    {['soccer', 'all-time'].map(f => (
-                        <button 
-                            key={f}
-                            className={`${styles.filterBtn} ${filter === f ? styles.active : ''}`}
-                            onClick={() => setFilter(f)}
-                        >
-                            {f === 'soccer' ? '⚽ Soccer' : '🏆 Global'}
-                        </button>
-                    ))}
-                </div>
+                <button onClick={() => router.back()} className={styles.backBtn}>← RETURN</button>
+                <h1 className={styles.title}>ARENA STANDINGS</h1>
+                <p className={styles.subtitle}>The elite analysts of the Events Arena.</p>
             </header>
 
-            <main className={styles.main}>
-                <div className={`${styles.leaderboardCard} glass`}>
-                    <div className={styles.tableHeader}>
-                        <span>Rank</span>
-                        <span>Prophet</span>
-                        <span>Correct</span>
-                        <span>PTS</span>
-                    </div>
-                    
-                    <div className={styles.entries}>
-                        {isLoading ? (
-                            <div className={styles.loading}>Calculating Ranks...</div>
-                        ) : entries.map((entry, index) => (
-                            <div key={entry.username} className={styles.entry}>
-                                <div className={styles.rank}>
-                                    {entry.rank <= 3 ? ['🥇', '🥈', '🥉'][entry.rank - 1] : `#${entry.rank}`}
-                                </div>
-                                <div className={styles.user}>
-                                    <div className={styles.miniAvatar}>
-                                        {entry.username.charAt(0).toUpperCase()}
-                                    </div>
-                                    <span>{entry.username}</span>
-                                </div>
-                                <div className={styles.correct}>{entry.correct_predictions}</div>
-                                <div className={styles.points}>{entry.points}</div>
+            <div className={styles.filterBar}>
+                {(['global', 'soccer'] as const).map(f => (
+                    <button 
+                        key={f}
+                        className={`${styles.filterBtn} ${filter === f ? styles.activeFilter : ''}`}
+                        onClick={() => setFilter(f)}
+                    >
+                        {f === 'soccer' ? '🎯 Soccer' : '🏆 Global'}
+                    </button>
+                ))}
+            </div>
+
+            <main className={`${styles.board} glass`}>
+                <div className={styles.tableHeader}>
+                    <span>Rank</span>
+                    <span>Supporter</span>
+                    <span>XP</span>
+                    <span>Level</span>
+                </div>
+
+                <div className={styles.rows}>
+                    {isLoading ? (
+                        <p className={styles.loading}>Accessing Arena Records...</p>
+                    ) : standings.length === 0 ? (
+                        <p className={styles.empty}>No standings recorded yet.</p>
+                    ) : (
+                        standings.map(s => (
+                            <div key={s.username} className={styles.row}>
+                                <span className={styles.rank}>
+                                    {s.rank <= 3 ? ['🥇', '🥈', '🥉'][s.rank-1] : `#${s.rank}`}
+                                </span>
+                                <span className={styles.username}>@{s.username}</span>
+                                <span className={styles.points}>{s.points}</span>
+                                <span className={styles.levelBadge}>Lvl {s.level}</span>
                             </div>
-                        ))}
-                    </div>
+                        ))
+                    )}
                 </div>
             </main>
         </div>
     );
 };
 
-export default LeaderboardPage;
+export default function LeaderboardPage() {
+    return (
+        <Suspense fallback={<div>Loading Arena Records...</div>}>
+            <LeaderboardContent />
+        </Suspense>
+    );
+}
