@@ -66,9 +66,9 @@ builds/
 *.aab
 *.log
 
-# Project Documentation & Internal References
-MASTER_REFERENCE.md
-PROJECT_CONTEXT.md
-DEPLOYMENT_SETUP.md
+# Project Documentation & Internal References (TEMP UNBLOCKED)
+# MASTER_REFERENCE.md
+# PROJECT_CONTEXT.md
+# DEPLOYMENT_SETUP.md
 .agent/
 legacy_backup/

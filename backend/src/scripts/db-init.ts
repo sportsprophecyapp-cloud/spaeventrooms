@@ -3,7 +3,7 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Pure-Data Database Initialization (v2.9)...');
+        console.log('🚀 Starting Prize-Draw Ready Database Initialization (v3.0)...');
 
         const schema = `
             CREATE TABLE IF NOT EXISTS users (
@@ -87,20 +87,47 @@ const initDB = async () => {
                 description TEXT,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS room_sponsors (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) REFERENCES rooms(room_id),
+                name VARCHAR(100) NOT NULL,
+                logo_url TEXT,
+                link_url TEXT,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            -- NEW: PRIZE DRAW SYSTEM
+            CREATE TABLE IF NOT EXISTS prize_draws (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                prize_description TEXT,
+                room_id VARCHAR(50) REFERENCES rooms(room_id),
+                sponsor_id INTEGER REFERENCES room_sponsors(id),
+                status VARCHAR(20) DEFAULT 'active', -- 'active', 'completed', 'cancelled'
+                draw_date TIMESTAMP WITH TIME ZONE,
+                winner_id INTEGER REFERENCES users(id),
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS prize_draw_entries (
+                id SERIAL PRIMARY KEY,
+                draw_id INTEGER REFERENCES prize_draws(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                entry_type VARCHAR(50) NOT NULL, -- 'streak', 'referral', 'accuracy'
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
 
-        // 2. Fix Missing Usernames
+        // Update Super Admin
         await client.query(`
-            UPDATE users 
-            SET username = split_part(email, '@', 1) 
-            WHERE username IS NULL OR username = '';
-            
             UPDATE users SET role = 'super_admin' WHERE email = 'sportsprophecyapp@gmail.com';
         `);
 
-        // 3. Seed ONLY Essential System Content (Rooms & Gear)
-        // No mock polls, no mock games.
+        // Seed Essential System Content
         await client.query(`
             INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Soccer Room')
             ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
@@ -112,7 +139,7 @@ const initDB = async () => {
             ON CONFLICT (id) DO NOTHING;
         `);
 
-        console.log('✅ Arena Cleaned: Mock data removed. System ready for Real Data.');
+        console.log('✅ Prize Draw System Initialized in DB.');
     } catch (err) {
         console.error('❌ DB Init failed:', err);
         process.exit(1);
