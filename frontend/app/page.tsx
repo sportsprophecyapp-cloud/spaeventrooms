@@ -22,7 +22,7 @@ const HomePage = () => {
       id: 'soccer',
       name: 'Soccer Arena',
       description: 'Forecast match winners and events from the world\'s top leagues.',
-      icon: '🎯',
+      icon: '◈', // Replaced target with sleek diamond
       color: 'var(--accent)',
       active: true
     },
@@ -71,7 +71,7 @@ const HomePage = () => {
       <header className={styles.header}>
         <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
         <div className={styles.logo}>
-          <span className={styles.icon}>🎯</span>
+          {/* REMOVED TARGET: LET TYPOGRAPHY LEAD */}
           <h1>EVENTS <span style={{color: 'var(--accent)'}}>ARENA</span></h1>
         </div>
         <p className={styles.tagline}>{t('tagline')}</p>
