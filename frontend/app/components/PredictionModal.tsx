@@ -35,7 +35,11 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
         setLoading(true);
         setError('');
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.sportsprophecyapp.com';
+
+        // SAFETY TIMEOUT: Force reset after 8 seconds
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         try {
             const res = await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
@@ -47,26 +51,33 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
                 body: JSON.stringify({
                     matchId: match.match_id,
                     pick: pick
-                })
+                }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.message || 'Transmission failed.');
             }
 
-            // Trigger Animation
+            // Success Animation
             setShowAnim(true);
             
-            // Wait for animation to finish before closing modal
             setTimeout(() => {
                 onSuccess();
                 onClose();
             }, 1200);
 
         } catch (err: any) {
-            setError(err.message || 'Transmission failed. Try again.');
+            console.error('Call Error:', err);
             setLoading(false);
+            if (err.name === 'AbortError') {
+                setError('Network Timeout. Try again.');
+            } else {
+                setError(err.message || 'Transmission failed.');
+            }
         }
     };
 
@@ -88,21 +99,21 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
                     <button
                         className={`${styles.option} ${pick === 'home' ? styles.active : ''}`}
                         onClick={() => setPick('home')}
-                        disabled={showAnim}
+                        disabled={loading || showAnim}
                     >
                         {match.home_team}
                     </button>
                     <button
                         className={`${styles.option} ${pick === 'draw' ? styles.active : ''}`}
                         onClick={() => setPick('draw')}
-                        disabled={showAnim}
+                        disabled={loading || showAnim}
                     >
                         DRAW
                     </button>
                     <button
                         className={`${styles.option} ${pick === 'away' ? styles.active : ''}`}
                         onClick={() => setPick('away')}
-                        disabled={showAnim}
+                        disabled={loading || showAnim}
                     >
                         {match.away_team}
                     </button>
