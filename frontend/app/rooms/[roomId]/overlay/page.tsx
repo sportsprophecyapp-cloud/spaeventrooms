@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { SocketProvider, useSocket } from '../../../context/SocketContext';
-import styles from './page.module.css';
+import styles from './overlay.module.css'; // Renamed to ensure Git/Render picks it up
 
 function OverlayContent() {
     const { roomId } = useParams();
@@ -14,10 +14,9 @@ function OverlayContent() {
     useEffect(() => {
         if (!socket) return;
 
-        // Listen for Creator-Only Flash Calls
         socket.on('flash_call_start', (data) => {
             setActiveCall(data);
-            setStats({ home: 50, away: 50 }); // Reset stats for new call
+            setStats({ home: 50, away: 50 });
         });
 
         socket.on('flash_call_update', (data) => {
@@ -25,7 +24,6 @@ function OverlayContent() {
         });
 
         socket.on('flash_call_end', () => {
-            // Wait 5 seconds then hide the overlay stats
             setTimeout(() => setActiveCall(null), 5000);
         });
 

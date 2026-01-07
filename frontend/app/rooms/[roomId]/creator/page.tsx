@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '../../../context/AuthContext'; // Path confirmed correct for rooms/[roomId]/creator
+import { useAuth } from '../../../context/AuthContext';
 import { SocketProvider, useSocket } from '../../../context/SocketContext';
-import styles from './page.module.css';
+import styles from './remote.module.css'; // CRITICAL: Unique name to bypass Git cache issues
 
 function CreatorDashboardContent() {
     const { roomId } = useParams();
@@ -51,7 +51,7 @@ function CreatorDashboardContent() {
         <div className={styles.container}>
             <header className={styles.header}>
                 <h1 className={styles.title}>CREATOR REMOTE</h1>
-                <p className={styles.subtitle}>Room: {roomId?.toString().toUpperCase()}</p>
+                <p className={styles.subtitle}>Arena: {roomId?.toString().toUpperCase()}</p>
             </header>
 
             <main className={styles.controlPanel}>

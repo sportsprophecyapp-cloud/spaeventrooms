@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../../context/AuthContext'; // Fixed relative path
-import styles from './page.module.css';
+import { useAuth } from '../../../context/AuthContext';
+import styles from './wizard.module.css'; // CRITICAL: Unique name to bypass Git cache issues
 
 const CreateRoomPage = () => {
     const { token, user } = useAuth();
