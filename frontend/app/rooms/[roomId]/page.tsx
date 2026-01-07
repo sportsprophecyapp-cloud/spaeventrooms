@@ -106,6 +106,11 @@ function RoomContent() {
                 </div>
             </header>
 
+            {/* STICKY SPONSOR BAR (Mobile Optimized) */}
+            <div className={styles.mobileSponsorWrapper}>
+                <SponsorWidget roomId={roomId} />
+            </div>
+
             <div className={styles.mobileTabs}>
                 <button
                     className={`${styles.tabBtn} ${activeTab === 'predictions' ? styles.activeTab : ''}`}
@@ -129,11 +134,14 @@ function RoomContent() {
 
             <div className={styles.mainLayout}>
                 <div className={`${styles.column} ${activeTab !== 'predictions' ? styles.mobileHidden : ''}`}>
-                    <SponsorWidget roomId={roomId} />
-                    <AnnouncementsSection roomId={roomId} />
+                    {/* Compact Announcements */}
+                    <div className={styles.compactAnnouncements}>
+                        <AnnouncementsSection roomId={roomId} />
+                    </div>
 
-                    {predictions.length > 0 ? (
+                    {predictions.length > 0 && (
                         <div className={styles.predictionsSection}>
+                            <h3 className={styles.sectionHeading}>Active Flash Calls</h3>
                             {predictions.map(p => (
                                 <CustomPollCard
                                     key={p.id}
@@ -143,14 +151,10 @@ function RoomContent() {
                                 />
                             ))}
                         </div>
-                    ) : (
-                        <EmptyStateWidget
-                            onScrollToMatches={() => document.getElementById('match-list-section')?.scrollIntoView({ behavior: 'smooth' })}
-                            onViewLeaderboard={() => setActiveTab('leaderboard')}
-                        />
                     )}
 
-                    <div id="match-list-section">
+                    <div id="match-list-section" className={styles.matchListSection}>
+                        <h3 className={styles.sectionHeading}>Match Forecasts</h3>
                         <MatchList />
                     </div>
                 </div>
