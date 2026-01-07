@@ -1,26 +1,35 @@
 import { fetchLiveMatches } from '../../shared/services/footballApi';
+import { fetchApiFootballMatches } from '../../shared/services/apiFootball';
+import { resolveSoccerPredictions } from '../../shared/services/resolver';
 
-/**
- * SMART SCHEDULER
- * To stay within "The Odds API" free tier (500 requests/month):
- * - Fetching every 2 hours = 12 times a day.
- * - 12 times * 30 days = 360 requests.
- * - This stays SAFELY under the 500 limit even with 1 API key.
- */
-const NORMAL_INTERVAL = 2 * 60 * 60 * 1000; // 2 Hours
+// Strategy: Maximize frequency while staying under API quotas
+const ODDS_API_INTERVAL = 30 * 60 * 1000;    // 30 Minutes (48/day)
+const FOOTBALL_API_INTERVAL = 15 * 60 * 1000; // 15 Minutes (96/day)
 
 export const startSoccerScheduler = () => {
-    console.log('⚽️ Soccer Data Scheduler started. Mode: Quota-Friendly (2h interval)');
+    console.log('⚽️ Soccer Data Scheduler: HIGH-SPEED MODE (15m / 30m Dual-Interval)');
 
-    // Initial fetch on server start
-    fetchLiveMatches().catch(err => console.error('Initial soccer fetch failed:', err));
+    // 1. Immediate Initial Sync
+    const initialRun = async () => {
+        console.log('🚀 Performing initial Arena sync...');
+        await fetchLiveMatches().catch(e => {});
+        await fetchApiFootballMatches().catch(e => {});
+        await resolveSoccerPredictions().catch(e => {});
+    };
+    initialRun();
 
-    setInterval(() => {
-        const hour = new Date().getHours();
+    // 2. High-Frequency: API-Football (Every 15 Minutes)
+    setInterval(async () => {
+        console.log('📡 [High-Freq] API-Football: Refreshing scores...');
+        await fetchApiFootballMatches().catch(e => {});
         
-        // Optional: You could add logic here to fetch more often during "Peak" match hours
-        // for now, we stay consistent at 2 hours to protect the budget.
-        console.log('⚽️ Scheduled fetch: Updating soccer matches in database...');
-        fetchLiveMatches().catch(err => console.error('Scheduled soccer fetch failed:', err));
-    }, NORMAL_INTERVAL);
+        // Resolve predictions after every score update
+        await resolveSoccerPredictions().catch(e => {});
+    }, FOOTBALL_API_INTERVAL);
+
+    // 3. Standard-Frequency: The Odds API (Every 30 Minutes)
+    setInterval(async () => {
+        console.log('📡 [Std-Freq] The Odds API: Syncing markets...');
+        await fetchLiveMatches().catch(e => {});
+    }, ODDS_API_INTERVAL);
 };
