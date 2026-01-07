@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import styles from './PredictionModal.module.css';
 import ScoreAnimation from './ScoreAnimation';
@@ -19,6 +19,16 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
     const [showAnim, setShowAnim] = useState(false);
     const { token, isAuthenticated } = useAuth();
 
+    // RESET STATE WHEN MODAL OPENS FOR A NEW MATCH
+    useEffect(() => {
+        if (isOpen) {
+            setPick(null);
+            setError('');
+            setLoading(false);
+            setShowAnim(false);
+        }
+    }, [isOpen, match?.match_id]);
+
     if (!isOpen || !match) return null;
 
     const handleSubmit = async () => {
@@ -35,11 +45,11 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
         setLoading(true);
         setError('');
 
+        // Use dynamic environment variable for API URL
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.sportsprophecyapp.com';
 
-        // SAFETY TIMEOUT: Force reset after 8 seconds
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         try {
             const res = await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
@@ -57,26 +67,26 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
 
             clearTimeout(timeoutId);
 
+            const data = await res.json();
+
             if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || 'Transmission failed.');
+                throw new Error(data.message || data.error || 'Transmission failed.');
             }
 
-            // Success Animation
+            // Success Path
             setShowAnim(true);
-            
             setTimeout(() => {
                 onSuccess();
                 onClose();
             }, 1200);
 
         } catch (err: any) {
-            console.error('Call Error:', err);
+            console.error('Call Transmission Failed:', err);
             setLoading(false);
             if (err.name === 'AbortError') {
-                setError('Network Timeout. Try again.');
+                setError('Connection timed out. Check your internet.');
             } else {
-                setError(err.message || 'Transmission failed.');
+                setError(err.message || 'Transmission failed. Please try again.');
             }
         }
     };
@@ -91,7 +101,7 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
             
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
                 <h3 className={styles.title}>Make Your Call</h3>
-                <p style={{ color: 'var(--neutral)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                <p className={styles.matchTeams}>
                     {match.home_team} vs {match.away_team}
                 </p>
 

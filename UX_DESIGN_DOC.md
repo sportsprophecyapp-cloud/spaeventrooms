@@ -1,51 +1,46 @@
 # Events Arena - UX Design Document
-**Version 2.8 | January 2026**
+**Version 2.9 | January 2026**
 
 ## 🎯 Overview
-Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. It is build-stabilized, branding-unified, and regionally intelligent for global pre-launch.
+Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. It is build-stabilized, branding-unified, and mobile-organized for global pre-launch.
 
 ### Core Philosophy:
-- **Regional Intelligence:** Automatic language detection combined with manual overrides to ensure Supporters in any market feel at home.
-- **Mobile-First Compaction:** Eliminates "Scrolling Nightmares" by using sticky navigation and compact content sections.
+- **Room Isolation Strategy:** Dedicated UI for different event types. Pure Soccer Arena focuses on data; Creator Rooms focus on interactive stream engagement.
+- **Accordion Arena:** Eliminates "Scrolling Nightmares" by grouping content into collapsible, intelligent blocks.
 - **User-First Lean Strategy:** Prioritizes immediate value (200 Welcome Tokens) over intrusive installation prompts.
 
 ---
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
 - **Dual-Sync Data Layer:** API-Football (15m) + The Odds API (30m) with 4-key rotation.
-- **Resolution Engine:** 15-minute automated checks for Match Calls, XP, and Prize Tickets.
-- **Localization Engine:** Context-based translation system supporting English, Bahasa Indonesia (ID), and Thai (TH).
+- **Intelligent Deduplication:** Frontend fuzzy-match logic ensures unique event listings across multiple data providers.
+- **Auto-Resolution Engine:** 15-minute automated checks for Match Calls, XP, and Prize Tickets.
 
 ---
 
 ## 🛠️ USER ROLES & HIERARCHY
 1. **Supporter (User):** Earns status and rewards through accurate "Calls."
-2. **Creator (Partner):** Triggers Flash Calls and uses real-time OBS Overlays.
-3. **Admin (Moderator):** Full system oversight and Resolution Testing (Debug tools).
+2. **Creator (Partner):** Owns rooms, triggers Flash Calls, uses OBS Overlays.
+3. **Admin (Moderator):** Full system oversight and QA Debug tools.
+
+---
+
+## 📱 MOBILE UX STANDARDS
+### 2.1 The Isolated Arena Page
+- **Pure Soccer Room:** Lean layout focused 100% on official match data and prize tickets.
+- **Creator Hub:** Interactive dashboard featuring real-time stream sentiment and haptic alerts.
+- **Unified Sidebar:** Consolidated `Fan Arena | Standings` tabs for integrated social experience.
+
+### 2.2 Organized Match List
+- **League Accordions:** Collapsible blocks grouped by official league headers.
+- **Auto-Expand:** Sections containing **LIVE** events automatically expand for immediate engagement.
+- **Status Pulsing:** High-contrast neon visual feedback for active and finishing events.
 
 ---
 
 ## 🌏 GLOBAL ACCESSIBILITY
-### 2.1 Multi-Language Support
-- **Auto-Detection:** Detects browser locale (`navigator.language`) to serve native text immediately.
-- **Manual Toggle:** Sleek `[ EN | ID | TH ]` selector in the Navbar for user preference.
-- **Persistence:** User language choices are stored in `localStorage` for returning visits.
-
-### 2.2 Native Mobile UX
-- **Sticky Navigation:** Persistent tabs for seamless section jumping.
-- **PWA Ready:** Background architecture for home-screen installation without store friction.
-
----
-
-## 🏠 MAIN APP SCREENS
-- **Landing Page Hooks:** Promo banners and economy previews surface the platform's value immediately.
-- **Match Cards:** Direct `🎫 EARN 1 TICKET` labels and explicit `Make your call` instructions.
-
----
-
-## 4. COMPLIANCE & SEO
-- **Non-Gambling:** Strictly skill and loyalty based. No "Bets" or "Wagers."
-- **SEO Ready:** Professional metadata and Open Graph tags optimized for global search and social sharing.
+- **Multi-Language Engine:** Automatic browser detection with manual `[ EN | ID | TH ]` toggle and sticky persistence.
+- **SEO Ready:** Professional metadata and OG tags for global visibility and sharing.
 
 ---
 *This document serves as the master blueprint for the Events Arena platform.*
