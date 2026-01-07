@@ -32,6 +32,7 @@ const AdminUsersPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
 
+    // REVERTED: Keep personal email for login access
     const isAdmin = user?.email === 'sportsprophecyapp@gmail.com';
 
     useEffect(() => {
@@ -147,7 +148,6 @@ const AdminUsersPage = () => {
                             </div>
                         </div>
 
-                        {/* SECTION 1: TEST MATCHES */}
                         <div className={`${styles.matchTable} ${styles.testTable} glass`}>
                             <h3>ACTIVE TEST SCENARIOS ({testMatches.length})</h3>
                             {testMatches.map(m => (
@@ -159,7 +159,6 @@ const AdminUsersPage = () => {
                             {testMatches.length === 0 && <p className={styles.emptyNote}>No active test scenarios.</p>}
                         </div>
 
-                        {/* SECTION 2: PRODUCTION DATA */}
                         <div className={`${styles.matchTable} glass`}>
                             <h3>LIVE PRODUCTION DATA ({realMatches.length})</h3>
                             <p className={styles.warningText}>Caution: Deleting these affects the live arena.</p>

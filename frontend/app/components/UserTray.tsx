@@ -1,83 +1,72 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import styles from './UserTray.module.css';
 import { useAuth } from '../context/AuthContext';
+import styles from './UserTray.module.css';
 
-interface UserStats {
-    total_points: number;
-    current_level: number;
-    progress_xp: number;
-    next_level_xp: number;
-}
-
-const UserTray: React.FC = () => {
-    const { isAuthenticated, token, user } = useAuth();
-    const [stats, setStats] = useState<UserStats | null>(null);
+const UserTray = () => {
+    const { user, token } = useAuth();
+    const [userData, setUserData] = useState<any>(null);
     const [isExpanded, setIsExpanded] = useState(false);
 
+    // REVERTED: Keep personal email for login access
     const isAdmin = user?.email === 'sportsprophecyapp@gmail.com';
 
     useEffect(() => {
-        if (!isAuthenticated || !token) return;
-
-        const fetchStats = async () => {
+        const fetchBalance = async () => {
+            if (!token) return;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${apiUrl}/api/gamification/me`, {
+                const res = await fetch(`${apiUrl}/api/gamification/balance`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    setStats(data.stats);
+                    setUserData(data);
                 }
             } catch (err) {
-                console.error('Error fetching stats:', err);
+                console.error('Failed to fetch balance');
             }
         };
 
-        fetchStats();
-    }, [isAuthenticated, token]);
+        fetchBalance();
+        const interval = setInterval(fetchBalance, 30000);
+        return () => clearInterval(interval);
+    }, [token]);
 
-    if (!isAuthenticated || !stats) return null;
-
-    // Use backend-provided progress math
-    const levelProgress = (stats.progress_xp / stats.next_level_xp) * 100;
+    if (!user) return null;
 
     return (
-        <div className={`${styles.container} ${isExpanded ? styles.expanded : ''}`}>
-            <div className={styles.minimal} onClick={() => setIsExpanded(!isExpanded)}>
-                <div className={styles.levelBadge}>
-                    <span className={styles.levelNum}>Lvl {stats.current_level}</span>
+        <div className={styles.wrapper}>
+            <div className={styles.tray} onClick={() => setIsExpanded(!isExpanded)}>
+                <div className={styles.stat}>
+                    <span className={styles.icon}>🪙</span>
+                    <span className={styles.value}>{userData?.token_balance ?? 0}</span>
                 </div>
-                <div className={styles.progressContainer}>
-                    <div className={styles.progressBar} style={{ width: `${levelProgress}%` }}></div>
+                <div className={styles.stat}>
+                    <span className={styles.icon}>🎫</span>
+                    <span className={styles.value}>{userData?.total_tickets ?? 0}</span>
                 </div>
-                <div className={styles.points}>
-                    <span className={styles.pointsNum}>{stats.total_points}</span>
-                    <span className={styles.pointsLabel}>XP</span>
+                <div className={styles.avatar}>
+                    {user.username?.substring(0, 2).toUpperCase()}
                 </div>
-                <span className={styles.arrow}>{isExpanded ? '▴' : '▾'}</span>
             </div>
 
             {isExpanded && (
-                <div className={`${styles.drawer} glass`}>
-                    <h4 className={styles.drawerTitle}>COMMAND CENTER</h4>
-                    <div className={styles.menuLinks}>
-                        <Link href={`/profile/${user?.id}`} className={styles.menuLink}>
-                            👤 VIEW PROFILE
-                        </Link>
-                        
+                <div className={`${styles.dropdown} glass`}>
+                    <div className={styles.header}>
+                        <p className={styles.name}>@{user.username}</p>
+                        <p className={styles.level}>Level {userData?.current_level ?? 1} Supporter</p>
+                    </div>
+                    <div className={styles.menu}>
+                        <Link href={`/profile/${user.id}`} className={styles.item}>👤 My Profile</Link>
                         {isAdmin && (
-                            <Link href="/admin/users" className={`${styles.menuLink} ${styles.adminLink}`}>
-                                🛡️ ADMIN PANEL
-                            </Link>
+                            <>
+                                <Link href="/admin/users" className={styles.item}>🛡️ Command Center</Link>
+                                <Link href="/admin/rooms/create" className={styles.item}>🪄 Arena Wizard</Link>
+                            </>
                         )}
-                        
-                        <Link href="/sponsors/pricing" className={styles.menuLink}>
-                            💎 BECOME A SPONSOR
-                        </Link>
                     </div>
                 </div>
             )}

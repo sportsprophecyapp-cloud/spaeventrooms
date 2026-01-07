@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import styles from './wizard.module.css'; // CRITICAL: Unique name to bypass Git cache issues
+import styles from './wizard.module.css';
 
 const CreateRoomPage = () => {
     const { token, user } = useAuth();
@@ -16,6 +16,7 @@ const CreateRoomPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [successData, setSuccessData] = useState<any>(null);
 
+    // REVERTED: Keep personal email for login access
     const isAdmin = user?.email === 'sportsprophecyapp@gmail.com';
 
     const handleCreate = async (e: React.FormEvent) => {
