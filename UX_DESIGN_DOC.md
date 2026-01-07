@@ -1,5 +1,5 @@
 # Sports Prophecy - UX Design Document
-**Version 1.3 | January 2026**
+**Version 1.4 | January 2026**
 
 ## 🎯 Overview
 Sports Prophecy is a full-stack, high-energy sports engagement platform designed for **entertainment and social competition**. It is strictly **NOT a gambling site**.
@@ -7,63 +7,51 @@ Sports Prophecy is a full-stack, high-energy sports engagement platform designed
 ---
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
-- **High-Speed Sync:** 
-    - **API-Football (15m interval):** Lightning-fast score updates.
-    - **The Odds API (30m interval):** High-coverage market and schedule sync.
-- **Smart Failover:** Automatic rotation between multiple API keys to prevent downtime.
-- **Auto-Resolution:** The "Resolver Engine" automatically awards +100 Points/XP every 15 minutes for correct prophecies.
+- **Dual-API Sync:** Uses API-Football (15m) and The Odds API (30m) for lightning-fast scores and market coverage.
+- **Smart Key Rotation:** Automatic failover between 4+ API keys to ensure 100% uptime and stay within free-tier limits.
+- **Auto-Resolution Engine:** Analyzes finished scores and automatically awards +100 XP and **+1 Prize Draw Ticket** for correct forecasts every 15 minutes.
 
 ---
 
 ## 🛠️ USER ROLES & HIERARCHY
-1. **Prophet (User):** Regular user. Can chat, forecast, and buy gear.
-2. **Creator (Partner):** Room Owners (e.g., PGA, PGA, Kick Streamers). Link to specific `room_id`.
-3. **Admin (Moderator):** Platform-wide support.
-4. **Super Admin:** Full control (sportsprophecyapp@gmail.com).
+1. **Prophet (User):** The core community. Can chat, forecast, and earn status.
+2. **Creator (Partner):** Verified Room Owners (e.g., TaylorMade, Twitch Streamers). Can moderate specific arenas.
+3. **Admin (Moderator):** Platform support and user management.
+4. **Super Admin:** Full platform control (sportsprophecyapp@gmail.com).
 
 ---
 
-## 1. AUTHENTICATION & IDENTITY
-### 1.1 Bulletproof Handles (UUID)
-- Users choose a unique **Prophet Handle** (e.g., @SeerOne).
-- Anchor: Uses DB `user.id`. Data remains persistent even if the handle or email changes.
-- Access: Profile page includes high-energy "✎ Edit Identity" field.
+## 1. IDENTITY & REFERRALS
+### 1.1 Persistent Handles (UUID)
+- **Immutable Anchor:** System uses internal `user.id` so history/referrals never break if a user changes their @handle.
+- **Identity Lab:** Profile page features a neon edit-mode for handle customization with real-time availability checks.
 
-### 1.2 Dual-Reward Referral Program
-- **Referrer:** Receives **+50 tokens** instantly.
-- **New User:** Receives **+50 token Welcome Bonus** (Start: 200).
-- **Security:** Links use the unique numeric `user.id` for maximum stability.
+### 1.2 Bulletproof Referral Program
+- **Dual-Rewards:** Both the Referrer (+50) and the New Prophet (+50) receive tokens instantly.
+- **Welcome Bonus:** New users start with 200 tokens (instead of 150) when using a referral link.
 
 ---
 
-## 2. MAIN APP SCREENS
-### 2.1 Homepage / Lobby (`/`)
-- **Compact Mobile Header:** Optimized vertical space.
-- **Stuck-Proof UI:** Navigation fixes ensure no "dead-ends" in modals or pages.
-- **Real-Time Data:** Matches grouped by League (EPL, La Liga, etc.) with logos.
+## 2. SPONSOR ECOSYSTEM & PRIZE DRAWS
+### 3.1 Monetization & Automation
+- **Self-Selling Placeholders:** Empty ad spots show "SPONSOR THIS ARENA" cards that link to Stripe-integrated pricing.
+- **Auto-Activation:** Sponsor ads go LIVE instantly upon payment confirmation.
+- **Admin Alerts:** Instant email notifications to the Super Admin for every checkout and payment.
 
-### 2.2 Room Page (`/rooms/[roomId]`)
-- **Native Experience:** Sticky `Predict | Ranks | Chat` tab bar for mobile.
-- **Interactive Discussion:** Collapsible comments under every specific prophecy.
-
----
-
-## 3. SPONSOR ECOSYSTEM & PRIZE DRAWS
-### 3.1 Automated Monetization
-- **"Your Ad Here" Placeholders:** link to tiered pricing.
-- **Auto-Activation:** Ad goes LIVE the second payment is confirmed via Stripe Webhook.
-- **Admin Alerts:** Instant email notifications to `sportsprophecyapp@gmail.com`.
-
-### 3.2 Prize Draw (Ticket System)
-- **Automatic Entry:** Users earn virtual tickets for Streaks, Referrals, and Skill.
-- **Trust:** Random winner selector in the Admin Command Center.
+### 3.2 The Draw Commander (50/50 Strategy)
+- **Ticket Stash:** Users track their earned tickets (from Skill, Streaks, and Referrals) on their profile.
+- **Fair Resolution:** Admin panel features a 50/50 distribution engine:
+    - **50% Skill:** Prizes awarded to the Top Prophets on the Leaderboard.
+    - **50% Engagement:** Prizes awarded via a verifiable random draw from all ticket holders.
+- **Trust:** Winners are permanently archived and displayed in the draw history.
 
 ---
 
-## 4. COMPLIANCE & SAFETY
-- **Non-Gambling:** Strict terminology audit (No "Bets," "Wagers," or "Payouts"). 
-- **Time as Currency:** Prizes are earned through engagement and sports IQ, not financial risk.
-- **Keep-Alive:** Dual-ping system ensures the site never "sleeps," providing a 24/7 high-end experience.
+## 3. COMPLIANCE & UX POLISH
+- **Non-Gambling:** Strict terminology (No "Bets," "Wagers," or "Money"). Purely skill and loyalty rewards.
+- **Native Mobile Experience:** Sticky navigation tabs and compact headers for a high-end app feel.
+- **Stuck-Proof UI:** Guaranteed exit paths (Back buttons/Click-outside) for all modals and pages.
+- **Keep-Alive:** Cross-ping service ensures the arena stays "warm" and responsive 24/7.
 
 ---
 *This document serves as the master blueprint for the Sports Prophecy platform.*
