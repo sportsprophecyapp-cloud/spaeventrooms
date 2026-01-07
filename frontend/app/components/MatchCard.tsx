@@ -21,6 +21,9 @@ interface MatchCardProps {
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
+    // Prediction is allowed if the match is not finished
+    const canPredict = match.status === 'scheduled' || match.status === 'live';
+
     return (
         <div className={`${styles.card} ${match.isPulsing ? styles.pulsar : ''}`}>
             <div className={styles.teamsSection}>
@@ -40,7 +43,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
             </div>
 
             <div className={styles.actions}>
-                {match.status === 'scheduled' && (
+                {canPredict ? (
                     <div className={styles.predictWrapper}>
                         <button
                             onClick={() => {
@@ -53,8 +56,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
                         </button>
                         <span className={styles.btnHint}>Make your call</span>
                     </div>
-                )}
-                {match.status !== 'scheduled' && (
+                ) : (
                     <div className={styles.scoreDisplay}>
                         <span className={styles.scoreNum}>{match.score_home}</span>
                         <span className={styles.scoreDivider}>-</span>
