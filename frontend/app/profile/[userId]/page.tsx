@@ -28,26 +28,27 @@ const ProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [newName, setNewName] = useState('');
     const [editError, setEditError] = useState('');
+    const [copyMessage, setCopyMessage] = useState('');
+
+    const fetchProfileData = async () => {
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${apiUrl}/api/auth/profile/${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setProfile(data.user);
+                setNewName(data.user.username);
+            }
+        } catch (err) {
+            console.error('Error fetching profile data:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchProfileData = async () => {
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${apiUrl}/api/auth/profile/${userId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setProfile(data.user);
-                    setNewName(data.user.username);
-                }
-            } catch (err) {
-                console.error('Error fetching profile data:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         if (isAuthenticated && token) {
             fetchProfileData();
         }
@@ -78,6 +79,14 @@ const ProfilePage = () => {
         }
     };
 
+    const handleCopyReferral = () => {
+        if (!profile) return;
+        const refUrl = `${window.location.origin}/auth/register?ref=${profile.id}`;
+        navigator.clipboard.writeText(refUrl);
+        setCopyMessage('LINK COPIED! (+50 TOKENS PER SIGNUP)');
+        setTimeout(() => setCopyMessage(''), 3000);
+    };
+
     if (isLoading) return <div className={styles.loading}>Accessing Prophet Records...</div>;
     if (!profile) return <div className={styles.error}>Prophet not found.</div>;
 
@@ -85,7 +94,6 @@ const ProfilePage = () => {
 
     return (
         <div className={styles.container}>
-            {/* BACK BUTTON */}
             <div className={styles.navBar}>
                 <button onClick={() => router.back()} className={styles.backBtn}>
                     ← RETURN TO ARENA
@@ -130,13 +138,25 @@ const ProfilePage = () => {
             </header>
 
             <div className={styles.content}>
+                {isOwnProfile && (
+                    <section className={`${styles.referralCard} glass`}>
+                        <div className={styles.refInfo}>
+                            <h3>RECRUIT NEW PROPHETS</h3>
+                            <p>Share your link and earn 50 tokens for every signup.</p>
+                        </div>
+                        <button onClick={handleCopyReferral} className={styles.copyBtn}>
+                            {copyMessage || 'COPY REFERRAL LINK'}
+                        </button>
+                    </section>
+                )}
+
                 <section className={styles.statsGrid}>
                     <div className={`${styles.statCard} glass`}>
                         <span className={styles.statLabel}>Tokens</span>
                         <span className={styles.statValue}>{profile.tokens}</span>
                     </div>
                     <div className={`${styles.statCard} glass`}>
-                        <span className={styles.statLabel}>Rank</span>
+                        <span className={styles.statLabel}>Global Rank</span>
                         <span className={styles.statValue}>#{profile.level > 1 ? '12' : '---'}</span>
                     </div>
                     <div className={`${styles.statCard} glass`}>

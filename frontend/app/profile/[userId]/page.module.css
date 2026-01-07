@@ -72,78 +72,53 @@
     border-color: var(--accent);
 }
 
-/* Edit Identity Mode */
-.editArea {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-}
-
-.nameInput {
-    background: var(--glass);
-    border: 2px solid var(--accent);
-    padding: 10px 16px;
-    border-radius: 12px;
-    color: white;
-    font-size: 1.5rem;
-    font-weight: 800;
-    width: 250px;
-}
-
-.saveBtn {
-    background: var(--success);
-    color: black;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 900;
-    cursor: pointer;
-}
-
-.cancelBtn {
-    background: var(--glass-border);
-    color: white;
-    border: none;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    cursor: pointer;
-}
-
-.editError {
-    width: 100%;
-    color: var(--error);
-    font-size: 0.8rem;
-    font-weight: 700;
-    margin-top: 8px;
-}
-
-.badges {
-    display: flex;
-    gap: 12px;
-}
-
-.levelBadge, .pointsBadge {
-    padding: 6px 16px;
-    border-radius: 30px;
-    font-size: 0.8rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-}
-
-.levelBadge { color: var(--accent); }
-.pointsBadge { color: #ffd700; }
-
-.content {
+/* REFERRAL CARD */
+.referralCard {
     max-width: 900px;
-    margin: 0 auto;
+    margin: 0 auto 3rem auto;
+    padding: 2rem;
+    border-radius: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--glass-border);
+    background: linear-gradient(135deg, rgba(0, 112, 243, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.refInfo h3 {
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+}
+
+.refInfo p {
+    font-size: 0.85rem;
+    color: var(--neutral);
+}
+
+.copyBtn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 0.8rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.copyBtn:hover {
+    box-shadow: 0 0 20px var(--accent-glow);
+    transform: translateY(-2px);
 }
 
 .statsGrid {
+    max-width: 900px;
+    margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
@@ -175,9 +150,24 @@
     font-weight: 900;
 }
 
+.navBar {
+    max-width: 900px;
+    margin: 0 auto 2rem auto;
+}
+
+.backBtn {
+    background: transparent;
+    border: none;
+    color: var(--neutral);
+    font-weight: 900;
+    font-size: 0.8rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+}
+
 @media (max-width: 768px) {
+    .referralCard { flex-direction: column; text-align: center; gap: 1.5rem; }
+    .statsGrid { grid-template-columns: 1fr; }
     .profileHeader { flex-direction: column; text-align: center; gap: 2rem; }
     .nameDisplay { justify-content: center; }
-    .statsGrid { grid-template-columns: 1fr; }
-    .editArea { justify-content: center; }
 }

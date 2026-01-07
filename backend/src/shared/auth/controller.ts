@@ -52,7 +52,6 @@ export const register = async (req: Request, res: Response) => {
             return res.status(400).json({ success: false, error: 'Email, password, and username required' });
         }
 
-        // Check if user or email exists
         const check = await dbQuery('SELECT id FROM users WHERE email = $1 OR username = $2', [email.toLowerCase(), username]);
         if (check.rows.length > 0) {
             return res.status(400).json({ success: false, error: 'Email or Username already taken' });
@@ -60,17 +59,42 @@ export const register = async (req: Request, res: Response) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // DEFAULT STARTING BALANCE: 150
+        let startingBalance = 150;
+        
+        // If referred, the NEW USER gets a +50 bonus (Total 200)
+        if (referred_by) startingBalance += 50;
+
         const result = await dbQuery(
             `INSERT INTO users (email, username, password_hash, token_balance) 
-             VALUES ($1, $2, $3, 150) RETURNING id, email, username`,
-            [email.toLowerCase(), username, hashedPassword]
+             VALUES ($1, $2, $3, $4) RETURNING id, email, username`,
+            [email.toLowerCase(), username, hashedPassword, startingBalance]
         );
 
         const newUser = result.rows[0];
 
-        // Handle referral
+        // AWARD THE REFERRER (The person who sent the link)
         if (referred_by) {
-            await dbQuery('UPDATE users SET token_balance = token_balance + 50 WHERE id = $1', [referred_by]);
+            try {
+                // Verify referrer exists and award +50
+                const refCheck = await dbQuery('UPDATE users SET token_balance = token_balance + 50 WHERE id = $1 RETURNING username', [referred_by]);
+                
+                if (refCheck.rows.length > 0) {
+                    const referrerName = refCheck.rows[0].username;
+                    // Log for referrer
+                    await dbQuery(
+                        'INSERT INTO token_transactions (user_id, amount, type, description) VALUES ($1, 50, $2, $3)',
+                        [referred_by, 'referral', `Referral Bonus: @${newUser.username} joined the arena`]
+                    );
+                    // Log for new user
+                    await dbQuery(
+                        'INSERT INTO token_transactions (user_id, amount, type, description) VALUES ($1, 50, $2, $3)',
+                        [newUser.id, 'referral', `Welcome Bonus: Referred by @${referrerName}`]
+                    );
+                }
+            } catch (refErr) {
+                console.warn('Referral award failed:', refErr);
+            }
         }
 
         const token = jwt.sign(
@@ -86,9 +110,6 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
-/**
- * NEW: Update User Identity (Handle/UUID)
- */
 export const updateUsername = async (req: AuthRequest, res: Response) => {
     const { newUsername } = req.body;
     const userId = req.user?.id;
@@ -98,13 +119,11 @@ export const updateUsername = async (req: AuthRequest, res: Response) => {
     }
 
     try {
-        // Check availability
         const check = await dbQuery('SELECT id FROM users WHERE username = $1 AND id != $2', [newUsername, userId]);
         if (check.rows.length > 0) {
             return res.status(400).json({ success: false, error: 'Prophet Name already taken' });
         }
 
-        // Update
         const result = await dbQuery(
             'UPDATE users SET username = $1 WHERE id = $2 RETURNING id, username, email',
             [newUsername, userId]
@@ -112,7 +131,6 @@ export const updateUsername = async (req: AuthRequest, res: Response) => {
 
         res.json({ success: true, user: result.rows[0] });
     } catch (error) {
-        console.error('Update Username error:', error);
         res.status(500).json({ success: false, error: 'Server error' });
     }
 };
