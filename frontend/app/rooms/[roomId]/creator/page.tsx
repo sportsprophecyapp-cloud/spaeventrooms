@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../context/AuthContext'; // Path confirmed correct for rooms/[roomId]/creator
 import { SocketProvider, useSocket } from '../../../context/SocketContext';
 import styles from './page.module.css';
 
@@ -37,7 +37,7 @@ function CreatorDashboardContent() {
             question,
             optionA,
             optionB,
-            duration: 60 // Default 60 seconds
+            duration: 60
         });
     };
 
@@ -63,7 +63,7 @@ function CreatorDashboardContent() {
                             <input 
                                 value={question} 
                                 onChange={(e) => setQuestion(e.target.value)}
-                                placeholder="e.g. Do I win this next fight?"
+                                placeholder="e.g. Do I win this next match?"
                                 className={styles.mainInput}
                             />
                         </div>

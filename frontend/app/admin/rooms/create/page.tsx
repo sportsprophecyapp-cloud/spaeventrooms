@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/context/AuthContext';
+import { useAuth } from '../../../context/AuthContext'; // Fixed relative path
 import styles from './page.module.css';
 
 const CreateRoomPage = () => {
