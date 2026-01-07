@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useAuth } from '../../context/AuthContext';
-import styles from './page.module.css';
+import styles from './sponsors.module.css'; // Renamed to ensure Git/Render picks it up
 
 interface Subscription {
     id: number;
@@ -87,7 +87,6 @@ export default function AdminSponsorsPage() {
                 throw new Error('Failed to update sponsor');
             }
 
-            // Refetch sponsors
             const updatedResponse = await fetch(`${apiUrl}/api/sponsor-subscriptions/admin/sponsors`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -136,20 +135,17 @@ export default function AdminSponsorsPage() {
 
     return (
         <div className={styles.container}>
-            {/* Header */}
             <div className={styles.header}>
                 <h1 className={styles.title}>Sponsors Dashboard</h1>
                 <p className={styles.subtitle}>Manage active sponsors and subscriptions</p>
             </div>
 
-            {/* Error Message */}
             {error && (
                 <div className={styles.errorAlert}>
                     <p>{error}</p>
                 </div>
             )}
 
-            {/* Filter Buttons */}
             <div className={styles.filters}>
                 {(['all', 'active', 'pending', 'expired'] as const).map((f) => (
                     <button
@@ -162,7 +158,6 @@ export default function AdminSponsorsPage() {
                 ))}
             </div>
 
-            {/* Sponsors Table */}
             {sponsors.length === 0 ? (
                 <div className={styles.emptyState}>
                     <p>No sponsors found</p>
@@ -178,7 +173,6 @@ export default function AdminSponsorsPage() {
                                 <th>Expires</th>
                                 <th>Room</th>
                                 <th>Active</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -249,11 +243,6 @@ export default function AdminSponsorsPage() {
                                             className={styles.checkbox}
                                         />
                                     </td>
-                                    <td>
-                                        <button className={styles.viewBtn}>
-                                            View
-                                        </button>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -261,7 +250,6 @@ export default function AdminSponsorsPage() {
                 </div>
             )}
 
-            {/* Summary Stats */}
             {sponsors.length > 0 && (
                 <div className={styles.statsGrid}>
                     <div className={styles.statCard}>
