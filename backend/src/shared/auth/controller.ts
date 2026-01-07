@@ -6,6 +6,25 @@ import { AuthRequest } from './middleware';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
+// NEW: FAST LOGS (Verify Session)
+export const getMe = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        const result = await dbQuery(`
+            SELECT id, email, username, token_balance as tokens, total_points as points, current_level as level, role
+            FROM users WHERE id = $1
+        `, [userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Session expired' });
+        }
+
+        res.json({ success: true, user: result.rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: 'Verification failed' });
+    }
+};
+
 export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
@@ -36,7 +55,8 @@ export const login = async (req: Request, res: Response) => {
                 username: user.username,
                 tokens: user.token_balance,
                 points: user.total_points,
-                level: user.current_level
+                level: user.current_level,
+                role: user.role
             } 
         });
     } catch (error) {

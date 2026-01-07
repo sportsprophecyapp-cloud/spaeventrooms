@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import { login, register, getProfile, updateUsername } from './controller';
+import { login, register, updateUsername, getProfile, getMe } from './controller';
 import { authenticate } from './middleware';
 
 const router = Router();
 
-router.post('/login', login);
 router.post('/register', register);
-router.get('/profile/:userId', authenticate, getProfile);
-router.put('/username', authenticate, updateUsername); // New Identity Route
+router.post('/login', login);
+router.get('/me', authenticate, getMe); // NEW: Fast Log Handshake
+router.get('/profile/:userId', getProfile);
+router.patch('/update-username', authenticate, updateUsername);
 
 export default router;
