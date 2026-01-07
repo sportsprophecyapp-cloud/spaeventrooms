@@ -1,63 +1,73 @@
-# Sports Prophecy - UX Design Document
-**Version 1.6 | January 2026**
+# Events Arena - UX Design Document
+**Version 1.7 | January 2026**
 
 ## 🎯 Overview
-Sports Prophecy is a full-stack, high-energy sports engagement platform designed for **entertainment and social competition**. It is strictly **NOT a gambling site**.
+Events Arena is a versatile, high-energy interactive engagement platform designed for **entertainment and social competition**. While built on the foundations of Sports Prophecy, it is optimized for cross-platform expansion into sports, TV, and creator-led events.
+
+### Core Philosophy:
+- **The Brand Bridge:** Users entering via legacy domains are greeted with: *"Sports Prophecy welcomes you to the Events Arena."*
+- **Mutual Benefit:** Users get a free, gamified interactive experience. Sponsors/Creators get automated, high-visibility ad placements and engagement data.
+- **Skill over Luck:** Everything is framed as "Forecasting" and "Knowledge," strictly avoiding religious and gambling terminology.
 
 ---
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
-- **Dual-API Sync:** High-frequency scores (15m) and market sync (30m) with automatic key rotation.
-- **Auto-Resolution Engine:** Analyzes scores and automatically awards **+100 XP** and **+1 Prize Draw Ticket** for correct match calls every 15 minutes.
-- **Dynamic XP Scaling:** Leveling follows a linear-growth formula: `XP Required = Current Level * 500`. Leveling gets progressively harder, adding prestige to high-level Pros.
+- **High-Frequency Dual-Sync:** 
+    - **API-Football (15m interval):** Lightning-fast score updates.
+    - **The Odds API (30m interval):** High-coverage market and schedule sync.
+- **Smart Key Rotation:** Failover across 4+ API keys to ensure 100% uptime.
+- **Automatic Resolution:** Every 15 minutes, the "Resolver Engine" awards **+100 XP** and **+1 Prize Draw Ticket** for correct match calls.
 
 ---
 
 ## 🛠️ USER ROLES & HIERARCHY
 1. **User (Pro):** Regular player. Can chat, forecast match calls, and earn status.
-2. **Creator (Partner):** Verified Room Owners. Can moderate and co-brand specific arenas.
-3. **Admin (Moderator):** Platform support and user management.
-4. **Super Admin:** Full platform control (sportsprophecyapp@gmail.com).
+2. **Creator (Partner):** Room Owners (Streamers/Brands). Can moderate and co-brand their specific arenas.
+3. **Admin (Moderator):** Platform-wide support.
+4. **Super Admin:** Full control (sportsprophecyapp@gmail.com).
 
 ---
 
 ## 1. IDENTITY & REFERRALS
 ### 1.1 Persistent Handles (UUID)
-- **Immutable Anchor:** Uses `user.id` so history never breaks during handle changes.
-- **Identity Lab:** Profile page neon edit-mode for handle customization.
+- **Anchor:** Uses internal DB `user.id`. Identity remains stable even if @handle or email changes.
+- **Identity Lab:** Profile page features a neon edit-mode for real-time handle customization.
 
-### 1.2 Bulletproof Referral Program
-- **Dual-Rewards:** Both Referrer and New User receive **+50 tokens** instantly.
-- **Welcome Bonus:** New users start with 200 tokens (instead of 150) via referral link.
+### 1.2 Dual-Reward Referrals
+- **The Reward:** Both Referrer and New User receive **+50 tokens** instantly.
+- **The Welcome:** Referral signups start with 200 tokens (vs 150 standard).
 
 ---
 
 ## 2. MAIN APP SCREENS
 ### 2.1 Homepage / Lobby (`/`)
-- **Compact UX:** Mobile-optimized header showing rooms "above the fold."
-- **Arena Standings:** Global rankings showing user XP and dynamic Levels.
+- **Visual:** Compact header showing active arenas "above the fold."
+- **Standings:** Global leaderboard showing Pro XP and Level rankings.
+- **Branding:** footer links Events Arena to the parent "Powered by Sports Prophecy" legacy.
 
 ### 2.2 Room Page (`/rooms/[roomId]`)
-- **Tab System:** Sticky `Predict | Standings | Chat` navigation for native feel.
-- **Official Sponsor Widget:** Auto-injection of active, Stripe-verified sponsors.
+- **Layout:** Professional 3-column desktop view; sticky tabbed mobile view.
+- **The Call:** Users transmit their "Call" on live events with immediate score feedback.
 
 ---
 
 ## 3. SPONSOR ECOSYSTEM & PRIZE DRAWS
 ### 3.1 Automated Monetization
-- **Self-Selling Placeholders:** Empty ad spots show "SPONSOR THIS ARENA" links.
-- **Auto-Activation:** Sponsor ads go LIVE instantly upon payment confirmation.
+- **Self-Selling Slots:** Automated ad placeholders link to Stripe-integrated pricing.
+- **Auto-Activation:** Ad placements go LIVE instantly upon payment confirmation.
 
-### 3.2 The Draw Commander (50/50 Strategy)
-- **Ticket Stash:** Users track tickets earned from Skill, Streaks, and Referrals.
-- **Fair Resolution:** 50% Skill (Leaderboard) / 50% Engagement (Random Draw).
+### 3.2 Draw Commander (50/50 Strategy)
+- **Ticket Stash:** Users track tickets earned from skill, streaks, and referrals.
+- **Fair Resolution:** Admin resolution engine splits prizes:
+    - **50% Skill:** Awarded to Top Pros on the Standings board.
+    - **50% Engagement:** Random draw from all ticket holders.
 
 ---
 
 ## 4. COMPLIANCE & SAFETY
-- **Non-Gambling:** Pure skill/loyalty rewards. No "Bets," "Wagers," or financial risk.
-- **Cultural Neutrality:** Modern sports terminology ("Pro", "Standings", "Call") for global appeal.
-- **Performance:** Mutual keep-alive system ensures 24/7 responsiveness on Render.
+- **Non-Gambling:** Strictly skill and loyalty based. No real-money wagering.
+- **Cultural Neutrality:** Modern, professional terminology ("Pro", "Standings", "Call") for global appeal.
+- **Performance:** Dual-ping Keep-Alive system ensures 24/7 site responsiveness.
 
 ---
-*This document serves as the master blueprint for the Sports Prophecy platform.*
+*This document serves as the master blueprint for the Events Arena platform.*
