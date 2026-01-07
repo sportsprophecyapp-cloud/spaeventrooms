@@ -11,10 +11,25 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'Events Arena | The Prediction Platform',
-  description: 'Forecast live match outcomes, earn status, and compete in the ultimate events arena. No gambling, pure skill.',
+  title: 'Events Arena | The Ultimate Fan Engagement & Prediction Platform',
+  description: 'Join the ultimate second-screen experience. Forecast live match outcomes, earn status, and compete for prizes in the Events Arena. 100% free, pure skill.',
+  keywords: ['sports predictions', 'live soccer calls', 'fan engagement', 'arena IQ', 'prize draws', 'soccer standings', 'events arena', 'sports prophecy'],
+  authors: [{ name: 'Events Arena Team' }],
+  openGraph: {
+    title: 'Events Arena | Predict. Compete. Win.',
+    description: 'The world\'s most engaging second-screen platform for live sports and creator events.',
+    url: 'https://www.sportsprophecyapp.com',
+    siteName: 'Events Arena',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Events Arena | Predict. Compete. Win.',
+    description: '100% free sports engagement platform for the ultimate fan experience.',
+  },
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
-  manifest: '/manifest.json', // Linked the PWA manifest
+  manifest: '/manifest.json',
   themeColor: '#050505',
 };
 

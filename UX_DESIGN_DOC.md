@@ -1,13 +1,14 @@
 # Events Arena - UX Design Document
-**Version 2.5 | January 2026**
+**Version 2.6 | January 2026**
 
 ## 🎯 Overview
-Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. Designed as a Progressive Web App (PWA) to ensure zero-friction onboarding in global markets.
+Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. It is designed for maximum conversion through a "User-First" lean strategy and professional SEO architecture.
 
 ### Core Philosophy:
+- **User-First Lean Strategy:** Eliminates "Feature Bloat" and first-touch friction (e.g., PWA installation nudges) to prioritize immediate value and engagement.
 - **Immediate Value Visibility:** Surfaces the 200-token welcome bonus and prize economy on the landing page to maximize conversion.
-- **Engagement Master:** Uses "Direct Reward Labels" on match cards to show Supporters exactly what they earn (Tickets/XP) for every action.
-- **PWA Strategy:** Bypasses app stores via "Add to Home Screen" functionality, creating a native mobile experience.
+- **Engagement Master:** Uses "Direct Reward Labels" on match cards to show Supporters exactly what they earn (Tickets/XP).
+- **SEO & Social Ready:** Built with professional Open Graph (OG) and metadata tags for high visibility on search engines and social platforms.
 
 ---
 
@@ -26,13 +27,13 @@ Events Arena is a full-stack, high-energy interactive engagement platform optimi
 ---
 
 ## 🏠 MAIN APP SCREENS
-### 2.1 High-Conversion Lobby
+### 2.1 The High-Conversion Lobby
 - **Promo Banner:** Visual callout for the **200 Welcome Tokens** reward.
 - **Economy Preview:** Transparent display of the "Win Prizes / Level Up / Recruit" loop.
+- **Branding:** Versatile "Events Arena" identity with a legacy bridge for Sports Prophecy users.
 
-### 2.2 Perfected Soccer Room
+### 2.2 Perfected Soccer Arena
 - **Match Cards:** Features neon status pulsing and direct `🎫 EARN 1 TICKET` tags.
-- **Clarity:** Explicit `Make your call` instructions under primary interaction buttons.
 - **League Organization:** Matches grouped by official league headers with logos.
 
 ---
@@ -43,16 +44,10 @@ Events Arena is a full-stack, high-energy interactive engagement platform optimi
 
 ---
 
-## 🎙️ REWARD ECONOMY
-- **Token Starting Balance:** 150 standard / 200 via referral.
-- **Prize Ticket Engine:** Correct calls automatically award +1 Ticket to the active room's draw.
-
----
-
 ## 4. COMPLIANCE & PERFORMANCE
-- **Non-Gambling:** Purely skill and loyalty based. No "Bets" or "Wagers."
-- **Cultural Neutrality:** Secular terminology ("Supporter", "Standings", "Call") for global appeal.
-- **Keep-Alive:** Cross-ping service ensures 24/7 responsiveness.
+- **Non-Gambling:** Strictly skill and loyalty based. No "Bets" or "Wagers."
+- **PWA Ready:** Manifest and background architecture active, but installation is optional and non-intrusive.
+- **SEO Optimized:** Full meta-tag suite for high-end search rankings and social previews.
 
 ---
 *This document serves as the master blueprint for the Events Arena platform.*
