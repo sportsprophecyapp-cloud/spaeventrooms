@@ -18,11 +18,11 @@ interface Match {
 interface MatchCardProps {
     match: Match;
     onPredict: (match: Match) => void;
+    hasPredicted?: boolean; // New Prop
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
-    // Prediction is allowed if the match is not finished
-    const canPredict = match.status === 'scheduled' || match.status === 'live';
+const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted }) => {
+    const canPredict = (match.status === 'scheduled' || match.status === 'live') && !hasPredicted;
 
     return (
         <div className={`${styles.card} ${match.isPulsing ? styles.pulsar : ''}`}>
@@ -43,7 +43,12 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
             </div>
 
             <div className={styles.actions}>
-                {canPredict ? (
+                {hasPredicted ? (
+                    <div className={styles.lockedState}>
+                        <span className={styles.lockIcon}>✅</span>
+                        <span className={styles.lockText}>CALL SUBMITTED</span>
+                    </div>
+                ) : canPredict ? (
                     <div className={styles.predictWrapper}>
                         <button
                             onClick={() => {
@@ -65,7 +70,6 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
                 )}
             </div>
 
-            {/* SPONSOR INTEGRATION LABEL */}
             <div className={styles.cardFooter}>
                 <span className={styles.prizeTag}>🎫 EARN 1 TICKET</span>
             </div>

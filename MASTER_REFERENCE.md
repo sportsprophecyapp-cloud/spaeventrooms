@@ -7,18 +7,18 @@
 - **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Creator Events).
 
 ## 📡 Data Architecture (API & Limits)
-- **Resilient Dual-API Sync:** API-Football (15m) + The Odds API (30m).
+- **Resilient Dual-API Sync:** API-Football (20m) + The Odds API (45m).
 - **Sequential Key Rotation:** Supports comma-separated lists for both `THE_ODDS_API_KEY` and `API_FOOTBALL_KEY`.
 - **Fail-Over Logic:** Automatic rotation to the next key index on 401/429 errors.
-- **Source of Truth:** All data cached in PostgreSQL `soccer_matches`.
+- **Accuracy:** Frontend fuzzy-match logic (`home-away-time`) ensures unique match cards across multiple APIs.
 
 ## 🚀 Deployment & Build Rules
 - **Method:** `./deploy.sh "message"` (Run from root only).
 - **CSS Rule:** CRITICAL. Always use unique filenames for CSS modules (e.g., `wizard.module.css`) instead of `page.module.css` to prevent Render build cache conflicts.
-- **Relative Paths:** Next.js App Router requires strict relative pathing for context imports.
+- **Transmission:** Every POST request must include an `AbortController` with a 10s timeout and a dedicated state reset.
 
 ## 📝 Persistent AI Instructions
 1. **Supporter Identity:** Always use "Supporter" branding for users.
-2. **Creator Toolset:** Respect the isolation of the OBS Overlay (`/overlay`) and Creator Remote (`/creator`) routes.
-3. **No Mock Data:** Only use live API data for events.
-4. **Resilience:** Maintain the sequential retry logic for data sync to maximize uptime on free-tier APIs.
+2. **Room Isolation:** Maintain strict separation between Pure Soccer (`/rooms/soccer`) and Interactive Creator Hubs.
+3. **Regionally Intelligent:** Every UI text string must pass through the `useLanguage()` hook.
+4. **Safety Buffer:** Keep schedulers 25% under free-tier limits to allow for manual admin refreshes.

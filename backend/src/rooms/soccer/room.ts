@@ -16,8 +16,6 @@ export class SoccerRoom extends BaseRoom {
     initRoutes(): void {
         this.router.get('/matches', async (req, res) => {
             try {
-                // TIGHTENED QUERY: Only show Games from last 6 hours to next 36 hours.
-                // This removes old junk and focuses the Arena.
                 const result = await query(`
                     SELECT * FROM soccer_matches 
                     WHERE start_time > NOW() - INTERVAL '6 hours' 
@@ -33,6 +31,47 @@ export class SoccerRoom extends BaseRoom {
             }
         });
 
+        // Fetch User's existing predictions for this room
+        this.router.get('/my-calls', authenticate, async (req: AuthRequest, res) => {
+            try {
+                const result = await query(
+                    'SELECT match_id, prediction_data FROM soccer_predictions WHERE user_id = $1',
+                    [req.user.id]
+                );
+                res.json(result.rows);
+            } catch (err) {
+                res.status(500).json({ error: 'Failed to fetch your calls' });
+            }
+        });
+
+        this.router.post('/predictions/match', authenticate, async (req: AuthRequest, res) => {
+            const { matchId, pick } = req.body;
+            const userId = req.user?.id;
+            if (!matchId || !pick) return res.status(400).json({ message: 'matchId and pick are required' });
+
+            try {
+                // LOCK-IN LOGIC: Check if call already exists
+                const existing = await query(
+                    'SELECT id FROM soccer_predictions WHERE user_id = $1 AND match_id = $2',
+                    [userId, matchId]
+                );
+
+                if (existing.rows.length > 0) {
+                    return res.status(400).json({ message: 'Your call is already locked in for this match!' });
+                }
+
+                await query(`
+                    INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
+                    VALUES ($1, $2, $3)
+                `, [userId, matchId, JSON.stringify({ pick })]);
+                
+                res.json({ success: true, message: 'Call Transmitted & Locked!' });
+            } catch (err) {
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
+
+        // ... rest of routes (test-game, refresh) stay same
         this.router.post('/test-game', authenticate, isAdmin, async (req, res) => {
             try {
                 const matchId = `test-${Date.now()}`;
@@ -49,24 +88,6 @@ export class SoccerRoom extends BaseRoom {
                 res.json({ success: true, matchId });
             } catch (err) {
                 res.status(500).json({ error: 'Failed to create test match' });
-            }
-        });
-
-        this.router.post('/predictions/match', authenticate, async (req: AuthRequest, res) => {
-            const { matchId, pick } = req.body;
-            const userId = req.user?.id;
-            if (!matchId || !pick) return res.status(400).json({ message: 'matchId and pick are required' });
-
-            try {
-                await query(`
-                    INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
-                    VALUES ($1, $2, $3)
-                    ON CONFLICT (user_id, match_id) 
-                    DO UPDATE SET prediction_data = EXCLUDED.prediction_data, created_at = CURRENT_TIMESTAMP
-                `, [userId, matchId, JSON.stringify({ pick })]);
-                res.json({ success: true, message: 'Call Transmitted!' });
-            } catch (err) {
-                res.status(500).json({ error: 'Internal Server Error' });
             }
         });
 
