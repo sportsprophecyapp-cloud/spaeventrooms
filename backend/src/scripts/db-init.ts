@@ -3,106 +3,43 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Pure-Data Database Initialization (v3.3 - Supporter Branding Sync)...');
+        console.log('🚀 Starting Pure-Economy Database Initialization (v3.4 - Ticket & XP Sync)...');
 
         const schema = `
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                email VARCHAR(255) UNIQUE NOT NULL,
-                username VARCHAR(50) UNIQUE,
-                password_hash VARCHAR(255) NOT NULL,
-                role VARCHAR(20) DEFAULT 'user',
-                token_balance INTEGER DEFAULT 150,
-                total_points INTEGER DEFAULT 0,
-                current_level INTEGER DEFAULT 1,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
+            -- 1. Ensure user table has all economy columns
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER DEFAULT 150;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS total_points INTEGER DEFAULT 0;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS total_tickets INTEGER DEFAULT 0;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS current_level INTEGER DEFAULT 1;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
 
-            CREATE TABLE IF NOT EXISTS rooms (
-                room_id VARCHAR(50) PRIMARY KEY,
-                display_name VARCHAR(100) NOT NULL,
-                config JSONB DEFAULT '{}',
-                is_active BOOLEAN DEFAULT TRUE,
-                owner_id INTEGER REFERENCES users(id)
-            );
-
-            CREATE TABLE IF NOT EXISTS soccer_matches (
-                match_id VARCHAR(50) PRIMARY KEY, home_team VARCHAR(100) NOT NULL, away_team VARCHAR(100) NOT NULL,
-                start_time TIMESTAMP WITH TIME ZONE NOT NULL, status VARCHAR(20) DEFAULT 'scheduled',
-                score_home INTEGER DEFAULT 0, score_away INTEGER DEFAULT 0, league VARCHAR(100),
-                league_logo TEXT, data JSONB DEFAULT '{}', updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS soccer_predictions (
-                id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                match_id VARCHAR(50) REFERENCES soccer_matches(match_id) ON DELETE CASCADE,
-                prediction_data JSONB NOT NULL, result VARCHAR(20) DEFAULT 'pending',
-                points_earned INTEGER DEFAULT 0, created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(user_id, match_id)
-            );
-
-            CREATE TABLE IF NOT EXISTS room_messages (
-                id SERIAL PRIMARY KEY, room_id VARCHAR(50) NOT NULL REFERENCES rooms(room_id),
-                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, username VARCHAR(50),
-                content TEXT NOT NULL, created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS cosmetics (
-                id VARCHAR(100) PRIMARY KEY, name VARCHAR(100) NOT NULL, description TEXT,
-                type VARCHAR(50) NOT NULL, cost INTEGER NOT NULL, asset_url TEXT NOT NULL,
-                is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS user_cosmetics (
-                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                cosmetic_id VARCHAR(100) REFERENCES cosmetics(id) ON DELETE CASCADE,
-                is_equipped BOOLEAN DEFAULT FALSE, acquired_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (user_id, cosmetic_id)
-            );
-
-            CREATE TABLE IF NOT EXISTS token_transactions (
-                id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                amount INTEGER NOT NULL, type VARCHAR(50) NOT NULL, description TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS prize_draws (
-                id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, prize_description TEXT,
-                room_id VARCHAR(50) REFERENCES rooms(room_id), sponsor_id INTEGER,
-                status VARCHAR(20) DEFAULT 'active', draw_date TIMESTAMP WITH TIME ZONE,
-                winner_id INTEGER REFERENCES users(id), created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
+            -- 2. Ensure Ticket Tracking table exists
             CREATE TABLE IF NOT EXISTS prize_draw_entries (
-                id SERIAL PRIMARY KEY, draw_id INTEGER REFERENCES prize_draws(id) ON DELETE CASCADE,
-                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, entry_type VARCHAR(50) NOT NULL,
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                room_id VARCHAR(50) DEFAULT 'soccer',
+                entry_type VARCHAR(50) NOT NULL, -- 'accuracy', 'streak', 'referral'
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            -- 3. Ensure Transaction Logging for audit
+            CREATE TABLE IF NOT EXISTS economy_transactions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                amount INTEGER NOT NULL,
+                currency_type VARCHAR(20) NOT NULL, -- 'tokens', 'tickets', 'xp'
+                reason TEXT,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         `;
         await client.query(schema);
 
-        // 2. Branding Sync
-        await client.query(`
-            UPDATE users SET token_balance = 150 WHERE token_balance IS NULL OR token_balance = 0;
-            UPDATE users SET role = 'super_admin' WHERE email = 'sportsprophecyapp@gmail.com';
-        `);
+        // SYNC: Ensure everyone has their starting 150 tokens
+        await client.query("UPDATE users SET token_balance = 150 WHERE token_balance IS NULL OR token_balance = 0");
 
-        // 3. Seed Content (Clean Supporter Branding)
-        await client.query(`
-            INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Soccer Arena')
-            ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
-
-            INSERT INTO cosmetics (id, name, description, type, cost, asset_url) VALUES 
-            ('avatar_basic', 'Rookie Supporter', 'Entry-level fan avatar', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
-            ('avatar_premium', 'Legendary Fan', 'Elite status avatar', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
-            ('frame_gold', 'Champion Aura', 'Exclusive winner border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
-            ON CONFLICT (id) DO NOTHING;
-        `);
-
-        console.log('✅ DB Initialized: Branding synchronized to "Supporter" identity.');
+        console.log('✅ DB Initialized: Economy systems (Tokens, XP, Tickets) are now logically unified.');
     } catch (err) {
-        console.error('❌ DB Init failed:', err);
-        process.exit(1);
+        console.error('❌ DB Economy sync failed:', err);
     } finally {
         client.release();
         process.exit(0);
