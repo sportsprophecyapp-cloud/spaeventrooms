@@ -2,14 +2,13 @@ import { fetchLiveMatches } from '../../shared/services/footballApi';
 import { fetchApiFootballMatches } from '../../shared/services/apiFootball';
 import { resolveSoccerPredictions } from '../../shared/services/resolver';
 
-// Strategy: Maximize frequency while staying under API quotas
-const ODDS_API_INTERVAL = 30 * 60 * 1000;    // 30 Minutes (48/day)
-const FOOTBALL_API_INTERVAL = 15 * 60 * 1000; // 15 Minutes (96/day)
+// CONSERVATIVE STRATEGY: Stay 25% under free-tier limits to allow for manual refreshes
+const ODDS_API_INTERVAL = 45 * 60 * 1000;    // 45 Minutes (32/day = ~960/mo) - Safe for 2,000 limit
+const FOOTBALL_API_INTERVAL = 20 * 60 * 1000; // 20 Minutes (72/day) - Safe for 100 limit
 
 export const startSoccerScheduler = () => {
-    console.log('🎯 Arena Data Scheduler: HIGH-SPEED MODE (15m / 30m Dual-Interval)');
+    console.log('🎯 Arena Data Scheduler: SAFETY-BUFFER MODE (20m / 45m Intervals)');
 
-    // 1. Immediate Initial Sync
     const initialRun = async () => {
         console.log('🚀 Performing initial Arena sync...');
         await fetchLiveMatches().catch(e => {});
@@ -18,18 +17,16 @@ export const startSoccerScheduler = () => {
     };
     initialRun();
 
-    // 2. High-Frequency: API-Football (Every 15 Minutes)
+    // High-Frequency Scores (Every 20 Minutes)
     setInterval(async () => {
-        console.log('📡 [High-Freq] API-Football: Refreshing scores...');
+        console.log('📡 [Safety-Freq] API-Football: Syncing scores...');
         await fetchApiFootballMatches().catch(e => {});
-        
-        // Resolve predictions after every score update
         await resolveSoccerPredictions().catch(e => {});
     }, FOOTBALL_API_INTERVAL);
 
-    // 3. Standard-Frequency: The Odds API (Every 30 Minutes)
+    // Standard-Frequency Markets (Every 45 Minutes)
     setInterval(async () => {
-        console.log('📡 [Std-Freq] The Odds API: Syncing markets...');
+        console.log('📡 [Safety-Freq] The Odds API: Syncing markets...');
         await fetchLiveMatches().catch(e => {});
     }, ODDS_API_INTERVAL);
 };
