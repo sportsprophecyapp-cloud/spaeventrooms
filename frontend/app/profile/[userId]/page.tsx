@@ -15,7 +15,7 @@ interface UserProfile {
     total_predictions: number;
     correct_predictions: number;
     streak: number;
-    frame_url?: string;
+    draw_entries?: number; // Added entries count
 }
 
 const ProfilePage = () => {
@@ -38,7 +38,17 @@ const ProfilePage = () => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setProfile(data.user);
+                
+                // Fetch Ticket Count specifically
+                const ticketRes = await fetch(`${apiUrl}/api/gamification/tickets`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const ticketData = await ticketRes.json();
+
+                setProfile({
+                    ...data.user,
+                    draw_entries: ticketData.count || 0
+                });
                 setNewName(data.user.username);
             }
         } catch (err) {
@@ -83,7 +93,7 @@ const ProfilePage = () => {
         if (!profile) return;
         const refUrl = `${window.location.origin}/auth/register?ref=${profile.id}`;
         navigator.clipboard.writeText(refUrl);
-        setCopyMessage('LINK COPIED! (+50 TOKENS PER SIGNUP)');
+        setCopyMessage('LINK COPIED! (+50 TOKENS)');
         setTimeout(() => setCopyMessage(''), 3000);
     };
 
@@ -114,7 +124,7 @@ const ProfilePage = () => {
                                     className={styles.nameInput}
                                     value={newName}
                                     onChange={(e) => setNewName(e.target.value)}
-                                    placeholder="Enter UUID/Handle"
+                                    placeholder="Enter Handle"
                                     maxLength={15}
                                 />
                                 <button className={styles.saveBtn} onClick={handleUpdateIdentity}>SAVE</button>
@@ -131,13 +141,29 @@ const ProfilePage = () => {
                         )}
                         <div className={styles.badges}>
                             <span className={styles.levelBadge}>Level {profile.level || 1}</span>
-                            <span className={styles.pointsBadge}>💎 {profile.points || 0} PTS</span>
+                            <span className={styles.pointsBadge}>💎 {profile.points || 0} XP</span>
                         </div>
                     </div>
                 </div>
             </header>
 
             <div className={styles.content}>
+                <section className={styles.statsGrid}>
+                    <div className={`${styles.statCard} ${styles.ticketCard} glass`}>
+                        <span className={styles.statLabel}>PRIZE DRAW TICKETS</span>
+                        <span className={styles.statValue}>🎫 {profile.draw_entries || 0}</span>
+                        <p className={styles.statHint}>Earned from skill & streaks</p>
+                    </div>
+                    <div className={`${styles.statCard} glass`}>
+                        <span className={styles.statLabel}>PROPHET TOKENS</span>
+                        <span className={styles.statValue}>🪙 {profile.tokens}</span>
+                    </div>
+                    <div className={`${styles.statCard} glass`}>
+                        <span className={styles.statLabel}>ARENA RANK</span>
+                        <span className={styles.statValue}>#{profile.level > 1 ? '12' : '---'}</span>
+                    </div>
+                </section>
+
                 {isOwnProfile && (
                     <section className={`${styles.referralCard} glass`}>
                         <div className={styles.refInfo}>
@@ -149,21 +175,6 @@ const ProfilePage = () => {
                         </button>
                     </section>
                 )}
-
-                <section className={styles.statsGrid}>
-                    <div className={`${styles.statCard} glass`}>
-                        <span className={styles.statLabel}>Tokens</span>
-                        <span className={styles.statValue}>{profile.tokens}</span>
-                    </div>
-                    <div className={`${styles.statCard} glass`}>
-                        <span className={styles.statLabel}>Global Rank</span>
-                        <span className={styles.statValue}>#{profile.level > 1 ? '12' : '---'}</span>
-                    </div>
-                    <div className={`${styles.statCard} glass`}>
-                        <span className={styles.statLabel}>Experience</span>
-                        <span className={styles.statValue}>{profile.points} XP</span>
-                    </div>
-                </section>
             </div>
         </div>
     );
