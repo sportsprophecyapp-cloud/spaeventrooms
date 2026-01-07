@@ -3,7 +3,7 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Prize-Draw Ready Database Initialization (v3.0)...');
+        console.log('🚀 Starting Pure-Data Database Initialization (v3.1 - Global Branding Sync)...');
 
         const schema = `
             CREATE TABLE IF NOT EXISTS users (
@@ -11,7 +11,7 @@ const initDB = async () => {
                 email VARCHAR(255) UNIQUE NOT NULL,
                 username VARCHAR(50) UNIQUE,
                 password_hash VARCHAR(255) NOT NULL,
-                role VARCHAR(20) DEFAULT 'prophet',
+                role VARCHAR(20) DEFAULT 'user', -- 'super_admin', 'admin', 'creator', 'user'
                 token_balance INTEGER DEFAULT 150,
                 total_points INTEGER DEFAULT 0,
                 current_level INTEGER DEFAULT 1,
@@ -88,25 +88,14 @@ const initDB = async () => {
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
-            CREATE TABLE IF NOT EXISTS room_sponsors (
-                id SERIAL PRIMARY KEY,
-                room_id VARCHAR(50) REFERENCES rooms(room_id),
-                name VARCHAR(100) NOT NULL,
-                logo_url TEXT,
-                link_url TEXT,
-                is_active BOOLEAN DEFAULT TRUE,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
-            -- NEW: PRIZE DRAW SYSTEM
             CREATE TABLE IF NOT EXISTS prize_draws (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
                 prize_description TEXT,
                 room_id VARCHAR(50) REFERENCES rooms(room_id),
-                sponsor_id INTEGER REFERENCES room_sponsors(id),
-                status VARCHAR(20) DEFAULT 'active', -- 'active', 'completed', 'cancelled'
+                sponsor_id INTEGER,
+                status VARCHAR(20) DEFAULT 'active',
                 draw_date TIMESTAMP WITH TIME ZONE,
                 winner_id INTEGER REFERENCES users(id),
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -116,30 +105,31 @@ const initDB = async () => {
                 id SERIAL PRIMARY KEY,
                 draw_id INTEGER REFERENCES prize_draws(id) ON DELETE CASCADE,
                 user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                entry_type VARCHAR(50) NOT NULL, -- 'streak', 'referral', 'accuracy'
+                entry_type VARCHAR(50) NOT NULL,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         `;
         await client.query(schema);
 
-        // Update Super Admin
+        // 2. Fix Missing Usernames & Admin Roles
         await client.query(`
+            UPDATE users SET username = split_part(email, '@', 1) WHERE username IS NULL OR username = '';
             UPDATE users SET role = 'super_admin' WHERE email = 'sportsprophecyapp@gmail.com';
         `);
 
-        // Seed Essential System Content
+        // 3. Seed Content (Clean, Modern Sports Wording)
         await client.query(`
             INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Soccer Room')
             ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
 
             INSERT INTO cosmetics (id, name, description, type, cost, asset_url) VALUES 
-            ('avatar_basic', 'Prophet Apprentice', 'Standard path entry', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
-            ('avatar_premium', 'Master Seer', 'Expert level prophet', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
-            ('frame_gold', 'Gilded Aura', 'Exclusive level border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
+            ('avatar_basic', 'Rookie Pro', 'Entry-level player avatar', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
+            ('avatar_premium', 'Elite Legend', 'Top-tier status avatar', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
+            ('frame_gold', 'Champion Aura', 'Exclusive winner border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
             ON CONFLICT (id) DO NOTHING;
         `);
 
-        console.log('✅ Prize Draw System Initialized in DB.');
+        console.log('✅ Branding Updated: Terminology is now modern and non-religious.');
     } catch (err) {
         console.error('❌ DB Init failed:', err);
         process.exit(1);

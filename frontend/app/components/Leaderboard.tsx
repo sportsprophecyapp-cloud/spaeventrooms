@@ -21,15 +21,12 @@ const Leaderboard: React.FC = () => {
                 const res = await fetch(`${apiUrl}/api/gamification/leaderboard`);
                 if (res.ok) {
                     const data = await res.json();
-                    // FIX: Extract the array from the new { success, leaderboard } structure
                     if (data && Array.isArray(data.leaderboard)) {
                         setEntries(data.leaderboard);
-                    } else if (Array.isArray(data)) {
-                        setEntries(data);
                     }
                 }
             } catch (err) {
-                console.error('Error fetching leaderboard:', err);
+                console.error('Error fetching standings:', err);
             } finally {
                 setLoading(false);
             }
@@ -38,14 +35,14 @@ const Leaderboard: React.FC = () => {
         fetchLeaderboard();
     }, []);
 
-    if (loading) return <div className={styles.loading}>Accessing Prophet Records...</div>;
+    if (loading) return <div className={styles.loading}>Accessing Arena Records...</div>;
 
     return (
         <div className={`${styles.container} glass`}>
-            <h2 className={styles.title}>ARENA RANKINGS</h2>
+            <h2 className={styles.title}>ARENA STANDINGS</h2>
             <div className={styles.list}>
                 {entries.length === 0 ? (
-                    <p className={styles.empty}>No prophecies recorded yet.</p>
+                    <p className={styles.empty}>No standings recorded yet. Make your call to join the board!</p>
                 ) : (
                     entries.map((entry, index) => (
                         <div key={`${entry.username}-${index}`} className={styles.row}>
@@ -54,7 +51,7 @@ const Leaderboard: React.FC = () => {
                             </div>
                             <div className={styles.userInfo}>
                                 <span className={styles.username}>@{entry.username}</span>
-                                <span className={styles.levelBadge}>Lvl {entry.level || 1}</span>
+                                <span className={styles.levelBadge}>Level {entry.level || 1}</span>
                             </div>
                             <div className={styles.points}>{entry.points}</div>
                         </div>

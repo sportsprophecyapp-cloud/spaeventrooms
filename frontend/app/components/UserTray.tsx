@@ -32,7 +32,7 @@ const UserTray: React.FC = () => {
                     setStats(data.stats);
                 }
             } catch (err) {
-                console.error('Error fetching gamification stats:', err);
+                console.error('Error fetching stats:', err);
             }
         };
 
@@ -45,6 +45,7 @@ const UserTray: React.FC = () => {
 
     return (
         <div className={`${styles.container} ${isExpanded ? styles.expanded : ''}`}>
+            {/* Visual hint that it's clickable */}
             <div className={styles.minimal} onClick={() => setIsExpanded(!isExpanded)}>
                 <div className={styles.levelBadge}>
                     <span className={styles.levelNum}>Lvl {stats.current_level}</span>
@@ -56,18 +57,19 @@ const UserTray: React.FC = () => {
                     <span className={styles.pointsNum}>{stats.total_points}</span>
                     <span className={styles.pointsLabel}>PTS</span>
                 </div>
+                <span className={styles.arrow}>{isExpanded ? '▴' : '▾'}</span>
             </div>
 
             {isExpanded && (
                 <div className={`${styles.drawer} glass`}>
-                    <h4 className={styles.drawerTitle}>PROPHET COMMAND</h4>
+                    <h4 className={styles.drawerTitle}>COMMAND CENTER</h4>
                     <div className={styles.menuLinks}>
                         <Link href={`/profile/${user?.id}`} className={styles.menuLink}>
                             👤 VIEW PROFILE
                         </Link>
                         
                         {isAdmin && (
-                            <Link href="/admin" className={`${styles.menuLink} ${styles.adminLink}`}>
+                            <Link href="/admin/users" className={`${styles.menuLink} ${styles.adminLink}`}>
                                 🛡️ ADMIN PANEL
                             </Link>
                         )}

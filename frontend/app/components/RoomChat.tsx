@@ -21,18 +21,16 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
-    const { isAuthenticated, user, token } = useAuth();
+    const { isAuthenticated, token } = useAuth();
     const { socket } = useSocket();
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Auto-scroll to bottom
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messages]);
 
-    // Initial Fetch
     useEffect(() => {
         const fetchHistory = async () => {
             try {
@@ -51,7 +49,6 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
         fetchHistory();
     }, [roomId]);
 
-    // Socket Listener
     useEffect(() => {
         if (!socket) return;
 
@@ -69,7 +66,7 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
         if (!newMessage.trim() || !isAuthenticated) return;
 
         const content = newMessage;
-        setNewMessage(''); // Clear immediately for snappy UX
+        setNewMessage(''); 
 
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -90,20 +87,20 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
         <div className={`${styles.container} glass`}>
             <div className={styles.header}>
                 <span className={styles.statusDot}></span>
-                <h3>LIVE ARENA CHAT</h3>
+                <h3>LIVE FAN ARENA</h3>
             </div>
 
             <div className={styles.feed} ref={scrollRef}>
                 {loading ? (
-                    <div className={styles.loading}>Accessing encrypted channel...</div>
+                    <div className={styles.loading}>Accessing arena channel...</div>
                 ) : messages.length === 0 ? (
-                    <div className={styles.empty}>Channel is quiet. Start the prophecy.</div>
+                    <div className={styles.empty}>Channel is quiet. Make your call!</div>
                 ) : (
                     messages.map((msg) => (
                         <div key={msg.id} className={styles.message}>
                             <div className={styles.meta}>
                                 <span className={styles.level}>Lvl {msg.current_level}</span>
-                                <span className={styles.username}>{msg.username}</span>
+                                <span className={styles.username}>@{msg.username}</span>
                             </div>
                             <p className={styles.content}>{msg.content}</p>
                         </div>

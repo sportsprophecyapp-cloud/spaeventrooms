@@ -23,7 +23,7 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
 
     const handleSubmit = async () => {
         if (!isAuthenticated) {
-            setError('Please login to make a prediction');
+            setError('Please login to make your call');
             return;
         }
 
@@ -52,20 +52,19 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.message || 'Failed to save prediction');
+                throw new Error(data.message || 'Transmission failed.');
             }
 
             // Trigger Animation
             setShowAnim(true);
             
-            // Success: Wait for animation to finish before closing modal
+            // Wait for animation to finish before closing modal
             setTimeout(() => {
                 onSuccess();
                 onClose();
             }, 1200);
 
         } catch (err: any) {
-            console.error('Prediction Error:', err);
             setError(err.message || 'Transmission failed. Try again.');
             setLoading(false);
         }
@@ -80,7 +79,7 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
             />
             
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                <h3 className={styles.title}>Predict Outcome</h3>
+                <h3 className={styles.title}>Make Your Call</h3>
                 <p style={{ color: 'var(--neutral)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                     {match.home_team} vs {match.away_team}
                 </p>
@@ -118,7 +117,7 @@ export const PredictionModal = ({ match, isOpen, onClose, onSuccess }: Predictio
                         onClick={handleSubmit}
                         disabled={loading || !pick || showAnim}
                     >
-                        {loading ? 'TRANSMITTING...' : 'CONFIRM PROPHECY'}
+                        {loading ? 'TRANSMITTING...' : 'CONFIRM YOUR CALL'}
                     </button>
                 </div>
             </div>
