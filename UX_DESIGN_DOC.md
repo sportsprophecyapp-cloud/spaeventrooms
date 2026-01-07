@@ -1,53 +1,52 @@
 # Events Arena - UX Design Document
-**Version 2.6 | January 2026**
+**Version 2.7 | January 2026**
 
 ## 🎯 Overview
-Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. It is designed for maximum conversion through a "User-First" lean strategy and professional SEO architecture.
+Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. It is build-stabilized, branding-unified, and mobile-optimized for global pre-launch.
 
 ### Core Philosophy:
-- **User-First Lean Strategy:** Eliminates "Feature Bloat" and first-touch friction (e.g., PWA installation nudges) to prioritize immediate value and engagement.
-- **Immediate Value Visibility:** Surfaces the 200-token welcome bonus and prize economy on the landing page to maximize conversion.
-- **Engagement Master:** Uses "Direct Reward Labels" on match cards to show Supporters exactly what they earn (Tickets/XP).
-- **SEO & Social Ready:** Built with professional Open Graph (OG) and metadata tags for high visibility on search engines and social platforms.
+- **Mobile-First Compaction:** Eliminates "Scrolling Nightmares" by using sticky navigation and compact content sections.
+- **Resilient Reliability:** Implementation of AbortControllers and timeouts ensure the platform never "gets stuck" during critical user actions (e.g., submitting calls).
+- **User-First Lean Strategy:** Prioritizes immediate value (200 Welcome Tokens) over intrusive installation prompts.
 
 ---
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
 - **Dual-Sync Data Layer:** API-Football (15m) + The Odds API (30m) with 4-key rotation.
-- **Resolution Loop:** 15-minute automated checks for Match Calls, XP, and Prize Tickets.
-- **Dynamic XP Math:** Progressively harder leveling (`Current Level * 500`).
+- **Resolution Engine:** 15-minute automated checks for Match Calls, XP, and Prize Tickets.
+- **Transmission Layer:** Resilient Fetch logic with 8-second safety timeouts and explicit error reporting.
 
 ---
 
 ## 🛠️ USER ROLES & HIERARCHY
-1. **Supporter (User):** Earns status, XP, and tickets through accurate "Calls."
-2. **Creator (Partner):** Owns rooms, triggers Flash Calls, uses OBS Overlays.
-3. **Admin (Moderator):** Manages users, prize draws, and system-wide quality assurance.
+1. **Supporter (User):** Earns status and rewards through accurate "Calls."
+2. **Creator (Partner):** Triggers Flash Calls and uses real-time OBS Overlays.
+3. **Admin (Moderator):** Full system oversight and Resolution Testing (Debug tools).
 
 ---
 
-## 🏠 MAIN APP SCREENS
-### 2.1 The High-Conversion Lobby
-- **Promo Banner:** Visual callout for the **200 Welcome Tokens** reward.
-- **Economy Preview:** Transparent display of the "Win Prizes / Level Up / Recruit" loop.
-- **Branding:** Versatile "Events Arena" identity with a legacy bridge for Sports Prophecy users.
+## 📱 MOBILE UX STANDARDS
+### 2.1 The Optimized Arena Page
+- **Sticky Tabs:** `Calls | Standings | Fan Arena` navigation remains fixed at the top for instant section jumping.
+- **Compact Header:** Vertical space is preserved by shrinking room headers and lobby navigation.
+- **Announcement Tickers:** Scrollable, capped-height sections for official news.
+- **League Grouping:** Match list organized by official league headers with logos.
 
-### 2.2 Perfected Soccer Arena
-- **Match Cards:** Features neon status pulsing and direct `🎫 EARN 1 TICKET` tags.
-- **League Organization:** Matches grouped by official league headers with logos.
+### 2.2 Interactive Interaction
+- **Match Cards:** Direct `🎫 EARN 1 TICKET` labels and explicit `Make your call` instructions.
+- **Neon Pulsing:** Real-time visual feedback for Live and Active events.
 
 ---
 
 ## 🛡️ ADMIN & QUALITY ASSURANCE
-- **The Command Center:** Full user management and 50/50 prize distribution logic.
-- **Resolution Tester (Debug):** Allows real-time verification of the ticket economy via 60-second test games.
+- **Debug Dashboard:** Real-time generation of 60-second test games to verify the prize ticket economy.
+- **Role Management:** Internal tools for promoting users to Creator or Admin status.
 
 ---
 
-## 4. COMPLIANCE & PERFORMANCE
+## 4. COMPLIANCE & SEO
 - **Non-Gambling:** Strictly skill and loyalty based. No "Bets" or "Wagers."
-- **PWA Ready:** Manifest and background architecture active, but installation is optional and non-intrusive.
-- **SEO Optimized:** Full meta-tag suite for high-end search rankings and social previews.
+- **SEO & Social:** Professional metadata and Open Graph (OG) tags for elite social sharing and search ranking.
 
 ---
 *This document serves as the master blueprint for the Events Arena platform.*

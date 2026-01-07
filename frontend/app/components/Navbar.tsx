@@ -3,10 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext'; // Import Language Hook
 import styles from './Navbar.module.css';
 
 const Navbar = () => {
     const { isAuthenticated, logout } = useAuth();
+    const { language, setLanguage } = useLanguage();
 
     return (
         <nav className={styles.nav}>
@@ -18,15 +20,39 @@ const Navbar = () => {
                     </div>
                 </Link>
 
-                <div className={styles.links}>
-                    {!isAuthenticated ? (
-                        <>
-                            <Link href="/auth/login" className={styles.loginBtn}>LOGIN</Link>
-                            <Link href="/auth/register" className={styles.registerBtn}>JOIN FREE</Link>
-                        </>
-                    ) : (
-                        <button onClick={logout} className={styles.logoutBtn}>LOGOUT</button>
-                    )}
+                <div className={styles.rightSection}>
+                    {/* LANGUAGE PICKER */}
+                    <div className={styles.langPicker}>
+                        <button 
+                            className={`${styles.langBtn} ${language === 'en' ? styles.activeLang : ''}`}
+                            onClick={() => setLanguage('en')}
+                        >
+                            EN
+                        </button>
+                        <button 
+                            className={`${styles.langBtn} ${language === 'id' ? styles.activeLang : ''}`}
+                            onClick={() => setLanguage('id')}
+                        >
+                            ID
+                        </button>
+                        <button 
+                            className={`${styles.langBtn} ${language === 'th' ? styles.activeLang : ''}`}
+                            onClick={() => setLanguage('th')}
+                        >
+                            TH
+                        </button>
+                    </div>
+
+                    <div className={styles.links}>
+                        {!isAuthenticated ? (
+                            <>
+                                <Link href="/auth/login" className={styles.loginBtn}>LOGIN</Link>
+                                <Link href="/auth/register" className={styles.registerBtn}>JOIN FREE</Link>
+                            </>
+                        ) : (
+                            <button onClick={logout} className={styles.logoutBtn}>LOGOUT</button>
+                        )}
+                    </div>
                 </div>
             </div>
         </nav>

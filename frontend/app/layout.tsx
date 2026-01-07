@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext'; // New Provider
 import Navbar from './components/Navbar';
 
 const outfit = Outfit({ 
@@ -42,8 +43,10 @@ export default function RootLayout({
     <html lang="en" className={outfit.variable}>
       <body className={outfit.className}>
         <AuthProvider>
-          <Navbar />
-          {children}
+          <LanguageProvider>
+            <Navbar />
+            {children}
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>

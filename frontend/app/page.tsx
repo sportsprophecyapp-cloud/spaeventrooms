@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
+import { useLanguage } from '@/app/context/LanguageContext'; // New Hook
 import styles from './page.module.css';
 import { APP_VERSION } from './version';
 import OnboardingModal from '@/app/components/OnboardingModal';
@@ -11,6 +12,11 @@ import SponsorMarquee from '@/app/components/SponsorMarquee';
 import UserTray from '@/app/components/UserTray';
 
 const HomePage = () => {
+  const { t } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
+
   const rooms = [
     {
       id: 'soccer',
@@ -38,10 +44,6 @@ const HomePage = () => {
     }
   ];
 
-  const { user, isAuthenticated } = useAuth();
-  const router = useRouter();
-  const [showOnboarding, setShowOnboarding] = React.useState(false);
-
   React.useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
     if (!hasSeenOnboarding) {
@@ -68,30 +70,30 @@ const HomePage = () => {
       
       <div className={styles.promoBanner}>
         <span className={styles.fire}>🔥</span>
-        <p>JOIN 500+ SUPPORTERS! GET <strong>200 WELCOME TOKENS</strong> TODAY.</p>
-        <Link href="/auth/register" className={styles.promoBtn}>CLAIM NOW</Link>
+        <p>{t('welcome_bonus')}</p>
+        <Link href="/auth/register" className={styles.promoBtn}>{t('claim_now')}</Link>
       </div>
 
       <header className={styles.header}>
-        <p className={styles.welcomeBridge}>Sports Prophecy welcomes you to the</p>
+        <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
         <div className={styles.logo}>
           <span className={styles.icon}>🎯</span>
           <h1>EVENTS <span style={{color: 'var(--accent)'}}>ARENA</span></h1>
         </div>
-        <p className={styles.tagline}>The Ultimate Prediction Experience</p>
+        <p className={styles.tagline}>{t('tagline')}</p>
         
         <div className={styles.quickNav}>
-          <Link href="/leaderboard" className={styles.navLink}>🏆 Standings</Link>
+          <Link href="/leaderboard" className={styles.navLink}>🏆 {t('standings')}</Link>
           {isAuthenticated ? (
             <Link href={`/profile/${user?.id}`} className={styles.navLink}>👤 Profile</Link>
           ) : (
-            <Link href="/auth/register" className={styles.navLink}>⚡ Join Free</Link>
+            <Link href="/auth/register" className={styles.navLink}>⚡ {t('join_free')}</Link>
           )}
         </div>
       </header>
 
       <main className={styles.main}>
-        <h2 className={styles.sectionTitle}>Select Your Arena</h2>
+        <h2 className={styles.sectionTitle}>{t('select_arena')}</h2>
         <div className={styles.roomGrid}>
           {rooms.map(room => (
             <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`}>
@@ -105,7 +107,7 @@ const HomePage = () => {
                   onClick={() => handleEnterRoom(room.id)}
                   className={styles.enterBtn}
                 >
-                  ENTER ARENA
+                  {t('enter_arena')}
                 </button>
               ) : (
                 <span className={styles.comingSoon}>COMING SOON</span>
@@ -145,7 +147,6 @@ const HomePage = () => {
         </div>
       </footer>
 
-      {/* MODALS */}
       <OnboardingModal isOpen={showOnboarding} onClose={handleOnboardingClose} />
     </div>
   );
