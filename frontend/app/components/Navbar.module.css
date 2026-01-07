@@ -1,7 +1,7 @@
 .nav {
     height: 70px;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--glass-border);
     position: fixed;
     top: 0;
@@ -11,7 +11,7 @@
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     height: 100%;
     display: flex;
@@ -40,14 +40,14 @@
 .rightSection {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1.5rem; /* Reduced from 2rem to prevent overlap */
 }
 
 /* LANGUAGE PICKER */
 .langPicker {
     display: flex;
     background: rgba(255,255,255,0.05);
-    padding: 4px;
+    padding: 2px;
     border-radius: 8px;
     border: 1px solid var(--glass-border);
 }
@@ -56,9 +56,9 @@
     background: transparent;
     border: none;
     color: var(--neutral);
-    font-size: 0.65rem;
+    font-size: 0.6rem; /* Smaller font */
     font-weight: 900;
-    padding: 4px 8px;
+    padding: 4px 6px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -67,45 +67,70 @@
 .activeLang {
     background: var(--accent);
     color: white;
-    box-shadow: 0 0 10px var(--accent-glow);
 }
 
 .links {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem; /* Reduced from 1.5rem */
     align-items: center;
 }
 
 .loginBtn {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 800;
     color: var(--neutral);
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .registerBtn {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 900;
     color: white;
     background: var(--accent);
-    padding: 8px 16px;
-    border-radius: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .logoutBtn {
     background: transparent;
     border: 1px solid #ff4b4b;
     color: #ff4b4b;
-    padding: 6px 12px;
+    padding: 6px 10px;
     border-radius: 8px;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 800;
     cursor: pointer;
 }
 
+/* MOBILE REFINEMENTS */
 @media (max-width: 768px) {
     .container { padding: 0 1rem; }
-    .logo { display: none; }
-    .langPicker { display: flex; }
+    
+    .logo { display: none; } /* Hide text logo on mobile to save space */
+    
+    .rightSection {
+        gap: 0.75rem; /* Tight gap for mobile */
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .langPicker {
+        order: -1; /* Move lang picker to the start of the right section */
+    }
+
+    .links { gap: 0.75rem; }
+
+    .registerBtn {
+        padding: 6px 10px;
+        font-size: 0.65rem;
+    }
+}
+
+/* TABLET REFINEMENTS */
+@media (max-width: 1000px) {
+    .logo { font-size: 0.9rem; }
+    .rightSection { gap: 1rem; }
 }
