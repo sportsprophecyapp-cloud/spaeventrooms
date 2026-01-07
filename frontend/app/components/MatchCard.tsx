@@ -18,11 +18,13 @@ interface Match {
 interface MatchCardProps {
     match: Match;
     onPredict: (match: Match) => void;
-    hasPredicted?: boolean; // New Prop
+    hasPredicted?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted }) => {
-    const canPredict = (match.status === 'scheduled' || match.status === 'live') && !hasPredicted;
+    // FAIR PLAY LOGIC: Only allow prediction if game is 'scheduled' AND hasn't started yet.
+    const isPastKickoff = new Date(match.start_time) <= new Date();
+    const canPredict = match.status === 'scheduled' && !isPastKickoff && !hasPredicted;
 
     return (
         <div className={`${styles.card} ${match.isPulsing ? styles.pulsar : ''}`}>
@@ -62,6 +64,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
                         <span className={styles.btnHint}>Make your call</span>
                     </div>
                 ) : (
+                    /* LOCK STATE: Game started or finished */
                     <div className={styles.scoreDisplay}>
                         <span className={styles.scoreNum}>{match.score_home}</span>
                         <span className={styles.scoreDivider}>-</span>

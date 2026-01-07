@@ -16,11 +16,29 @@
     letter-spacing: -2px;
 }
 
-.subtitle {
-    color: var(--neutral);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 0.8rem;
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.tab {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.activeTab {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 .main {
@@ -28,151 +46,96 @@
     margin: 0 auto;
 }
 
-/* SEARCH BOX */
-.searchBox {
+/* DEBUG VIEW STYLES */
+.controls {
     display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    border-radius: 20px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
     margin-bottom: 3rem;
 }
 
-.input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 700;
-    padding: 0 1rem;
-}
+.controlInfo h3 { font-size: 1.2rem; font-weight: 900; }
+.controlInfo p { font-size: 0.8rem; color: var(--neutral); }
 
-.input:focus { outline: none; }
+.btnRow { display: flex; gap: 1rem; }
 
-.searchBtn {
-    background: var(--accent);
-    color: white;
+.launchBtn {
+    background: var(--success);
+    color: black;
     border: none;
-    padding: 12px 30px;
+    padding: 12px 24px;
     border-radius: 12px;
     font-weight: 900;
     cursor: pointer;
 }
 
-/* TABLE */
-.tableCard {
+.nukeBtn {
+    background: #ff0055;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.matchTable {
+    padding: 2rem;
     border-radius: 24px;
-    overflow: hidden;
-    margin-bottom: 4rem;
+    margin-bottom: 3rem;
 }
 
-.tableHeader {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 2fr;
-    padding: 1.5rem 2rem;
-    background: rgba(255,255,255,0.05);
-    font-weight: 900;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: var(--neutral);
-}
+.testTable { border-color: var(--success); }
 
-.row {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 2fr;
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--glass-border);
-    align-items: center;
-}
-
-.username {
-    display: block;
-    font-weight: 800;
-    color: var(--accent);
-}
-
-.email {
-    font-size: 0.8rem;
-    color: var(--neutral);
-}
-
-.roleBadge {
-    font-size: 0.7rem;
-    font-weight: 900;
-    background: rgba(255,255,255,0.1);
-    padding: 4px 10px;
-    border-radius: 6px;
-    width: fit-content;
-}
-
-.actions {
+.matchRow {
     display: flex;
-    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--glass-border);
 }
 
-.actions button {
-    font-size: 0.65rem;
-    font-weight: 900;
-    padding: 8px 12px;
+.matchMeta { display: flex; flex-direction: column; gap: 4px; }
+.matchLeague { font-size: 0.6rem; font-weight: 900; color: var(--accent); text-transform: uppercase; }
+.matchTeams { font-size: 0.95rem; font-weight: 700; }
+
+.deleteBtn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--neutral);
+    padding: 8px;
     border-radius: 8px;
     cursor: pointer;
-    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
 }
 
-.creatorBtn { background: var(--success); color: black; }
-.adminBtn { background: #ffd700; color: black; }
-.resetBtn { background: var(--glass); color: white; }
+.deleteBtn:hover { border-color: #ff0055; color: #ff0055; }
+.dangerBtn:hover { background: #ff0055; color: white; border-color: #ff0055; }
 
-/* ROOM GRID */
-.sectionTitle {
-    font-size: 1.2rem;
-    font-weight: 900;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.roomGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.roomCard {
-    padding: 2rem;
-    border-radius: 20px;
-    text-align: center;
-}
-
-.roomCard h3 { margin-bottom: 1rem; }
-.roomCard p { font-size: 0.85rem; color: var(--neutral); margin-bottom: 1.5rem; }
-.roomCard span { color: var(--accent); font-weight: 800; }
-
-.assignBtn {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    color: white;
-    padding: 8px 20px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    cursor: pointer;
-}
-
-.error {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    color: var(--error);
-}
+.warningText { font-size: 0.75rem; color: #ff0055; font-weight: 800; margin-bottom: 1.5rem; }
+.emptyNote { font-size: 0.8rem; font-style: italic; color: var(--neutral); }
 
 .toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--success);
     color: black;
-    padding: 10px 20px;
-    border-radius: 10px;
+    padding: 12px 30px;
+    border-radius: 12px;
     font-weight: 900;
-    margin-bottom: 1rem;
-    text-align: center;
+    z-index: 10000;
 }
+
+/* SEARCH & TABLE (Standard) */
+.searchBox { display: flex; gap: 1rem; margin-bottom: 3rem; }
+.input { flex: 1; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 20px; color: white; }
+.searchBtn { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 12px; font-weight: 900; cursor: pointer; }
+
+.tableCard { border-radius: 24px; overflow: hidden; border: 1px solid var(--glass-border); }
+.row { display: flex; justify-content: space-between; padding: 1.5rem 2rem; border-bottom: 1px solid var(--glass-border); }
+.roleBadge { font-size: 0.65rem; font-weight: 900; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; }
+
+.error { height: 100vh; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #ff0055; }
