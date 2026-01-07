@@ -13,15 +13,35 @@ export class SoccerRoom extends BaseRoom {
     }
 
     initRoutes(): void {
-        // GET /api/rooms/soccer/matches
+        // GET /api/rooms/soccer/matches (Grouped by League)
         this.router.get('/matches', async (req, res) => {
             try {
-                const result = await query('SELECT * FROM soccer_matches WHERE start_time > NOW() - INTERVAL \'24 hours\' ORDER BY start_time ASC');
-                // Always return an array to prevent frontend map() crash
-                res.json(Array.isArray(result.rows) ? result.rows : []);
+                const result = await query(`
+                    SELECT * FROM soccer_matches 
+                    WHERE start_time > NOW() - INTERVAL '24 hours' 
+                    AND start_time < NOW() + INTERVAL '48 hours'
+                    ORDER BY league ASC, start_time ASC
+                `);
+
+                const matches = result.rows;
+                const grouped: Record<string, any[]> = {};
+
+                matches.forEach(match => {
+                    const leagueName = match.league || 'International / Other';
+                    if (!grouped[leagueName]) grouped[leagueName] = [];
+                    grouped[leagueName].push(match);
+                });
+
+                // Convert to array of sections for the frontend
+                const sections = Object.keys(grouped).map(league => ({
+                    title: league,
+                    logo: grouped[league][0]?.league_logo || '',
+                    matches: grouped[league]
+                }));
+
+                res.json(sections);
             } catch (err) {
                 console.error('Error fetching matches:', err);
-                // Return empty array instead of 500 error
                 res.json([]);
             }
         });
@@ -43,7 +63,7 @@ export class SoccerRoom extends BaseRoom {
                     DO UPDATE SET prediction_data = EXCLUDED.prediction_data, created_at = CURRENT_TIMESTAMP
                 `, [userId, matchId, JSON.stringify({ pick })]);
 
-                res.json({ success: true, message: 'Prediction saved successfully!' });
+                res.json({ success: true, message: 'Prophecy Transmitted!' });
             } catch (err) {
                 console.error('Error saving prediction:', err);
                 res.status(500).json({ error: 'Internal Server Error' });
@@ -54,7 +74,7 @@ export class SoccerRoom extends BaseRoom {
         this.router.post('/refresh', async (req, res) => {
             try {
                 await fetchLiveMatches();
-                res.json({ success: true, message: 'Data refresh triggered' });
+                res.json({ success: true, message: 'Arena data refreshed' });
             } catch (err) {
                 res.status(500).json({ error: 'Refresh failed' });
             }

@@ -5,6 +5,7 @@ import MatchCard from './MatchCard';
 import { PredictionModal } from './PredictionModal';
 import { useSocket } from '../context/SocketContext';
 import SkeletonCard from './SkeletonCard';
+import styles from './MatchList.module.css';
 
 interface Match {
     match_id: string;
@@ -14,11 +15,19 @@ interface Match {
     status: string;
     score_home?: number;
     score_away?: number;
+    league?: string;
+    league_logo?: string;
     isPulsing?: boolean;
 }
 
+interface LeagueSection {
+    title: string;
+    logo: string;
+    matches: Match[];
+}
+
 const MatchList: React.FC = () => {
-    const [matches, setMatches] = useState<Match[]>([]);
+    const [sections, setSections] = useState<LeagueSection[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,12 +38,10 @@ const MatchList: React.FC = () => {
         fetch(`${apiUrl}/api/rooms/soccer/matches`)
             .then(res => res.json())
             .then(data => {
-                // Safety check: ensure data is an array before setting state
                 if (Array.isArray(data)) {
-                    setMatches(data);
+                    setSections(data);
                 } else {
-                    console.error('Expected array of matches, got:', data);
-                    setMatches([]);
+                    setSections([]);
                 }
                 setLoading(false);
             })
@@ -48,15 +55,20 @@ const MatchList: React.FC = () => {
         if (!socket) return;
 
         socket.on('match_update', (updatedMatch: Match) => {
-            console.log('Real-time match update received:', updatedMatch);
-            setMatches(prev => prev.map(m =>
-                m.match_id === updatedMatch.match_id ? { ...m, ...updatedMatch, isPulsing: true } : m
-            ));
+            setSections(prev => prev.map(section => ({
+                ...section,
+                matches: section.matches.map(m => 
+                    m.match_id === updatedMatch.match_id ? { ...m, ...updatedMatch, isPulsing: true } : m
+                )
+            })));
 
             setTimeout(() => {
-                setMatches(prev => prev.map(m =>
-                    m.match_id === updatedMatch.match_id ? { ...m, isPulsing: false } : m
-                ));
+                setSections(prev => prev.map(section => ({
+                    ...section,
+                    matches: section.matches.map(m => 
+                        m.match_id === updatedMatch.match_id ? { ...m, isPulsing: false } : m
+                    )
+                })));
             }, 3000);
         });
 
@@ -72,8 +84,8 @@ const MatchList: React.FC = () => {
 
     if (loading) {
         return (
-            <div>
-                <h2 style={{ marginBottom: '1rem', fontWeight: 800, color: 'var(--neutral)' }}>Upcoming Matches</h2>
+            <div className={styles.container}>
+                <h2 className={styles.sectionTitle}>Arena Schedule</h2>
                 <SkeletonCard type="match" />
                 <SkeletonCard type="match" />
             </div>
@@ -81,19 +93,30 @@ const MatchList: React.FC = () => {
     }
 
     return (
-        <div>
-            <h2 style={{ marginBottom: '1rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Upcoming Matches</h2>
-            {matches.length === 0 ? (
-                <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--glass)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
-                    <p style={{ color: 'var(--neutral)' }}>No matches scheduled for the next 24 hours.</p>
+        <div className={styles.container}>
+            <h2 className={styles.sectionTitle}>Arena Schedule</h2>
+            
+            {sections.length === 0 ? (
+                <div className={styles.emptyState}>
+                    <p>No active markets found in this arena.</p>
                 </div>
             ) : (
-                matches.map(match => (
-                    <MatchCard
-                        key={match.match_id}
-                        match={match}
-                        onPredict={handlePredictClick}
-                    />
+                sections.map(section => (
+                    <div key={section.title} className={styles.leagueSection}>
+                        <div className={styles.leagueHeader}>
+                            {section.logo && <img src={section.logo} alt="" className={styles.leagueLogo} />}
+                            <h3 className={styles.leagueTitle}>{section.title}</h3>
+                        </div>
+                        <div className={styles.matchGrid}>
+                            {section.matches.map(match => (
+                                <MatchCard
+                                    key={match.match_id}
+                                    match={match}
+                                    onPredict={handlePredictClick}
+                                />
+                            ))}
+                        </div>
+                    </div>
                 ))
             )}
 
@@ -102,9 +125,7 @@ const MatchList: React.FC = () => {
                     match={selectedMatch}
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    onSuccess={() => {
-                        console.log('Prediction success!');
-                    }}
+                    onSuccess={() => console.log('Prediction success!')}
                 />
             )}
         </div>
