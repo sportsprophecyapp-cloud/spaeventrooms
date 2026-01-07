@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 import styles from './page.module.css';
 
 interface Prophet {
@@ -24,15 +24,11 @@ interface Draw {
 const AdminUsersPage = () => {
     const { token, user } = useAuth();
     const router = useRouter();
-    const [activeView, setActiveTab] = useState<'users' | 'draws'>('users');
+    const [activeView, setActiveTab] = useState<'users' | 'draws' | 'debug'>('users');
     
-    // User Search State
     const [searchTerm, setSearchTerm] = useState('');
     const [prophets, setProphets] = useState<Prophet[]>([]);
-    
-    // Draws State
     const [draws, setDraws] = useState<Draw[]>([]);
-    const [isCreatingDraw, setIsCreatingDraw] = useState(false);
     
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -64,20 +60,22 @@ const AdminUsersPage = () => {
         finally { setIsLoading(false); }
     };
 
-    const resolveDraw = async (drawId: number) => {
+    const triggerTestMatch = async () => {
+        setIsLoading(true);
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/admin/draws/resolve`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({ drawId, prizeCount: 10 })
-        });
-        if (res.ok) {
-            setMessage('Draw Resolved! Winners notified.');
-            fetchDraws();
-            setTimeout(() => setMessage(''), 3000);
+        try {
+            const res = await fetch(`${apiUrl}/api/rooms/soccer/test-game`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setMessage('Test Match Created! Resolve it in 1 minute.');
+                setTimeout(() => setMessage(''), 5000);
+            }
+        } catch (e) {
+            setMessage('Failed to create test match');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -92,68 +90,54 @@ const AdminUsersPage = () => {
             <header className={styles.header}>
                 <h1 className={styles.title}>COMMAND CENTER</h1>
                 <div className={styles.tabs}>
-                    <button 
-                        className={`${styles.tab} ${activeView === 'users' ? styles.activeTab : ''}`}
-                        onClick={() => setActiveTab('users')}
-                    >USER ROLES</button>
-                    <button 
-                        className={`${styles.tab} ${activeView === 'draws' ? styles.activeTab : ''}`}
-                        onClick={() => setActiveTab('draws')}
-                    >PRIZE DRAWS</button>
+                    <button className={`${styles.tab} ${activeView === 'users' ? styles.activeTab : ''}`} onClick={() => setActiveTab('users')}>USERS</button>
+                    <button className={`${styles.tab} ${activeView === 'draws' ? styles.activeTab : ''}`} onClick={() => setActiveTab('draws')}>DRAWS</button>
+                    <button className={`${styles.tab} ${activeView === 'debug' ? styles.activeTab : ''}`} onClick={() => setActiveTab('debug')}>DEBUG</button>
                 </div>
             </header>
 
             <main className={styles.main}>
                 {message && <div className={styles.toast}>{message}</div>}
 
-                {activeView === 'users' ? (
+                {activeView === 'users' && (
                     <section className={styles.userView}>
                         <div className={`${styles.searchBox} glass`}>
-                            <input 
-                                className={styles.input}
-                                placeholder="Search Prophets..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                            />
+                            <input className={styles.input} placeholder="Search Supporters..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
                             <button className={styles.searchBtn} onClick={handleSearch}>SEARCH</button>
                         </div>
-
                         <div className={`${styles.tableCard} glass`}>
                             {prophets.map(p => (
                                 <div key={p.id} className={styles.row}>
                                     <span className={styles.username}>@{p.username}</span>
                                     <span className={styles.roleBadge}>{p.role}</span>
-                                    <div className={styles.actions}>
-                                        <button className={styles.adminBtn}>ADMIN</button>
-                                        <button className={styles.creatorBtn}>CREATOR</button>
-                                    </div>
                                 </div>
                             ))}
                         </div>
                     </section>
-                ) : (
+                )}
+
+                {activeView === 'draws' && (
                     <section className={styles.drawView}>
-                        <button className={styles.createBtn} onClick={() => setIsCreatingDraw(true)}>+ CREATE NEW DRAW</button>
-                        
                         <div className={styles.drawGrid}>
                             {draws.map(draw => (
                                 <div key={draw.id} className={`${styles.drawCard} glass`}>
-                                    <span className={styles.drawStatus}>{draw.status.toUpperCase()}</span>
                                     <h3>{draw.title}</h3>
-                                    <p className={styles.prize}>{draw.prize_description}</p>
-                                    <p className={styles.sponsor}>Sponsor: {draw.sponsor_name || 'Generic'}</p>
-                                    
-                                    {draw.status === 'active' ? (
-                                        <button 
-                                            className={styles.resolveBtn}
-                                            onClick={() => resolveDraw(draw.id)}
-                                        >RESOLVE (50/50)</button>
-                                    ) : (
-                                        <p className={styles.winnerText}>Winner: <span>@{draw.winner_name}</span></p>
-                                    )}
+                                    <p>{draw.prize_description}</p>
+                                    <p className={styles.drawStatus}>{draw.status.toUpperCase()}</p>
                                 </div>
                             ))}
+                        </div>
+                    </section>
+                )}
+
+                {activeView === 'debug' && (
+                    <section className={styles.debugView}>
+                        <div className={`${styles.card} glass`}>
+                            <h3>Resolution Engine Tester</h3>
+                            <p>Create a fake match that finishes in 60 seconds to verify prize ticket awarding.</p>
+                            <button className={styles.launchBtn} onClick={triggerTestMatch} disabled={isLoading}>
+                                🧪 LAUNCH TEST MATCH
+                            </button>
                         </div>
                     </section>
                 )}

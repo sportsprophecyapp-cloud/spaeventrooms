@@ -17,7 +17,6 @@ interface Match {
     score_away?: number;
     league?: string;
     league_logo?: string;
-    isPulsing?: boolean;
 }
 
 interface LeagueSection {
@@ -33,48 +32,45 @@ const MatchList: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { socket } = useSocket();
 
+    const fetchMatches = async () => {
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${apiUrl}/api/rooms/soccer/matches`);
+            const data = await res.json();
+            
+            if (Array.isArray(data)) {
+                // The backend now returns raw matches, so we group them here for UX
+                const grouped: Record<string, LeagueSection> = {};
+                
+                data.forEach((match: Match) => {
+                    const leagueName = match.league || 'International';
+                    if (!grouped[leagueName]) {
+                        grouped[leagueName] = {
+                            title: leagueName,
+                            logo: match.league_logo || '',
+                            matches: []
+                        };
+                    }
+                    grouped[leagueName].matches.push(match);
+                });
+
+                setSections(Object.values(grouped));
+            }
+        } catch (err) {
+            console.error('Failed to fetch matches:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        fetch(`${apiUrl}/api/rooms/soccer/matches`)
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    setSections(data);
-                } else {
-                    setSections([]);
-                }
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Failed to fetch matches:', err);
-                setLoading(false);
-            });
+        fetchMatches();
     }, []);
 
     useEffect(() => {
         if (!socket) return;
-
-        socket.on('match_update', (updatedMatch: Match) => {
-            setSections(prev => prev.map(section => ({
-                ...section,
-                matches: section.matches.map(m => 
-                    m.match_id === updatedMatch.match_id ? { ...m, ...updatedMatch, isPulsing: true } : m
-                )
-            })));
-
-            setTimeout(() => {
-                setSections(prev => prev.map(section => ({
-                    ...section,
-                    matches: section.matches.map(m => 
-                        m.match_id === updatedMatch.match_id ? { ...m, isPulsing: false } : m
-                    )
-                })));
-            }, 3000);
-        });
-
-        return () => {
-            socket.off('match_update');
-        };
+        socket.on('match_update', () => fetchMatches());
+        return () => { socket.off('match_update'); };
     }, [socket]);
 
     const handlePredictClick = (match: Match) => {
@@ -98,7 +94,7 @@ const MatchList: React.FC = () => {
             
             {sections.length === 0 ? (
                 <div className={styles.emptyState}>
-                    <p>No active markets found in this arena.</p>
+                    <p>No active markets found. Check back for live games soon!</p>
                 </div>
             ) : (
                 sections.map(section => (
@@ -112,7 +108,7 @@ const MatchList: React.FC = () => {
                                 <MatchCard
                                     key={match.match_id}
                                     match={match}
-                                    onPredict={handlePredictClick}
+                                    onPredict={() => handlePredictClick(match)}
                                 />
                             ))}
                         </div>
@@ -125,7 +121,7 @@ const MatchList: React.FC = () => {
                     match={selectedMatch}
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    onSuccess={() => console.log('Prediction success!')}
+                    onSuccess={() => console.log('Call Confirmed!')}
                 />
             )}
         </div>
