@@ -35,7 +35,7 @@
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 2.5rem;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px; /* Expanded for 4 cards */
 }
 
 .card {
@@ -50,10 +50,34 @@
     overflow: hidden;
 }
 
+/* FOUNDING PARTNER SPECIAL STYLES */
+.founderCard {
+    border: 2px solid #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+}
+
+.specialBadge {
+    position: absolute;
+    top: 20px;
+    background: #ffd700;
+    color: black;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
 .card:hover {
     transform: translateY(-15px) scale(1.02);
     border-color: var(--accent);
     box-shadow: 0 20px 50px rgba(0, 112, 243, 0.2);
+}
+
+.founderCard:hover {
+    border-color: #ffd700;
+    box-shadow: 0 20px 50px rgba(255, 215, 0, 0.2);
 }
 
 .tierName {
@@ -108,7 +132,6 @@
 
 .ctaBtn:hover {
     box-shadow: 0 0 30px var(--accent-glow);
-    transform: scale(1.05);
 }
 
 .footer {
@@ -122,12 +145,6 @@
     color: var(--accent);
     text-decoration: none;
     font-weight: 900;
-    border-bottom: 2px solid transparent;
-    transition: all 0.3s ease;
-}
-
-.contactLink:hover {
-    border-bottom-color: var(--accent);
 }
 
 @media (max-width: 768px) {

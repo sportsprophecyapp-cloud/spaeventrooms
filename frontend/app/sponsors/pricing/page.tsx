@@ -2,10 +2,21 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 const pricingTiers = [
     {
+        id: 'founding',
+        name: 'Founding Partner',
+        price: '0',
+        features: ['Priority Global Placement', 'Exclusive "Founding Brand" Badge', 'Custom Campaign Sandbox', 'Monthly Prize Escrow Deal'],
+        cta: 'APPLY NOW',
+        color: '#ffd700', // Gold
+        special: 'EARLY ACCESS - FIRST 5 ONLY'
+    },
+    {
+        id: 'starter',
         name: 'Starter Arena',
         price: '99',
         features: ['1 Room Placement', 'Static Logo Banner', 'Monthly Draw Integration', 'Supporter Insights'],
@@ -13,6 +24,7 @@ const pricingTiers = [
         color: 'var(--neutral)'
     },
     {
+        id: 'growth',
         name: 'Growth Arena',
         price: '299',
         features: ['3 Room Placements', 'Animated Marquee', 'Bi-Weekly Draw Integration', 'Priority Admin Support'],
@@ -20,6 +32,7 @@ const pricingTiers = [
         color: 'var(--accent)'
     },
     {
+        id: 'premium',
         name: 'Premium Arena',
         price: '599',
         features: ['Global Placement', 'Interactive Flash Calls', 'Weekly Draw Integration', 'Custom Branding'],
@@ -29,6 +42,17 @@ const pricingTiers = [
 ];
 
 const SponsorsPricingPage = () => {
+    const router = useRouter();
+
+    const handleAction = (tierId: string) => {
+        if (tierId === 'founding') {
+            router.push('/sponsors/apply');
+        } else {
+            // Standard Stripe Flow
+            router.push(`/sponsors/checkout?tier=${tierId}`);
+        }
+    };
+
     return (
         <div className={styles.container}>
             <header className={styles.header}>
@@ -38,7 +62,8 @@ const SponsorsPricingPage = () => {
 
             <div className={styles.grid}>
                 {pricingTiers.map((tier) => (
-                    <div key={tier.name} className={`${styles.card} glass`}>
+                    <div key={tier.id} className={`${styles.card} glass ${tier.id === 'founding' ? styles.founderCard : ''}`}>
+                        {tier.special && <div className={styles.specialBadge}>{tier.special}</div>}
                         <h2 className={styles.tierName}>{tier.name}</h2>
                         <div className={styles.priceRow}>
                             <span className={styles.currency}>$</span>
@@ -48,7 +73,13 @@ const SponsorsPricingPage = () => {
                         <ul className={styles.features}>
                             {tier.features.map(f => <li key={f}>✅ {f}</li>)}
                         </ul>
-                        <button className={styles.ctaBtn} style={{ background: tier.color }}>{tier.cta}</button>
+                        <button 
+                            className={styles.ctaBtn} 
+                            style={{ background: tier.color, color: tier.id === 'founding' ? 'black' : 'white' }}
+                            onClick={() => handleAction(tier.id)}
+                        >
+                            {tier.cta}
+                        </button>
                     </div>
                 ))}
             </div>
