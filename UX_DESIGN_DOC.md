@@ -1,5 +1,5 @@
 # Events Arena - UX Design Document
-**Version 2.3 | January 2026**
+**Version 2.4 | January 2026**
 
 ## 🎯 Overview
 Events Arena is a full-stack, high-energy interactive engagement platform optimized for sports, TV, and creator-led events. Designed as a Progressive Web App (PWA) to ensure zero-friction onboarding in global markets.
@@ -21,33 +21,43 @@ Events Arena is a full-stack, high-energy interactive engagement platform optimi
 ## 🛠️ USER ROLES & HIERARCHY
 1. **Supporter (User):** Earns status, XP, and tickets.
 2. **Creator (Partner):** Owns rooms, triggers Flash Calls, uses OBS Overlays.
-3. **Super Admin:** Generates arenas via the Arena Wizard.
+3. **Admin (Moderator):** Platform-wide user management, prize draw resolution, and debug verification.
+4. **Super Admin:** Generates arenas via the Arena Wizard.
 
 ---
 
-## 🏠 MAIN APP SCREENS (Landing Page Hooks)
+## 🏠 MAIN APP SCREENS
 ### 2.1 The High-Conversion Lobby
 - **Promo Banner:** Visual callout for the **200 Welcome Tokens** reward.
 - **Economy Preview:** Transparent display of the "Win Prizes / Level Up / Recruit" loop.
 - **PWA Nudge:** Explicit Chrome/Safari instructions for home-screen installation.
-- **Brand Bridge:** Persistent welcome message for legacy Sports Prophecy users.
 
 ### 2.2 Room Page & Creator Tools
+- **League Grouping:** Matches are organized by official leagues (EPL, MLS, etc.) with logos.
 - **Interactive Remote:** Creators launch manual polls with instant mobile haptic alerts.
 - **OBS Stats:** Transparent community-sentiment bars for live stream integration.
+
+---
+
+## 🛡️ ADMIN & QUALITY ASSURANCE
+### 3.1 The Command Center
+- **User/Role Manager:** Promotion of users to Admin or Creator status.
+- **Draw Commander:** Executes 50/50 prize distribution strategy.
+- **Resolution Tester (Debug):** Allows admins to generate 60-second test games to verify ticket awarding and XP scaling in real-time.
 
 ---
 
 ## 🎙️ REWARD ECONOMY
 - **Token Starting Balance:** 150 standard / 200 via referral.
 - **Referral Loop:** +50 tokens awarded to both the recruiter and the new Supporter.
-- **50/50 Draw Strategy:** Admin resolves prizes by splitting 50% to Top Standings and 50% to Random Tickets.
+- **Prize Ticket Engine:** Correct calls automatically award +1 Ticket to the active room's draw.
 
 ---
 
 ## 4. COMPLIANCE & PERFORMANCE
 - **Non-Gambling:** Strictly skill and loyalty based. No "Bets" or "Wagers."
-- **Keep-Alive:** Cross-ping service ensures 24/7 responsiveness on free-tier hosting.
+- **Identity Sync:** All error messages and middleware labels are sanitized to remove religious or legacy terminology.
+- **Keep-Alive:** Cross-ping service ensures 24/7 responsiveness.
 
 ---
 *This document serves as the master blueprint for the Events Arena platform.*

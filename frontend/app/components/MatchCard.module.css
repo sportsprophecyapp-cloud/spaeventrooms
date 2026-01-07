@@ -1,40 +1,34 @@
 .card {
     background: var(--glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 20px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 1.5rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative;
-    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .card:hover {
     border-color: var(--accent);
-    transform: scale(1.02);
-    box-shadow: 0 0 20px var(--accent-glow);
+    transform: translateX(5px);
 }
 
 .teamsSection {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .teams {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+    gap: 12px;
 }
 
 .team {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--foreground);
+    font-size: 1.1rem;
+    font-weight: 900;
     letter-spacing: -0.5px;
 }
 
@@ -42,36 +36,43 @@
     font-size: 0.7rem;
     font-weight: 900;
     color: var(--accent);
-    background: rgba(0, 112, 243, 0.1);
-    padding: 4px 8px;
-    border-radius: 6px;
+    opacity: 0.6;
 }
 
 .info {
     display: flex;
-    gap: 1rem;
+    gap: 12px;
     align-items: center;
 }
 
 .status {
-    font-size: 0.7rem;
-    text-transform: uppercase;
+    font-size: 0.65rem;
     font-weight: 900;
-    letter-spacing: 1px;
     color: var(--neutral);
+    letter-spacing: 1px;
+}
+
+.live {
+    color: #ff0055;
+    animation: blink 1.5s infinite;
 }
 
 .time {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--neutral);
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
+/* PREDICT BUTTON & HINT */
 .actions {
+    text-align: center;
+}
+
+.predictWrapper {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 6px;
 }
 
 .predictBtn {
@@ -83,48 +84,51 @@
     font-weight: 900;
     font-size: 0.85rem;
     cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
     transition: all 0.3s ease;
+    min-width: 100px;
 }
 
 .predictBtn:hover {
     box-shadow: 0 0 15px var(--accent-glow);
-    transform: translateY(-2px);
+    transform: scale(1.05);
 }
 
-.score {
-    font-size: 1.5rem;
+.btnHint {
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--accent);
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+/* SCORE DISPLAY */
+.scoreDisplay {
+    background: rgba(255,255,255,0.05);
+    padding: 8px 16px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scoreNum {
+    font-size: 1.2rem;
     font-weight: 900;
-    color: var(--success);
-    text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
-    font-variant-numeric: tabular-nums;
 }
 
-/* Real-time pulse animation */
-.pulsar {
-    animation: borderPulse 2s infinite;
+.scoreDivider {
+    color: var(--accent);
+    opacity: 0.5;
 }
 
-@keyframes borderPulse {
-    0% { border-color: var(--glass-border); }
-    50% { border-color: var(--success); box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); }
-    100% { border-color: var(--glass-border); }
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
 }
 
 @media (max-width: 600px) {
-    .card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-    
-    .actions {
-        width: 100%;
-        align-items: stretch;
-    }
-    
-    .predictBtn {
-        width: 100%;
-    }
+    .card { padding: 1.2rem; }
+    .team { font-size: 0.95rem; }
 }

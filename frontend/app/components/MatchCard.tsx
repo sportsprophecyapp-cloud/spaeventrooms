@@ -29,28 +29,35 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict }) => {
                     <span className={styles.team}>{match.away_team}</span>
                 </div>
                 <div className={styles.info}>
-                    <span className={styles.status}>{match.status}</span>
+                    <span className={`${styles.status} ${match.status === 'live' ? styles.live : ''}`}>
+                        {match.status.toUpperCase()}
+                    </span>
                     <span className={styles.time}>
-                        {new Date(match.start_time).toLocaleString()}
+                        {new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                 </div>
             </div>
 
             <div className={styles.actions}>
                 {match.status === 'scheduled' && (
-                    <button
-                        onClick={() => {
-                            if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
-                            onPredict(match);
-                        }}
-                        className={styles.predictBtn}
-                    >
-                        Predict
-                    </button>
+                    <div className={styles.predictWrapper}>
+                        <button
+                            onClick={() => {
+                                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+                                onPredict(match);
+                            }}
+                            className={styles.predictBtn}
+                        >
+                            Predict
+                        </button>
+                        <span className={styles.btnHint}>Make your call</span>
+                    </div>
                 )}
                 {match.status !== 'scheduled' && (
-                    <div className={styles.score}>
-                        {match.score_home} - {match.score_away}
+                    <div className={styles.scoreDisplay}>
+                        <span className={styles.scoreNum}>{match.score_home}</span>
+                        <span className={styles.scoreDivider}>-</span>
+                        <span className={styles.scoreNum}>{match.score_away}</span>
                     </div>
                 )}
             </div>

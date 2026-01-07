@@ -38,7 +38,7 @@ export const isAdmin = async (req: AuthRequest, res: Response, next: NextFunctio
         if (role === 'super_admin' || role === 'admin') {
             next();
         } else {
-            res.status(403).json({ message: 'Access denied. Prophets only.' });
+            res.status(403).json({ message: 'Access denied. Admins only.' });
         }
     } catch (error) {
         res.status(500).json({ message: 'Server error during auth check' });

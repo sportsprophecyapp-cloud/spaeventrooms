@@ -15,7 +15,7 @@ import UserTray from '../../components/UserTray';
 import Leaderboard from '../../components/Leaderboard';
 import EmptyStateWidget from '../../components/EmptyStateWidget';
 import RoomChat from '../../components/RoomChat';
-import FlashCallAlerter from '../../components/FlashCallAlerter'; // New Import
+import FlashCallAlerter from '../../components/FlashCallAlerter';
 
 function RoomContent() {
     const params = useParams();
@@ -86,12 +86,11 @@ function RoomContent() {
 
     return (
         <div className={styles.container}>
-            {/* Real-time Creator Alerts */}
             <FlashCallAlerter />
 
             <header className={styles.header}>
                 <div className={styles.headerLeft}>
-                    <Link href="/" className={styles.backBtn}>← Lobby</Link>
+                    <Link href="/" className={styles.backBtn}>← Arena Lobby</Link>
                     <h1 className={styles.title}>{roomId.toUpperCase()}</h1>
                 </div>
                 
@@ -112,7 +111,7 @@ function RoomContent() {
                     className={`${styles.tabBtn} ${activeTab === 'predictions' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('predictions')}
                 >
-                    Predict
+                    Calls
                 </button>
                 <button
                     className={`${styles.tabBtn} ${activeTab === 'leaderboard' ? styles.activeTab : ''}`}
@@ -124,7 +123,7 @@ function RoomContent() {
                     className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('chat')}
                 >
-                    Chat
+                    Fan Arena
                 </button>
             </div>
 
