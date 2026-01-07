@@ -92,9 +92,9 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
 
             <div className={styles.feed} ref={scrollRef}>
                 {loading ? (
-                    <div className={styles.loading}>Accessing arena channel...</div>
+                    <div className={styles.loading}>Accessing Arena Channel...</div>
                 ) : messages.length === 0 ? (
-                    <div className={styles.empty}>Channel is quiet. Make your call!</div>
+                    <div className={styles.empty}>Arena is quiet. Make your call!</div>
                 ) : (
                     messages.map((msg) => (
                         <div key={msg.id} className={styles.message}>

@@ -32,6 +32,31 @@ export const getRooms = async (req: Request, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Fetch failed' }); }
 };
 
+// NEW: Create Dedicated Creator/Partner Room
+export const createRoom = async (req: Request, res: Response) => {
+    const { room_id, display_name, owner_email } = req.body;
+    try {
+        // 1. Find Owner ID
+        const ownerResult = await query('SELECT id FROM users WHERE email = $1', [owner_email]);
+        const ownerId = ownerResult.rows.length > 0 ? ownerResult.rows[0].id : null;
+
+        // 2. Insert Room
+        const result = await query(
+            'INSERT INTO rooms (room_id, display_name, owner_id) VALUES ($1, $2, $3) RETURNING *',
+            [room_id, display_name, ownerId]
+        );
+
+        // 3. If owner found, make them a 'creator' role automatically
+        if (ownerId) {
+            await query("UPDATE users SET role = 'creator' WHERE id = $1", [ownerId]);
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: 'Room generation failed' });
+    }
+};
+
 // PRIZE DRAWS
 export const getDraws = async (req: Request, res: Response) => {
     try {
@@ -57,37 +82,14 @@ export const createDraw = async (req: Request, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Create draw failed' }); }
 };
 
-/**
- * RESOLVE DRAW (50/50 Strategy)
- * Resolves a draw by picking winners from the leaderboard and randomly.
- */
 export const resolveDraw = async (req: Request, res: Response) => {
-    const { drawId, prizeCount } = req.body; // e.g., 10 prizes
-    
+    const { drawId, prizeCount } = req.body;
     try {
-        const drawResult = await query('SELECT * FROM prize_draws WHERE id = $1', [drawId]);
-        if (drawResult.rows.length === 0) return res.status(404).json({ error: 'Draw not found' });
-        
-        const draw = drawResult.rows[0];
         const halfPrizes = Math.floor(prizeCount / 2);
-
-        // 1. Skill Winners (Top 5 on Leaderboard)
-        const skillWinners = await query(`
-            SELECT u.id, u.username FROM users u
-            ORDER BY total_points DESC LIMIT $1
-        `, [halfPrizes]);
-
-        // 2. Random Winner (Lucky Ticket holder)
+        const skillWinners = await query(`SELECT u.id, u.username FROM users u ORDER BY total_points DESC LIMIT $1`, [halfPrizes]);
         const luckyWinner = await pickWinner(drawId);
-
-        res.json({
-            success: true,
-            skillWinners: skillWinners.rows,
-            luckyWinner: luckyWinner
-        });
-    } catch (err) {
-        res.status(500).json({ error: 'Resolution failed' });
-    }
+        res.json({ success: true, skillWinners: skillWinners.rows, luckyWinner });
+    } catch (err) { res.status(500).json({ error: 'Resolution failed' }); }
 };
 
 export const assignRoomOwner = async (req: Request, res: Response) => {

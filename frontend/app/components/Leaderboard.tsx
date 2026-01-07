@@ -35,7 +35,7 @@ const Leaderboard: React.FC = () => {
         fetchLeaderboard();
     }, []);
 
-    if (loading) return <div className={styles.loading}>Accessing Arena Records...</div>;
+    if (loading) return <div className={styles.loading}>Ranking Top Supporters...</div>;
 
     return (
         <div className={`${styles.container} glass`}>
@@ -51,7 +51,7 @@ const Leaderboard: React.FC = () => {
                             </div>
                             <div className={styles.userInfo}>
                                 <span className={styles.username}>@{entry.username}</span>
-                                <span className={styles.levelBadge}>Level {entry.level || 1}</span>
+                                <span className={styles.levelBadge}>Lvl {entry.level || 1}</span>
                             </div>
                             <div className={styles.points}>{entry.points}</div>
                         </div>

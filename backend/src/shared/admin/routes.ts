@@ -6,7 +6,8 @@ import {
     assignRoomOwner, 
     getDraws, 
     createDraw, 
-    resolveDraw 
+    resolveDraw,
+    createRoom
 } from './controller';
 import { authenticate, isAdmin } from '../auth/middleware';
 
@@ -22,6 +23,7 @@ router.use(isAdmin);
 router.get('/users/search', searchProphets);
 router.put('/users/:userId/role', updateUserRole);
 router.get('/rooms', getRooms);
+router.post('/rooms', createRoom); // New Create Room Route
 router.put('/rooms/:roomId/owner', assignRoomOwner);
 
 /**
@@ -29,6 +31,6 @@ router.put('/rooms/:roomId/owner', assignRoomOwner);
  */
 router.get('/draws', getDraws);
 router.post('/draws', createDraw);
-router.post('/draws/resolve', resolveDraw); // 50/50 Strategy
+router.post('/draws/resolve', resolveDraw);
 
 export default router;

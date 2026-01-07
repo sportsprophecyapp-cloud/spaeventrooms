@@ -11,27 +11,27 @@ interface OnboardingModalProps {
 const steps = [
     {
         title: "Welcome to The Arena",
-        description: "Join the ultimate second-screen experience. Compete in live prediction markets, earn status, and prove your sports IQ.",
-        icon: "🏟️"
+        description: "Join the ultimate second-screen experience. Compete in live markets, earn status, and prove your Arena IQ.",
+        icon: "🎯"
     },
     {
-        title: "Predict Live",
-        description: "Watch the match and answer live questions like 'Goal in next 5 mins?'. Predictions are <span class='highlight'>Risk-Free</span> (0 tokens).",
+        title: "Submit Your Call",
+        description: "Watch the event and answer live questions. Calls are <span class='highlight'>Risk-Free</span> (0 tokens).",
         icon: "⚡"
     },
     {
-        title: "Earn Tokens",
-        description: "Login daily for <span class='highlight'>+5 tokens</span>. Keep your streak alive to earn massive bonuses (up to +500!).",
+        title: "Earn Status",
+        description: "Login daily for <span class='highlight'>+5 tokens</span>. Build your streak to earn massive XP bonuses.",
         icon: "💎"
     },
     {
-        title: "Build Your Status",
-        description: "Spend tokens on exclusive <span class='highlight'>Avatars, Frames, and Badges</span>. Show the community who's boss.",
+        title: "Build Your Identity",
+        description: "Spend tokens on exclusive <span class='highlight'>Avatars and Frames</span>. Stand out in the arena chat.",
         icon: "👑"
     },
     {
-        title: "Climb the Ranks",
-        description: "Correct predictions boost your ranking. Top players earn respect and entry into exclusive <span class='highlight'>Prize Draws</span>.",
+        title: "Climb the Standings",
+        description: "Accurate calls boost your ranking. Top Supporters earn respect and entry into exclusive <span class='highlight'>Prize Draws</span>.",
         icon: "🏆"
     }
 ];
@@ -45,7 +45,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
             setMounted(true);
             document.body.style.overflow = 'hidden';
         } else {
-            const timer = setTimeout(() => setMounted(false), 500); // Wait for animation
+            const timer = setTimeout(() => setMounted(false), 500); 
             document.body.style.overflow = 'unset';
             return () => clearTimeout(timer);
         }

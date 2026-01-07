@@ -3,7 +3,7 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Robust Database Initialization (v3.2 - Token Backfill)...');
+        console.log('🚀 Starting Pure-Data Database Initialization (v3.3 - Supporter Branding Sync)...');
 
         const schema = `
             CREATE TABLE IF NOT EXISTS users (
@@ -18,8 +18,6 @@ const initDB = async () => {
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
-            -- ... Rest of the schema (Rooms, Matches, Predictions, Chat, Cosmetics, Draws) ...
-            -- Keeping the existing stable schema definitions
             CREATE TABLE IF NOT EXISTS rooms (
                 room_id VARCHAR(50) PRIMARY KEY,
                 display_name VARCHAR(100) NOT NULL,
@@ -49,6 +47,25 @@ const initDB = async () => {
                 content TEXT NOT NULL, created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
+            CREATE TABLE IF NOT EXISTS cosmetics (
+                id VARCHAR(100) PRIMARY KEY, name VARCHAR(100) NOT NULL, description TEXT,
+                type VARCHAR(50) NOT NULL, cost INTEGER NOT NULL, asset_url TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS user_cosmetics (
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                cosmetic_id VARCHAR(100) REFERENCES cosmetics(id) ON DELETE CASCADE,
+                is_equipped BOOLEAN DEFAULT FALSE, acquired_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, cosmetic_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS token_transactions (
+                id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                amount INTEGER NOT NULL, type VARCHAR(50) NOT NULL, description TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
             CREATE TABLE IF NOT EXISTS prize_draws (
                 id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, prize_description TEXT,
                 room_id VARCHAR(50) REFERENCES rooms(room_id), sponsor_id INTEGER,
@@ -64,21 +81,25 @@ const initDB = async () => {
         `;
         await client.query(schema);
 
-        // 2. CRITICAL FIX: Backfill tokens for existing users who have 0 or NULL
-        console.log('🔧 Backfilling tokens and ensuring data integrity...');
+        // 2. Branding Sync
         await client.query(`
             UPDATE users SET token_balance = 150 WHERE token_balance IS NULL OR token_balance = 0;
-            UPDATE users SET total_points = 0 WHERE total_points IS NULL;
             UPDATE users SET role = 'super_admin' WHERE email = 'sportsprophecyapp@gmail.com';
         `);
 
-        // 3. Ensure Soccer Room exists
+        // 3. Seed Content (Clean Supporter Branding)
         await client.query(`
             INSERT INTO rooms (room_id, display_name) VALUES ('soccer', 'Soccer Arena')
             ON CONFLICT (room_id) DO UPDATE SET display_name = EXCLUDED.display_name;
+
+            INSERT INTO cosmetics (id, name, description, type, cost, asset_url) VALUES 
+            ('avatar_basic', 'Rookie Supporter', 'Entry-level fan avatar', 'avatar', 0, 'https://via.placeholder.com/150/0070f3'),
+            ('avatar_premium', 'Legendary Fan', 'Elite status avatar', 'avatar', 500, 'https://via.placeholder.com/150/00ff41'),
+            ('frame_gold', 'Champion Aura', 'Exclusive winner border', 'frame', 300, 'https://via.placeholder.com/150/ffd700')
+            ON CONFLICT (id) DO NOTHING;
         `);
 
-        console.log('✅ DB Update Complete: Everyone now has their starting tokens!');
+        console.log('✅ DB Initialized: Branding synchronized to "Supporter" identity.');
     } catch (err) {
         console.error('❌ DB Init failed:', err);
         process.exit(1);
