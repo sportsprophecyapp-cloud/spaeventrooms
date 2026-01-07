@@ -72,7 +72,7 @@ const RegisterContent = () => {
         <div className={styles.container}>
             <div className={`${styles.card} glass`}>
                 <h1 className={styles.title}>Join the Arena</h1>
-                <p className={styles.subtitle}>Predict. Compete. Win Status.</p>
+                <p className={styles.subtitle}>Forecast. Compete. Win Status.</p>
                 
                 {refName && (
                     <div className={styles.refBadge}>
@@ -89,7 +89,7 @@ const RegisterContent = () => {
                             type="text" 
                             autoComplete="username"
                             required 
-                            placeholder="prophet_name"
+                            placeholder="user_name"
                             value={formData.username}
                             onChange={(e) => setFormData({...formData, username: e.target.value})}
                         />
@@ -137,7 +137,7 @@ const RegisterContent = () => {
                     {error && <div className={styles.error}>{error}</div>}
 
                     <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-                        {isLoading ? 'Creating Prophet...' : 'CREATE ACCOUNT'}
+                        {isLoading ? 'Processing...' : 'CREATE ACCOUNT'}
                     </button>
                 </form>
 

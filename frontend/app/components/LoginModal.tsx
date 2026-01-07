@@ -34,7 +34,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-    // Fetch sponsor data for login modal
     useEffect(() => {
         const fetchSponsors = async () => {
             try {
@@ -43,12 +42,9 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
                     `${apiUrl}/api/sponsor-subscriptions/placements/login`
                 );
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch sponsors');
-                }
+                if (!response.ok) throw new Error('Failed to fetch sponsors');
 
                 const data = await response.json();
-                // Filter to only active Growth or Premium tier sponsors
                 const activeSponsors = data.filter(
                     (s: Sponsor) =>
                         s.is_active &&
@@ -57,16 +53,13 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
                 setSponsors(activeSponsors);
             } catch (err) {
                 console.error('Error fetching sponsor data:', err);
-                // Fail gracefully - no sponsors shown if API fails
                 setSponsors([]);
             } finally {
                 setSponsorLoading(false);
             }
         };
 
-        if (isOpen) {
-            fetchSponsors();
-        }
+        if (isOpen) fetchSponsors();
     }, [isOpen, apiUrl]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -83,9 +76,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 
             const data = await res.json();
 
-            if (!res.ok) {
-                throw new Error(data.message || 'Login failed');
-            }
+            if (!res.ok) throw new Error(data.message || 'Login failed');
 
             login(data.token, data.user);
             onLoginSuccess?.();
@@ -102,33 +93,20 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
     return (
         <div className={styles.modalOverlay} onClick={onClose}>
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                {/* Close Button */}
-                <button
-                    onClick={onClose}
-                    className={styles.closeButton}
-                    aria-label="Close modal"
-                >
-                    ✕
-                </button>
+                <button onClick={onClose} className={styles.closeButton} aria-label="Close modal">✕</button>
 
-                {/* Login Form */}
                 <div className={styles.container}>
                     <h2 className={styles.title}>Welcome Back</h2>
-                    <p className={styles.subtitle}>Sign in to your Sports Prophecy account</p>
+                    <p className={styles.subtitle}>Sign in to your Events Arena account</p>
 
-                    {error && (
-                        <div className={styles.errorMessage}>
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className={styles.errorMessage}>{error}</div>}
 
                     <form onSubmit={handleSubmit} className={styles.form}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="email" className={styles.label}>
-                                Email
-                            </label>
+                            <label htmlFor="login-email" className={styles.label}>Email</label>
                             <input
-                                id="email"
+                                id="login-email"
+                                name="email"
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -136,15 +114,15 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
                                 className={styles.input}
                                 required
                                 disabled={loading}
+                                autoComplete="email"
                             />
                         </div>
 
                         <div className={styles.formGroup}>
-                            <label htmlFor="password" className={styles.label}>
-                                Password
-                            </label>
+                            <label htmlFor="login-password" className={styles.label}>Password</label>
                             <input
-                                id="password"
+                                id="login-password"
+                                name="password"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -152,14 +130,11 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
                                 className={styles.input}
                                 required
                                 disabled={loading}
+                                autoComplete="current-password"
                             />
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={styles.submitButton}
-                        >
+                        <button type="submit" disabled={loading} className={styles.submitButton}>
                             {loading ? 'Signing in...' : 'Sign In'}
                         </button>
                     </form>
@@ -167,20 +142,10 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
                     <div className={styles.footer}>
                         <p className={styles.footerText}>
                             Don't have an account?{' '}
-                            <button
-                                type="button"
-                                className={styles.signupLink}
-                                onClick={() => {
-                                    onClose();
-                                    // Trigger signup modal if you have one
-                                }}
-                            >
-                                Sign up
-                            </button>
+                            <button type="button" className={styles.signupLink} onClick={onClose}>Sign up</button>
                         </p>
                     </div>
 
-                    {/* Sponsor Section - Bottom of Modal */}
                     {sponsors.length > 0 && !sponsorLoading && (
                         <div className={styles.sponsorSection}>
                             <div className={styles.sponsorDivider} />
@@ -195,11 +160,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
                                         className={styles.sponsorItem}
                                         title={sponsor.name}
                                     >
-                                        <img
-                                            src={sponsor.logo_url}
-                                            alt={sponsor.name}
-                                            className={styles.sponsorLogo}
-                                        />
+                                        <img src={sponsor.logo_url} alt={sponsor.name} className={styles.sponsorLogo} />
                                     </a>
                                 ))}
                             </div>

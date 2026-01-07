@@ -59,10 +59,7 @@ export const register = async (req: Request, res: Response) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // DEFAULT STARTING BALANCE: 150
         let startingBalance = 150;
-        
-        // If referred, the NEW USER gets a +50 bonus (Total 200)
         if (referred_by) startingBalance += 50;
 
         const result = await dbQuery(
@@ -73,20 +70,16 @@ export const register = async (req: Request, res: Response) => {
 
         const newUser = result.rows[0];
 
-        // AWARD THE REFERRER (The person who sent the link)
         if (referred_by) {
             try {
-                // Verify referrer exists and award +50
                 const refCheck = await dbQuery('UPDATE users SET token_balance = token_balance + 50 WHERE id = $1 RETURNING username', [referred_by]);
                 
                 if (refCheck.rows.length > 0) {
                     const referrerName = refCheck.rows[0].username;
-                    // Log for referrer
                     await dbQuery(
                         'INSERT INTO token_transactions (user_id, amount, type, description) VALUES ($1, 50, $2, $3)',
                         [referred_by, 'referral', `Referral Bonus: @${newUser.username} joined the arena`]
                     );
-                    // Log for new user
                     await dbQuery(
                         'INSERT INTO token_transactions (user_id, amount, type, description) VALUES ($1, 50, $2, $3)',
                         [newUser.id, 'referral', `Welcome Bonus: Referred by @${referrerName}`]
@@ -121,7 +114,7 @@ export const updateUsername = async (req: AuthRequest, res: Response) => {
     try {
         const check = await dbQuery('SELECT id FROM users WHERE username = $1 AND id != $2', [newUsername, userId]);
         if (check.rows.length > 0) {
-            return res.status(400).json({ success: false, error: 'Prophet Name already taken' });
+            return res.status(400).json({ success: false, error: 'Name already taken' });
         }
 
         const result = await dbQuery(

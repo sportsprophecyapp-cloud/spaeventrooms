@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import { Outfit } from 'next/font/google'; // Changed to Outfit
+import { Outfit } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 
-// Configuration for the gaming-themed font
 const outfit = Outfit({ 
   subsets: ['latin'],
   weight: ['100', '300', '400', '600', '800', '900'],
@@ -12,9 +11,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'Sports Prophecy | The Prediction Arena',
-  description: 'Forecast live match outcomes, earn status, and compete in the ultimate prophet arena. No gambling, pure skill.',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0', // Prevent zoom on mobile inputs
+  title: 'Events Arena | The Prediction Platform',
+  description: 'Forecast live match outcomes, earn status, and compete in the ultimate events arena. No gambling, pure skill.',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
 };
 
 export default function RootLayout({
