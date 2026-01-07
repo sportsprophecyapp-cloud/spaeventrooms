@@ -1,29 +1,11 @@
 .container {
     min-height: 100vh;
-    padding: 2rem;
+    padding: 6rem 2rem;
     background: var(--background);
     color: white;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.navBar {
-    margin-bottom: 3rem;
-}
-
-.backBtn {
-    background: transparent;
-    border: none;
-    color: var(--neutral);
-    font-weight: 900;
-    font-size: 0.8rem;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: color 0.2s;
-}
-
-.backBtn:hover {
-    color: var(--accent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .header {
@@ -36,125 +18,120 @@
     font-weight: 900;
     letter-spacing: -2px;
     margin-bottom: 1rem;
+    background: linear-gradient(to right, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-    color: var(--neutral);
     font-size: 1.1rem;
+    color: var(--neutral);
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-/* PRICING GRID */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-bottom: 5rem;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2.5rem;
+    width: 100%;
+    max-width: 1200px;
 }
 
 .card {
-    padding: 3rem 2rem;
-    border-radius: 30px;
-    text-align: center;
-    border: 1px solid var(--glass-border);
-    transition: transform 0.3s ease;
+    padding: 3.5rem 2.5rem;
+    border-radius: 32px;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
 }
 
 .card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-15px) scale(1.02);
     border-color: var(--accent);
-}
-
-.featured {
-    border-color: var(--accent);
-    background: rgba(0, 112, 243, 0.05);
-    position: relative;
-}
-
-.popularBadge {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    padding: 6px 20px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 900;
-    letter-spacing: 1px;
+    box-shadow: 0 20px 50px rgba(0, 112, 243, 0.2);
 }
 
 .tierName {
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: 900;
-    margin-bottom: 1rem;
-}
-
-.price {
-    font-size: 3rem;
-    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
     margin-bottom: 2rem;
 }
 
-.price span {
-    font-size: 1rem;
-    color: var(--neutral);
+.priceRow {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 3rem;
 }
+
+.currency { font-size: 1.5rem; font-weight: 600; color: var(--neutral); }
+.amount { font-size: 4.5rem; font-weight: 900; letter-spacing: -3px; }
+.period { font-size: 1rem; color: var(--neutral); }
 
 .features {
     list-style: none;
-    text-align: left;
-    margin-bottom: 3rem;
-    flex-grow: 1;
+    padding: 0;
+    margin: 0 0 3.5rem 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .features li {
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    color: var(--neutral);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    opacity: 0.9;
 }
 
-.check {
-    color: var(--success);
-    margin-right: 10px;
-    font-weight: 900;
-}
-
-.buttonPrimary, .buttonSecondary {
+.ctaBtn {
     width: 100%;
     padding: 1.2rem;
+    border: none;
     border-radius: 16px;
     font-weight: 900;
     font-size: 0.9rem;
+    letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
-    border: none;
-}
-
-.buttonPrimary {
-    background: var(--accent);
     color: white;
 }
 
-.buttonSecondary {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    color: white;
+.ctaBtn:hover {
+    box-shadow: 0 0 30px var(--accent-glow);
+    transform: scale(1.05);
 }
 
-.footerContact {
+.footer {
+    margin-top: 6rem;
     text-align: center;
     color: var(--neutral);
-    font-size: 0.9rem;
+    font-weight: 600;
 }
 
-.footerContact a {
+.contactLink {
     color: var(--accent);
-    font-weight: 800;
+    text-decoration: none;
+    font-weight: 900;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.contactLink:hover {
+    border-bottom-color: var(--accent);
 }
 
 @media (max-width: 768px) {
-    .title { font-size: 2.5rem; }
+    .title { font-size: 2.2rem; }
     .grid { grid-template-columns: 1fr; }
+    .container { padding: 4rem 1rem; }
 }
