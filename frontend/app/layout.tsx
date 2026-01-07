@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   title: 'Events Arena | The Prediction Platform',
   description: 'Forecast live match outcomes, earn status, and compete in the ultimate events arena. No gambling, pure skill.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
+  manifest: '/manifest.json', // Linked the PWA manifest
+  themeColor: '#050505',
 };
 
 export default function RootLayout({
