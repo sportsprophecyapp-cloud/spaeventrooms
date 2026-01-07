@@ -7,7 +7,10 @@ import {
     getDraws, 
     createDraw, 
     resolveDraw,
-    createRoom
+    createRoom,
+    getAllMatches,
+    deleteMatch,
+    clearDebugTestMatches
 } from './controller';
 import { authenticate, isAdmin } from '../auth/middleware';
 
@@ -24,7 +27,13 @@ router.get('/users/search', searchSupporters);
 router.put('/users/:userId/role', updateUserRole);
 router.get('/rooms', getRooms);
 router.post('/rooms', createRoom);
-router.put('/rooms/:roomId/owner', assignRoomOwner);
+
+/**
+ * MATCH & DATA CONTROLS
+ */
+router.get('/matches', getAllMatches);
+router.delete('/matches/:matchId', deleteMatch);
+router.post('/matches/clear-debug', clearDebugTestMatches);
 
 /**
  * PRIZE DRAW MANAGEMENT

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { query } from '../database';
 import { pickWinner } from '../services/drawService';
 
-// USER SEARCH (Supporter Sync)
+// USER SEARCH
 export const searchSupporters = async (req: Request, res: Response) => {
     const { query: searchTerm } = req.query;
     if (!searchTerm) return res.status(400).json({ error: 'Search term required' });
@@ -24,34 +24,35 @@ export const updateUserRole = async (req: Request, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Update failed' }); }
 };
 
+// MATCH MANAGEMENT (NEW CONTROLS)
+export const getAllMatches = async (req: Request, res: Response) => {
+    try {
+        const result = await query('SELECT * FROM soccer_matches ORDER BY start_time DESC LIMIT 50');
+        res.json(result.rows);
+    } catch (err) { res.status(500).json({ error: 'Fetch failed' }); }
+};
+
+export const deleteMatch = async (req: Request, res: Response) => {
+    const { matchId } = req.params;
+    try {
+        await query('DELETE FROM soccer_matches WHERE match_id = $1', [matchId]);
+        res.json({ success: true, message: `Match ${matchId} deleted.` });
+    } catch (err) { res.status(500).json({ error: 'Delete failed' }); }
+};
+
+export const clearDebugTestMatches = async (req: Request, res: Response) => {
+    try {
+        const result = await query("DELETE FROM soccer_matches WHERE match_id LIKE 'test-%'");
+        res.json({ success: true, count: result.rowCount });
+    } catch (err) { res.status(500).json({ error: 'Clear failed' }); }
+};
+
 // ROOMS
 export const getRooms = async (req: Request, res: Response) => {
     try {
         const result = await query('SELECT r.*, u.username as owner_name FROM rooms r LEFT JOIN users u ON r.owner_id = u.id');
         res.json(result.rows);
     } catch (err) { res.status(500).json({ error: 'Fetch failed' }); }
-};
-
-// Create Dedicated Creator/Partner Room
-export const createRoom = async (req: Request, res: Response) => {
-    const { room_id, display_name, owner_email } = req.body;
-    try {
-        const ownerResult = await query('SELECT id FROM users WHERE email = $1', [owner_email]);
-        const ownerId = ownerResult.rows.length > 0 ? ownerResult.rows[0].id : null;
-
-        const result = await query(
-            'INSERT INTO rooms (room_id, display_name, owner_id) VALUES ($1, $2, $3) RETURNING *',
-            [room_id, display_name, ownerId]
-        );
-
-        if (ownerId) {
-            await query("UPDATE users SET role = 'creator' WHERE id = $1", [ownerId]);
-        }
-
-        res.json(result.rows[0]);
-    } catch (err) {
-        res.status(500).json({ error: 'Room generation failed' });
-    }
 };
 
 // PRIZE DRAWS
@@ -87,13 +88,4 @@ export const resolveDraw = async (req: Request, res: Response) => {
         const luckyWinner = await pickWinner(drawId);
         res.json({ success: true, skillWinners: skillWinners.rows, luckyWinner });
     } catch (err) { res.status(500).json({ error: 'Resolution failed' }); }
-};
-
-export const assignRoomOwner = async (req: Request, res: Response) => {
-    const { roomId } = req.params;
-    const { ownerId } = req.body;
-    try {
-        await query('UPDATE rooms SET owner_id = $1 WHERE room_id = $2', [ownerId, roomId]);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: 'Assignment failed' }); }
 };

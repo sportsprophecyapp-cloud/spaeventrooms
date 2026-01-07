@@ -12,13 +12,12 @@ interface Supporter {
     role: string;
 }
 
-interface Draw {
-    id: number;
-    title: string;
-    prize_description: string;
+interface Match {
+    match_id: string;
+    home_team: string;
+    away_team: string;
     status: string;
-    winner_name: string | null;
-    sponsor_name: string | null;
+    league: string;
 }
 
 const AdminUsersPage = () => {
@@ -28,7 +27,7 @@ const AdminUsersPage = () => {
     
     const [searchTerm, setSearchTerm] = useState('');
     const [supporters, setSupporters] = useState<Supporter[]>([]);
-    const [draws, setDraws] = useState<Draw[]>([]);
+    const [matches, setMatches] = useState<Match[]>([]);
     
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -36,15 +35,15 @@ const AdminUsersPage = () => {
     const isAdmin = user?.email === 'sportsprophecyapp@gmail.com';
 
     useEffect(() => {
-        if (isAdmin && activeView === 'draws') fetchDraws();
+        if (isAdmin && activeView === 'debug') fetchMatches();
     }, [isAdmin, activeView]);
 
-    const fetchDraws = async () => {
+    const fetchMatches = async () => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/admin/draws`, {
+        const res = await fetch(`${apiUrl}/api/admin/matches`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (res.ok) setDraws(await res.json());
+        if (res.ok) setMatches(await res.json());
     };
 
     const handleSearch = async () => {
@@ -69,29 +68,41 @@ const AdminUsersPage = () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
-                setMessage('Test Match Created! Resolve it in 1 minute.');
-                setTimeout(() => setMessage(''), 5000);
+                setMessage('Test Match Created!');
+                fetchMatches();
+                setTimeout(() => setMessage(''), 3000);
             }
-        } catch (e) {
-            setMessage('Failed to create test match');
-        } finally {
-            setIsLoading(false);
-        }
+        } finally { setIsLoading(false); }
+    };
+
+    const deleteMatch = async (matchId: string) => {
+        if (!confirm(`Delete match ${matchId}?`)) return;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        await fetch(`${apiUrl}/api/admin/matches/${matchId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        fetchMatches();
+    };
+
+    const nukeDebug = async () => {
+        if (!confirm('NUKE ALL TEST GAMES? This cannot be undone.')) return;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        await fetch(`${apiUrl}/api/admin/matches/clear-debug`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        fetchMatches();
     };
 
     if (!isAdmin) return <div className={styles.error}>UNAUTHORIZED</div>;
 
     return (
         <div className={styles.container}>
-            <div className={styles.navBar}>
-                <button onClick={() => router.back()} className={styles.backBtn}>← RETURN</button>
-            </div>
-
             <header className={styles.header}>
                 <h1 className={styles.title}>COMMAND CENTER</h1>
                 <div className={styles.tabs}>
                     <button className={`${styles.tab} ${activeView === 'users' ? styles.activeTab : ''}`} onClick={() => setActiveTab('users')}>SUPPORTERS</button>
-                    <button className={`${styles.tab} ${activeView === 'draws' ? styles.activeTab : ''}`} onClick={() => setActiveTab('draws')}>DRAWS</button>
                     <button className={`${styles.tab} ${activeView === 'debug' ? styles.activeTab : ''}`} onClick={() => setActiveTab('debug')}>DEBUG</button>
                 </div>
             </header>
@@ -116,28 +127,27 @@ const AdminUsersPage = () => {
                     </section>
                 )}
 
-                {activeView === 'draws' && (
-                    <section className={styles.drawView}>
-                        <div className={styles.drawGrid}>
-                            {draws.map(draw => (
-                                <div key={draw.id} className={`${styles.drawCard} glass`}>
-                                    <h3>{draw.title}</h3>
-                                    <p>{draw.prize_description}</p>
-                                    <p className={styles.drawStatus}>{draw.status.toUpperCase()}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
                 {activeView === 'debug' && (
                     <section className={styles.debugView}>
-                        <div className={`${styles.card} glass`}>
-                            <h3>Resolution Engine Tester</h3>
-                            <p>Create a fake match that finishes in 60 seconds to verify prize ticket awarding.</p>
-                            <button className={styles.launchBtn} onClick={triggerTestMatch} disabled={isLoading}>
-                                🧪 LAUNCH TEST MATCH
-                            </button>
+                        <div className={`${styles.controls} glass`}>
+                            <button className={styles.launchBtn} onClick={triggerTestMatch}>🧪 LAUNCH TEST MATCH</button>
+                            <button className={styles.nukeBtn} onClick={nukeDebug}>☢️ NUKE ALL TEST GAMES</button>
+                        </div>
+
+                        <div className={`${styles.matchTable} glass`}>
+                            <h3>ARENA MATCH OVERVIEW</h3>
+                            {matches.map(m => (
+                                <div key={m.match_id} className={styles.matchRow}>
+                                    <div className={styles.matchMeta}>
+                                        <span className={styles.matchLeague}>{m.league}</span>
+                                        <span className={styles.matchTeams}>{m.home_team} vs {m.away_team}</span>
+                                    </div>
+                                    <div className={styles.matchActions}>
+                                        <span className={styles.statusLabel}>{m.status}</span>
+                                        <button className={styles.deleteBtn} onClick={() => deleteMatch(m.match_id)}>🗑️</button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </section>
                 )}
