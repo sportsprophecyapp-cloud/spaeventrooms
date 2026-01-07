@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import styles from './page.module.css';
 import MatchList from '../../components/MatchList';
-import AnnouncementsSection from '../../components/AnnouncementsSection';
 import CustomPollCard from '../../components/CustomPollCard';
 import SponsorWidget from '../../components/SponsorWidget';
 import { useAuth } from '../../context/AuthContext';
@@ -13,160 +11,113 @@ import LoginModal from '@/app/components/LoginModal';
 import { SocketProvider, useSocket } from '../../context/SocketContext';
 import UserTray from '../../components/UserTray';
 import Leaderboard from '../../components/Leaderboard';
-import EmptyStateWidget from '../../components/EmptyStateWidget';
 import RoomChat from '../../components/RoomChat';
 import FlashCallAlerter from '../../components/FlashCallAlerter';
 
 function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
-    const { logout, isAuthenticated, token } = useAuth();
+    const isSoccerRoom = roomId === 'soccer'; // Identification Logic
+    
+    const { isAuthenticated, token } = useAuth();
     const { socket } = useSocket();
 
     const [isLoginOpen, setIsLoginOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'predictions' | 'leaderboard' | 'chat'>('predictions');
     const [predictions, setPredictions] = useState<any[]>([]);
+    const [activeSidebar, setActiveSidebar] = useState<'chat' | 'standings'>('chat');
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
     const fetchPredictions = async () => {
+        // Only fetch manual custom polls if NOT in the pure soccer room
+        if (isSoccerRoom) return;
+
         try {
             const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions`);
             const data = await res.json();
-            if (Array.isArray(data)) {
-                setPredictions(data);
-            } else if (data && Array.isArray(data.predictions)) {
-                setPredictions(data.predictions);
-            } else {
-                setPredictions([]);
-            }
+            setPredictions(Array.isArray(data) ? data : (data.predictions || []));
         } catch (err) {
-            console.error('Error fetching predictions:', err);
             setPredictions([]);
         }
     };
 
     useEffect(() => {
         fetchPredictions();
-    }, [roomId]);
+    }, [roomId, isSoccerRoom]);
 
     useEffect(() => {
-        if (!socket) return;
-
+        if (!socket || isSoccerRoom) return;
         socket.on('prediction_new', (newPrediction: any) => {
             setPredictions(prev => [newPrediction, ...prev]);
         });
-
-        return () => {
-            socket.off('prediction_new');
-        };
-    }, [socket]);
-
-    const handleVote = async (predictionId: number, option: string) => {
-        if (!isAuthenticated || !token) {
-            setIsLoginOpen(true);
-            return;
-        }
-
-        try {
-            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions/${predictionId}/submit`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ option })
-            });
-
-            if (!res.ok) throw new Error('Failed to submit vote');
-        } catch (err) {
-            console.error('Vote failed:', err);
-        }
-    };
+        return () => { socket.off('prediction_new'); };
+    }, [socket, isSoccerRoom]);
 
     return (
         <div className={styles.container}>
-            <FlashCallAlerter />
+            {/* Haptic Alerts only for Creator Rooms */}
+            {!isSoccerRoom && <FlashCallAlerter />}
 
-            <header className={styles.header}>
-                <div className={styles.headerLeft}>
-                    <Link href="/" className={styles.backBtn}>← Arena Lobby</Link>
-                    <h1 className={styles.title}>{roomId.toUpperCase()}</h1>
-                </div>
-                
-                <div className={styles.userSection}>
-                    {isAuthenticated ? (
-                        <>
-                            <UserTray />
-                            <button onClick={logout} className={styles.authBtn}>Logout</button>
-                        </>
-                    ) : (
-                        <button onClick={() => setIsLoginOpen(true)} className={styles.authBtn}>Login</button>
-                    )}
+            <header className={styles.minimalHeader}>
+                <h1 className={styles.arenaTitle}>{roomId.toUpperCase()} ARENA</h1>
+                <div className={styles.headerActions}>
+                    {isAuthenticated ? <UserTray /> : <button onClick={() => setIsLoginOpen(true)} className={styles.loginBtn}>LOGIN</button>}
                 </div>
             </header>
 
-            {/* STICKY SPONSOR BAR (Mobile Optimized) */}
-            <div className={styles.mobileSponsorWrapper}>
-                <SponsorWidget roomId={roomId} />
-            </div>
-
-            <div className={styles.mobileTabs}>
-                <button
-                    className={`${styles.tabBtn} ${activeTab === 'predictions' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('predictions')}
-                >
-                    Calls
-                </button>
-                <button
-                    className={`${styles.tabBtn} ${activeTab === 'leaderboard' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('leaderboard')}
-                >
-                    Standings
-                </button>
-                <button
-                    className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('chat')}
-                >
-                    Fan Arena
-                </button>
-            </div>
-
-            <div className={styles.mainLayout}>
-                <div className={`${styles.column} ${activeTab !== 'predictions' ? styles.mobileHidden : ''}`}>
-                    {/* Compact Announcements */}
-                    <div className={styles.compactAnnouncements}>
-                        <AnnouncementsSection roomId={roomId} />
-                    </div>
-
-                    {predictions.length > 0 && (
-                        <div className={styles.predictionsSection}>
-                            <h3 className={styles.sectionHeading}>Active Flash Calls</h3>
+            <main className={styles.dualLayout}>
+                {/* PRIMARY COLUMN: MATCHES OR CREATOR CONTENT */}
+                <div className={styles.mainContent}>
+                    <SponsorWidget roomId={roomId} />
+                    
+                    {/* ONLY SHOW CUSTOM POLLS IN CREATOR ROOMS */}
+                    {!isSoccerRoom && predictions.length > 0 && (
+                        <div className={styles.flashSection}>
+                            <h3 className={styles.sectionHeading}>Active Live Polls</h3>
                             {predictions.map(p => (
-                                <CustomPollCard
-                                    key={p.id}
-                                    prediction={p}
-                                    roomId={roomId}
-                                    onVote={(opt) => handleVote(p.id, opt)}
-                                />
+                                <CustomPollCard key={p.id} prediction={p} roomId={roomId} onVote={() => {}} />
                             ))}
                         </div>
                     )}
 
-                    <div id="match-list-section" className={styles.matchListSection}>
-                        <h3 className={styles.sectionHeading}>Match Forecasts</h3>
-                        <MatchList />
+                    <div className={styles.matchesWrapper}>
+                        {isSoccerRoom ? (
+                            <>
+                                <h3 className={styles.sectionHeading}>Official Match Schedule</h3>
+                                <MatchList />
+                            </>
+                        ) : (
+                            <div className={styles.creatorWelcome}>
+                                <h3 className={styles.sectionHeading}>Creator Event Hub</h3>
+                                <p className={styles.welcomeText}>Watch the stream and participate in live polls below!</p>
+                                {/* We can add specialized Creator modules here later */}
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className={`${styles.column} ${styles.middleColumn} ${activeTab !== 'leaderboard' ? styles.mobileHidden : ''}`}>
-                    <Leaderboard />
-                </div>
-
-                <div className={`${styles.column} ${styles.rightColumn} ${activeTab !== 'chat' ? styles.mobileHidden : ''}`}>
-                    <RoomChat roomId={roomId} />
-                </div>
-            </div>
+                {/* SECONDARY COLUMN: SOCIAL & STANDINGS */}
+                <aside className={styles.sidebar}>
+                    <div className={styles.sidebarTabs}>
+                        <button 
+                            className={`${styles.sideTab} ${activeSidebar === 'chat' ? styles.activeSideTab : ''}`}
+                            onClick={() => setActiveSidebar('chat')}
+                        >
+                            FAN ARENA
+                        </button>
+                        <button 
+                            className={`${styles.sideTab} ${activeSidebar === 'standings' ? styles.activeSideTab : ''}`}
+                            onClick={() => setActiveSidebar('standings')}
+                        >
+                            STANDINGS
+                        </button>
+                    </div>
+                    
+                    <div className={styles.sidebarContent}>
+                        {activeSidebar === 'chat' ? <RoomChat roomId={roomId} /> : <Leaderboard />}
+                    </div>
+                </aside>
+            </main>
 
             <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
         </div>
