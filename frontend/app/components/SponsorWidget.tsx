@@ -40,12 +40,11 @@ const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
 
     if (loading) return <div className={styles.loading}>Accessing Sponsor...</div>;
 
-    // If no sponsors, show the "Your Ad Here" placeholder
     if (sponsors.length === 0) {
         return (
             <Link href={`/sponsors/pricing?ref=${roomId}`} className={`${styles.placeholderContainer} glass`}>
                 <div className={styles.placeholderLabel}>SPONSOR THIS ARENA</div>
-                <p className={styles.placeholderText}>Reach 5,000+ local prophets daily.</p>
+                <p className={styles.placeholderText}>Reach 5,000+ active sports fans daily.</p>
                 <div className={styles.placeholderBtn}>SECURE SPOT</div>
             </Link>
         );

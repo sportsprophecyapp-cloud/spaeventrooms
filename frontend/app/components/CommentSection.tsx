@@ -21,7 +21,7 @@ interface CommentSectionProps {
 
 const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId }) => {
     const [comments, setComments] = useState<Comment[]>([]);
-    const [newComment, setNewComment] = useState('');
+    const [newComment, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const { isAuthenticated, token } = useAuth();
     const { socket } = useSocket();
@@ -63,20 +63,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
         e.preventDefault();
         if (!newComment.trim() || !token) return;
 
+        const content = newComment;
+        setNewMessage('');
+
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions/${predictionId}/comments`, {
+            await fetch(`${apiUrl}/api/rooms/${roomId}/predictions/${predictionId}/comments`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ content: newComment })
+                body: JSON.stringify({ content })
             });
-
-            if (res.ok) {
-                setNewComment('');
-            }
         } catch (err) {
             console.error('Error posting comment:', err);
         }
@@ -86,13 +85,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
         <div className={styles.container}>
             <div className={styles.list}>
                 {loading ? (
-                    <p className={styles.loading}>Accessing records...</p>
+                    <p className={styles.loading}>Accessing Arena Records...</p>
                 ) : comments.length === 0 ? (
-                    <p className={styles.empty}>The discussion is empty. Be the first to prophesy.</p>
+                    <p className={styles.empty}>The discussion is empty. Be the first to make a call.</p>
                 ) : (
                     comments.map(comment => (
                         <div key={comment.id} className={styles.comment}>
-                            <div className={styles.author}>@{comment.username || 'Prophet'}</div>
+                            <div className={styles.author}>@{comment.username || 'User'}</div>
                             <div className={styles.content}>{comment.content}</div>
                         </div>
                     ))
@@ -104,7 +103,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ predictionId, roomId })
                     <input
                         type="text"
                         value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
+                        onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Add your thoughts..."
                         className={styles.input}
                         maxLength={150}

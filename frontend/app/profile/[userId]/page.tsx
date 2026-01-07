@@ -15,7 +15,7 @@ interface UserProfile {
     total_predictions: number;
     correct_predictions: number;
     streak: number;
-    draw_entries?: number; // Added entries count
+    draw_entries?: number;
 }
 
 const ProfilePage = () => {
@@ -30,35 +30,33 @@ const ProfilePage = () => {
     const [editError, setEditError] = useState('');
     const [copyMessage, setCopyMessage] = useState('');
 
-    const fetchProfileData = async () => {
-        try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const res = await fetch(`${apiUrl}/api/auth/profile/${userId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                
-                // Fetch Ticket Count specifically
-                const ticketRes = await fetch(`${apiUrl}/api/gamification/tickets`, {
+    useEffect(() => {
+        const fetchProfileData = async () => {
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                const res = await fetch(`${apiUrl}/api/auth/profile/${userId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const ticketData = await ticketRes.json();
+                if (res.ok) {
+                    const data = await res.json();
+                    const ticketRes = await fetch(`${apiUrl}/api/gamification/tickets`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const ticketData = await ticketRes.json();
 
-                setProfile({
-                    ...data.user,
-                    draw_entries: ticketData.count || 0
-                });
-                setNewName(data.user.username);
+                    setProfile({
+                        ...data.user,
+                        draw_entries: ticketData.count || 0
+                    });
+                    setNewName(data.user.username);
+                }
+            } catch (err) {
+                console.error('Error fetching profile data:', err);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (err) {
-            console.error('Error fetching profile data:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        };
 
-    useEffect(() => {
         if (isAuthenticated && token) {
             fetchProfileData();
         }
@@ -97,8 +95,8 @@ const ProfilePage = () => {
         setTimeout(() => setCopyMessage(''), 3000);
     };
 
-    if (isLoading) return <div className={styles.loading}>Accessing Prophet Records...</div>;
-    if (!profile) return <div className={styles.error}>Prophet not found.</div>;
+    if (isLoading) return <div className={styles.loading}>Accessing Records...</div>;
+    if (!profile) return <div className={styles.error}>User not found.</div>;
 
     const isOwnProfile = user?.id.toString() === userId;
 
@@ -155,11 +153,11 @@ const ProfilePage = () => {
                         <p className={styles.statHint}>Earned from skill & streaks</p>
                     </div>
                     <div className={`${styles.statCard} glass`}>
-                        <span className={styles.statLabel}>PROPHET TOKENS</span>
+                        <span className={styles.statLabel}>ARENA TOKENS</span>
                         <span className={styles.statValue}>🪙 {profile.tokens}</span>
                     </div>
                     <div className={`${styles.statCard} glass`}>
-                        <span className={styles.statLabel}>ARENA RANK</span>
+                        <span className={styles.statLabel}>GLOBAL RANK</span>
                         <span className={styles.statValue}>#{profile.level > 1 ? '12' : '---'}</span>
                     </div>
                 </section>
@@ -167,7 +165,7 @@ const ProfilePage = () => {
                 {isOwnProfile && (
                     <section className={`${styles.referralCard} glass`}>
                         <div className={styles.refInfo}>
-                            <h3>RECRUIT NEW PROPHETS</h3>
+                            <h3>RECRUIT NEW PLAYERS</h3>
                             <p>Share your link and earn 50 tokens for every signup.</p>
                         </div>
                         <button onClick={handleCopyReferral} className={styles.copyBtn}>

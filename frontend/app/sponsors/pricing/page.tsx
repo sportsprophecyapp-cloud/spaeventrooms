@@ -49,7 +49,6 @@ export default function SponsorshipPricingPage() {
 
     return (
         <div className={styles.container}>
-            {/* BACK BUTTON */}
             <div className={styles.navBar}>
                 <button onClick={() => router.back()} className={styles.backBtn}>
                     ← RETURN TO ARENA
@@ -59,13 +58,12 @@ export default function SponsorshipPricingPage() {
             <header className={styles.header}>
                 <h1 className={styles.title}>Secure Your Placement</h1>
                 <p className={styles.subtitle}>
-                    Promote your brand to thousands of active sports prophets. 
+                    Promote your brand to thousands of active sports fans. 
                     Choose your impact level below.
                 </p>
             </header>
 
             <div className={styles.grid}>
-                {/* Tiers kept as is, but UI will be polished in CSS */}
                 <div className={`${styles.card} glass`}>
                     <h2 className={styles.tierName}>Starter Display</h2>
                     <div className={styles.price}>$99<span>/mo</span></div>
