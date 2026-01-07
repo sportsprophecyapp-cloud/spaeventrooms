@@ -39,7 +39,7 @@ const MatchList: React.FC = () => {
             const data = await res.json();
             
             if (Array.isArray(data)) {
-                // The backend now returns raw matches, so we group them here for UX
+                // Group matches by league
                 const grouped: Record<string, LeagueSection> = {};
                 
                 data.forEach((match: Match) => {
@@ -81,7 +81,6 @@ const MatchList: React.FC = () => {
     if (loading) {
         return (
             <div className={styles.container}>
-                <h2 className={styles.sectionTitle}>Arena Schedule</h2>
                 <SkeletonCard type="match" />
                 <SkeletonCard type="match" />
             </div>
@@ -90,18 +89,17 @@ const MatchList: React.FC = () => {
 
     return (
         <div className={styles.container}>
-            <h2 className={styles.sectionTitle}>Arena Schedule</h2>
-            
             {sections.length === 0 ? (
                 <div className={styles.emptyState}>
                     <p>No active markets found. Check back for live games soon!</p>
                 </div>
             ) : (
                 sections.map(section => (
-                    <div key={section.title} className={styles.leagueSection}>
+                    <div key={section.title} className={styles.leagueBlock}>
                         <div className={styles.leagueHeader}>
                             {section.logo && <img src={section.logo} alt="" className={styles.leagueLogo} />}
                             <h3 className={styles.leagueTitle}>{section.title}</h3>
+                            <span className={styles.matchCount}>{section.matches.length} EVENTS</span>
                         </div>
                         <div className={styles.matchGrid}>
                             {section.matches.map(match => (

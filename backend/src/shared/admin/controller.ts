@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { query } from '../database';
 import { pickWinner } from '../services/drawService';
 
-// USER SEARCH
-export const searchProphets = async (req: Request, res: Response) => {
+// USER SEARCH (Supporter Sync)
+export const searchSupporters = async (req: Request, res: Response) => {
     const { query: searchTerm } = req.query;
     if (!searchTerm) return res.status(400).json({ error: 'Search term required' });
     try {
@@ -32,21 +32,18 @@ export const getRooms = async (req: Request, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Fetch failed' }); }
 };
 
-// NEW: Create Dedicated Creator/Partner Room
+// Create Dedicated Creator/Partner Room
 export const createRoom = async (req: Request, res: Response) => {
     const { room_id, display_name, owner_email } = req.body;
     try {
-        // 1. Find Owner ID
         const ownerResult = await query('SELECT id FROM users WHERE email = $1', [owner_email]);
         const ownerId = ownerResult.rows.length > 0 ? ownerResult.rows[0].id : null;
 
-        // 2. Insert Room
         const result = await query(
             'INSERT INTO rooms (room_id, display_name, owner_id) VALUES ($1, $2, $3) RETURNING *',
             [room_id, display_name, ownerId]
         );
 
-        // 3. If owner found, make them a 'creator' role automatically
         if (ownerId) {
             await query("UPDATE users SET role = 'creator' WHERE id = $1", [ownerId]);
         }

@@ -16,11 +16,16 @@ export class SoccerRoom extends BaseRoom {
     initRoutes(): void {
         this.router.get('/matches', async (req, res) => {
             try {
+                // TIGHTENED QUERY: Only show Games from last 6 hours to next 36 hours.
+                // This removes old junk and focuses the Arena.
                 const result = await query(`
                     SELECT * FROM soccer_matches 
-                    WHERE start_time > NOW() - INTERVAL '24 hours' 
-                    AND start_time < NOW() + INTERVAL '48 hours'
-                    ORDER BY league ASC, start_time ASC
+                    WHERE start_time > NOW() - INTERVAL '6 hours' 
+                    AND start_time < NOW() + INTERVAL '36 hours'
+                    ORDER BY 
+                        CASE WHEN status = 'live' THEN 1 ELSE 2 END,
+                        league ASC, 
+                        start_time ASC
                 `);
                 res.json(Array.isArray(result.rows) ? result.rows : []);
             } catch (err) {
@@ -28,21 +33,17 @@ export class SoccerRoom extends BaseRoom {
             }
         });
 
-        // TEST MATCH GENERATOR (Admin Only)
         this.router.post('/test-game', authenticate, isAdmin, async (req, res) => {
             try {
                 const matchId = `test-${Date.now()}`;
-                const startTime = new Date(Date.now() + 5000); // Starts in 5 seconds
-                
+                const startTime = new Date(Date.now() + 5000);
                 await query(`
                     INSERT INTO soccer_matches (match_id, home_team, away_team, start_time, status, league, score_home, score_away)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                 `, [matchId, 'Test Team A', 'Test Team B', startTime, 'live', 'DEBUG LEAGUE', 0, 0]);
 
-                // Auto-finish after 60 seconds
                 setTimeout(async () => {
                     await query("UPDATE soccer_matches SET status = 'finished', score_home = 2, score_away = 1 WHERE match_id = $1", [matchId]);
-                    console.log(`🏁 Test Match ${matchId} finished. Resolution Engine will pick it up.`);
                 }, 60000);
 
                 res.json({ success: true, matchId });

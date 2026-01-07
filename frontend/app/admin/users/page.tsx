@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext'; // Fixed path: only 2 levels up
+import { useAuth } from '../../context/AuthContext';
 import styles from './page.module.css';
 
-interface Prophet {
+interface Supporter {
     id: number;
     username: string;
     email: string;
@@ -27,7 +27,7 @@ const AdminUsersPage = () => {
     const [activeView, setActiveTab] = useState<'users' | 'draws' | 'debug'>('users');
     
     const [searchTerm, setSearchTerm] = useState('');
-    const [prophets, setProphets] = useState<Prophet[]>([]);
+    const [supporters, setSupporters] = useState<Supporter[]>([]);
     const [draws, setDraws] = useState<Draw[]>([]);
     
     const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +55,7 @@ const AdminUsersPage = () => {
             const res = await fetch(`${apiUrl}/api/admin/users/search?query=${searchTerm}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (res.ok) setProphets(await res.json());
+            if (res.ok) setSupporters(await res.json());
         } catch (err) { console.error('Search failed'); }
         finally { setIsLoading(false); }
     };
@@ -90,7 +90,7 @@ const AdminUsersPage = () => {
             <header className={styles.header}>
                 <h1 className={styles.title}>COMMAND CENTER</h1>
                 <div className={styles.tabs}>
-                    <button className={`${styles.tab} ${activeView === 'users' ? styles.activeTab : ''}`} onClick={() => setActiveTab('users')}>USERS</button>
+                    <button className={`${styles.tab} ${activeView === 'users' ? styles.activeTab : ''}`} onClick={() => setActiveTab('users')}>SUPPORTERS</button>
                     <button className={`${styles.tab} ${activeView === 'draws' ? styles.activeTab : ''}`} onClick={() => setActiveTab('draws')}>DRAWS</button>
                     <button className={`${styles.tab} ${activeView === 'debug' ? styles.activeTab : ''}`} onClick={() => setActiveTab('debug')}>DEBUG</button>
                 </div>
@@ -106,10 +106,10 @@ const AdminUsersPage = () => {
                             <button className={styles.searchBtn} onClick={handleSearch}>SEARCH</button>
                         </div>
                         <div className={`${styles.tableCard} glass`}>
-                            {prophets.map(p => (
-                                <div key={p.id} className={styles.row}>
-                                    <span className={styles.username}>@{p.username}</span>
-                                    <span className={styles.roleBadge}>{p.role}</span>
+                            {supporters.map(s => (
+                                <div key={s.id} className={styles.row}>
+                                    <span className={styles.username}>@{s.username}</span>
+                                    <span className={styles.roleBadge}>{s.role}</span>
                                 </div>
                             ))}
                         </div>
