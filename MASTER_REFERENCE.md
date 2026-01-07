@@ -1,34 +1,23 @@
-# 📌 Project Master Reference: SportsProphecyApp
+# 📌 Project Master Reference: Events Arena
 
-## 🛠 Project Identity & Boundaries
-- **Project Name:** SportsProphecyApp
-- **Root Path:** `/Users/williamcommu/Desktop/mobile`
-- **Isolation Rule:** CRITICAL. Stay within this root folder.
-- **Type:** Full-stack Mobile/Web Prediction Platform.
-
-## 💻 Tech Stack
+## 🛠 Project Identity & Tech Stack
+- **Project Name:** Events Arena (formerly Sports Prophecy)
 - **Frontend:** Next.js (located in `/frontend`). Styling: Outfit Font, Glassmorphism.
 - **Backend:** Node.js/Express (located in `/backend`).
-- **Database:** PostgreSQL (Render).
-- **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Polls).
+- **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Creator Events).
 
 ## 📡 Data Architecture (API & Limits)
-- **Dual-API Sync:** Uses both **API-Football** and **The Odds API** for maximum coverage.
-- **High-Speed Scheduler:** 
-    - API-Football: Refreshes every **15 minutes** (96 calls/day).
-    - The Odds API: Refreshes every **30 minutes** (48 calls/day).
-- **Smart Key Rotation:** 
-    - The system supports multiple keys in `THE_ODDS_API_KEY` (comma-separated).
-    - **Automatic Failover:** If a key hits its 500-request limit (Status 429), the backend instantly rotates to the next available key.
-- **Source of Truth:** All API data is cached in PostgreSQL `soccer_matches`. Users only query the DB, never the external APIs.
+- **Dual-API Sync:** API-Football (15m) + The Odds API (30m).
+- **Smart Key Rotation:** 4+ keys with automatic failover on Status 429.
+- **Source of Truth:** All data cached in PostgreSQL `soccer_matches`.
 
-## 🚀 Deployment Process (Live Site)
-- **Method:** `bash deploy.sh "your message"` (Use from main prompt only).
-- **Environment:** Render (Production), Vercel (Testing).
-- **Trigger:** Pushes to `main` branch trigger automatic build/deploy.
+## 🚀 Deployment & Build Rules
+- **Method:** `./deploy.sh "message"` (Run from root only).
+- **CSS Rule:** CRITICAL. Always use unique filenames for CSS modules (e.g., `wizard.module.css`) instead of `page.module.css` to prevent Render build cache conflicts.
+- **Relative Paths:** Next.js App Router requires strict relative pathing for context imports (e.g., `../../../context/AuthContext`).
 
 ## 📝 Persistent AI Instructions
-1. **Reference First:** Check this file at the start of every session.
-2. **Safe Code:** Always verify Typescript interfaces before updating components.
-3. **No Mock Data:** Only use live API data for games and prophecies.
-4. **Stuck-Proof UI:** Ensure all modals/pages have a back button or click-outside-to-close.
+1. **Supporter Identity:** Always use "Supporter" branding for users.
+2. **Creator Toolset:** Respect the isolation of the OBS Overlay (`/overlay`) and Creator Remote (`/creator`) routes.
+3. **No Mock Data:** Only use live API data for events.
+4. **Keep-Alive:** Maintain the dual-ping service to prevent Render free-tier sleep.
