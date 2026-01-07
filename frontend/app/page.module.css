@@ -162,6 +162,7 @@
   border: none;
   border-radius: 16px;
   font-weight: 900;
+  letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
@@ -197,52 +198,37 @@
   line-height: 1.5;
 }
 
-/* PWA NUDGE */
-.pwaNudge {
-  padding: 3rem;
-  border-radius: 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid var(--accent);
-  background: linear-gradient(135deg, rgba(0, 112, 243, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
-}
-
-.pwaContent h3 {
-  font-size: 1.5rem;
-  font-weight: 900;
-  margin-bottom: 8px;
-}
-
-.pwaContent p {
-  color: var(--neutral);
-  font-size: 0.95rem;
-}
-
-.pwaInstructions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.pwaInstructions span {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--accent);
-  padding: 8px 16px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-}
-
 .footer {
   margin-top: 6rem;
   width: 100%;
   text-align: center;
 }
 
+.footerInfo {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: var(--neutral);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.disclaimer {
+  max-width: 600px;
+  font-size: 0.7rem;
+  opacity: 0.5;
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0 auto;
+}
+
+.version {
+  opacity: 0.4;
+}
+
 /* MOBILE */
 @media (max-width: 768px) {
   .logo h1 { font-size: 2.2rem; }
   .economyPreview { grid-template-columns: 1fr; }
-  .pwaNudge { flex-direction: column; text-align: center; gap: 2rem; }
 }

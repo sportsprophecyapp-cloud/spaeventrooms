@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
@@ -131,17 +131,6 @@ const HomePage = () => {
             <p>Invite friends and both get <strong>+50 Bonus Tokens</strong>.</p>
           </div>
         </section>
-
-        <section className={`${styles.pwaNudge} glass`}>
-          <div className={styles.pwaContent}>
-            <h3>📲 INSTANT APP ACCESS</h3>
-            <p>Add <strong>Events Arena</strong> to your home screen for full-screen play. No app store needed.</p>
-          </div>
-          <div className={styles.pwaInstructions}>
-            <span>Chrome: Menu → Install App</span>
-            <span>Safari: Share → Add to Home Screen</span>
-          </div>
-        </section>
       </main>
 
       <footer className={styles.footer}>
@@ -156,6 +145,7 @@ const HomePage = () => {
         </div>
       </footer>
 
+      {/* MODALS */}
       <OnboardingModal isOpen={showOnboarding} onClose={handleOnboardingClose} />
     </div>
   );
