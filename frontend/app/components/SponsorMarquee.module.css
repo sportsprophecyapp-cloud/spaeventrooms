@@ -1,53 +1,58 @@
 .container {
     width: 100%;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.5);
     border-top: 1px solid var(--glass-border);
-    padding: 1rem 0;
+    padding: 1.5rem 0;
     position: relative;
 }
 
+/* FORCES EVERYTHING ONTO ONE LINE */
 .track {
     display: flex;
-    gap: 4rem;
-    width: max-content;
-    animation: scroll 40s linear infinite;
+    gap: 5rem;
+    width: fit-content;
+    white-space: nowrap;
+    animation: scroll 30s linear infinite;
 }
 
 .item {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.5;
-    transition: opacity 0.3s ease;
+    opacity: 0.4;
+    transition: all 0.3s ease;
 }
 
 .item:hover {
     opacity: 1;
+    transform: scale(1.1);
 }
 
 .logo {
-    height: 30px;
+    height: 24px; /* Professional slim profile */
     width: auto;
-    filter: grayscale(100%);
-    transition: filter 0.3s ease;
+    filter: grayscale(100%) brightness(2);
 }
 
 .item:hover .logo {
-    filter: grayscale(0%);
+    filter: grayscale(0%) brightness(1);
+}
+
+.nameOnly {
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: white;
 }
 
 @keyframes scroll {
-    0% {
-        transform: translateX(0);
-    }
-
-    100% {
-        transform: translateX(-50%);
-    }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
-/* Pause animation on hover */
+/* Pause on hover for easier clicking */
 .container:hover .track {
     animation-play-state: paused;
 }
