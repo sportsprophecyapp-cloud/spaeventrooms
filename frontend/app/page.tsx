@@ -66,10 +66,15 @@ const HomePage = () => {
     <div className={styles.container}>
       {isAuthenticated && <UserTray />}
       
+      {/* QUICK WIN 1: DOPAMINE BANNER */}
+      <div className={styles.promoBanner}>
+        <span className={styles.fire}>🔥</span>
+        <p>JOIN 500+ SUPPORTERS! GET <strong>200 WELCOME TOKENS</strong> TODAY.</p>
+        <Link href="/auth/register" className={styles.promoBtn}>CLAIM NOW</Link>
+      </div>
+
       <header className={styles.header}>
-        {/* BRAND BRIDGE MESSAGE */}
         <p className={styles.welcomeBridge}>Sports Prophecy welcomes you to the</p>
-        
         <div className={styles.logo}>
           <span className={styles.icon}>🎯</span>
           <h1>EVENTS <span style={{color: 'var(--accent)'}}>ARENA</span></h1>
@@ -87,7 +92,8 @@ const HomePage = () => {
       </header>
 
       <main className={styles.main}>
-        <h2 className={styles.sectionTitle}>Select Your Room</h2>
+        {/* ROOM SELECTOR */}
+        <h2 className={styles.sectionTitle}>Select Your Arena</h2>
         <div className={styles.roomGrid}>
           {rooms.map(room => (
             <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`}>
@@ -109,6 +115,37 @@ const HomePage = () => {
             </div>
           ))}
         </div>
+
+        {/* QUICK WIN 2: ECONOMY PREVIEW */}
+        <section className={styles.economyPreview}>
+          <div className={`${styles.ecoCard} glass`}>
+            <span className={styles.ecoIcon}>🎫</span>
+            <h4>WIN PRIZES</h4>
+            <p>Every correct call awards a <strong>Prize Draw Ticket</strong>.</p>
+          </div>
+          <div className={`${styles.ecoCard} glass`}>
+            <span className={styles.ecoIcon}>📈</span>
+            <h4>LEVEL UP</h4>
+            <p>Climb the standings and earn elite status in the community.</p>
+          </div>
+          <div className={`${styles.ecoCard} glass`}>
+            <span className={styles.ecoIcon}>🤝</span>
+            <h4>RECRUIT</h4>
+            <p>Invite friends and both get <strong>+50 Bonus Tokens</strong>.</p>
+          </div>
+        </section>
+
+        {/* QUICK WIN 3: PWA NUDGE */}
+        <section className={`${styles.pwaNudge} glass`}>
+          <div className={styles.pwaContent}>
+            <h3>📲 INSTANT APP ACCESS</h3>
+            <p>Add <strong>Events Arena</strong> to your home screen for full-screen play. No app store needed.</p>
+          </div>
+          <div className={styles.pwaInstructions}>
+            <span>Chrome: Menu → Install App</span>
+            <span>Safari: Share → Add to Home Screen</span>
+          </div>
+        </section>
       </main>
 
       <footer className={styles.footer}>
