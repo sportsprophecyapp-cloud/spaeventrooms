@@ -4,7 +4,20 @@ import { query } from '../database';
 // 1. GET ALL SUPPORTERS
 export const getAllSupporters = async (req: Request, res: Response) => {
     try {
-        const result = await query('SELECT id, username, email, permissions FROM users ORDER BY created_at DESC');
+        const sql = `
+            SELECT 
+                u.id, 
+                u.username, 
+                u.email, 
+                u.permissions, 
+                u.created_at,
+                COUNT(p.id) as prediction_count
+            FROM users u
+            LEFT JOIN soccer_predictions p ON u.id = p.user_id
+            GROUP BY u.id
+            ORDER BY u.created_at DESC
+        `;
+        const result = await query(sql);
         res.json(result.rows);
     } catch (err) { res.status(500).json({ error: 'Failed to fetch supporters' }); }
 };

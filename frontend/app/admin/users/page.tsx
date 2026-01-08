@@ -10,6 +10,8 @@ interface Supporter {
     username: string;
     email: string;
     permissions: string[];
+    created_at: string;
+    prediction_count: string;
 }
 
 const AdminUsersPage = () => {
@@ -69,6 +71,8 @@ const AdminUsersPage = () => {
                             <div className={styles.userMeta}>
                                 <span className={styles.username}>@{s.username}</span>
                                 <span className={styles.email}>{s.email}</span>
+                                <span className={styles.metadata}>Joined: {new Date(s.created_at).toLocaleDateString()}</span>
+                                <span className={styles.metadata}>Predictions: {s.prediction_count}</span>
                             </div>
                             <div className={styles.actions}>
                                 {s.permissions.map(p => <span key={p} className={styles.roleBadge}>{p}</span>)}
