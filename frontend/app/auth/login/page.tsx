@@ -92,7 +92,7 @@ const LoginContent = () => {
                     New to the arena? <Link href="/auth/register">SIGN UP FREE</Link>
                 </p>
                 <p className={styles.forgotPassword}>
-                    <Link href="/auth/reset">Forgot password?</Link>
+                    <Link href="/auth/forgot-password">Forgot password?</Link>
                 </p>
             </div>
         </div>

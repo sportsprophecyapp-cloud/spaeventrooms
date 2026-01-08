@@ -107,8 +107,9 @@ export const register = async (req: Request, res: Response) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const result = await dbQuery(
-            `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets) 
-             VALUES ($1, $2, $3, false, 150, 0) RETURNING id, email, username, permissions, token_balance, total_tickets`,
+            `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets, total_points, current_level) 
+             VALUES ($1, $2, $3, false, 150, 0, 0, 1) 
+             RETURNING id, email, username, permissions, token_balance, total_tickets, total_points, current_level`,
             [email.toLowerCase(), username, hashedPassword]
         );
 
@@ -118,6 +119,7 @@ export const register = async (req: Request, res: Response) => {
             JWT_SECRET,
             { expiresIn: '7d' }
         );
+
         res.status(201).json({ 
             success: true, 
             user: { 
@@ -127,6 +129,8 @@ export const register = async (req: Request, res: Response) => {
                 permissions: newUser.permissions,
                 tokens: newUser.token_balance,
                 tickets: newUser.total_tickets,
+                points: newUser.total_points,
+                level: newUser.current_level
             }, 
             token 
         });

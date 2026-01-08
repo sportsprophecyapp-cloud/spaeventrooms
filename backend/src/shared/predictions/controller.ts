@@ -4,15 +4,35 @@ import { AuthRequest } from '../auth/middleware';
 import { socketService } from '../socket/SocketService';
 import { gamificationService } from '../gamification/GamificationService';
 
+const PREDICTION_COST = 10;
+
 export const submitMatchPrediction = async (req: AuthRequest, res: Response) => {
     const { matchId, pick } = req.body;
     const userId = req.user?.id;
+
+    if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
 
     if (!matchId || !pick) {
         return res.status(400).json({ message: 'Match ID and pick are required' });
     }
 
     try {
+        // 1. Check user exists and has enough tokens
+        const userResult = await query('SELECT token_balance FROM users WHERE id = $1', [userId]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const user = userResult.rows[0];
+        if (user.token_balance < PREDICTION_COST) {
+            return res.status(402).json({ message: 'Not enough tokens' });
+        }
+
+        // 2. Deduct tokens and insert prediction in a transaction
+        await query('BEGIN');
+        await query('UPDATE users SET token_balance = token_balance - $1 WHERE id = $2', [PREDICTION_COST, userId]);
         await query(
             `INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
              VALUES ($1, $2, $3)
@@ -20,14 +40,14 @@ export const submitMatchPrediction = async (req: AuthRequest, res: Response) => 
              DO UPDATE SET prediction_data = EXCLUDED.prediction_data`,
             [userId, matchId, { pick }]
         );
+        await query('COMMIT');
 
-        // Award points for participation
-        if (userId) {
-            await gamificationService.awardPoints(userId, 10);
-        }
+        // 3. Award points for participation
+        await gamificationService.awardPoints(userId, 10);
 
         res.status(201).json({ success: true, message: 'Match prediction submitted' });
     } catch (err) {
+        await query('ROLLBACK');
         console.error('Error submitting match prediction:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }

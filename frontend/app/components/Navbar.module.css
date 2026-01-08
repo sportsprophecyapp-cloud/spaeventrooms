@@ -1,5 +1,5 @@
 .nav {
-    height: 60px; /* Shrunk from 70px */
+    height: 60px; 
     background: rgba(0, 0, 0, 0.9);
     backdrop-filter: blur(15px);
     border-bottom: 1px solid var(--glass-border);
@@ -91,7 +91,9 @@
 /* MOBILE "ULTRA-COMPACT" */
 @media (max-width: 768px) {
     .container { padding: 0 0.75rem; }
-    .logo { display: none; }
+    .logo {
+        font-size: 0.8rem; /* Make logo slightly smaller on mobile */
+    }
     
     .rightSection { gap: 0.5rem; }
     
