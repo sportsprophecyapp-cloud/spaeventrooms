@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { 
+    getAllSupporters, // NEW
     searchSupporters, 
     updateUserRole, 
     getRooms, 
@@ -23,6 +24,7 @@ router.use(isAdmin);
 /**
  * USER & ROOM MANAGEMENT
  */
+router.get('/users', getAllSupporters); // NEW
 router.get('/users/search', searchSupporters);
 router.put('/users/:userId/role', updateUserRole);
 router.get('/rooms', getRooms);

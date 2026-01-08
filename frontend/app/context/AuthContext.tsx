@@ -2,10 +2,16 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// IRONCLAD USER TYPE: All economy fields are now part of the core user object.
 interface User {
     id: number;
     email: string;
-    username: string; // Made required
+    username: string;
+    role: string;
+    tokens: number;
+    tickets: number;
+    points: number;
+    level: number;
 }
 
 interface AuthContextType {
@@ -24,30 +30,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const savedToken = localStorage.getItem('auth_token');
-        const savedUser = localStorage.getItem('auth_user');
-
-        if (savedToken && savedUser) {
-            try {
-                setToken(savedToken);
-                setUser(JSON.parse(savedUser));
-            } catch (err) {
-                console.error("Auth hydration failed", err);
+        // Auto-login via /me for full, fresh data
+        const verifySession = async () => {
+            if (savedToken) {
+                try {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    const res = await fetch(`${apiUrl}/api/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${savedToken}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        login(savedToken, data.user);
+                    } else {
+                        logout(); // Invalid token
+                    }
+                } catch (e) {
+                    logout(); // Network or server error
+                }
             }
-        }
+        };
+        verifySession();
     }, []);
 
     const login = (newToken: string, newUser: User) => {
         setToken(newToken);
         setUser(newUser);
         localStorage.setItem('auth_token', newToken);
-        localStorage.setItem('auth_user', JSON.stringify(newUser));
     };
 
     const logout = () => {
         setToken(null);
         setUser(null);
         localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_user');
     };
 
     return (

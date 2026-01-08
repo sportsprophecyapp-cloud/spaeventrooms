@@ -2,7 +2,15 @@ import { Request, Response } from 'express';
 import { query } from '../database';
 import { pickWinner } from '../services/drawService';
 
-// USER SEARCH
+// 1. GET ALL SUPPORTERS
+export const getAllSupporters = async (req: Request, res: Response) => {
+    try {
+        const result = await query('SELECT id, username, email, role, current_level, created_at FROM users ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (err) { res.status(500).json({ error: 'Failed to fetch supporters' }); }
+};
+
+// 2. SEARCH SUPPORTERS
 export const searchSupporters = async (req: Request, res: Response) => {
     const { query: searchTerm } = req.query;
     if (!searchTerm) return res.status(400).json({ error: 'Search term required' });
@@ -15,6 +23,7 @@ export const searchSupporters = async (req: Request, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Search failed' }); }
 };
 
+// 3. UPDATE ROLE
 export const updateUserRole = async (req: Request, res: Response) => {
     const { userId } = req.params;
     const { role } = req.body;
@@ -23,6 +32,8 @@ export const updateUserRole = async (req: Request, res: Response) => {
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: 'Update failed' }); }
 };
+
+// ... (rest of file remains same)
 
 // MATCH MANAGEMENT
 export const getAllMatches = async (req: Request, res: Response) => {
@@ -47,7 +58,7 @@ export const clearDebugTestMatches = async (req: Request, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Clear failed' }); }
 };
 
-// ROOMS (FIXED: Re-added missing exports)
+// ROOMS
 export const getRooms = async (req: Request, res: Response) => {
     try {
         const result = await query('SELECT r.*, u.username as owner_name FROM rooms r LEFT JOIN users u ON r.owner_id = u.id');
