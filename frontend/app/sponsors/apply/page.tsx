@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import styles from './page.module.css';
 
 const SponsorApplyPage = () => {
@@ -102,7 +103,9 @@ const SponsorApplyPage = () => {
                     <div className={styles.legalSection}>
                         <label className={styles.checkboxLabel}>
                             <input type="checkbox" required checked={formData.agreed} onChange={e => setFormData({...formData, agreed: e.target.checked})} />
-                            <span>I AGREE TO TERMS & ESCROW.</span>
+                            <span>
+                                I AGREE TO THE <Link href="/sponsors/terms" target="_blank" style={{color: 'var(--accent)', textDecoration: 'underline'}}>TERMS & CONDITIONS</Link> AND PRIZE ESCROW PROTOCOL.
+                            </span>
                         </label>
                     </div>
 
@@ -114,7 +117,6 @@ const SponsorApplyPage = () => {
                     <h3 className={styles.previewTitle}>ARENA LIVE PREVIEW</h3>
                     
                     <div className={styles.previewScroll}>
-                        {/* LOGO WIDGET WITH ADJUSTABLE STYLES */}
                         <div className={`${styles.previewWidget} glass`}>
                             <p className={styles.previewLabel}>OFFICIAL ROOM SPONSOR</p>
                             <div className={styles.logoFrame}>

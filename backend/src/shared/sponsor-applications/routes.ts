@@ -1,26 +1,26 @@
 import { Router } from 'express';
-import { authenticate } from '../auth/middleware';
-import {
-    submitApplication,
-    getApplications,
-    approveApplication,
-    getAllSponsors,
-    generateInvoice,
-    markPaymentPaid,
-    getActiveSponsors
+import { 
+    submitApplication, 
+    getApplications, 
+    approveApplication, 
+    getAllSponsors, 
+    generateInvoice, 
+    markPaymentPaid, 
+    getActiveSponsors 
 } from './controller';
+import { authenticate, isAdmin } from '../auth/middleware';
 
 const router = Router();
 
-// Public routes
-router.post('/apply', submitApplication);
+// PUBLIC
+router.post('/submit', submitApplication);
 router.get('/active', getActiveSponsors);
 
-// Admin routes (require authentication)
-router.get('/applications', authenticate, getApplications);
-router.post('/applications/:applicationId/approve', authenticate, approveApplication);
-router.get('/sponsors', authenticate, getAllSponsors);
-router.post('/sponsors/:sponsorId/invoice', authenticate, generateInvoice);
-router.post('/payments/:paymentId/mark-paid', authenticate, markPaymentPaid);
+// ADMIN PROTECTED
+router.get('/', authenticate, isAdmin, getApplications);
+router.post('/:appId/approve', authenticate, isAdmin, approveApplication); // NEW: Instant Deploy
+router.get('/all', authenticate, isAdmin, getAllSponsors);
+router.post('/:sponsorId/invoice', authenticate, isAdmin, generateInvoice);
+router.patch('/payments/:paymentId/paid', authenticate, isAdmin, markPaymentPaid);
 
 export default router;

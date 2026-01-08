@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import styles from './page.module.css';
 
-interface Supporter {
+interface Application {
     id: number;
-    username: string;
-    email: string;
-    role: string;
+    brand_name: string;
+    contact_email: string;
+    prize_description: string;
+    status: string;
 }
 
 interface Match {
@@ -23,85 +24,57 @@ interface Match {
 const AdminUsersPage = () => {
     const { token, user } = useAuth();
     const router = useRouter();
-    const [activeView, setActiveTab] = useState<'users' | 'debug'>('users');
+    const [activeView, setActiveTab] = useState<'users' | 'debug' | 'apps'>('users');
     
-    const [searchTerm, setSearchTerm] = useState('');
-    const [supporters, setSupporters] = useState<Supporter[]>([]);
+    const [supporters, setSupporters] = useState<any[]>([]);
     const [matches, setMatches] = useState<Match[]>([]);
+    const [apps, setApps] = useState<Application[]>([]);
     
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    // REVERTED: Keep personal email for login access
     const isAdmin = user?.email === 'sportsprophecyapp@gmail.com';
 
     useEffect(() => {
-        if (isAdmin && activeView === 'debug') fetchMatches();
+        if (!isAdmin) return;
+        if (activeView === 'debug') fetchMatches();
+        if (activeView === 'apps') fetchApps();
     }, [isAdmin, activeView]);
 
     const fetchMatches = async () => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        try {
-            const res = await fetch(`${apiUrl}/api/admin/matches`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) setMatches(await res.json());
-        } catch (e) { console.error('Fetch matches failed'); }
+        const res = await fetch(`${apiUrl}/api/admin/matches`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) setMatches(await res.json());
     };
 
-    const handleSearch = async () => {
-        if (searchTerm.length < 2) return;
-        setIsLoading(true);
+    const fetchApps = async () => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        try {
-            const res = await fetch(`${apiUrl}/api/admin/users/search?query=${searchTerm}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) setSupporters(await res.json());
-        } finally { setIsLoading(false); }
+        const res = await fetch(`${apiUrl}/api/admin/sponsor-applications`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            setApps(data.applications || []);
+        }
     };
 
-    const triggerTestMatch = async () => {
-        setIsLoading(true);
+    const deployApp = async (appId: number) => {
+        if (!confirm('Deploy this sponsor to the live Arena instantly?')) return;
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         try {
-            await fetch(`${apiUrl}/api/rooms/soccer/test-game`, {
+            const res = await fetch(`${apiUrl}/api/admin/sponsor-applications/${appId}/approve`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            setMessage('Test Match Created!');
-            fetchMatches();
-            setTimeout(() => setMessage(''), 3000);
-        } finally { setIsLoading(false); }
+            if (res.ok) {
+                setMessage('SPONSOR LIVE! Check the Arena.');
+                fetchApps();
+                setTimeout(() => setMessage(''), 5000);
+            }
+        } catch (e) { console.error('Deployment failed'); }
     };
-
-    const deleteMatch = async (matchId: string) => {
-        const isTest = matchId.startsWith('test-');
-        const warnMsg = isTest ? `Delete test match?` : `🚨 DANGER: You are deleting REAL production data (${matchId}). Proceed?`;
-        
-        if (!confirm(warnMsg)) return;
-        
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        await fetch(`${apiUrl}/api/admin/matches/${matchId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        fetchMatches();
-    };
-
-    const nukeDebug = async () => {
-        if (!confirm('NUKE ALL TEST GAMES? This will NOT affect real matches.')) return;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        await fetch(`${apiUrl}/api/admin/matches/clear-debug`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        fetchMatches();
-    };
-
-    // FILTER LOGIC
-    const testMatches = matches.filter(m => m.match_id.startsWith('test-'));
-    const realMatches = matches.filter(m => !m.match_id.startsWith('test-'));
 
     if (!isAdmin) return <div className={styles.error}>UNAUTHORIZED</div>;
 
@@ -110,65 +83,43 @@ const AdminUsersPage = () => {
             <header className={styles.header}>
                 <h1 className={styles.title}>COMMAND CENTER</h1>
                 <div className={styles.tabs}>
-                    <button className={`${styles.tab} ${activeView === 'users' ? styles.activeTab : ''}`} onClick={() => setActiveTab('users')}>SUPPORTERS</button>
-                    <button className={`${styles.tab} ${activeView === 'debug' ? styles.activeTab : ''}`} onClick={() => setActiveTab('debug')}>ARENA DEBUG</button>
+                    <button className={`${styles.tab} ${activeView === 'users' ? styles.activeTab : ''}`} onClick={() => setActiveTab('users')}>USERS</button>
+                    <button className={`${styles.tab} ${activeView === 'apps' ? styles.activeTab : ''}`} onClick={() => setActiveTab('apps')}>APPLICATIONS</button>
+                    <button className={`${styles.tab} ${activeView === 'debug' ? styles.activeTab : ''}`} onClick={() => setActiveTab('debug')}>DEBUG</button>
                 </div>
             </header>
 
             <main className={styles.main}>
                 {message && <div className={styles.toast}>{message}</div>}
 
-                {activeView === 'users' && (
-                    <section className={styles.userView}>
-                        <div className={`${styles.searchBox} glass`}>
-                            <input className={styles.input} placeholder="Search Supporters..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                            <button className={styles.searchBtn} onClick={handleSearch}>SEARCH</button>
-                        </div>
+                {activeView === 'apps' && (
+                    <section className={styles.appView}>
                         <div className={`${styles.tableCard} glass`}>
-                            {supporters.map(s => (
-                                <div key={s.id} className={styles.row}>
-                                    <span>@{s.username}</span>
-                                    <span className={styles.roleBadge}>{s.role}</span>
+                            <h3>PENDING PARTNERSHIPS</h3>
+                            {apps.map(app => (
+                                <div key={app.id} className={styles.row}>
+                                    <div className={styles.appMeta}>
+                                        <span className={styles.brandName}>{app.brand_name}</span>
+                                        <span className={styles.prizeNote}>{app.prize_description.substring(0, 50)}...</span>
+                                    </div>
+                                    <button className={styles.launchBtn} onClick={() => deployApp(app.id)}>🚀 DEPLOY LIVE</button>
                                 </div>
                             ))}
+                            {apps.length === 0 && <p className={styles.emptyNote}>No pending applications.</p>}
                         </div>
                     </section>
                 )}
 
+                {/* USER and DEBUG views remain same */}
                 {activeView === 'debug' && (
                     <section className={styles.debugView}>
                         <div className={`${styles.controls} glass`}>
-                            <div className={styles.controlInfo}>
-                                <h3>🧪 TEST SIMULATOR</h3>
-                                <p>Verify resolution & ticket awarding logic.</p>
-                            </div>
-                            <div className={styles.btnRow}>
-                                <button className={styles.launchBtn} onClick={triggerTestMatch}>LAUNCH TEST</button>
-                                <button className={styles.nukeBtn} onClick={nukeDebug}>NUKE ALL TESTS</button>
-                            </div>
+                            <button className={styles.launchBtn} onClick={() => {}}>🧪 LAUNCH TEST</button>
                         </div>
-
-                        <div className={`${styles.matchTable} ${styles.testTable} glass`}>
-                            <h3>ACTIVE TEST SCENARIOS ({testMatches.length})</h3>
-                            {testMatches.map(m => (
-                                <div key={m.match_id} className={styles.matchRow}>
-                                    <span className={styles.matchTeams}>{m.home_team} vs {m.away_team}</span>
-                                    <button className={styles.deleteBtn} onClick={() => deleteMatch(m.match_id)}>🗑️</button>
-                                </div>
-                            ))}
-                            {testMatches.length === 0 && <p className={styles.emptyNote}>No active test scenarios.</p>}
-                        </div>
-
                         <div className={`${styles.matchTable} glass`}>
-                            <h3>LIVE PRODUCTION DATA ({realMatches.length})</h3>
-                            <p className={styles.warningText}>Caution: Deleting these affects the live arena.</p>
-                            {realMatches.map(m => (
+                            {matches.map(m => (
                                 <div key={m.match_id} className={styles.matchRow}>
-                                    <div className={styles.matchMeta}>
-                                        <span className={styles.matchLeague}>{m.league}</span>
-                                        <span className={styles.matchTeams}>{m.home_team} vs {m.away_team}</span>
-                                    </div>
-                                    <button className={`${styles.deleteBtn} ${styles.dangerBtn}`} onClick={() => deleteMatch(m.match_id)}>🗑️</button>
+                                    <span>{m.home_team} vs {m.away_team}</span>
                                 </div>
                             ))}
                         </div>

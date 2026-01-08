@@ -27,20 +27,42 @@ export const submitApplication = async (req: Request, res: Response) => {
     }
 };
 
-// 2. ADMIN: GET ALL APPLICATIONS (Restored)
+// 2. ADMIN: DEPLOY TO LIVE ARENA (Instant Verification)
+export const approveApplication = async (req: Request, res: Response) => {
+    try {
+        const { appId } = req.params;
+
+        // Fetch application details
+        const appRes = await dbQuery('SELECT * FROM sponsor_applications WHERE id = $1', [appId]);
+        if (appRes.rows.length === 0) return res.status(404).json({ error: 'App not found' });
+        
+        const app = appRes.rows[0];
+
+        // Transfer to live Sponsors table
+        await dbQuery(`
+            INSERT INTO room_sponsors 
+            (room_id, sponsor_name, logo_url, website_url, prize_description, is_active, prize_escrow_received)
+            VALUES ($1, $2, $3, $4, $5, TRUE, TRUE)
+        `, [app.arena_target, app.brand_name, app.logo_url, app.website_url, app.prize_description]);
+
+        // Mark app as approved
+        await dbQuery("UPDATE sponsor_applications SET status = 'approved' WHERE id = $1", [appId]);
+
+        res.json({ success: true, message: 'Partner is now LIVE!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Deployment failed' });
+    }
+};
+
+// 3. ADMIN: GET ALL APPLICATIONS
 export const getApplications = async (req: Request, res: Response) => {
     try {
-        const result = await dbQuery('SELECT * FROM sponsor_applications ORDER BY created_at DESC');
+        const result = await dbQuery("SELECT * FROM sponsor_applications WHERE status = 'pending' ORDER BY created_at DESC");
         res.json({ success: true, applications: result.rows });
     } catch (err) { res.status(500).json({ error: 'Fetch failed' }); }
 };
 
-// 3. ADMIN: APPROVE (Restored)
-export const approveApplication = async (req: Request, res: Response) => {
-    res.json({ success: true, message: 'Approval system active.' });
-};
-
-// 4. ADMIN: GET ALL SPONSORS (Restored)
+// ... keep other admin functions for build stability
 export const getAllSponsors = async (req: Request, res: Response) => {
     try {
         const result = await dbQuery('SELECT * FROM room_sponsors ORDER BY created_at DESC');
@@ -48,16 +70,8 @@ export const getAllSponsors = async (req: Request, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Fetch failed' }); }
 };
 
-// 5. ADMIN: BILLING (Restored)
-export const generateInvoice = async (req: Request, res: Response) => {
-    res.json({ success: true, url: '#' });
-};
-
-export const markPaymentPaid = async (req: Request, res: Response) => {
-    res.json({ success: true });
-};
-
-// 6. PUBLIC: ACTIVE PLACEMENTS (Restored)
+export const generateInvoice = async (req: Request, res: Response) => { res.json({ success: true }); };
+export const markPaymentPaid = async (req: Request, res: Response) => { res.json({ success: true }); };
 export const getActiveSponsors = async (req: Request, res: Response) => {
     try {
         const result = await dbQuery('SELECT * FROM room_sponsors WHERE is_active = TRUE');
