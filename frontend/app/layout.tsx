@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next'; // Import Viewport
 import { Outfit } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from './context/AuthContext';
-import { LanguageProvider } from './context/LanguageContext'; // New Provider
+import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Navbar';
 
 const outfit = Outfit({ 
@@ -11,9 +11,11 @@ const outfit = Outfit({
   variable: '--font-outfit',
 });
 
+// METADATA (SEO & SOCIAL)
 export const metadata: Metadata = {
   title: 'Events Arena | The Ultimate Fan Engagement & Prediction Platform',
   description: 'Join the ultimate second-screen experience. Forecast live match outcomes, earn status, and compete for prizes in the Events Arena. 100% free, pure skill.',
+  manifest: '/manifest.json',
   keywords: ['sports predictions', 'live soccer calls', 'fan engagement', 'arena IQ', 'prize draws', 'soccer standings', 'events arena', 'sports prophecy'],
   authors: [{ name: 'Events Arena Team' }],
   openGraph: {
@@ -29,9 +31,15 @@ export const metadata: Metadata = {
     title: 'Events Arena | Predict. Compete. Win.',
     description: '100% free sports engagement platform for the ultimate fan experience.',
   },
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
-  manifest: '/manifest.json',
+};
+
+// VIEWPORT & THEME (Modern Next.js Standard)
+export const viewport: Viewport = {
   themeColor: '#050505',
+  initialScale: 1,
+  width: 'device-width',
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
