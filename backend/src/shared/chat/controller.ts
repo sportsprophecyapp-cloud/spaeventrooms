@@ -16,9 +16,13 @@ const getFilteredWords = async () => {
 export const getRoomMessages = async (req: Request, res: Response) => {
     const { roomId } = req.params;
     try {
+        // ULTRA-STABLE QUERY: Avoids selecting any potentially crashing columns (e.g., JSONB from users)
+        // This is the same successful strategy used to fix the admin panel.
         const result = await query(`
             SELECT 
-                m.*, 
+                m.id,
+                m.content,
+                m.created_at,
                 COALESCE(u.username, '[deleted]') as username, 
                 COALESCE(u.current_level, 1) as current_level
             FROM room_messages m
@@ -29,8 +33,8 @@ export const getRoomMessages = async (req: Request, res: Response) => {
         `, [roomId]);
         res.json(result.rows.reverse());
     } catch (err) {
-        console.error('[FATAL] Error fetching room messages:', err);
-        res.status(500).json({ error: 'Could not load chat history.' });
+        console.error('[FATAL] CRASH while fetching room messages:', err);
+        res.status(500).json({ error: 'Could not load chat history due to a server error.' });
     }
 };
 
