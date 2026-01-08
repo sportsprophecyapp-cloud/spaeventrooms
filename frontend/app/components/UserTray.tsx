@@ -6,12 +6,13 @@ import { useAuth } from '../context/AuthContext';
 import styles from './UserTray.module.css';
 
 const UserTray = () => {
-    const { user, logout } = useAuth(); // Get logout function from context
+    const { user, logout } = useAuth();
     const [isExpanded, setIsExpanded] = useState(false);
 
     if (!user) return null;
 
-    const isAdmin = user.role === 'admin';
+    // CORRECT PERMISSION CHECK
+    const isAdmin = user.permissions.includes('super_admin') || user.permissions.includes('can_manage_users');
 
     return (
         <div className={styles.wrapper}>
@@ -42,7 +43,7 @@ const UserTray = () => {
                                 <Link href="/admin/users" className={styles.item}>🛡️ Command Center</Link>
                                 <Link href="/admin/rooms/create" className={styles.item}>🪄 Arena Wizard</Link>
                             </>
-                        )}\n                        {/* LOGOUT BUTTON RESTORED */}
+                        )}
                         <button onClick={logout} className={`${styles.item} ${styles.logoutBtn}`}>Logout</button>
                     </div>
                 </div>
