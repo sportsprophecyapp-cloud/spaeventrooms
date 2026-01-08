@@ -1,19 +1,13 @@
-.container {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+.wrapper {
+    position: relative;
 }
 
-.minimal {
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(10px);
+/* THE TRAY (INLINE VERSION) */
+.tray {
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--glass-border);
-    padding: 8px 16px;
-    border-radius: 30px;
+    padding: 4px 12px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -21,98 +15,89 @@
     transition: all 0.3s ease;
 }
 
-.minimal:hover {
+.tray:hover {
     border-color: var(--accent);
-    box-shadow: 0 0 15px var(--accent-glow);
+    background: rgba(255, 255, 255, 0.08);
 }
 
-.levelBadge {
-    background: var(--accent);
-    padding: 2px 8px;
-    border-radius: 10px;
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.levelNum {
-    font-size: 0.7rem;
+.icon { font-size: 0.8rem; }
+
+.value {
+    font-size: 0.75rem;
     font-weight: 900;
     color: white;
 }
 
-.progressContainer {
-    width: 60px;
-    height: 4px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progressBar {
-    height: 100%;
-    background: var(--success);
-    box-shadow: 0 0 10px var(--success);
-}
-
-.pointsNum {
-    font-weight: 900;
-    font-size: 0.9rem;
-}
-
-.pointsLabel {
+.avatar {
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.6rem;
-    font-weight: 700;
-    color: var(--neutral);
-    margin-left: 4px;
+    font-weight: 900;
 }
 
-/* DRAWER SYSTEM */
-.drawer {
-    margin-top: 10px;
-    width: 220px;
+/* DROWER DROPDOWN */
+.dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 200px;
     padding: 1.5rem;
     border-radius: 20px;
-    animation: slideIn 0.3s ease-out;
+    border: 1px solid var(--glass-border);
+    z-index: 1000;
+    animation: slideIn 0.2s ease-out;
 }
 
-.drawerTitle {
-    font-size: 0.65rem;
-    font-weight: 900;
-    color: var(--neutral);
-    letter-spacing: 2px;
+.header {
     margin-bottom: 1.5rem;
     text-align: center;
 }
 
-.menuLinks {
+.name {
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
+.level {
+    font-size: 0.6rem;
+    color: var(--neutral);
+    font-weight: 700;
+}
+
+.menu {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
-.menuLink {
-    font-size: 0.8rem;
+.item {
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
     font-weight: 800;
     color: white;
-    padding: 10px;
-    border-radius: 10px;
+    text-decoration: none;
     background: rgba(255,255,255,0.03);
     transition: all 0.2s;
-    text-decoration: none;
 }
 
-.menuLink:hover {
-    background: rgba(255,255,255,0.08);
-    color: var(--accent);
-}
-
-.adminLink {
-    color: #ffd700; /* Gold for Admin */
-    border: 1px solid rgba(255, 215, 0, 0.2);
-}
-
-.adminLink:hover {
-    background: rgba(255, 215, 0, 0.1);
-    color: #ffd700;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+.item:hover {
+    background: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 @keyframes slideIn {
@@ -120,7 +105,9 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 600px) {
-    .container { top: 0.5rem; right: 0.5rem; }
-    .minimal { padding: 6px 12px; }
+@media (max-width: 768px) {
+    .tray { gap: 8px; padding: 4px 8px; }
+    .stat { gap: 2px; }
+    .value { font-size: 0.65rem; }
+    .avatar { width: 20px; height: 20px; font-size: 0.5rem; }
 }
