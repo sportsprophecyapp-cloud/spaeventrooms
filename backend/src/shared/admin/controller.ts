@@ -1,31 +1,32 @@
 import { Request, Response } from 'express';
 import { query } from '../database';
 
-// 1. GET ALL SUPPORTERS (FINAL FIX)
+// 1. GET ALL SUPPORTERS (STABILITY-FOCUSED FIX)
 export const getAllSupporters = async (req: Request, res: Response) => {
     try {
+        // REVERTING to a simple, stable query to prevent backend crashes.
+        // The prediction_count logic is the source of the 500 error and will be handled separately.
         const sql = `
             SELECT 
-                u.id, 
-                u.username, 
-                u.email, 
-                u.permissions, 
-                u.created_at,
-                u.is_banned,
-                u.is_muted,
-                COUNT(p.id) as prediction_count
+                id, 
+                username, 
+                email, 
+                permissions, 
+                created_at,
+                is_banned,
+                is_muted,
+                0 as prediction_count
             FROM users u
-            LEFT JOIN soccer_predictions p ON u.id = p.user_id
-            GROUP BY u.id, u.username, u.email, u.permissions, u.created_at, u.is_banned, u.is_muted
             ORDER BY u.created_at DESC
         `;
         const result = await query(sql);
         res.json(result.rows);
     } catch (err) { 
-        console.error("[FATAL] Failed to fetch supporters:", err);
+        console.error("[FATAL] Failed to fetch supporters with stable query:", err);
         res.status(500).json({ error: 'A critical error occurred while fetching user data.' }); 
     }
 };
+
 
 // 2. GET SITE STATS
 export const getSiteStats = async (req: Request, res: Response) => {
