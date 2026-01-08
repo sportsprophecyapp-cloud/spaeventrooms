@@ -9,7 +9,6 @@ import styles from './page.module.css';
 import { APP_VERSION } from './version';
 import OnboardingModal from '@/app/components/OnboardingModal';
 import SponsorMarquee from '@/app/components/SponsorMarquee';
-import UserTray from '@/app/components/UserTray';
 
 const HomePage = () => {
   const { t } = useLanguage();
@@ -22,7 +21,7 @@ const HomePage = () => {
       id: 'soccer',
       name: 'Soccer Arena',
       description: 'Forecast match winners and events from the world\'s top leagues.',
-      icon: '◈', // Replaced target with sleek diamond
+      icon: '◈',
       color: 'var(--accent)',
       active: true
     },
@@ -66,12 +65,11 @@ const HomePage = () => {
 
   return (
     <div className={styles.container}>
-      {isAuthenticated && <UserTray />}
+      {/* REMOVED EXTRA USERTRAY: User stats now live strictly in the Navbar */}
       
       <header className={styles.header}>
         <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
         <div className={styles.logo}>
-          {/* REMOVED TARGET: LET TYPOGRAPHY LEAD */}
           <h1>EVENTS <span style={{color: 'var(--accent)'}}>ARENA</span></h1>
         </div>
         <p className={styles.tagline}>{t('tagline')}</p>

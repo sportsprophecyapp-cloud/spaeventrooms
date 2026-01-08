@@ -7,16 +7,21 @@ import styles from './UserTray.module.css';
 
 const UserTray = () => {
     const { user, token } = useAuth();
-    const [userData, setUserData] = useState<any>(null);
+    // INITIALIZE WITH AUTH CACHE DATA TO PREVENT 0/0 FLICKER
+    const [userData, setUserData] = useState<any>({
+        token_balance: user?.tokens || 0,
+        total_tickets: user?.tickets || 0,
+        current_level: user?.level || 1
+    });
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // REVERTED: Keep personal email for login access
     const isAdmin = user?.email === 'sportsprophecyapp@gmail.com';
 
     useEffect(() => {
         const fetchBalance = async () => {
             if (!token) return;
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            // SYNC WITH PRODUCTION API
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.sportsprophecyapp.com';
             try {
                 const res = await fetch(`${apiUrl}/api/gamification/balance`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -26,14 +31,15 @@ const UserTray = () => {
                     setUserData(data);
                 }
             } catch (err) {
-                console.error('Failed to fetch balance');
+                console.error('Balance Sync Failed');
             }
         };
 
         fetchBalance();
-        const interval = setInterval(fetchBalance, 30000);
+        // Sync every 60 seconds
+        const interval = setInterval(fetchBalance, 60000);
         return () => clearInterval(interval);
-    }, [token]);
+    }, [token, user]);
 
     if (!user) return null;
 
