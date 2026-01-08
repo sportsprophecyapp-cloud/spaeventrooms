@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// IRONCLAD USER TYPE: All economy and role fields are now part of the core user object.
+// IRONCLAD USER TYPE (v3.8): Synchronized with backend permissions
 interface User {
     id: number;
     email: string;
     username: string;
-    role: string; // <-- ENSURED ROLE IS HERE
+    permissions: string[]; // <-- The missing piece
     tokens: number;
     tickets: number;
     points: number;
@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         const savedToken = localStorage.getItem('auth_token');
-        // Auto-login via /me for full, fresh data
         const verifySession = async () => {
             if (savedToken) {
                 try {
@@ -42,10 +41,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         const data = await res.json();
                         login(savedToken, data.user);
                     } else {
-                        logout(); // Invalid token
+                        logout();
                     }
                 } catch (e) {
-                    logout(); // Network or server error
+                    logout();
                 }
             }
         };
