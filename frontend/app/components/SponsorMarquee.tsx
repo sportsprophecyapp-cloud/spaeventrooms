@@ -3,22 +3,24 @@
 import React from 'react';
 import styles from './SponsorMarquee.module.css';
 
+const sponsors = [
+    { id: 1, name: 'ArenaX', logo_url: '' },
+    { id: 2, name: 'ProphetGear', logo_url: '' },
+    { id: 3, name: 'FanCentral', logo_url: '' },
+    { id: 4, name: 'SportsHub', logo_url: '' },
+    { id: 5, name: 'Velocity', logo_url: '' }
+];
+
 const SponsorMarquee = () => {
-    // UPDATED: Removed any mention of "Bet" to ensure app store compliance
-    const sponsors = [
-        { id: 1, name: 'ArenaX', logo_url: 'https://placehold.co/100x40/222/999?text=ArenaX' },
-        { id: 2, name: 'ProphetGear', logo_url: 'https://placehold.co/100x40/222/999?text=ProphetGear' },
-        { id: 3, name: 'FanCentral', logo_url: 'https://placehold.co/100x40/222/999?text=FanCentral' },
-        { id: 4, name: 'SportsHub', logo_url: 'https://placehold.co/100x40/222/999?text=SportsHub' },
-        { id: 5, name: 'Velocity', logo_url: 'https://placehold.co/100x40/222/999?text=Velocity' }
-    ];
+    // Duplicate for seamless loop
+    const doubleSponsors = [...sponsors, ...sponsors, ...sponsors, ...sponsors];
 
     return (
-        <div className={styles.marqueeContainer}>
-            <div className={styles.marquee}>
-                {[...sponsors, ...sponsors].map((s, idx) => (
-                    <div key={`${s.id}-${idx}`} className={styles.sponsorItem}>
-                        <img src={s.logo_url} alt={s.name} className={styles.logo} />
+        <div className={styles.container}>
+            <div className={styles.track}>
+                {doubleSponsors.map((s, idx) => (
+                    <div key={`${s.id}-${idx}`} className={styles.item}>
+                        <span className={styles.nameOnly}>{s.name}</span>
                     </div>
                 ))}
             </div>

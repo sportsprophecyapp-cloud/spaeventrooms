@@ -10,14 +10,14 @@
 /* FORCES EVERYTHING ONTO ONE LINE */
 .track {
     display: flex;
+    flex-wrap: nowrap; /* PREVENTS WRAPPING */
     gap: 5rem;
     width: fit-content;
-    white-space: nowrap;
     animation: scroll 30s linear infinite;
 }
 
 .item {
-    flex-shrink: 0;
+    flex-shrink: 0; /* PREVENTS SQUEEZING */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,21 +30,12 @@
     transform: scale(1.1);
 }
 
-.logo {
-    height: 24px; /* Professional slim profile */
-    width: auto;
-    filter: grayscale(100%) brightness(2);
-}
-
-.item:hover .logo {
-    filter: grayscale(0%) brightness(1);
-}
-
 .nameOnly {
     font-size: 0.8rem;
     font-weight: 900;
     letter-spacing: 2px;
     color: white;
+    white-space: nowrap; /* PREVENTS TEXT WRAPPING */
 }
 
 @keyframes scroll {
