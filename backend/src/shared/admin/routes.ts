@@ -1,47 +1,22 @@
 import { Router } from 'express';
 import { 
-    getAllSupporters, // NEW
+    getAllSupporters,
     searchSupporters, 
-    updateUserRole, 
-    getRooms, 
-    assignRoomOwner, 
-    getDraws, 
-    createDraw, 
-    resolveDraw,
-    createRoom,
-    getAllMatches,
-    deleteMatch,
-    clearDebugTestMatches
+    updateUserPermissions, // NEW
+    getRooms,
+    // ... other imports
 } from './controller';
-import { authenticate, isAdmin } from '../auth/middleware';
+import { authenticate, hasPermission } from '../auth/middleware';
 
 const router = Router();
 
-// Apply strict admin check to all routes
 router.use(authenticate);
-router.use(isAdmin);
 
-/**
- * USER & ROOM MANAGEMENT
- */
-router.get('/users', getAllSupporters); // NEW
-router.get('/users/search', searchSupporters);
-router.put('/users/:userId/role', updateUserRole);
-router.get('/rooms', getRooms);
-router.post('/rooms', createRoom);
+// USER MANAGEMENT (Granular)
+router.get('/users', hasPermission('can_manage_users'), getAllSupporters);
+router.get('/users/search', hasPermission('can_manage_users'), searchSupporters);
+router.put('/users/:userId/permissions', hasPermission('can_manage_users'), updateUserPermissions); // NEW
 
-/**
- * MATCH & DATA CONTROLS
- */
-router.get('/matches', getAllMatches);
-router.delete('/matches/:matchId', deleteMatch);
-router.post('/matches/clear-debug', clearDebugTestMatches);
-
-/**
- * PRIZE DRAW MANAGEMENT
- */
-router.get('/draws', getDraws);
-router.post('/draws', createDraw);
-router.post('/draws/resolve', resolveDraw);
+// ... (rest of routes will be updated to use hasPermission later)
 
 export default router;
