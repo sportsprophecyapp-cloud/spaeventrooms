@@ -4,7 +4,6 @@ import { query } from '../database';
 // 1. GET ALL SUPPORTERS (FINAL FIX)
 export const getAllSupporters = async (req: Request, res: Response) => {
     try {
-        // This query is more robust and explicit for grouping, preventing common SQL errors.
         const sql = `
             SELECT 
                 u.id, 
@@ -42,8 +41,6 @@ export const getSiteStats = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to fetch site stats' });
     }
 };
-
-// ... (rest of the file remains the same)
 
 // 3. GET SPONSOR STATS (NEW)
 export const getSponsorStats = async (req: Request, res: Response) => {
@@ -105,4 +102,13 @@ export const updateUserPermissions = async (req: Request, res: Response) => {
     } catch (err) {
         res.status(500).json({ error: 'Update failed' });
     }
+};
+
+// RESTORING STUBS FOR BUILD
+export const searchSupporters = async (req: Request, res: Response) => {
+    res.status(501).json({ message: 'Not Implemented' });
+};
+
+export const getRooms = async (req: Request, res: Response) => {
+    res.status(501).json({ message: 'Not Implemented' });
 };
