@@ -1,0 +1,48 @@
+.rewardCenter {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.voucherList {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.voucher {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+}
+
+.voucher.claimed {
+    opacity: 0.5;
+}
+
+.voucherInfo h4 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.voucherInfo p {
+    margin: 5px 0 0;
+    font-size: 0.9rem;\n    color: #ccc;
+}
+
+.claimBtn {
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+}
+
+.claimBtn:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}

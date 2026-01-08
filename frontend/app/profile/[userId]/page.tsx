@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import styles from './page.module.css';
+import RewardCenter from '@/app/components/RewardCenter/RewardCenter';
 
 interface UserProfile {
     id: string;
@@ -163,15 +164,18 @@ const ProfilePage = () => {
                 </section>
 
                 {isOwnProfile && (
-                    <section className={`${styles.referralCard} glass`}>
-                        <div className={styles.refInfo}>
-                            <h3>RECRUIT NEW PLAYERS</h3>
-                            <p>Share your link and earn 50 tokens for every signup.</p>
-                        </div>
-                        <button onClick={handleCopyReferral} className={styles.copyBtn}>
-                            {copyMessage || 'COPY REFERRAL LINK'}
-                        </button>
-                    </section>
+                    <>
+                        <section className={`${styles.referralCard} glass`}>
+                            <div className={styles.refInfo}>
+                                <h3>RECRUIT NEW PLAYERS</h3>
+                                <p>Share your link and earn 50 tokens for every signup.</p>
+                            </div>
+                            <button onClick={handleCopyReferral} className={styles.copyBtn}>
+                                {copyMessage || 'COPY REFERRAL LINK'}
+                            </button>
+                        </section>
+                        <RewardCenter />
+                    </>
                 )}
             </div>
         </div>

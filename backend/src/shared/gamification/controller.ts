@@ -69,6 +69,39 @@ export const handleGetLeaderboard = async (req: Request, res: Response) => {
     }
 };
 
+export const handleGetVouchers = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        const result = await dbQuery(
+            `SELECT id, title, description, claimed_at IS NOT NULL as claimed FROM user_vouchers WHERE user_id = $1 ORDER BY created_at DESC`,
+            [userId]
+        );
+        res.json({ success: true, vouchers: result.rows });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Error fetching vouchers' });
+    }
+};
+
+export const handleClaimVoucher = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        const { voucherId } = req.body;
+
+        const result = await dbQuery(
+            `UPDATE user_vouchers SET claimed_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND claimed_at IS NULL RETURNING id`,
+            [voucherId, userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Voucher not found or already claimed' });
+        }
+
+        res.json({ success: true, voucherId });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Error claiming voucher' });
+    }
+};
+
 export const handleGetTickets = async (req: AuthRequest, res: Response) => {
     try {
         const result = await dbQuery(`SELECT COUNT(*) as count FROM prize_draw_entries WHERE user_id = $1`, [req.user?.id]);
