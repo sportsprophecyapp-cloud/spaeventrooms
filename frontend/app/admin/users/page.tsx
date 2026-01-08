@@ -28,19 +28,29 @@ const AdminUsersPage = () => {
 
     const isSuperAdmin = user?.permissions.includes('super_admin');
 
+    // DEBUGGING: Log admin status and supporters data
+    console.log('AdminUsersPage - Is Super Admin:', isSuperAdmin);
+    console.log('AdminUsersPage - Supporters State:', supporters);
+
     const fetchAllUsers = async () => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         try {
             const res = await fetch(`${apiUrl}/api/admin/users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (res.ok) setSupporters(await res.json());
-        } catch (e) { console.error('Fetch users failed'); }
+            if (res.ok) {
+                const data = await res.json();
+                console.log('AdminUsersPage - Fetched data:', data); // DEBUG: Log fetched data
+                setSupporters(data);
+            }
+        } catch (e) { console.error('Fetch users failed', e); }
     };
 
     useEffect(() => {
-        if (isSuperAdmin) fetchAllUsers();
-    }, [isSuperAdmin]);
+        if (token && isSuperAdmin) {
+            fetchAllUsers();
+        }
+    }, [token, isSuperAdmin]);
 
     const handleOpenPermissionsModal = (supporter: Supporter) => {
         setSelectedUser(supporter);
@@ -79,7 +89,7 @@ const AdminUsersPage = () => {
                     <input className={styles.input} placeholder="Filter Supporters..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
                 <div className={`${styles.tableCard} glass`}>
-                    {filteredSupporters.map(s => (
+                    {filteredSupporters.length > 0 ? filteredSupporters.map(s => (
                         <div key={s.id} className={`${styles.row} ${s.is_banned ? styles.banned : ''}`}>
                             <div className={styles.userMeta}>
                                 <span className={styles.username}>@{s.username}</span>
@@ -95,7 +105,9 @@ const AdminUsersPage = () => {
                                 <button className={styles.manageBtn} onClick={() => handleOpenPermissionsModal(s)}>MANAGE</button>
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <div className={styles.row}>No supporters found.</div>
+                    )}
                 </div>
             </main>
 

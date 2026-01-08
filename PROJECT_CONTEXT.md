@@ -29,7 +29,11 @@ The platform is prioritizing the complete refinement and polishing of the Soccer
 
 2.  **The "Golf Arena" Template:**
     - **(POSTPONED)** Development will commence after the Soccer room is fully optimized.
-    - Initial tasks were hole-by-hole pairing calls and specialized golf mechanics.
 
 3.  **Beta Launch:**
     - Initial opening once Google Organization Verification is complete.
+
+## 🔧 WORKFLOW SUMMARY FOR FUTURE SESSIONS:
+- **Commit Message Style:** Single line, descriptive, prefixed with a type (e.g., `feat:`, `fix:`, `refactor:`).
+- **Deployment:** Executed via `./deploy.sh "commit message"` from the project root (`/Users/williamcommu/Desktop/mobileV3`).
+- **Self-Checks:** Systematic review of documentation and code is performed after major feature implementations to ensure functionality and consistency.

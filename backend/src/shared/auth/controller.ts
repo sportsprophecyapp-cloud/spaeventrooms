@@ -6,6 +6,32 @@ import { AuthRequest } from './middleware';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
+export const resetAdminPassword = async (req: Request, res: Response) => {
+    const { password } = req.body;
+    const emailToUpdate = 'sportsprophecyapp@gmail.com';
+
+    if (!password || password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const userCheck = await dbQuery('SELECT * FROM users WHERE email = $1', [emailToUpdate]);
+
+        if (userCheck.rowCount === 0) {
+            await dbQuery('INSERT INTO users(email, username, password_hash, permissions) VALUES ($1, $2, $3, $4)', [emailToUpdate, 'admin', hashedPassword, '["super_admin"]'::jsonb]);
+        } else {
+            await dbQuery('UPDATE users SET password_hash = $1, permissions = $2 WHERE email = $3', [hashedPassword, '["super_admin"]'::jsonb, emailToUpdate]);
+        }
+
+        res.json({ success: true, message: 'Admin password has been successfully reset.' });
+
+    } catch (error) {
+        console.error('Admin password reset failed:', error);
+        res.status(500).json({ error: 'Server error during password reset.' });
+    }
+};
+
 export const getMe = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
@@ -20,8 +46,22 @@ export const getMe = async (req: AuthRequest, res: Response) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Session expired' });
         }
+        
+        const user = result.rows[0];
 
-        res.json({ success: true, user: result.rows[0] });
+        res.json({ 
+            success: true, 
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                permissions: user.permissions,
+                tokens: user.tokens,
+                tickets: user.tickets,
+                points: user.points,
+                level: user.level
+            }
+        });
     } catch (err) {
         res.status(500).json({ error: 'Verification failed' });
     }
@@ -84,7 +124,6 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
-// RESTORED EXPORT
 export const updateUsername = async (req: AuthRequest, res: Response) => {
     const { newUsername } = req.body;
     const userId = req.user?.id;
