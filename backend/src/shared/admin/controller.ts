@@ -6,18 +6,16 @@ export const getAllSupporters = async (req: Request, res: Response) => {
     try {
         const sql = `
             SELECT 
-                u.id, 
-                u.username, 
-                u.email, 
-                u.permissions, 
-                u.created_at,
-                u.is_banned,
-                u.is_muted,
-                COUNT(p.id) as prediction_count
-            FROM users u
-            LEFT JOIN soccer_predictions p ON u.id = p.user_id
-            GROUP BY u.id
-            ORDER BY u.created_at DESC
+                id, 
+                username, 
+                email, 
+                permissions, 
+                created_at,
+                is_banned,
+                is_muted,
+                0 as prediction_count
+            FROM users
+            ORDER BY created_at DESC
         `;
         const result = await query(sql);
         res.json(result.rows);
