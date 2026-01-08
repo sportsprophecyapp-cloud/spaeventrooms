@@ -89,10 +89,10 @@ const runMigrations = async () => {
 
         if (userCheck.rowCount === 0) {
             console.log(`Admin user not found. Creating user '${adminEmail}'...`);
-            await client.query('INSERT INTO users(email, username, password_hash, permissions) VALUES ($1, $2, $3, $4)', [adminEmail, 'admin', hashedPassword, '["super_admin"]'::jsonb]);
+            await client.query('INSERT INTO users(email, username, password_hash, permissions) VALUES ($1, $2, $3, $4)', [adminEmail, 'admin', hashedPassword, '["super_admin"]']);
         } else {
             console.log(`Admin user found. Updating password and permissions for '${adminEmail}'...`);
-            await client.query('UPDATE users SET password_hash = $1, permissions = $2 WHERE email = $3', [hashedPassword, '["super_admin"]'::jsonb, adminEmail]);
+            await client.query('UPDATE users SET password_hash = $1, permissions = $2 WHERE email = $3', [hashedPassword, '["super_admin"]', adminEmail]);
         }
         
         console.log('✅ Admin user is configured correctly.');

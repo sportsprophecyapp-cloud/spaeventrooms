@@ -19,9 +19,9 @@ export const resetAdminPassword = async (req: Request, res: Response) => {
         const userCheck = await dbQuery('SELECT * FROM users WHERE email = $1', [emailToUpdate]);
 
         if (userCheck.rowCount === 0) {
-            await dbQuery('INSERT INTO users(email, username, password_hash, permissions) VALUES ($1, $2, $3, $4)', [emailToUpdate, 'admin', hashedPassword, '["super_admin"]'::jsonb]);
+            await dbQuery('INSERT INTO users(email, username, password_hash, permissions) VALUES ($1, $2, $3, $4)', [emailToUpdate, 'admin', hashedPassword, '["super_admin"]']);
         } else {
-            await dbQuery('UPDATE users SET password_hash = $1, permissions = $2 WHERE email = $3', [hashedPassword, '["super_admin"]'::jsonb, emailToUpdate]);
+            await dbQuery('UPDATE users SET password_hash = $1, permissions = $2 WHERE email = $3', [hashedPassword, '["super_admin"]', emailToUpdate]);
         }
 
         res.json({ success: true, message: 'Admin password has been successfully reset.' });
