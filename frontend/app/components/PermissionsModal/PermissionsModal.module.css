@@ -1,0 +1,112 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    width: 90%;
+    max-width: 600px;
+    padding: 2rem;
+    border-radius: 24px;
+}
+
+.modal h3 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.section h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+
+.permissionsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.permissionItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.moderationActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.modBtn {
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.banBtn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.banBtn.unban {
+    background-color: #4caf50;
+}
+
+.muteBtn {
+    background-color: #f39c12;
+    color: white;
+}
+
+.muteBtn.unmute {
+    background-color: #3498db;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.cancelBtn, .saveBtn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 900;
+    cursor: pointer;
+    border: none;
+}
+
+.cancelBtn {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.saveBtn {
+    background: var(--accent);
+    color: black;
+}
+
+.status {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: var(--accent);
+}

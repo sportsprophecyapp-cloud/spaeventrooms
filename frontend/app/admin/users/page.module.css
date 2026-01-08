@@ -57,6 +57,11 @@
     align-items: center;
     padding: 1.5rem 2rem;
     border-bottom: 1px solid var(--glass-border);
+    transition: opacity 0.3s;
+}
+
+.row.banned {
+    opacity: 0.4;
 }
 
 .userMeta { display: flex; flex-direction: column; gap: 4px; }
@@ -64,18 +69,35 @@
 .email { font-size: 0.8rem; color: var(--neutral); }
 .metadata { font-size: 0.8rem; color: #888; }
 
-.actions { display: flex; align-items: center; gap: 1rem; }
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
-.roleBadge {
+.roleBadge, .bannedBadge, .mutedBadge {
     font-size: 0.65rem;
     font-weight: 900;
-    background: rgba(255,255,255,0.1);
     padding: 4px 10px;
     border-radius: 6px;
     text-transform: uppercase;
 }
 
-.adminBtn {
+.roleBadge {
+    background: rgba(255,255,255,0.1);
+}
+
+.bannedBadge {
+    background: #ff4d4d;
+    color: white;
+}
+
+.mutedBadge {
+    background: #f39c12;
+    color: white;
+}
+
+.manageBtn {
     background: #ffd700;
     color: black;
     border: none;
@@ -84,6 +106,10 @@
     font-weight: 900;
     font-size: 0.7rem;
     cursor: pointer;
+}
+
+.messageBtn {
+    background: var(--accent);
 }
 
 .toast {

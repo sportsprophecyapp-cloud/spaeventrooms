@@ -8,7 +8,8 @@ import gamificationRoutes from './shared/gamification/routes';
 import sponsorSubscriptionRoutes from './shared/sponsor-subscriptions/routes';
 import sponsorApplicationRoutes from './shared/sponsor-applications/routes';
 import chatRoutes from './shared/chat/routes';
-import adminRoutes from './shared/admin/routes'; // Added Admin Routes
+import adminRoutes from './shared/admin/routes';
+import moderationRoutes from './shared/moderation/routes'; // NEW
 
 const app = express();
 
@@ -30,7 +31,8 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes); // Mounted Admin Routes
+app.use('/api/admin', adminRoutes);
+app.use('/api/moderation', moderationRoutes); // NEW
 app.use('/api/rooms/:roomId/announcements', announcementRoutes);
 app.use('/api/rooms/:roomId/predictions', predictionRoutes);
 app.use('/api/rooms/:roomId/sponsors', sponsorRoutes);

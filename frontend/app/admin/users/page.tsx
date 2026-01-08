@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './page.module.css';
-import PermissionsModal from '../../components/PermissionsModal'; // NEW MODAL
+import PermissionsModal from '../../components/PermissionsModal/PermissionsModal';
+import MessageUserModal from '../../components/MessageUserModal/MessageUserModal';
+import AnalyticsDashboard from '../../components/AnalyticsDashboard/AnalyticsDashboard';
 
 interface Supporter {
     id: number;
@@ -12,6 +14,8 @@ interface Supporter {
     permissions: string[];
     created_at: string;
     prediction_count: string;
+    is_banned: boolean;
+    is_muted: boolean;
 }
 
 const AdminUsersPage = () => {
@@ -19,7 +23,8 @@ const AdminUsersPage = () => {
     const [supporters, setSupporters] = useState<Supporter[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState<Supporter | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
+    const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
 
     const isSuperAdmin = user?.permissions.includes('super_admin');
 
@@ -37,15 +42,21 @@ const AdminUsersPage = () => {
         if (isSuperAdmin) fetchAllUsers();
     }, [isSuperAdmin]);
 
-    const handleOpenModal = (supporter: Supporter) => {
+    const handleOpenPermissionsModal = (supporter: Supporter) => {
         setSelectedUser(supporter);
-        setIsModalOpen(true);
+        setIsPermissionsModalOpen(true);
     };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
+    const handleOpenMessageModal = (supporter: Supporter) => {
+        setSelectedUser(supporter);
+        setIsMessageModalOpen(true);
+    };
+
+    const handleCloseModals = () => {
         setSelectedUser(null);
-        fetchAllUsers(); // Refresh list after update
+        setIsPermissionsModalOpen(false);
+        setIsMessageModalOpen(false);
+        fetchAllUsers(); // Refresh list after any update
     };
 
     const filteredSupporters = supporters.filter(s => 
@@ -62,12 +73,14 @@ const AdminUsersPage = () => {
             </header>
 
             <main className={styles.main}>
+                <AnalyticsDashboard />
+
                 <div className={`${styles.searchBox} glass`}>
                     <input className={styles.input} placeholder="Filter Supporters..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
                 <div className={`${styles.tableCard} glass`}>
                     {filteredSupporters.map(s => (
-                        <div key={s.id} className={styles.row}>
+                        <div key={s.id} className={`${styles.row} ${s.is_banned ? styles.banned : ''}`}>
                             <div className={styles.userMeta}>
                                 <span className={styles.username}>@{s.username}</span>
                                 <span className={styles.email}>{s.email}</span>
@@ -75,8 +88,11 @@ const AdminUsersPage = () => {
                                 <span className={styles.metadata}>Predictions: {s.prediction_count}</span>
                             </div>
                             <div className={styles.actions}>
+                                {s.is_banned && <span className={styles.bannedBadge}>BANNED</span>}
+                                {s.is_muted && <span className={styles.mutedBadge}>MUTED</span>} 
                                 {s.permissions.map(p => <span key={p} className={styles.roleBadge}>{p}</span>)}
-                                <button className={styles.manageBtn} onClick={() => handleOpenModal(s)}>MANAGE</button>
+                                <button className={`${styles.manageBtn} ${styles.messageBtn}`} onClick={() => handleOpenMessageModal(s)}>MESSAGE</button>
+                                <button className={styles.manageBtn} onClick={() => handleOpenPermissionsModal(s)}>MANAGE</button>
                             </div>
                         </div>
                     ))}
@@ -85,8 +101,16 @@ const AdminUsersPage = () => {
 
             {selectedUser && (
                 <PermissionsModal 
-                    isOpen={isModalOpen} 
-                    onClose={handleCloseModal} 
+                    isOpen={isPermissionsModalOpen} 
+                    onClose={handleCloseModals} 
+                    user={selectedUser} 
+                />
+            )}
+
+            {selectedUser && (
+                <MessageUserModal 
+                    isOpen={isMessageModalOpen} 
+                    onClose={handleCloseModals} 
                     user={selectedUser} 
                 />
             )}

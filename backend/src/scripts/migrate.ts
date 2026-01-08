@@ -64,17 +64,33 @@ const runMigrations = async () => {
                 claimed_at TIMESTAMP WITH TIME ZONE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS chat_filter_words (
+                id SERIAL PRIMARY KEY,
+                word VARCHAR(255) UNIQUE NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
         `;
 
         await client.query(schema);
+
+        // Add columns if they don't exist
+        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT false');
+        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS is_muted BOOLEAN DEFAULT false');
+
         console.log('Schema applied successfully.');
 
     } catch (err) {
         console.error('Migration failed:', err);
     } finally {
         client.release();
-        process.exit();
     }
 };
 
-runMigrations();
+// Only run migrations if this script is executed directly
+if (require.main === module) {
+    runMigrations().then(() => {
+        console.log('Migration script finished.');
+        process.exit();
+    });
+}
