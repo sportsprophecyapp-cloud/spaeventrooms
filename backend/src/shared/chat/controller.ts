@@ -3,10 +3,35 @@ import { query } from '../database';
 import { AuthRequest } from '../auth/middleware';
 import { socketService } from '../socket/SocketService';
 
-// ... (getFilteredWords remains the same)
+const getFilteredWords = async () => {
+    try {
+        const result = await query('SELECT word FROM chat_filter_words');
+        return result.rows.map(r => r.word);
+    } catch (e) {
+        console.error("[WARN] Could not fetch chat filter words:", e);
+        return [];
+    }
+};
 
 export const getRoomMessages = async (req: Request, res: Response) => {
-    // ... (existing, corrected implementation)
+    const { roomId } = req.params;
+    try {
+        const result = await query(`
+            SELECT 
+                m.*, 
+                COALESCE(u.username, '[deleted]') as username, 
+                COALESCE(u.current_level, 1) as current_level
+            FROM room_messages m
+            LEFT JOIN users u ON m.user_id = u.id
+            WHERE m.room_id = $1
+            ORDER BY m.created_at DESC
+            LIMIT 50
+        `, [roomId]);
+        res.json(result.rows.reverse());
+    } catch (err) {
+        console.error('[FATAL] Error fetching room messages:', err);
+        res.status(500).json({ error: 'Could not load chat history.' });
+    }
 };
 
 export const createRoomMessage = async (req: AuthRequest, res: Response) => {
@@ -18,7 +43,6 @@ export const createRoomMessage = async (req: AuthRequest, res: Response) => {
         return res.status(400).json({ message: 'Message content is required.' });
     }
 
-    // 1. Verify User and Permissions
     let user;
     try {
         const userResult = await query('SELECT username, current_level, is_muted FROM users WHERE id = $1', [userId]);
@@ -34,7 +58,6 @@ export const createRoomMessage = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({ message: 'Server error while verifying your account.' });
     }
 
-    // 2. Filter Message Content
     try {
         const filteredWords = await getFilteredWords();
         const lowerCaseContent = content.toLowerCase();
@@ -44,11 +67,9 @@ export const createRoomMessage = async (req: AuthRequest, res: Response) => {
             }
         }
     } catch (err) {
-        // This is unlikely to fail, but good to have.
-        console.error("[FATAL] Chat filtering failed:", err);
+        console.error("[WARN] Chat filtering failed:", err);
     }
 
-    // 3. Insert Message into Database
     let newMessage;
     try {
         const result = await query(
@@ -62,13 +83,10 @@ export const createRoomMessage = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({ message: 'Failed to save your message to the database.' });
     }
 
-    // 4. Broadcast via Socket.io
     try {
         socketService.emitToRoom(roomId, 'chat_message', newMessage);
     } catch (err) {
-        console.error("[FATAL] Socket.io broadcast failed:", err);
-        // Note: The message is in the DB, but others won't see it in real-time.
-        // The request still succeeds overall, as the message is persistent.
+        console.error("[WARN] Socket.io broadcast failed:", err);
     }
 
     res.status(201).json(newMessage);
