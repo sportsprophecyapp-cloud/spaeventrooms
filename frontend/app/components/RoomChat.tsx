@@ -21,8 +21,8 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
-    const [isSending, setIsSending] = useState(false); // NEW
-    const [error, setError] = useState<string | null>(null); // NEW
+    const [isSending, setIsSending] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const { isAuthenticated, token } = useAuth();
     const { socket } = useSocket();
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,20 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
 
     useEffect(() => {
         const fetchHistory = async () => {
-            // ... (existing history fetch logic)
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                const res = await fetch(`${apiUrl}/api/rooms/${roomId}/chat`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setMessages(data);
+                } else {
+                    setError('Could not load chat history.');
+                }
+            } catch (err) {
+                setError('Could not connect to the server to load chat history.');
+            } finally {
+                setLoading(false);
+            }
         };
         fetchHistory();
     }, [roomId]);
@@ -66,11 +79,13 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
                 body: JSON.stringify({ content })
             });
 
-            if (!res.ok) {
+            if (res.ok) {
+                const sentMessage = await res.json();
+                // OPTIMISTIC UI: Add message immediately instead of waiting for socket
+                setMessages(prev => [...prev, sentMessage]);
+            } else {
                 const errorData = await res.json();
                 setError(errorData.message || 'Failed to send message. Please try again.');
-            } else {
-                // Success, message will be broadcast via socket.
             }
         } catch (err) {
             setError('Could not connect to the chat server.');
@@ -87,7 +102,21 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
             </div>
 
             <div className={styles.feed} ref={scrollRef}>
-                {/* ... (existing message mapping logic) ... */}
+                 {loading ? (
+                    <div className={styles.loading}>Accessing Arena Channel...</div>
+                ) : messages.length === 0 ? (
+                    <div className={styles.empty}>Arena is quiet. Make your call!</div>
+                ) : (
+                    messages.map((msg) => (
+                        <div key={msg.id} className={styles.message}>
+                            <div className={styles.meta}>
+                                <span className={styles.level}>Lvl {msg.current_level}</span>
+                                <span className={styles.username}>@{msg.username}</span>
+                            </div>
+                            <p className={styles.content}>{msg.content}</p>
+                        </div>
+                    ))
+                )}
             </div>
 
             {isAuthenticated ? (
