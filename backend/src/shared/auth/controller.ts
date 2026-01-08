@@ -107,8 +107,8 @@ export const register = async (req: Request, res: Response) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const result = await dbQuery(
-            `INSERT INTO users (email, username, password_hash, is_muted) 
-             VALUES ($1, $2, $3, false) RETURNING id, email, username, permissions`,
+            `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets) 
+             VALUES ($1, $2, $3, false, 150, 0) RETURNING id, email, username, permissions, token_balance, total_tickets`,
             [email.toLowerCase(), username, hashedPassword]
         );
 
@@ -118,7 +118,18 @@ export const register = async (req: Request, res: Response) => {
             JWT_SECRET,
             { expiresIn: '7d' }
         );
-        res.status(201).json({ success: true, user: newUser, token });
+        res.status(201).json({ 
+            success: true, 
+            user: { 
+                id: newUser.id, 
+                email: newUser.email, 
+                username: newUser.username,
+                permissions: newUser.permissions,
+                tokens: newUser.token_balance,
+                tickets: newUser.total_tickets,
+            }, 
+            token 
+        });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Server error' });
     }

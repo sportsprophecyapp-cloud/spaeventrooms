@@ -67,6 +67,7 @@ const runMigrations = async () => {
         await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS is_muted BOOLEAN DEFAULT false');
         await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS total_points INTEGER DEFAULT 0');
         await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER DEFAULT 150');
+        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS total_tickets INTEGER DEFAULT 0');
         await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS current_level INTEGER DEFAULT 1');
 
         // Add all missing columns to soccer_predictions table
