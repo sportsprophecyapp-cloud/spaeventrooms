@@ -9,10 +9,13 @@ const UserTray = () => {
     const { user, logout } = useAuth();
     const [isExpanded, setIsExpanded] = useState(false);
 
-    if (!user) return null;
+    // GUARD CLAUSE: Do not render anything if the user object is not yet loaded.
+    if (!user) {
+        return null;
+    }
 
-    // CORRECT PERMISSION CHECK
-    const isAdmin = user.permissions.includes('super_admin') || user.permissions.includes('can_manage_users');
+    // SAFE PERMISSION CHECK: Check permissions only after confirming user exists.
+    const isAdmin = user.permissions?.includes('super_admin') || user.permissions?.includes('can_manage_users');
 
     return (
         <div className={styles.wrapper}>
