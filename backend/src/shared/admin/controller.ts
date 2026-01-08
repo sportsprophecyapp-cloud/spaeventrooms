@@ -1,26 +1,35 @@
 import { Request, Response } from 'express';
 import { query } from '../database';
 
-// 1. GET ALL SUPPORTERS
+// 1. GET ALL SUPPORTERS (DEBUGGING)
 export const getAllSupporters = async (req: Request, res: Response) => {
     try {
-        const sql = `
-            SELECT 
-                id, 
-                username, 
-                email, 
-                permissions, 
-                created_at,
-                is_banned,
-                is_muted,
-                0 as prediction_count
-            FROM users
-            ORDER BY created_at DESC
-        `;
-        const result = await query(sql);
-        res.json(result.rows);
+        const dummyUsers = [
+            {
+                id: 1,
+                username: 'dummyuser1',
+                email: 'dummy1@example.com',
+                permissions: ['supporter'],
+                created_at: new Date().toISOString(),
+                is_banned: false,
+                is_muted: false,
+                prediction_count: 5,
+            },
+            {
+                id: 2,
+                username: 'dummyuser2',
+                email: 'dummy2@example.com',
+                permissions: ['supporter'],
+                created_at: new Date().toISOString(),
+                is_banned: false,
+                is_muted: true,
+                prediction_count: 10,
+            },
+        ];
+        res.json(dummyUsers);
     } catch (err) { res.status(500).json({ error: 'Failed to fetch supporters' }); }
 };
+
 
 // 2. GET SITE STATS
 export const getSiteStats = async (req: Request, res: Response) => {

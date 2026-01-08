@@ -1,4 +1,4 @@
-# ✅ Core Feature QA Checklist (v1.0)
+# ✅ Core Feature QA Checklist (v1.1)
 
 This document is a mandatory pre-flight check before any `deploy.sh` command is recommended. It serves as a guard against regressions in the platform's most critical user-facing functions.
 
@@ -9,6 +9,10 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 - `[ ]` **Logout:** User can successfully log out from the `UserTray` dropdown.
 - `[ ]` **Admin Access:** An admin user can see the "Command Center" and "Arena Wizard" links in the `UserTray`.
 - `[ ]` **Session:** A logged-in user remains logged in after a page refresh.
+
+### New User Onboarding (v1.1 Update)
+- `[ ]` **Chat Access:** A newly registered user can successfully send a message in the chat.
+- `[ ]` **Initial Balance:** A newly registered user starts with 150 Tokens and 0 Tickets.
 
 ### Economy & Balances
 - `[ ]` **Balance Visibility:** The `UserTray` correctly displays the logged-in user's Token and Ticket balances.
@@ -22,5 +26,6 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 
 ### Sponsor & Admin
 - `[ ]` **Admin User View:** Admin can view the full list of registered supporters in the Command Center.
+- `[ ]` **Admin Prediction Count:** The "Predictions" count in the admin user view is accurate.
 - `[ ]` **Admin Role Update:** Admin can successfully promote another user to 'admin' via the Command Center.
 - `[ ]` **Sponsor Application:** The `/sponsors/apply` page and its live preview sandbox are functional.
