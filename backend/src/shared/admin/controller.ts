@@ -1,29 +1,27 @@
 import { Request, Response } from 'express';
 import { query } from '../database';
 
-// 1. GET ALL SUPPORTERS (ULTRA-STABLE EMERGENCY FIX)
+// 1. GET ALL SUPPORTERS (STEP 1: RESTORE PREDICTION COUNT)
 export const getAllSupporters = async (req: Request, res: Response) => {
     try {
-        // This is a last-resort, ultra-safe query. It avoids selecting any complex columns 
-        // (JSONB, BOOLEAN) that are causing the database driver to crash the server.
-        // The goal is to restore the page functionality immediately.
+        // Using a subquery for the count is safer and avoids the complex JOIN that was crashing the server.
         const sql = `
             SELECT 
                 u.id, 
                 u.username, 
                 u.email, 
                 u.created_at,
-                '[]'::jsonb as permissions, -- Placeholder to prevent crash
-                false as is_banned,        -- Placeholder to prevent crash
-                false as is_muted,         -- Placeholder to prevent crash
-                0 as prediction_count      -- Placeholder
+                '[]'::jsonb as permissions, -- Placeholder
+                false as is_banned,        -- Placeholder
+                false as is_muted,         -- Placeholder
+                (SELECT COUNT(*) FROM soccer_predictions WHERE user_id = u.id) as prediction_count
             FROM users u
             ORDER BY u.created_at DESC
         `;
         const result = await query(sql);
         res.json(result.rows);
     } catch (err) { 
-        console.error("[FATAL] CRASH while fetching supporters list with ultra-stable query:", err);
+        console.error("[FATAL] CRASH while restoring prediction_count:", err);
         res.status(500).json({ error: 'A critical and persistent error occurred on the server.' }); 
     }
 };
