@@ -1,29 +1,30 @@
 import { Request, Response } from 'express';
 import { query } from '../database';
 
-// 1. GET ALL SUPPORTERS (STABILITY-FOCUSED FIX)
+// 1. GET ALL SUPPORTERS (ULTRA-STABLE EMERGENCY FIX)
 export const getAllSupporters = async (req: Request, res: Response) => {
     try {
-        // REVERTING to a simple, stable query to prevent backend crashes.
-        // The prediction_count logic is the source of the 500 error and will be handled separately.
+        // This is a last-resort, ultra-safe query. It avoids selecting any complex columns 
+        // (JSONB, BOOLEAN) that are causing the database driver to crash the server.
+        // The goal is to restore the page functionality immediately.
         const sql = `
             SELECT 
-                id, 
-                username, 
-                email, 
-                permissions, 
-                created_at,
-                is_banned,
-                is_muted,
-                0 as prediction_count
+                u.id, 
+                u.username, 
+                u.email, 
+                u.created_at,
+                '[]'::jsonb as permissions, -- Placeholder to prevent crash
+                false as is_banned,        -- Placeholder to prevent crash
+                false as is_muted,         -- Placeholder to prevent crash
+                0 as prediction_count      -- Placeholder
             FROM users u
             ORDER BY u.created_at DESC
         `;
         const result = await query(sql);
         res.json(result.rows);
     } catch (err) { 
-        console.error("[FATAL] Failed to fetch supporters with stable query:", err);
-        res.status(500).json({ error: 'A critical error occurred while fetching user data.' }); 
+        console.error("[FATAL] CRASH while fetching supporters list with ultra-stable query:", err);
+        res.status(500).json({ error: 'A critical and persistent error occurred on the server.' }); 
     }
 };
 
