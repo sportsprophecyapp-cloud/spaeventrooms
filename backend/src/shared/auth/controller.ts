@@ -6,6 +6,50 @@ import { AuthRequest } from './middleware';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
+// ... (other functions remain the same)
+
+export const register = async (req: Request, res: Response) => {
+    try {
+        const { email, password, username } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const result = await dbQuery(
+            `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets, total_points, current_level) 
+             VALUES ($1, $2, $3, false, 150, 0, 0, 1) 
+             RETURNING id, email, username, permissions, token_balance, total_tickets, total_points, current_level, is_muted`,
+            [email.toLowerCase(), username, hashedPassword]
+        );
+
+        const newUser = result.rows[0];
+        const token = jwt.sign(
+            { id: newUser.id, email: newUser.email, username: newUser.username, permissions: newUser.permissions },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({ 
+            success: true, 
+            user: { 
+                id: newUser.id, 
+                email: newUser.email, 
+                username: newUser.username,
+                permissions: newUser.permissions,
+                tokens: newUser.token_balance,
+                tickets: newUser.total_tickets,
+                points: newUser.total_points,
+                level: newUser.current_level,
+                is_muted: newUser.is_muted // Explicitly return the mute status
+            }, 
+            token 
+        });
+    } catch (error) {
+        console.error("[FATAL] User registration failed:", error);
+        res.status(500).json({ success: false, error: 'Server error during registration.' });
+    }
+};
+
+// ... (rest of the functions remain the same)
+
 export const resetAdminPassword = async (req: Request, res: Response) => {
     const { password } = req.body;
     const emailToUpdate = 'sportsprophecyapp@gmail.com';
@@ -98,44 +142,6 @@ export const login = async (req: Request, res: Response) => {
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
-    }
-};
-
-export const register = async (req: Request, res: Response) => {
-    try {
-        const { email, password, username } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const result = await dbQuery(
-            `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets, total_points, current_level) 
-             VALUES ($1, $2, $3, false, 150, 0, 0, 1) 
-             RETURNING id, email, username, permissions, token_balance, total_tickets, total_points, current_level`,
-            [email.toLowerCase(), username, hashedPassword]
-        );
-
-        const newUser = result.rows[0];
-        const token = jwt.sign(
-            { id: newUser.id, email: newUser.email, username: newUser.username, permissions: newUser.permissions },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        res.status(201).json({ 
-            success: true, 
-            user: { 
-                id: newUser.id, 
-                email: newUser.email, 
-                username: newUser.username,
-                permissions: newUser.permissions,
-                tokens: newUser.token_balance,
-                tickets: newUser.total_tickets,
-                points: newUser.total_points,
-                level: newUser.current_level
-            }, 
-            token 
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, error: 'Server error' });
     }
 };
 

@@ -46,6 +46,12 @@ export const createRoomMessage = async (req: AuthRequest, res: Response) => {
     try {
         // Fetch user info for the message, including mute status
         const userResult = await query('SELECT username, current_level, is_muted FROM users WHERE id = $1', [userId]);
+        
+        // CRITICAL FIX: Ensure user exists before proceeding
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
         const user = userResult.rows[0];
 
         // Check if user is muted
