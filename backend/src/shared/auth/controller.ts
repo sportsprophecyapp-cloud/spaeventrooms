@@ -6,7 +6,6 @@ import { AuthRequest } from './middleware';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
-// FIXED: Use 'permissions' instead of the deleted 'role' column
 export const getMe = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
@@ -24,30 +23,22 @@ export const getMe = async (req: AuthRequest, res: Response) => {
 
         res.json({ success: true, user: result.rows[0] });
     } catch (err) {
-        console.error('Auth /me Error:', err);
         res.status(500).json({ error: 'Verification failed' });
     }
 };
 
-// FIXED: Use 'permissions' in login response
 export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
         const result = await dbQuery('SELECT * FROM users WHERE email = $1', [email]);
-
-        if (result.rows.length === 0) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
+        if (result.rows.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
 
         const user = result.rows[0];
         const validPassword = await bcrypt.compare(password, user.password_hash);
-
-        if (!validPassword) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
+        if (!validPassword) return res.status(401).json({ message: 'Invalid credentials' });
 
         const token = jwt.sign(
-            { id: user.id, email: user.email, username: user.username, permissions: user.permissions }, // Add permissions to JWT
+            { id: user.id, email: user.email, username: user.username, permissions: user.permissions },
             JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -70,7 +61,6 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-// ... (register and other functions remain largely the same, but should be audited)
 export const register = async (req: Request, res: Response) => {
     try {
         const { email, password, username } = req.body;
@@ -89,6 +79,32 @@ export const register = async (req: Request, res: Response) => {
             { expiresIn: '7d' }
         );
         res.status(201).json({ success: true, user: newUser, token });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+};
+
+// RESTORED EXPORT
+export const updateUsername = async (req: AuthRequest, res: Response) => {
+    const { newUsername } = req.body;
+    const userId = req.user?.id;
+
+    if (!newUsername || newUsername.length < 3) {
+        return res.status(400).json({ success: false, error: 'Name must be at least 3 characters' });
+    }
+
+    try {
+        const check = await dbQuery('SELECT id FROM users WHERE username = $1 AND id != $2', [newUsername, userId]);
+        if (check.rows.length > 0) {
+            return res.status(400).json({ success: false, error: 'Name already taken' });
+        }
+
+        const result = await dbQuery(
+            'UPDATE users SET username = $1 WHERE id = $2 RETURNING id, username, email, permissions',
+            [newUsername, userId]
+        );
+
+        res.json({ success: true, user: result.rows[0] });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Server error' });
     }
