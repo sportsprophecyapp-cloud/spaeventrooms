@@ -1,13 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation'; // NEW
 
 // IRONCLAD USER TYPE (v3.8): Synchronized with backend permissions
 interface User {
     id: number;
     email: string;
     username: string;
-    permissions: string[]; // <-- The missing piece
+    permissions: string[]; 
     tokens: number;
     tickets: number;
     points: number;
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
+    const router = useRouter(); // NEW
 
     useEffect(() => {
         const savedToken = localStorage.getItem('auth_token');
@@ -61,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setToken(null);
         setUser(null);
         localStorage.removeItem('auth_token');
+        router.push('/'); // NEW: Redirect to homepage
     };
 
     return (
