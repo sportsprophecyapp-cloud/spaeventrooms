@@ -15,6 +15,48 @@ export class SoccerRoom extends BaseRoom {
 
     initRoutes(): void {
         this.router.get('/matches', async (req, res) => {
+            // ... (matches fetch logic)
+        });
+
+        this.router.get('/my-calls', authenticate, async (req: AuthRequest, res) => {
+            // ... (my-calls fetch logic)
+        });
+
+        this.router.post('/predictions/match', authenticate, async (req: AuthRequest, res) => {
+            const { matchId, pick } = req.body;
+            const userId = req.user?.id;
+            if (!matchId || !pick) return res.status(400).json({ message: 'matchId and pick are required' });
+
+            try {
+                // Check if user can predict (pre-game only)
+                const matchCheck = await query('SELECT start_time, status FROM soccer_matches WHERE match_id = $1', [matchId]);
+                if (matchCheck.rows.length === 0 || matchCheck.rows[0].status !== 'scheduled' || new Date(matchCheck.rows[0].start_time) <= new Date()) {
+                    return res.status(400).json({ message: 'This match has already started!' });
+                }
+
+                const existing = await query(
+                    'SELECT id FROM soccer_predictions WHERE user_id = $1 AND match_id = $2',
+                    [userId, matchId]
+                );
+
+                if (existing.rows.length > 0) {
+                    return res.status(400).json({ message: 'Your call is already locked in for this match!' });
+                }
+
+                // Set default 'pending' result on new predictions
+                await query(`
+                    INSERT INTO soccer_predictions (user_id, match_id, prediction_data, result)
+                    VALUES ($1, $2, $3, 'pending')
+                `, [userId, matchId, JSON.stringify({ pick })]);
+                
+                res.json({ success: true, message: 'Call Transmitted & Locked!' });
+            } catch (err) {
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
+
+        // ... (rest of routes)
+        this.router.get('/matches', async (req, res) => {
             try {
                 const result = await query(`
                     SELECT * FROM soccer_matches 
@@ -22,16 +64,14 @@ export class SoccerRoom extends BaseRoom {
                     AND start_time < NOW() + INTERVAL '36 hours'
                     ORDER BY 
                         CASE WHEN status = 'live' THEN 1 ELSE 2 END,
-                        league ASC, 
-                        start_time ASC
+                        start_time ASC,
+                        league ASC
                 `);
                 res.json(Array.isArray(result.rows) ? result.rows : []);
             } catch (err) {
                 res.json([]);
             }
         });
-
-        // Fetch User's existing predictions for this room
         this.router.get('/my-calls', authenticate, async (req: AuthRequest, res) => {
             try {
                 const result = await query(
@@ -43,35 +83,6 @@ export class SoccerRoom extends BaseRoom {
                 res.status(500).json({ error: 'Failed to fetch your calls' });
             }
         });
-
-        this.router.post('/predictions/match', authenticate, async (req: AuthRequest, res) => {
-            const { matchId, pick } = req.body;
-            const userId = req.user?.id;
-            if (!matchId || !pick) return res.status(400).json({ message: 'matchId and pick are required' });
-
-            try {
-                // LOCK-IN LOGIC: Check if call already exists
-                const existing = await query(
-                    'SELECT id FROM soccer_predictions WHERE user_id = $1 AND match_id = $2',
-                    [userId, matchId]
-                );
-
-                if (existing.rows.length > 0) {
-                    return res.status(400).json({ message: 'Your call is already locked in for this match!' });
-                }
-
-                await query(`
-                    INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
-                    VALUES ($1, $2, $3)
-                `, [userId, matchId, JSON.stringify({ pick })]);
-                
-                res.json({ success: true, message: 'Call Transmitted & Locked!' });
-            } catch (err) {
-                res.status(500).json({ error: 'Internal Server Error' });
-            }
-        });
-
-        // ... rest of routes (test-game, refresh) stay same
         this.router.post('/test-game', authenticate, isAdmin, async (req, res) => {
             try {
                 const matchId = `test-${Date.now()}`;

@@ -3,37 +3,25 @@ import pool from '../shared/database';
 const initDB = async () => {
     const client = await pool.connect();
     try {
-        console.log('🚀 Starting Definitive Sandbox Database Initialization (v3.6 - Multi-Field App Sync)...');
+        console.log('🚀 Starting Economy Integrity Sync (v3.7 - Prediction Result)...');
 
         const schema = `
-            -- 1. Create Application Table with ALL strategy fields
-            CREATE TABLE IF NOT EXISTS sponsor_applications (
-                id SERIAL PRIMARY KEY,
-                brand_name VARCHAR(255) NOT NULL,
-                contact_email VARCHAR(255) NOT NULL,
-                website_url TEXT,
-                arena_target VARCHAR(50) DEFAULT 'soccer',
-                frequency VARCHAR(50) DEFAULT 'monthly',
-                prize_quantity INTEGER DEFAULT 1,
-                prize_description TEXT NOT NULL,
-                logo_url TEXT, -- Store sandbox base64 or link
-                prize_image_url TEXT,
-                agreed_to_terms BOOLEAN DEFAULT FALSE,
-                status VARCHAR(50) DEFAULT 'pending',
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
+            -- 1. Ensure predictions table has result tracking
+            ALTER TABLE soccer_predictions ADD COLUMN IF NOT EXISTS result VARCHAR(20) DEFAULT 'pending';
+            ALTER TABLE soccer_predictions ADD COLUMN IF NOT EXISTS points_earned INTEGER DEFAULT 0;
 
-            -- 2. Add legal tracking to existing sponsors table
-            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_escrow_received BOOLEAN DEFAULT FALSE;
-            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS legal_agreement_signed BOOLEAN DEFAULT FALSE;
-            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS signed_at TIMESTAMP WITH TIME ZONE;
+            -- 2. Ensure user table has all economy columns
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER DEFAULT 150;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS total_points INTEGER DEFAULT 0;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS total_tickets INTEGER DEFAULT 0;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS current_level INTEGER DEFAULT 1;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
         `;
         await client.query(schema);
 
-        console.log('✅ DB Initialized: Database now perfectly matches the Sponsor Sandbox form.');
+        console.log('✅ DB Initialized: Prediction result tracking is now active.');
     } catch (err) {
-        console.error('❌ DB Economy sync failed:', err);
+        console.error('❌ DB sync failed:', err);
     } finally {
         client.release();
         process.exit(0);

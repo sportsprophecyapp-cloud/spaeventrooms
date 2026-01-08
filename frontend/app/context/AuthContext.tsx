@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// IRONCLAD USER TYPE: All economy fields are now part of the core user object.
+// IRONCLAD USER TYPE: All economy and role fields are now part of the core user object.
 interface User {
     id: number;
     email: string;
     username: string;
-    role: string;
+    role: string; // <-- ENSURED ROLE IS HERE
     tokens: number;
     tickets: number;
     points: number;
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const verifySession = async () => {
             if (savedToken) {
                 try {
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.sportsprophecyapp.com';
                     const res = await fetch(`${apiUrl}/api/auth/me`, {
                         headers: { 'Authorization': `Bearer ${savedToken}` }
                     });
