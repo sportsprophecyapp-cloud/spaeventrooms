@@ -70,7 +70,7 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
 
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            await fetch(`${apiUrl}/api/rooms/${roomId}/chat`, {
+            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -78,8 +78,13 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
                 },
                 body: JSON.stringify({ content })
             });
+            if (!res.ok) {
+                const errorData = await res.json();
+                alert(errorData.message || 'Failed to send message');
+            }
         } catch (err) {
             console.error('Failed to send message:', err);
+            alert('Failed to send message. Please try again later.');
         }
     };
 

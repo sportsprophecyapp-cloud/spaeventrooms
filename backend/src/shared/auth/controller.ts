@@ -107,8 +107,8 @@ export const register = async (req: Request, res: Response) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const result = await dbQuery(
-            `INSERT INTO users (email, username, password_hash) 
-             VALUES ($1, $2, $3) RETURNING id, email, username, permissions`,
+            `INSERT INTO users (email, username, password_hash, is_muted) 
+             VALUES ($1, $2, $3, false) RETURNING id, email, username, permissions`,
             [email.toLowerCase(), username, hashedPassword]
         );
 
