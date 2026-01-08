@@ -46,8 +46,8 @@ const ResetAdminPasswordPage = () => {
     return (
         <div className={styles.container}>
             <div className={`${styles.card} glass`}>
-                <h2>Reset Admin Password (Local Only)</h2>
-                <p>Use this form to reset the password for the default admin account (sportsprophecyapp@gmail.com).</p>
+                <h2 className={styles.title}>Reset Admin Password (Local Only)</h2>
+                <p className={styles.subtitle}>Use this form to reset the password for the default admin account (sportsprophecyapp@gmail.com).</p>
                 <form onSubmit={handleSubmit}>
                     <div className={styles.inputGroup}>
                         <label htmlFor="password">New Password</label>
