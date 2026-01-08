@@ -46,75 +46,44 @@
     margin: 0 auto;
 }
 
-/* DEBUG VIEW STYLES */
-.controls {
+.searchBox { display: flex; gap: 1rem; margin-bottom: 3rem; }
+.input { flex: 1; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 20px; color: white; }
+
+.tableCard { border-radius: 24px; overflow: hidden; border: 1px solid var(--glass-border); }
+
+.row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem;
-    margin-bottom: 3rem;
-}
-
-.controlInfo h3 { font-size: 1.2rem; font-weight: 900; }
-.controlInfo p { font-size: 0.8rem; color: var(--neutral); }
-
-.btnRow { display: flex; gap: 1rem; }
-
-.launchBtn {
-    background: var(--success);
-    color: black;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 900;
-    cursor: pointer;
-}
-
-.nukeBtn {
-    background: #ff0055;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 900;
-    cursor: pointer;
-}
-
-.matchTable {
-    padding: 2rem;
-    border-radius: 24px;
-    margin-bottom: 3rem;
-}
-
-.testTable { border-color: var(--success); }
-
-.matchRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
+    padding: 1.5rem 2rem;
     border-bottom: 1px solid var(--glass-border);
 }
 
-.matchMeta { display: flex; flex-direction: column; gap: 4px; }
-.matchLeague { font-size: 0.6rem; font-weight: 900; color: var(--accent); text-transform: uppercase; }
-.matchTeams { font-size: 0.95rem; font-weight: 700; }
+.userMeta { display: flex; flex-direction: column; gap: 4px; }
+.username { font-weight: 800; color: var(--accent); }
+.email { font-size: 0.8rem; color: var(--neutral); }
 
-.deleteBtn {
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    color: var(--neutral);
-    padding: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.actions { display: flex; align-items: center; gap: 1rem; }
+
+.roleBadge {
+    font-size: 0.65rem;
+    font-weight: 900;
+    background: rgba(255,255,255,0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
 }
 
-.deleteBtn:hover { border-color: #ff0055; color: #ff0055; }
-.dangerBtn:hover { background: #ff0055; color: white; border-color: #ff0055; }
-
-.warningText { font-size: 0.75rem; color: #ff0055; font-weight: 800; margin-bottom: 1.5rem; }
-.emptyNote { font-size: 0.8rem; font-style: italic; color: var(--neutral); }
+.adminBtn {
+    background: #ffd700;
+    color: black;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 900;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
 
 .toast {
     position: fixed;
@@ -128,14 +97,5 @@
     font-weight: 900;
     z-index: 10000;
 }
-
-/* SEARCH & TABLE (Standard) */
-.searchBox { display: flex; gap: 1rem; margin-bottom: 3rem; }
-.input { flex: 1; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 20px; color: white; }
-.searchBtn { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 12px; font-weight: 900; cursor: pointer; }
-
-.tableCard { border-radius: 24px; overflow: hidden; border: 1px solid var(--glass-border); }
-.row { display: flex; justify-content: space-between; padding: 1.5rem 2rem; border-bottom: 1px solid var(--glass-border); }
-.roleBadge { font-size: 0.65rem; font-weight: 900; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; }
 
 .error { height: 100vh; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #ff0055; }

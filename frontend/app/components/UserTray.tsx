@@ -6,10 +6,10 @@ import { useAuth } from '../context/AuthContext';
 import styles from './UserTray.module.css';
 
 const UserTray = () => {
-    const { user } = useAuth(); // Only need user object from context
+    const { user, logout } = useAuth(); // Get logout function from context
     const [isExpanded, setIsExpanded] = useState(false);
 
-    if (!user) return null; // Don't render if not logged in
+    if (!user) return null;
 
     const isAdmin = user.role === 'admin';
 
@@ -18,7 +18,6 @@ const UserTray = () => {
             <div className={styles.tray} onClick={() => setIsExpanded(!isExpanded)}>
                 <div className={styles.stat}>
                     <span className={styles.icon}>🪙</span>
-                    {/* Use the user object directly from AuthContext for consistency */}
                     <span className={styles.value}>{user.tokens ?? 0}</span>
                 </div>
                 <div className={styles.stat}>
@@ -43,7 +42,8 @@ const UserTray = () => {
                                 <Link href="/admin/users" className={styles.item}>🛡️ Command Center</Link>
                                 <Link href="/admin/rooms/create" className={styles.item}>🪄 Arena Wizard</Link>
                             </>
-                        )}
+                        )}\n                        {/* LOGOUT BUTTON RESTORED */}
+                        <button onClick={logout} className={`${styles.item} ${styles.logoutBtn}`}>Logout</button>
                     </div>
                 </div>
             )}
