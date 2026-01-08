@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { query } from '../database';
 
-// 1. GET ALL SUPPORTERS
+// 1. GET ALL SUPPORTERS (FINAL FIX)
 export const getAllSupporters = async (req: Request, res: Response) => {
     try {
+        // This query is more robust and explicit for grouping, preventing common SQL errors.
         const sql = `
             SELECT 
                 u.id, 
@@ -13,15 +14,17 @@ export const getAllSupporters = async (req: Request, res: Response) => {
                 u.created_at,
                 u.is_banned,
                 u.is_muted,
-                (SELECT COUNT(*) FROM soccer_predictions WHERE user_id = u.id) as prediction_count
+                COUNT(p.id) as prediction_count
             FROM users u
+            LEFT JOIN soccer_predictions p ON u.id = p.user_id
+            GROUP BY u.id, u.username, u.email, u.permissions, u.created_at, u.is_banned, u.is_muted
             ORDER BY u.created_at DESC
         `;
         const result = await query(sql);
         res.json(result.rows);
     } catch (err) { 
-        console.error("Failed to fetch supporters:", err);
-        res.status(500).json({ error: 'Failed to fetch supporters' }); 
+        console.error("[FATAL] Failed to fetch supporters:", err);
+        res.status(500).json({ error: 'A critical error occurred while fetching user data.' }); 
     }
 };
 
@@ -39,6 +42,8 @@ export const getSiteStats = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to fetch site stats' });
     }
 };
+
+// ... (rest of the file remains the same)
 
 // 3. GET SPONSOR STATS (NEW)
 export const getSponsorStats = async (req: Request, res: Response) => {
@@ -100,49 +105,4 @@ export const updateUserPermissions = async (req: Request, res: Response) => {
     } catch (err) {
         res.status(500).json({ error: 'Update failed' });
     }
-};
-
-// ... (rest of file)
-export const searchSupporters = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const updateUserRole = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const getAllMatches = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const deleteMatch = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const clearDebugTestMatches = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const getRooms = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const createRoom = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const assignRoomOwner = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const getDraws = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const createDraw = async (req: Request, res: Response) => {
-    // ...
-};
-
-export const resolveDraw = async (req: Request, res: Response) => {
-    // ...
 };
