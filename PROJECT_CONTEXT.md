@@ -4,35 +4,32 @@
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
 **PATH:** `/Users/williamcommu/Desktop/mobileV3`
 
-## 🚀 CURRENT STATUS (Phase 3.1 - System-Wide Stability)
-The platform is prioritizing the complete refinement and polishing of the Soccer room experience to a 10/10 user satisfaction level before expanding to new arenas.
+## 🚀 CURRENT STATUS (Phase 3.2 - Pre-Launch Hardening)
+This phase focuses on implementing critical pre-launch compliance features, hardening the backend against crashes, and ensuring core user flows are stable.
 
-### ✅ COMPLETED THIS SESSION (Phase 3.1):
-1.  **Admin Panel Restoration (Complete):**
-    - Fixed a critical bug preventing the user list from appearing in the Command Center.
-    - Restored the correct "prediction count" for each user.
-2.  **New User Onboarding (Complete):
-    - Resolved an issue that prevented new users from sending chat messages.
-    - Corrected a bug that caused new users to start with 0 tokens and 0 tickets.
-    - Added a new `total_tickets` column to the user database schema.
-3.  **Build & Deployment (Complete):
-    - Fixed multiple build errors related to CSS modules and TypeScript syntax.
-    - Improved the chat UI to provide clearer error feedback to users.
+### ✅ COMPLETED THIS SESSION (Phase 3.2):
+1.  **Compliance & Trust Features (Grok Recommendations):
+    - Added `/corporate`, `/privacy`, and `/delete-account` links to the main homepage footer.
+    - Added a "Legal & Compliance" section to the `/corporate` page to improve transparency.
+2.  **Account Deletion (Backend Implemented):
+    - Created the secure, password-protected backend endpoint (`DELETE /api/auth/delete-account`) to handle permanent user data deletion, a critical App Store requirement.
+3.  **Admin Panel Restoration (Permanent Fix):
+    - Diagnosed and permanently fixed the recurring backend `500` crash that was preventing the user list from loading.
+    - The Command Center is now stable and correctly displays all registered users.
+4.  **Chat System Overhaul (Stability Fix):
+    - Fixed a `500` crash that occurred when loading chat history containing messages from a deleted user.
+    - Hardened the `createRoomMessage` controller to prevent crashes when a user record is not found.
+    - Made the `register` function more explicit to guarantee new users are not muted by default.
 
 ### ⚖️ COMPLIANCE STATUS (HOLDING):
-- **Organization Transfer:** Application submitted to Google with D-U-N-S and Corporate Hub URL.
-- **Policy Pages:** `/privacy` and `/delete-account` are live and linked.
+- **Organization Transfer:** Google Play transfer is the primary blocker for beta launch.
+- **Privacy Policy:** Requires expansion to meet App Store review standards (legal task).
 
-## 🔜 ACTIVE TASKS (Phase 3.2 - Soccer Room Polish):
+## 🔜 ACTIVE TASKS (Phase 3.3 - Soccer Room Polish):
 1.  **Perfect Soccer Room Experience:**
-    - Thoroughly review and enhance all aspects of the existing Soccer room.
-    - Implement any remaining features or quality-of-life improvements to achieve a 10/10 user experience.
-2.  **The "Golf Arena" Template:**
-    - **(POSTPONED)** Development will commence after the Soccer room is fully optimized.
-3.  **Beta Launch:**
-    - Initial opening once Google Organization Verification is complete.
+    - With the major backend crashes resolved, we can now proceed with a full inspection and polish of the Soccer Room UI and functionality.
 
 ## 🔧 WORKFLOW SUMMARY FOR FUTURE SESSIONS:
 - **Commit Message Style:** Single line, descriptive, prefixed with a type (e.g., `feat:`, `fix:`, `refactor:`).
-- **Deployment:** Executed via `./deploy.sh "commit message"` from the project root (`/Users/williamcommu/Desktop/mobileV3`).
-- **Self-Checks:** Systematic review of documentation and code is performed after major feature implementations to ensure functionality and consistency.
+- **Deployment:** Executed via `./deploy.sh "commit message"` from the project root (`/Users/williamcommu/Desktop/mobileV31`).
+- **Site Inspect:** For any UI or interaction bugs, always open the browser inspector and paste the **console output**, as it contains the critical error information.

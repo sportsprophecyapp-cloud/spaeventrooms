@@ -94,6 +94,18 @@
     font-weight: 700;
 }
 
+.legalLinks {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.legalLinks a {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+}
+
 .footer {
     margin-top: 6rem;
     text-align: center;

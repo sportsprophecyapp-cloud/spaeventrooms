@@ -130,6 +130,11 @@ const HomePage = () => {
       <footer className={styles.footer}>
         <SponsorMarquee />
         <div className={styles.footerInfo}>
+          <div className={styles.footerLinks}>
+              <Link href="/corporate">Corporate</Link>
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/delete-account">Delete Account</Link>
+          </div>
           <p>&copy; 2026 Events Arena | Powered by Sports Prophecy</p>
           <p className={styles.disclaimer}>
             Events Arena is a social platform for entertainment purposes only. 

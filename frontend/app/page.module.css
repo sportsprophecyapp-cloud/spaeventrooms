@@ -157,6 +157,9 @@
 /* FOOTER */
 .footer { border-top: 1px solid var(--glass-border); padding-top: 4rem; }
 .footerInfo { text-align: center; padding: 4rem 2rem; }
+.footerLinks { display: flex; justify-content: center; gap: 2rem; margin-bottom: 3rem; }
+.footerLinks a { color: var(--neutral); font-weight: 700; font-size: 0.8rem; text-decoration: none; }
+.footerLinks a:hover { color: var(--accent); }
 .footerInfo p { font-size: 0.85rem; color: var(--neutral); margin-bottom: 1rem; font-weight: 600; }
 .disclaimer { font-size: 0.7rem !important; opacity: 0.5; max-width: 600px; margin: 0 auto; }
 .version { display: block; margin-top: 2rem; font-size: 0.65rem; font-weight: 900; opacity: 0.3; }

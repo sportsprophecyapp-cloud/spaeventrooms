@@ -47,6 +47,15 @@ const CorporatePage = () => {
                         </div>
                     </div>
                 </section>
+
+                <section className={`${styles.card} glass`}>
+                    <h2>LEGAL & COMPLIANCE</h2>
+                    <p>Events Arena is a social platform for entertainment purposes only and does not facilitate or endorse real-money gambling of any kind.</p>
+                    <div className={styles.legalLinks}>
+                        <Link href="/privacy">Privacy Policy</Link>
+                        <Link href="/delete-account">Account Deletion</Link>
+                    </div>
+                </section>
             </main>
 
             <footer className={styles.footer}>

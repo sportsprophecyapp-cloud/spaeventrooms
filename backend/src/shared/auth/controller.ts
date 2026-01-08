@@ -8,6 +8,44 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
 // ... (other functions remain the same)
 
+export const deleteAccount = async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { password } = req.body;
+
+    if (!userId) {
+        return res.status(401).json({ message: 'Authentication required.' });
+    }
+
+    if (!password) {
+        return res.status(400).json({ message: 'Password confirmation is required.' });
+    }
+
+    try {
+        // 1. Verify user's current password
+        const userResult = await dbQuery('SELECT password_hash FROM users WHERE id = $1', [userId]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const user = userResult.rows[0];
+        const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
+
+        if (!isPasswordCorrect) {
+            return res.status(403).json({ message: 'Incorrect password.' });
+        }
+
+        // 2. Delete the user record. (Assuming DB schema has ON DELETE CASCADE for related data)
+        await dbQuery('DELETE FROM users WHERE id = $1', [userId]);
+
+        res.status(200).json({ success: true, message: 'Account has been permanently deleted.' });
+
+    } catch (err) {
+        console.error(`[FATAL] Account deletion failed for user ${userId}:`, err);
+        res.status(500).json({ error: 'An error occurred during account deletion.' });
+    }
+};
+
+
 export const register = async (req: Request, res: Response) => {
     try {
         const { email, password, username } = req.body;
