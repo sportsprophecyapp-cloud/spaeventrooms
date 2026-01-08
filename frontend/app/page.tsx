@@ -65,7 +65,7 @@ const HomePage = () => {
 
   return (
     <div className={styles.container}>
-      {/* REMOVED EXTRA USERTRAY: User stats now live strictly in the Navbar */}
+      {/* REMOVED to prevent duplication. The Navbar in layout.tsx is the single source of truth. */}
       
       <header className={styles.header}>
         <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
