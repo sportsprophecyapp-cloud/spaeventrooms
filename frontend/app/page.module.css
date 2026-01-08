@@ -1,234 +1,175 @@
 .container {
-  min-height: 100vh;
-  background: var(--background);
-  color: #fff;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* PROMO BANNER */
-.promoBanner {
-  width: 100%;
-  max-width: 1100px;
-  background: linear-gradient(90deg, var(--accent), #764ba2);
-  padding: 12px 24px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 2rem;
-  box-shadow: 0 0 20px var(--accent-glow);
-}
-
-.fire { font-size: 1.2rem; }
-
-.promoBanner p {
-  font-size: 0.85rem;
-  font-weight: 800;
-  margin: 0;
-  letter-spacing: 1px;
-}
-
-.promoBtn {
-  background: white;
-  color: black;
-  padding: 6px 16px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 900;
-  text-decoration: none;
+    min-height: 100vh;
+    background: var(--background);
+    color: white;
+    padding-top: 80px; /* CLEARANCE FOR FIXED HEADER */
+    padding-bottom: 4rem;
+    position: relative;
+    overflow-x: hidden;
 }
 
 .header {
-  text-align: center;
-  margin-bottom: 4rem;
-  margin-top: 1rem;
-  animation: fadeIn 1s ease-out;
+    text-align: center;
+    margin-bottom: 5rem;
+    padding: 0 2rem;
+    animation: fadeIn 0.8s ease-out;
 }
 
 .welcomeBridge {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  margin-bottom: 1rem;
-  opacity: 0.8;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--neutral);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
 }
 
 .logo h1 {
-  font-size: 3.5rem;
-  font-weight: 900;
-  margin: 0;
-  letter-spacing: -2px;
-}
-
-.icon {
-  font-size: 3rem;
-  filter: drop-shadow(0 0 10px var(--accent-glow));
+    font-size: 4rem;
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
 }
 
 .tagline {
-  font-size: 1.1rem;
-  color: var(--neutral);
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  margin-bottom: 2rem;
+    font-size: 1.1rem;
+    color: var(--neutral);
+    font-weight: 600;
+    max-width: 600px;
+    margin: 0 auto 3rem auto;
 }
 
+/* QUICK NAV (Lobby Level) */
 .quickNav {
-  display: flex;
-  gap: 1.5rem;
-  justify-content: center;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
 }
 
 .navLink {
-  font-weight: 800;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--neutral);
-  padding: 12px 20px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  transition: all 0.3s ease;
+    color: white;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
 .navLink:hover {
-  color: var(--accent);
-  background: rgba(255,255,255,0.08);
+    background: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
 }
 
 .main {
-  max-width: 1100px;
-  width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
 }
 
 .sectionTitle {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: var(--accent);
-  margin-bottom: 2rem;
-  font-weight: 900;
-  text-align: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 3rem;
+    text-align: center;
 }
 
+/* ROOM GRID */
 .roomGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-  margin-bottom: 5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 6rem;
 }
 
 .roomCard {
-  border-radius: 24px;
-  padding: 3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 3rem 2rem;
+    border-radius: 32px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.roomCard:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent);
 }
 
 .roomIcon {
-  width: 90px;
-  height: 90px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 2px solid transparent;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  margin-bottom: 2rem;
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 2rem auto;
 }
 
+.roomCard h3 { font-size: 1.4rem; font-weight: 900; margin-bottom: 1rem; }
+.roomCard p { font-size: 0.95rem; color: var(--neutral); line-height: 1.6; margin-bottom: 2rem; }
+
 .enterBtn {
-  height: 56px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 16px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
+    width: 100%;
+    padding: 1rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 0.85rem;
+    cursor: pointer;
 }
+
+.inactive { opacity: 0.6; grayscale: 1; pointer-events: none; }
+.comingSoon { font-size: 0.7rem; font-weight: 900; color: var(--neutral); letter-spacing: 2px; }
 
 /* ECONOMY PREVIEW */
 .economyPreview {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 8rem;
 }
 
 .ecoCard {
-  padding: 2.5rem;
-  border-radius: 24px;
-  text-align: center;
+    padding: 2.5rem;
+    border-radius: 24px;
+    text-align: center;
 }
 
-.ecoIcon { font-size: 2.5rem; display: block; margin-bottom: 1.5rem; }
+.ecoIcon { font-size: 2rem; display: block; margin-bottom: 1.5rem; }
+.ecoCard h4 { font-size: 1rem; font-weight: 900; margin-bottom: 10px; color: var(--accent); }
+.ecoCard p { font-size: 0.85rem; color: var(--neutral); }
 
-.ecoCard h4 {
-  font-size: 1rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  margin-bottom: 10px;
-  color: var(--accent);
+/* FOOTER */
+.footer { border-top: 1px solid var(--glass-border); padding-top: 4rem; }
+.footerInfo { text-align: center; padding: 4rem 2rem; }
+.footerInfo p { font-size: 0.85rem; color: var(--neutral); margin-bottom: 1rem; font-weight: 600; }
+.disclaimer { font-size: 0.7rem !important; opacity: 0.5; max-width: 600px; margin: 0 auto; }
+.version { display: block; margin-top: 2rem; font-size: 0.65rem; font-weight: 900; opacity: 0.3; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.ecoCard p {
-  font-size: 0.85rem;
-  color: var(--neutral);
-  line-height: 1.5;
-}
-
-.footer {
-  margin-top: 6rem;
-  width: 100%;
-  text-align: center;
-}
-
-.footerInfo {
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  color: var(--neutral);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.disclaimer {
-  max-width: 600px;
-  font-size: 0.7rem;
-  opacity: 0.5;
-  font-weight: 400;
-  line-height: 1.4;
-  margin: 0 auto;
-}
-
-.version {
-  opacity: 0.4;
-}
-
-/* MOBILE */
 @media (max-width: 768px) {
-  .logo h1 { font-size: 2.2rem; }
-  .economyPreview { grid-template-columns: 1fr; }
+    .container { padding-top: 100px; }
+    .logo h1 { font-size: 2.5rem; }
+    .roomGrid { grid-template-columns: 1fr; }
+    .quickNav { gap: 1rem; }
+    .navLink { font-size: 0.7rem; padding: 8px 12px; }
 }
