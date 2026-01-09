@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { getSponsors, createSponsor, deleteSponsor } from './controller';
-import { submitApplication, getPendingApplications, approveApplication } from './applicationsController';
 import { authenticate, isAdmin } from '../auth/middleware';
 
 const router = Router({ mergeParams: true });
