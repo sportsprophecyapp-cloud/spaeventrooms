@@ -21,7 +21,7 @@ interface Supporter {
 const AdminUsersPage = () => {
     const { token, user } = useAuth();
     const [supporters, setSupporters] = useState<Supporter[]>([]);
-    const [onlineUsers, setOnlineUsers] = useState<string[]>([]); // NEW
+    const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState<Supporter | null>(null);
     const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
@@ -37,7 +37,7 @@ const AdminUsersPage = () => {
         } catch (e) { console.error('Fetch users failed', e); }
     };
 
-    const fetchOnlineUsers = async () => { // NEW
+    const fetchOnlineUsers = async () => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         try {
             const res = await fetch(`${apiUrl}/api/admin/online-users`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -52,12 +52,27 @@ const AdminUsersPage = () => {
         if (token && isSuperAdmin) {
             fetchAllUsers();
             fetchOnlineUsers();
-            const interval = setInterval(fetchOnlineUsers, 10000); // Refresh every 10 seconds
+            const interval = setInterval(fetchOnlineUsers, 10000);
             return () => clearInterval(interval);
         }
     }, [token, isSuperAdmin]);
 
-    // ... (modal handlers)
+    const handleOpenPermissionsModal = (supporter: Supporter) => {
+        setSelectedUser(supporter);
+        setIsPermissionsModalOpen(true);
+    };
+
+    const handleOpenMessageModal = (supporter: Supporter) => {
+        setSelectedUser(supporter);
+        setIsMessageModalOpen(true);
+    };
+
+    const handleCloseModals = () => {
+        setSelectedUser(null);
+        setIsPermissionsModalOpen(false);
+        setIsMessageModalOpen(false);
+        fetchAllUsers(); // Refresh list after any update
+    };
 
     const filteredSupporters = supporters.filter(s => s.username.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -100,7 +115,21 @@ const AdminUsersPage = () => {
                 </div>
             </main>
 
-            {/* ... (modals) ... */}
+            {selectedUser && (
+                <PermissionsModal 
+                    isOpen={isPermissionsModalOpen} 
+                    onClose={handleCloseModals} 
+                    user={selectedUser} 
+                />
+            )}
+
+            {selectedUser && (
+                <MessageUserModal 
+                    isOpen={isMessageModalOpen} 
+                    onClose={handleCloseModals} 
+                    user={selectedUser} 
+                />
+            )}
         </div>
     );
 };
