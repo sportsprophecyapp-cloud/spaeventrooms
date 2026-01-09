@@ -85,8 +85,10 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
             });
 
             if (res.ok) {
-                const sentMessage = await res.json();
-                setMessages(prev => [...prev, sentMessage]);
+                // We rely on the socket event to update the UI for everyone, including the sender.
+                // This prevents duplication (local add + socket add).
+                // const sentMessage = await res.json();
+                // setMessages(prev => [...prev, sentMessage]);
             } else {
                 const errorData = await res.json();
                 setError(errorData.message || 'Failed to send message.');
