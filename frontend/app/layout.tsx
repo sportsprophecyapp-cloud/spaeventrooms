@@ -5,7 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { GlobalSocketProvider } from './context/GlobalSocketProvider';
 import Navbar from './components/Navbar';
-import ToastNotification from './components/ToastNotification/ToastNotification'; // NEW
+import ToastNotification from './components/ToastNotification/ToastNotification';
 
 const outfit = Outfit({ 
   subsets: ['latin'],
@@ -27,9 +27,9 @@ export default function RootLayout({
           <GlobalSocketProvider>
             <LanguageProvider>
               <Navbar />
-              <ToastNotification /> {/* NEW */}
+              <ToastNotification />
               {children}
-            </Language.Provider>
+            </LanguageProvider>
           </GlobalSocketProvider>
         </AuthProvider>
       </body>
