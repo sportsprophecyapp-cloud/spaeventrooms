@@ -64,7 +64,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
-        const trigger = vx > 0.2;
+        const trigger = Math.abs(vx) > 0.2; // Fixed: now works for both left and right
         if (!active && trigger) {
             gone.add(index);
             setPredictionCount(prev => prev + 1);
