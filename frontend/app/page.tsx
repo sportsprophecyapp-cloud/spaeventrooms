@@ -61,7 +61,7 @@ const HomePage = () => {
             </header>
 
             <main className={styles.main}>
-                <h2 className={styles.sectionTitle}>{t('select_arena')}</h2>
+                <div className={styles.sectionTitle}>{t('select_arena')}</div>
                 <div className={styles.roomGrid}>
                     {rooms.map(room => (
                         <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`}>
@@ -80,17 +80,17 @@ const HomePage = () => {
                 <section className={styles.economyPreview}>
                     <div className={`${styles.ecoCard} glass`}>
                         <span className={styles.ecoIcon}>🎫</span>
-                        <h2>WIN PRIZES</h2>
+                        <h4>WIN PRIZES</h4>
                         <p>Every correct call awards a <strong>Prize Draw Ticket</strong>.</p>
                     </div>
                     <div className={`${styles.ecoCard} glass`}>
                         <span className={styles.ecoIcon}>📈</span>
-                        <h2>LEVEL UP</h2>
+                        <h4>LEVEL UP</h4>
                         <p>Climb the standings and earn elite status in the community.</p>
                     </div>
                     <div className={`${styles.ecoCard} glass`}>
                         <span className={styles.ecoIcon}>🤝</span>
-                        <h2>RECRUIT</h2>
+                        <h4>RECRUIT</h4>
                         <p>Invite friends and both get <strong>+50 Bonus Tokens</strong>.</p>
                     </div>
                 </section>
