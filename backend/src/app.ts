@@ -15,7 +15,8 @@ import matchRoutes from './shared/matches/routes';
 
 const app = express();
 
-// ... (cors and middleware)
+app.use(cors());
+app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
