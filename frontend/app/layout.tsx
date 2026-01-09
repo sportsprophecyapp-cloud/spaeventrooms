@@ -33,8 +33,8 @@ export const viewport: Viewport = {
 // The RootLayout with the definitive, correct structure.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={outfit.variable}> {/* Apply the font variable to the root */}
-      <body> {/* The body tag no longer needs a manual className */}
+    <html lang="en" className={outfit.variable}>
+      <body>
         <AuthProvider>
           <GlobalSocketProvider>
             <LanguageProvider>
