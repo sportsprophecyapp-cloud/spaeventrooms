@@ -12,7 +12,7 @@ const SponsorApplyPage = () => {
         prize_description: '',
         agreed: false
     });
-    
+
     const [creative, setCreative] = useState({
         logo_size: 100,
         logo_x: 0,
@@ -39,7 +39,33 @@ const SponsorApplyPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.agreed) return alert('Please agree to terms.');
-        setSubmitted(true);
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${apiUrl}/api/sponsor-applications/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    brand_name: formData.brand_name,
+                    contact_email: formData.contact_email,
+                    arena_target: formData.arena_target,
+                    prize_description: formData.prize_description,
+                    logo_url: logoPreview,
+                    prize_image_url: prizePreview,
+                    creative_config: creative,
+                    agreed: formData.agreed
+                })
+            });
+
+            if (res.ok) {
+                setSubmitted(true);
+            } else {
+                alert('Submission failed. Please try again.');
+            }
+        } catch (err) {
+            console.error('Submission error:', err);
+            alert('Server connection error.');
+        }
     };
 
     if (submitted) {
@@ -65,7 +91,7 @@ const SponsorApplyPage = () => {
                 <form onSubmit={handleSubmit} className={`${styles.form} glass`}>
                     <div className={styles.inputGroup}>
                         <label>Brand Name</label>
-                        <input required value={formData.brand_name} onChange={e => setFormData({...formData, brand_name: e.target.value})} placeholder="e.g. Takomo" />
+                        <input required value={formData.brand_name} onChange={e => setFormData({ ...formData, brand_name: e.target.value })} placeholder="e.g. Takomo" />
                     </div>
 
                     <div className={styles.inputRow}>
@@ -75,18 +101,18 @@ const SponsorApplyPage = () => {
                         </div>
                         <div className={styles.inputGroup}>
                             <label>Logo Size (%)</label>
-                            <input type="range" min="50" max="150" value={creative.logo_size} onChange={e => setCreative({...creative, logo_size: parseInt(e.target.value)})} />
+                            <input type="range" min="50" max="150" value={creative.logo_size} onChange={e => setCreative({ ...creative, logo_size: parseInt(e.target.value) })} />
                         </div>
                     </div>
 
                     <div className={styles.inputRow}>
                         <div className={styles.inputGroup}>
                             <label>Move Horizontal</label>
-                            <input type="range" min="-50" max="50" value={creative.logo_x} onChange={e => setCreative({...creative, logo_x: parseInt(e.target.value)})} />
+                            <input type="range" min="-50" max="50" value={creative.logo_x} onChange={e => setCreative({ ...creative, logo_x: parseInt(e.target.value) })} />
                         </div>
                         <div className={styles.inputGroup}>
                             <label>Move Vertical</label>
-                            <input type="range" min="-50" max="50" value={creative.logo_y} onChange={e => setCreative({...creative, logo_y: parseInt(e.target.value)})} />
+                            <input type="range" min="-50" max="50" value={creative.logo_y} onChange={e => setCreative({ ...creative, logo_y: parseInt(e.target.value) })} />
                         </div>
                     </div>
 
@@ -97,14 +123,14 @@ const SponsorApplyPage = () => {
 
                     <div className={styles.inputGroup}>
                         <label>Prize Description</label>
-                        <textarea required value={formData.prize_description} onChange={e => setFormData({...formData, prize_description: e.target.value})} placeholder="Describe your prize..." />
+                        <textarea required value={formData.prize_description} onChange={e => setFormData({ ...formData, prize_description: e.target.value })} placeholder="Describe your prize..." />
                     </div>
 
                     <div className={styles.legalSection}>
                         <label className={styles.checkboxLabel}>
-                            <input type="checkbox" required checked={formData.agreed} onChange={e => setFormData({...formData, agreed: e.target.checked})} />
+                            <input type="checkbox" required checked={formData.agreed} onChange={e => setFormData({ ...formData, agreed: e.target.checked })} />
                             <span>
-                                I AGREE TO THE <Link href="/sponsors/terms" target="_blank" style={{color: 'var(--accent)', textDecoration: 'underline'}}>TERMS & CONDITIONS</Link> AND PRIZE ESCROW PROTOCOL.
+                                I AGREE TO THE <Link href="/sponsors/terms" target="_blank" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>TERMS & CONDITIONS</Link> AND PRIZE ESCROW PROTOCOL.
                             </span>
                         </label>
                     </div>
@@ -115,20 +141,20 @@ const SponsorApplyPage = () => {
                 {/* LIVE PREVIEW COLUMN */}
                 <aside className={styles.previewColumn}>
                     <h3 className={styles.previewTitle}>ARENA LIVE PREVIEW</h3>
-                    
+
                     <div className={styles.previewScroll}>
                         <div className={`${styles.previewWidget} glass`}>
                             <p className={styles.previewLabel}>OFFICIAL ROOM SPONSOR</p>
                             <div className={styles.logoFrame}>
                                 {logoPreview ? (
-                                    <img 
-                                        src={logoPreview} 
-                                        alt="Logo" 
+                                    <img
+                                        src={logoPreview}
+                                        alt="Logo"
                                         style={{
                                             transform: `scale(${creative.logo_size / 100}) translate(${creative.logo_x}px, ${creative.logo_y}px)`,
                                             transition: 'none'
-                                        }} 
-                                        className={styles.previewLogo} 
+                                        }}
+                                        className={styles.previewLogo}
                                     />
                                 ) : (
                                     <div className={styles.logoPlaceholder}>LOGO PREVIEW</div>

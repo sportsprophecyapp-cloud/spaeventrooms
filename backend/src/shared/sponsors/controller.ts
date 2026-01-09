@@ -7,7 +7,7 @@ export const getSponsors = async (req: AuthRequest, res: Response) => {
 
     try {
         const result = await query(
-            'SELECT * FROM room_sponsors WHERE room_id = $1 AND is_active = TRUE ORDER BY created_at DESC',
+            'SELECT *, sponsor_name AS name FROM room_sponsors WHERE room_id = $1 AND is_active = TRUE ORDER BY created_at DESC',
             [roomId]
         );
         res.json(result.rows);
@@ -27,9 +27,9 @@ export const createSponsor = async (req: AuthRequest, res: Response) => {
 
     try {
         const result = await query(
-            `INSERT INTO room_sponsors (room_id, name, logo_url, link_url)
+            `INSERT INTO room_sponsors (room_id, sponsor_name, logo_url, link_url)
              VALUES ($1, $2, $3, $4)
-             RETURNING *`,
+             RETURNING id, room_id, sponsor_name AS name, logo_url, link_url`,
             [roomId, name, logo_url, link_url]
         );
 

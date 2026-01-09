@@ -10,9 +10,11 @@ import {
     handleGetTickets,
     handleGetVouchers,
     handleClaimVoucher,
-    handleGetActiveDraws
+    handleGetActiveDraws,
+    handleGetUserTickets,
+    handleDeleteDraw
 } from './controller';
-import { authenticate } from '../auth/middleware';
+import { authenticate, isAdmin } from '../auth/middleware';
 
 const router = Router();
 
@@ -26,6 +28,8 @@ router.get('/tickets', authenticate, handleGetTickets); // New Tickets Route
 router.get('/vouchers', authenticate, handleGetVouchers);
 router.post('/vouchers/claim', authenticate, handleClaimVoucher);
 router.get('/draws/active', authenticate, handleGetActiveDraws);
+router.delete('/draws/:id', authenticate, isAdmin, handleDeleteDraw);
+router.get('/tickets', authenticate, handleGetUserTickets);
 
 router.post('/daily-login', authenticate, handleDailyLogin);
 router.post('/purchase', authenticate, purchaseCosmetic);

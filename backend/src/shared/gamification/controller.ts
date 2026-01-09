@@ -138,6 +138,18 @@ export const getShop = async (req: AuthRequest, res: Response) => {
     } catch (e) { res.json({ success: true, cosmetics: [] }); }
 };
 
+export const handleDeleteDraw = async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    try {
+        await dbQuery(`DELETE FROM prize_draws WHERE id = $1`, [id]);
+        res.json({ success: true, message: 'Draw removed successfully' });
+    } catch (err) {
+        res.status(500).json({ error: 'Delete failed' });
+    }
+};
+
+export const handleGetUserTickets = handleGetTickets; // Alias for route consistency
+
 export const purchaseCosmetic = async (req: AuthRequest, res: Response) => res.json({ success: false });
 export const equipCosmetic = async (req: AuthRequest, res: Response) => res.json({ success: false });
 export const shareRoom = async (req: AuthRequest, res: Response) => res.json({ success: false });
