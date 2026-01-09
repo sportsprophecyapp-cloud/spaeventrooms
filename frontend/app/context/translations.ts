@@ -2,13 +2,20 @@ export const translations: any = {
     en: {
         // Existing
         welcome_bridge: "Sports Prophecy welcomes you to the",
-        tagline: "The Ultimate Prediction Experience",
+        tagline: "Predict Live Sports. Compete for Prizes. 100% Free.",
+        how_it_works_title: "How It Works",
+        how_step_1: "Pick Your Sport",
+        how_step_1_desc: "Choose from Soccer, NFL, F1, and more",
+        how_step_2: "Swipe on Predictions",
+        how_step_2_desc: "Make your calls on live match outcomes",
+        how_step_3: "Earn & Win",
+        how_step_3_desc: "Climb the leaderboard and win real prizes",
         join_free: "Join Free",
         enter_arena: "ENTER ARENA",
         select_arena: "Select Your Arena",
         standings: "Standings",
         fan_arena: "Fan Arena",
-        
+
         // New For Prediction UI
         predict_winner_prompt: "Who will win?",
         predict_first_goal_prompt: "Who will score first?",
@@ -25,13 +32,20 @@ export const translations: any = {
     },
     id: { // Bahasa Indonesia
         welcome_bridge: "Sports Prophecy menyambut Anda di",
-        tagline: "Pengalaman Prediksi Terbaik",
+        tagline: "Prediksi Olahraga Langsung. Bersaing untuk Hadiah. 100% Gratis.",
+        how_it_works_title: "Cara Kerjanya",
+        how_step_1: "Pilih Olahraga Anda",
+        how_step_1_desc: "Pilih dari Sepak Bola, NFL, F1, dan lainnya",
+        how_step_2: "Geser untuk Prediksi",
+        how_step_2_desc: "Buat prediksi Anda pada hasil pertandingan langsung",
+        how_step_3: "Dapatkan & Menangkan",
+        how_step_3_desc: "Naik peringkat dan menangkan hadiah nyata",
         join_free: "Daftar Gratis",
         enter_arena: "MASUK ARENA",
         select_arena: "Pilih Arena Anda",
         standings: "Klasemen",
         fan_arena: "Arena Penggemar",
-        
+
         // New
         predict_winner_prompt: "Siapa yang akan menang?",
         predict_first_goal_prompt: "Tim mana yang mencetak gol pertama?",
@@ -46,7 +60,14 @@ export const translations: any = {
     },
     th: { // Thai
         welcome_bridge: "Sports Prophecy ยินดีต้อนรับคุณสู่",
-        tagline: "ประสบการณ์การทายผลที่ดีที่สุด",
+        tagline: "ทายผลกีฬาสด แข่งขันเพื่อรางวัล ฟรี 100%",
+        how_it_works_title: "วิธีการทำงาน",
+        how_step_1: "เลือกกีฬาของคุณ",
+        how_step_1_desc: "เลือกจากฟุตบอล, NFL, F1 และอื่นๆ",
+        how_step_2: "ปัดเพื่อทำนาย",
+        how_step_2_desc: "ทำการทายผลในการแข่งขันสด",
+        how_step_3: "รับและชนะ",
+        how_step_3_desc: "ปีนตารางคะแนนและชนะรางวัลจริง",
         join_free: "สมัครฟรี",
         enter_arena: "เข้าสู่สนาม",
         select_arena: "เลือกสนามของคุณ",

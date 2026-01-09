@@ -77,6 +77,28 @@ const HomePage = () => {
                     ))}
                 </div>
 
+                {/* How It Works Section */}
+                <section style={{ marginTop: '4rem', textAlign: 'center' }}>
+                    <div className={styles.sectionTitle}>{t('how_it_works_title')}</div>
+                    <div className={styles.economyPreview} style={{ marginTop: '2rem' }}>
+                        <div className={`${styles.ecoCard} glass`}>
+                            <span className={styles.ecoIcon}>1️⃣</span>
+                            <h4>{t('how_step_1')}</h4>
+                            <p>{t('how_step_1_desc')}</p>
+                        </div>
+                        <div className={`${styles.ecoCard} glass`}>
+                            <span className={styles.ecoIcon}>2️⃣</span>
+                            <h4>{t('how_step_2')}</h4>
+                            <p>{t('how_step_2_desc')}</p>
+                        </div>
+                        <div className={`${styles.ecoCard} glass`}>
+                            <span className={styles.ecoIcon}>3️⃣</span>
+                            <h4>{t('how_step_3')}</h4>
+                            <p>{t('how_step_3_desc')}</p>
+                        </div>
+                    </div>
+                </section>
+
                 <section className={styles.economyPreview}>
                     <div className={`${styles.ecoCard} glass`}>
                         <span className={styles.ecoIcon}>🎫</span>

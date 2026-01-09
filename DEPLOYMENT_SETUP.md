@@ -21,8 +21,21 @@ The project uses a custom deployment script to ensure consistency.
 
 ## 🔑 Required Environment Variables
 Must be configured in Render Dashboard:
-- `THE_ODDS_API_KEY`: Comma-separated list (e.g., `key1,key2,key3`).
-- `API_FOOTBALL_KEY`: Single key from api-football.com.
-- `STRIPE_SECRET_KEY`: For automated sponsorship payments.
-- `RENDER_EXTERNAL_URL`: Points to the backend for the Keep-Alive service.
-- `NEXT_PUBLIC_API_URL`: Points to the backend URL for the frontend.
+
+### Backend
+- `THE_ODDS_API_KEY`: Comma-separated list (e.g., `key1,key2,key3`)
+- `GOOGLE_CLIENT_ID`: OAuth 2.0 Client ID from Google Cloud Console
+- `JWT_SECRET`: Secret key for JWT token generation
+- `DATABASE_URL`: PostgreSQL connection string (auto-provided by Render)
+- `REDIS_URL`: Redis connection string (auto-provided by Render)
+- `STRIPE_SECRET_KEY`: For automated sponsorship payments
+- `RENDER_EXTERNAL_URL`: Points to the backend for the Keep-Alive service
+
+### Frontend
+- `NEXT_PUBLIC_API_URL`: Points to the backend URL (e.g., `https://spa-backend.onrender.com`)
+
+### Optional (Email Service)
+- `EMAIL_USER`: SMTP username for password reset emails
+- `EMAIL_PASS`: SMTP password
+- `EMAIL_HOST`: SMTP host (e.g., `smtp.gmail.com`)
+- `EMAIL_PORT`: SMTP port (e.g., `587`)

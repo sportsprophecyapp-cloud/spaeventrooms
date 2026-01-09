@@ -1,6 +1,9 @@
-# Sports Prophecy Rebuild
+# Events Arena (Sports Prophecy)
 
-A multi-room prediction platform architecture.
+**Version**: 3.2.0  
+**Release**: January 9, 2026
+
+A multi-room prediction platform with premium UI, Google Login, and real-time chat.
 
 ## Structure
 
