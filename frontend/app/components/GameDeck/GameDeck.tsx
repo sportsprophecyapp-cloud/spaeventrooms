@@ -63,8 +63,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
-    const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
-        const trigger = Math.abs(vx) > 0.1; // Lowered threshold for easier swiping
+    const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx], distance }) => {
+        const trigger = Math.abs(vx) > 0.1 || Math.abs(mx) > 100; // Velocity OR distance threshold
         if (!active && trigger) {
             gone.add(index);
             setPredictionCount(prev => prev + 1);
