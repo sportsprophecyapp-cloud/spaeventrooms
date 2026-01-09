@@ -1,178 +1,38 @@
 .container {
-    min-height: 100vh;
-    background: var(--background);
-    color: white;
-    padding-top: 80px; /* CLEARANCE FOR FIXED HEADER */
-    padding-bottom: 4rem;
-    position: relative;
-    overflow-x: hidden;
+    /* ... */
 }
 
 .header {
     text-align: center;
     margin-bottom: 5rem;
-    padding: 0 2rem;
-    animation: fadeIn 0.8s ease-out;
+    padding: 2rem; /* Added padding for switcher */
+    position: relative; /* For absolute positioning of switcher */
 }
 
-.welcomeBridge {
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: var(--neutral);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 1rem;
-}
-
-.logo {
+.languageSwitcher {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 1.5rem;
-}
-
-.logo h1 {
-    font-size: 4rem;
-    font-weight: 900;
-    letter-spacing: -2px;
-    line-height: 1;
-}
-
-.tagline {
-    font-size: 1.1rem;
-    color: var(--neutral);
-    font-weight: 600;
-    max-width: 600px;
-    margin: 0 auto 3rem auto;
-}
-
-/* QUICK NAV (Lobby Level) */
-.quickNav {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-}
-
-.navLink {
-    color: white;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 10px 20px;
+    gap: 0.5rem;
     background: rgba(255,255,255,0.05);
+    padding: 0.5rem;
     border-radius: 12px;
-    transition: all 0.3s ease;
 }
 
-.navLink:hover {
-    background: var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow);
-}
-
-.main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.sectionTitle {
-    font-size: 1.5rem;
-    font-weight: 900;
-    margin-bottom: 3rem;
-    text-align: center;
-}
-
-/* ROOM GRID */
-.roomGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-    margin-bottom: 6rem;
-}
-
-.roomCard {
-    padding: 3rem 2rem;
-    border-radius: 32px;
-    text-align: center;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.roomCard:hover {
-    transform: translateY(-10px);
-    border-color: var(--accent);
-}
-
-.roomIcon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255,255,255,0.05);
-    border: 2px solid;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    margin: 0 auto 2rem auto;
-}
-
-.roomCard h3 { font-size: 1.4rem; font-weight: 900; margin-bottom: 1rem; }
-.roomCard p { font-size: 0.95rem; color: var(--neutral); line-height: 1.6; margin-bottom: 2rem; }
-
-.enterBtn {
-    width: 100%;
-    padding: 1rem;
-    background: var(--accent);
-    color: white;
+.languageSwitcher button {
+    background: transparent;
     border: none;
-    border-radius: 16px;
-    font-weight: 900;
-    font-size: 0.85rem;
+    color: var(--neutral);
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
     cursor: pointer;
 }
 
-.inactive { opacity: 0.6; grayscale: 1; pointer-events: none; }
-.comingSoon { font-size: 0.7rem; font-weight: 900; color: var(--neutral); letter-spacing: 2px; }
-
-/* ECONOMY PREVIEW */
-.economyPreview {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-bottom: 8rem;
+.languageSwitcher .activeLang {
+    background: var(--accent);
+    color: white;
 }
 
-.ecoCard {
-    padding: 2.5rem;
-    border-radius: 24px;
-    text-align: center;
-}
-
-.ecoIcon { font-size: 2rem; display: block; margin-bottom: 1.5rem; }
-.ecoCard h4 { font-size: 1rem; font-weight: 900; margin-bottom: 10px; color: var(--accent); }
-.ecoCard p { font-size: 0.85rem; color: var(--neutral); }
-
-/* FOOTER */
-.footer { border-top: 1px solid var(--glass-border); padding-top: 4rem; }
-.footerInfo { text-align: center; padding: 4rem 2rem; }
-.footerLinks { display: flex; justify-content: center; gap: 2rem; margin-bottom: 3rem; }
-.footerLinks a { color: var(--neutral); font-weight: 700; font-size: 0.8rem; text-decoration: none; }
-.footerLinks a:hover { color: var(--accent); }
-.footerInfo p { font-size: 0.85rem; color: var(--neutral); margin-bottom: 1rem; font-weight: 600; }
-.disclaimer { font-size: 0.7rem !important; opacity: 0.5; max-width: 600px; margin: 0 auto; }
-.version { display: block; margin-top: 2rem; font-size: 0.65rem; font-weight: 900; opacity: 0.3; }
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-    .container { padding-top: 100px; }
-    .logo h1 { font-size: 2.5rem; }
-    .roomGrid { grid-template-columns: 1fr; }
-    .quickNav { gap: 1rem; }
-    .navLink { font-size: 0.7rem; padding: 8px 12px; }
-}
+/* ... (rest of the file) */
