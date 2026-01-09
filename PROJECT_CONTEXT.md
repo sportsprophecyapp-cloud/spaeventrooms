@@ -8,9 +8,13 @@
 **Version**: 3.3.0  
 **Release Date**: January 9, 2026
 
-This phase focused on the Sponsor Draw system, landing page onboarding refinements, and stabilizing user token balances.
+This phase focused on the Sponsor Draw system, landing page onboarding refinements, stabilizing user token balances, and transitioning to a "Pure Live" data infrastructure.
 
 ### ✅ COMPLETED (Phase 5.0 - January 9, 2026):
+1.  **Pure Live Data Transition (Savings Mode):**
+    *   **Odds API Throttling**: Implemented 4-hour "Savings Mode" interval to preserve API limits.
+    *   **Mock Removal**: Deleted all mock data fallbacks and automatic demo injections.
+    *   **Live Integrity**: The platform now relies exclusively on production API data for predictions.
 1.  **Sponsor Draw System:**
     *   **Draw Room**: Integrated `/draw` page for entering sponsor-backed prize draws.
     *   **Prize Tickets**: Fully implemented ticket-based entry system for gamified rewards.

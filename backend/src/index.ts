@@ -25,8 +25,7 @@ const io = socketService.getIO(); // Get the io instance from the service
     }
 
     if (!process.env.THE_ODDS_API_KEY) {
-        console.warn("\n⚠️  WARNING: THE_ODDS_API_KEY not found in .env.");
-        console.warn("   The app will run in MOCK DATA MODE.\n");
+        console.error("\n[CRITICAL] THE_ODDS_API_KEY not found in .env. Real-time predictions will be disabled.\n");
     }
 
     await connectRedis();

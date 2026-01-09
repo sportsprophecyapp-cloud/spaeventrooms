@@ -63,8 +63,7 @@ A multi-room prediction platform with premium UI, Google Login, and real-time ch
 - **Extraction**: To spinoff a room, copy the respective folders to a new repo.
 
 ## Data Modes
-- **Real Data**: Active when valid keys (`THE_ODDS_API_KEY`) are present in `.env`.
-- **Mock Data**: Automatically activates when keys are missing. Populates the app with realistic demo data for testing.
+- **Production Data**: Enabled via `THE_ODDS_API_KEY`. The system uses a "Savings Mode" 4-hour sync interval to preserve limits.
 
 ## Deployment
 See [DEPLOYMENT_SETUP.md](./DEPLOYMENT_SETUP.md) for full details.

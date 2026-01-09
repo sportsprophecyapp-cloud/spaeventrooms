@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { query } from '../database';
-import { injectMockMatches } from './mockFootballService';
+// import { injectMockMatches } from './mockFootballService'; // REMOVED
 
 // Configuration - Focused solely on Soccer for now
 const SPORTS = [
@@ -47,8 +47,7 @@ const rotateKey = () => {
 export const fetchLiveMatches = async () => {
     // 1. Fallback immediately if no keys are configured
     if (API_KEYS.length === 0) {
-        console.warn('⚠️ No THE_ODDS_API_KEYs found. Injecting MOCK DATA for demonstration.');
-        await injectMockMatches();
+        console.warn('⚠️ No THE_ODDS_API_KEYs found. Data sync will be skipped.');
         return;
     }
 
@@ -110,8 +109,7 @@ export const fetchLiveMatches = async () => {
                     const rotated = rotateKey();
                     if (!rotated) {
                         // 2. Fallback if keys expire/fail during runtime
-                        console.error('❌ No more working API keys available. Injecting MOCK DATA for demonstration.');
-                        await injectMockMatches();
+                        console.error('❌ No more working API keys available. Sync aborted.');
                         return; // Stop the entire batch
                     }
                     retryCount++;
