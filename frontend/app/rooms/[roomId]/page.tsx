@@ -4,31 +4,38 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import styles from './page.module.css';
 import LeagueGrid from '../../components/LeagueGrid/LeagueGrid';
-import GameDeck from '../../components/GameDeck/GameDeck'; // NEW
+import GameDeck from '../../components/GameDeck/GameDeck';
 import SponsorWidget from '../../components/SponsorWidget';
-// ... other imports
+import { useAuth } from '../../context/AuthContext';
+import LoginModal from '@/app/components/LoginModal';
+import { SocketProvider } from '../../context/SocketContext';
+import Leaderboard from '../../components/Leaderboard';
+import RoomChat from '../../components/RoomChat';
 
 function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
     const isSoccerRoom = roomId === 'soccer';
     
-    const [selectedLeague, setSelectedLeague] = useState<string | null>(null); // NEW
-    // ... other state
+    const [selectedLeague, setSelectedLeague] = useState<string | null>(null);
+    const { isAuthenticated } = useAuth();
+    const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const [activeSidebar, setActiveSidebar] = useState<'chat' | 'standings'>('chat');
 
-    const handleLeagueSelect = (leagueId: string) => { // NEW
+    const handleLeagueSelect = (leagueId: string) => {
         setSelectedLeague(leagueId);
     };
 
-    const handleReturnToGrid = () => { // NEW
+    const handleReturnToGrid = () => {
         setSelectedLeague(null);
     };
 
-    // ... other logic
-
     return (
         <div className={styles.container}>
-            <header className={styles.minimalHeader}>{/* ... */}</header>
+            <header className={styles.minimalHeader}>
+                 <h1 className={styles.arenaTitle}>{roomId.toUpperCase()} ARENA</h1>
+                 {/* ... other header actions ... */}
+            </header>
 
             <main className={styles.dualLayout}>
                 <div className={styles.mainContent}>
@@ -50,17 +57,38 @@ function RoomContent() {
                                 )}
                             </>
                         ) : (
-                            <div className={styles.creatorWelcome}>{/* ... */}</div>
+                            <div className={styles.creatorWelcome}>
+                                <h3 className={styles.sectionHeading}>Creator Event Hub</h3>
+                                <p className={styles.welcomeText}>Watch the stream and participate in live polls below!</p>
+                            </div>
                         )}
                     </div>
                 </div>
 
-                <aside className={styles.sidebar}>{/* ... */}</aside>
+                <aside className={styles.sidebar}>
+                    <div className={styles.sidebarTabs}>
+                        <button className={`${styles.sideTab} ${activeSidebar === 'chat' ? styles.activeSideTab : ''}`} onClick={() => setActiveSidebar('chat')}>FAN ARENA</button>
+                        <button className={`${styles.sideTab} ${activeSidebar === 'standings' ? styles.activeSideTab : ''}`} onClick={() => setActiveSidebar('standings')}>STANDINGS</button>
+                    </div>
+                    <div className={styles.sidebarContent}>
+                        {activeSidebar === 'chat' ? <RoomChat roomId={roomId} /> : <Leaderboard />}
+                    </div>
+                </aside>
             </main>
 
-            {/* ... (LoginModal) */}
+            <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
         </div>
     );
 }
 
-// ... (RoomPage wrapper remains the same)
+// RESTORED: This default export is essential for Next.js pages.
+export default function RoomPage() {
+    const params = useParams();
+    const roomId = params.roomId as string;
+
+    return (
+        <SocketProvider roomId={roomId}>
+            <RoomContent />
+        </SocketProvider>
+    );
+}
