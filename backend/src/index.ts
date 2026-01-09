@@ -1,9 +1,11 @@
 import http from 'http';
 import dotenv from 'dotenv';
-import { Server } from 'socket.io';
 import app from './app';
 import { socketService } from './shared/socket/SocketService';
-// import { initializeSocket } from './rooms/socket'; // To be implemented
+import { roomRegistry } from './rooms/registry';
+import { connectRedis } from './shared/database/redis';
+import { startKeepAlive } from './shared/cron/keepAlive';
+import { startSoccerScheduler } from './rooms/soccer/scheduler';
 
 dotenv.config();
 
@@ -11,25 +13,17 @@ const PORT = process.env.PORT || 8000;
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
-    cors: {
-        origin: '*', // Allow all for dev, restrict in prod
-        methods: ['GET', 'POST']
-    }
-});
+// Initialize the socket service WITH the http server
+socketService.init(server);
 
-socketService.init(io);
-
-import { roomRegistry } from './rooms/registry';
-import { connectRedis } from './shared/database/redis';
-import { startKeepAlive } from './shared/cron/keepAlive';
-import { startSoccerScheduler } from './rooms/soccer/scheduler';
-
-// ... other imports ...
-
-// initializeSocket(io);
+const io = socketService.getIO(); // Get the io instance from the service
 
 (async () => {
+    if (!io) {
+        console.error("[FATAL] Socket.io failed to initialize.");
+        process.exit(1);
+    }
+
     await connectRedis();
 
     startKeepAlive();
