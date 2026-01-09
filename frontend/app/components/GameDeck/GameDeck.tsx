@@ -6,7 +6,7 @@ import { useDrag } from '@use-gesture/react';
 import MatchCard from '../MatchCard/MatchCard';
 import styles from './GameDeck.module.css';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { useAuth } from '@/app/context/AuthContext'; // NEW
+import { useAuth } from '@/app/context/AuthContext';
 
 interface Match {
     id: string;
@@ -26,35 +26,41 @@ const trans = (r: number, s: number) => `perspective(1500px) rotateX(30deg) rota
 
 const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
-    const { token } = useAuth(); // NEW
+    const { token } = useAuth();
     const [gone] = useState(() => new Set());
     const [matches, setMatches] = useState<Match[]>([]);
-    const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
     useEffect(() => {
-        if (!token) return; // Don't fetch if not authenticated
-
+        if (!token) return;
         const fetchMatches = async () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                 const res = await fetch(`${apiUrl}/api/rooms/soccer/matches?league=${leagueId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}` // CORRECTED: Added Auth Header
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
                     setMatches(await res.json());
-                } else {
-                    console.error("API Error fetching matches:", res.status);
                 }
-            } catch (err) {
-                console.error("Network Error fetching matches:", err);
-            }
+            } catch (err) { console.error("Error fetching matches:", err); }
         };
         fetchMatches();
     }, [leagueId, token]);
 
-    const bind = useDrag(/* ... */); // Gesture logic remains the same
+    const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
+
+    const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
+        const trigger = vx > 0.2; 
+        if (!active && trigger) gone.add(index);
+        api.start(i => {
+            if (index !== i) return;
+            const isGone = gone.has(index);
+            const x = isGone ? (200 + window.innerWidth) * xDir : active ? mx : 0;
+            const rot = mx / 100 + (isGone ? xDir * 10 * vx : 0);
+            const scale = active ? 1.1 : 1;
+            return { x, rot, scale, delay: undefined, config: { friction: 50, tension: active ? 800 : isGone ? 200 : 500 } };
+        });
+        if (!active && gone.size === matches.length) setTimeout(() => { gone.clear(); api.start(i => to(i)); }, 600);
+    });
 
     if (matches.length === 0) {
         return <div className={styles.empty}>{t('no_matches_available')}</div>;
