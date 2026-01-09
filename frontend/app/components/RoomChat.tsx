@@ -58,7 +58,10 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
     useEffect(() => {
         if (!socket) return;
         socket.on('chat_message', (msg: ChatMessage) => {
-            setMessages(prev => [...prev, msg]);
+            setMessages(prev => {
+                if (prev.some(m => m.id === msg.id)) return prev;
+                return [...prev, msg];
+            });
         });
         return () => { socket.off('chat_message'); };
     }, [socket]);
@@ -103,19 +106,19 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
             </div>
 
             <div className={styles.feed} ref={scrollRef}>
-                {loading ? <div className={styles.loading}>Accessing Arena Channel...</div> : 
-                 messages.map((msg) => (
-                    <div key={msg.id} className={styles.message}>
-                        <div className={styles.meta}>
-                            {msg.equipped_badge_image_url && (
-                                <img src={msg.equipped_badge_image_url} alt="Badge" className={styles.equippedBadge} />
-                            )}
-                            <span className={styles.level}>Lvl {msg.current_level}</span>
-                            <span className={styles.username}>@{msg.username}</span>
+                {loading ? <div className={styles.loading}>Accessing Arena Channel...</div> :
+                    messages.map((msg) => (
+                        <div key={msg.id} className={styles.message}>
+                            <div className={styles.meta}>
+                                {msg.equipped_badge_image_url && (
+                                    <img src={msg.equipped_badge_image_url} alt="Badge" className={styles.equippedBadge} />
+                                )}
+                                <span className={styles.level}>Lvl {msg.current_level}</span>
+                                <span className={styles.username}>@{msg.username}</span>
+                            </div>
+                            <p className={styles.content}>{msg.content}</p>
                         </div>
-                        <p className={styles.content}>{msg.content}</p>
-                    </div>
-                ))}
+                    ))}
             </div>
 
             {isAuthenticated ? (
