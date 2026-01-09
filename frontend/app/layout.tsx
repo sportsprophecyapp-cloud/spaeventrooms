@@ -3,8 +3,9 @@ import { Outfit } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
-import { GlobalSocketProvider } from './context/GlobalSocketProvider'; // NEW
+import { GlobalSocketProvider } from './context/GlobalSocketProvider';
 import Navbar from './components/Navbar';
+import ToastNotification from './components/ToastNotification/ToastNotification'; // NEW
 
 const outfit = Outfit({ 
   subsets: ['latin'],
@@ -23,12 +24,13 @@ export default function RootLayout({
     <html lang="en" className={outfit.variable}>
       <body className={outfit.className}>
         <AuthProvider>
-          <GlobalSocketProvider> {/* NEW */}
+          <GlobalSocketProvider>
             <LanguageProvider>
               <Navbar />
+              <ToastNotification /> {/* NEW */}
               {children}
-            </LanguageProvider>
-          </GlobalSocketProvider> {/* NEW */}
+            </Language.Provider>
+          </GlobalSocketProvider>
         </AuthProvider>
       </body>
     </html>
