@@ -173,6 +173,7 @@ const AdminSponsorsPage = () => {
                         ))}
                     </div>
                 )}
+
                 {activeTab === 'placements' && (
                     <div className={styles.appList}>
                         {loading && <p>Loading placements...</p>}
