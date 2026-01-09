@@ -22,7 +22,7 @@ interface GameDeckProps {
 
 const to = (i: number) => ({ x: 0, y: i * -4, scale: 1, rot: -10 + Math.random() * 20, delay: i * 100 });
 const from = (_i: number) => ({ x: 0, rot: 0, scale: 1.5, y: -1000 });
-const trans = (r: number, s: number) => `perspective(1500px) rotateX(30deg) rotateY(${r / 10}deg) rotateZ(${r}deg) scale(${s})`;
+const trans = (r: number, s: number) => `rotateZ(${r}deg) scale(${s})`;
 
 const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
@@ -49,7 +49,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
-        const trigger = vx > 0.2; 
+        const trigger = vx > 0.2;
         if (!active && trigger) gone.add(index);
         api.start(i => {
             if (index !== i) return;

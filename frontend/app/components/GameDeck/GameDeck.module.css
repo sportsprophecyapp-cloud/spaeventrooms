@@ -14,8 +14,9 @@
 /* Each Card Wrapper */
 .deck {
     position: absolute;
-    width: 340px;
-    height: 500px;
+    width: 450px;
+    height: 600px;
+    /* Increased from 500px */
     /* Fixed height for consistency */
     display: flex;
     align-items: center;
