@@ -1,12 +1,13 @@
 import nodemailer from 'nodemailer';
 
-// NOTE: For production, use environment variables and a dedicated email service like SendGrid or AWS SES.
-// For Gmail, you must generate an "App Password" if you have 2-Factor Auth enabled.
+// Production: Use environment variables for SMTP (SendGrid, AWS, Google Workspace, or Custom Domain)
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.SMTP_HOST || 'smtp.gmail.com', // Default to Gmail if not set (legacy support)
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
     auth: {
-        user: process.env.EMAIL_USER || 'YOUR_EMAIL@gmail.com', // Placeholder
-        pass: process.env.EMAIL_PASS || 'YOUR_APP_PASSWORD'       // Placeholder
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
@@ -18,6 +19,18 @@ interface EmailOptions {
 }
 
 export const sendEmail = async (options: EmailOptions) => {
+    // FALLBACK: If authentication is missing/default, Log to Console (Dev Mode)
+    const isConfigured = process.env.EMAIL_USER && process.env.EMAIL_PASS;
+
+    if (!isConfigured) {
+        console.log('\n🔵 ================= [DEV MODE: MOCK EMAIL] =================');
+        console.log(`📨  To: ${options.to}`);
+        console.log(`📝  Subject: ${options.subject}`);
+        console.log(`🔗  Body Preview: ${options.text || options.html}`);
+        console.log('🔵 ==========================================================\n');
+        return true;
+    }
+
     try {
         const info = await transporter.sendMail({
             from: `"Events Arena" <${process.env.EMAIL_USER}>`,

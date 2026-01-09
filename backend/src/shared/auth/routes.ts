@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getMe, login, register, updateUsername, getProfile, resetAdminPassword, deleteAccount } from './controller';
+import { getMe, login, register, updateUsername, getProfile, resetAdminPassword, deleteAccount, forgotPassword, resetPassword, googleLogin } from './controller';
 import { authenticate } from './middleware';
 
 const router = Router();
@@ -7,6 +7,10 @@ const router = Router();
 // Public routes
 router.post('/login', login);
 router.post('/register', register);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
+
+router.post('/google', googleLogin);
 
 // Protected routes
 router.get('/me', authenticate, getMe);

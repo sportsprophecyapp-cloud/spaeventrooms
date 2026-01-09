@@ -57,6 +57,10 @@ A multi-room prediction platform architecture.
 - **Room Isolation**: Each room (e.g., `soccer`) has its own folder in `backend/src/rooms/` and `frontend/app/rooms/`.
 - **Extraction**: To spinoff a room, copy the respective folders to a new repo.
 
+## Data Modes
+- **Real Data**: Active when valid keys (`THE_ODDS_API_KEY`) are present in `.env`.
+- **Mock Data**: Automatically activates when keys are missing. Populates the app with realistic demo data for testing.
+
 ## Deployment
 See [DEPLOYMENT_SETUP.md](./DEPLOYMENT_SETUP.md) for full details.
 

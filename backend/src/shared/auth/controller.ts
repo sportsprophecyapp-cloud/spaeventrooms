@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import { query as dbQuery } from '../database';
 import { Request, Response } from 'express';
 import { AuthRequest } from './middleware';
+import { sendEmail } from '../services/emailService';
+import { OAuth2Client } from 'google-auth-library';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
@@ -91,7 +93,7 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
 export const resetAdminPassword = async (req: Request, res: Response) => {
     // This is a sensitive operation and should be handled with care.
     const { password } = req.body;
-    const emailToUpdate = 'sportsprophecyapp@gmail.com'; 
+    const emailToUpdate = 'sportsprophecyapp@gmail.com';
     if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -100,4 +102,94 @@ export const resetAdminPassword = async (req: Request, res: Response) => {
     } catch (error) { res.status(500).json({ error: 'Server error during password reset.' }); }
 };
 
-// NOTE: forgotPassword is intentionally left out for now as part of the rollback.
+// RESTORED: Forgot Password Flow
+export const forgotPassword = async (req: Request, res: Response) => {
+    const { email } = req.body;
+    try {
+        const result = await dbQuery('SELECT id, username FROM users WHERE email = $1', [email]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Email not found' });
+
+        const user = result.rows[0];
+
+        // Generate valid reset token (1 hour expiry)
+        const token = jwt.sign({ id: user.id, type: 'reset' }, JWT_SECRET, { expiresIn: '1h' });
+
+        // Use the Email Service (Handles both Dev Logging and Prod Sending)
+        const resetLink = `http://${req.headers.host}/auth/reset?token=${token}`;
+
+        await sendEmail({
+            to: email,
+            subject: 'Events Arena: Password Reset Request',
+            text: `You requested a password reset. Click here: ${resetLink}`,
+            html: `<p>You requested a password reset.</p><p><a href="${resetLink}">Click here to reset your password</a></p>`
+        });
+
+        res.json({ success: true, message: 'Reset link sent' });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export const googleLogin = async (req: Request, res: Response) => {
+    const { token } = req.body;
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+
+        if (!payload || !payload.email) return res.status(400).json({ error: 'Invalid Google Token' });
+
+        const { email, name, sub } = payload;
+
+        // Check if User Exists
+        const result = await dbQuery('SELECT * FROM users WHERE email = $1', [email]);
+
+        let user;
+        if (result.rows.length === 0) {
+            // Create New User
+            const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            const username = (name || 'user').replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000) || `user${Math.floor(Math.random() * 10000)}`;
+
+            const newUser = await dbQuery(
+                `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets, total_points, current_level, permissions) 
+                 VALUES ($1, $2, $3, false, 150, 0, 0, 1, '["supporter"]') RETURNING *`,
+                [email, username, hashedPassword]
+            );
+            user = newUser.rows[0];
+        } else {
+            user = result.rows[0];
+        }
+
+        const jwtToken = jwt.sign({ id: user.id, email: user.email, username: user.username, permissions: user.permissions }, JWT_SECRET, { expiresIn: '7d' });
+
+        res.json({ success: true, token: jwtToken, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level } });
+
+    } catch (error) {
+        console.error("Google Auth Error:", error);
+        res.status(401).json({ error: 'Google authentication failed' });
+    }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+    const { token, newPassword } = req.body;
+    try {
+        // Verify token
+        const decoded: any = jwt.verify(token, JWT_SECRET);
+        if (!decoded.id || decoded.type !== 'reset') return res.status(400).json({ error: 'Invalid token' });
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update User
+        await dbQuery('UPDATE users SET password_hash = $1 WHERE id = $2', [hashedPassword, decoded.id]);
+
+        res.json({ success: true, message: 'Password successfully reset' });
+    } catch (err) {
+        res.status(400).json({ error: 'Invalid or expired token' });
+    }
+};

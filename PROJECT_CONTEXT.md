@@ -4,19 +4,21 @@
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
 **PATH:** `/Users/williamcommu/Desktop/mobileV3`
 
-## 🚀 CURRENT STATUS (Phase 4.1 - New UI Foundation STABLE)
-This phase marks the successful implementation of the foundational UI for the new "Tinder-style" prediction system. All critical build failures have been resolved, and the platform is stable.
+## 🚀 CURRENT STATUS (Phase 4.2 - Data Stability & Mock Mode)
+This phase ensured the platform is robust against data failures. We implemented a "Mock Data Mode" to guarantee the app is always demonstrable, even without active API keys. The legacy `apiFootball` integration has been removed.
 
 ### ✅ COMPLETED THIS SESSION (Phase 4.0 & 4.1):
-1.  **New Soccer Room UI (v1 Complete):
-    - **League-Centric Design:** Replaced the old match list with a clean, tappable grid of official league logos.
-    - **Swipeable Card Foundation:** Built the core `MatchCard` and `GameDeck` components, which create a swipeable stack of matches for a selected league.
-    - **End-to-End Flow:** The full UI flow is functional: User enters the Soccer Room -> Taps a League -> Sees the swipeable deck of matches for that league.
-2.  **Full Internationalization (i18n):
-    - All new UI components (League Grid, Match Cards, etc.) are fully integrated with the `useLanguage` hook and support English, Thai, and Indonesian.
-    - A prominent language switcher has been added to the main landing page for better accessibility.
-3.  **Critical Build Failures Resolved:
-    - Diagnosed and permanently fixed a recurring catastrophic build failure caused by missing `export default` statements in Next.js page components.
+### ✅ COMPLETED (Phase 4.2 - Data Stability & Mock Mode):
+1.  **Crash Resolved (Backend):**
+    -   Fixed a critical crash caused by missing/invalid API keys.
+    -   Implemented graceful error handling in `footballApi.ts`.
+2.  **Mock Data Mode (Demo System):**
+    -   Added a default **"Mock Data Mode"** that activates automatically when no API keys are found.
+    -   Populates the app with realistic Live, Upcoming, and Finished matches for all leagues.
+    -   Ensures the app is always demo-ready, even without external data subscriptions.
+3.  **Legacy Cleanup:**
+    -   Removed the broken `apiFootball` integration to simplify the architecture.
+    -   The system now relies solely on `THE_ODDS_API` (or Mock Data).
 
 ### 💡 FUTURE FEATURES PLANNED (Multi-Prediction System):
 This roadmap details how we will expand the new swipeable UI to include multiple prediction types per match. Now that the UI foundation is stable, this is our next major task.

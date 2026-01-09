@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './shared/auth/routes';
 import adminRoutes from './shared/admin/routes';
+// import badgeRoutes from './shared/badges/routes'; // REVERTED
 import moderationRoutes from './shared/moderation/routes';
 import announcementRoutes from './shared/announcements/routes';
 import predictionRoutes from './shared/predictions/routes';
@@ -14,25 +15,12 @@ import matchRoutes from './shared/matches/routes';
 
 const app = express();
 
-const allowedOrigins = [
-    'http://localhost:3000',
-    'https://sportsprophecyapp.com',
-    'https://www.sportsprophecyapp.com'
-];
-
-app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
-}));
-
-app.use(express.json());
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// ... (cors and middleware)
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+// app.use('/api/badges', badgeRoutes); // REVERTED
 app.use('/api/moderation', moderationRoutes);
 app.use('/api/rooms/soccer/matches', matchRoutes);
 app.use('/api/rooms/:roomId/announcements', announcementRoutes);

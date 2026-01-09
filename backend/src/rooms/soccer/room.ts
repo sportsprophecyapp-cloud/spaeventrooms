@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import { query } from '../../shared/database';
 import { authenticate, AuthRequest, isAdmin } from '../../shared/auth/middleware';
 import { fetchLiveMatches } from '../../shared/services/footballApi';
-import { fetchApiFootballMatches } from '../../shared/services/apiFootball';
+
 
 export class SoccerRoom extends BaseRoom {
     constructor() {
@@ -68,7 +68,7 @@ export class SoccerRoom extends BaseRoom {
                     INSERT INTO soccer_predictions (user_id, match_id, prediction_data, result)
                     VALUES ($1, $2, $3, 'pending')
                 `, [userId, matchId, JSON.stringify({ pick })]);
-                
+
                 res.json({ success: true, message: 'Call Transmitted & Locked!' });
             } catch (err) {
                 res.status(500).json({ error: 'Internal Server Error' });
@@ -77,7 +77,7 @@ export class SoccerRoom extends BaseRoom {
 
         this.router.post('/refresh', authenticate, isAdmin, async (req, res) => {
             try {
-                await Promise.all([fetchLiveMatches(), fetchApiFootballMatches()]);
+                await fetchLiveMatches();
                 res.json({ success: true, message: 'Arena data refreshed' });
             } catch (err) {
                 res.status(500).json({ error: 'Refresh failed' });
