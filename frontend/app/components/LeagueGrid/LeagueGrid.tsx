@@ -9,13 +9,14 @@ interface League {
     logo_url: string;
 }
 
-interface LeagueGridProps { // NEW: Props interface
+interface LeagueGridProps {
     onLeagueSelect: (leagueId: string) => void;
 }
 
 const LeagueGrid: React.FC<LeagueGridProps> = ({ onLeagueSelect }) => {
     const [leagues, setLeagues] = useState<League[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [showInstructions, setShowInstructions] = useState(false);
 
     useEffect(() => {
         const fetchLeagues = async () => {
@@ -36,21 +37,76 @@ const LeagueGrid: React.FC<LeagueGridProps> = ({ onLeagueSelect }) => {
             }
         };
         fetchLeagues();
+
+        // Check if user has seen instructions
+        const hasSeenInstructions = localStorage.getItem('hasSeenPredictionInstructions');
+        if (!hasSeenInstructions) {
+            setShowInstructions(true);
+        }
     }, []);
+
+    const handleCloseInstructions = (dontShowAgain: boolean) => {
+        if (dontShowAgain) {
+            localStorage.setItem('hasSeenPredictionInstructions', 'true');
+        }
+        setShowInstructions(false);
+    };
 
     if (isLoading) {
         return <div className={styles.loading}>Loading Arenas...</div>;
     }
 
     return (
-        <div className={styles.grid}>
-            {leagues.map(league => (
-                <div key={league.league_id} className={`${styles.card} glass`} onClick={() => onLeagueSelect(league.league_id)}>
-                    <img src={league.logo_url} alt={`${league.name} logo`} className={styles.logo} />
-                    <span className={styles.name}>{league.name}</span>
+        <>
+            <div className={styles.grid}>
+                {leagues.map(league => (
+                    <div key={league.league_id} className={`${styles.card} glass`} onClick={() => onLeagueSelect(league.league_id)}>
+                        <img src={league.logo_url} alt={`${league.name} logo`} className={styles.logo} />
+                        <span className={styles.name}>{league.name}</span>
+                    </div>
+                ))}
+            </div>
+
+            {showInstructions && (
+                <div className={styles.instructionsOverlay}>
+                    <div className={styles.instructionsCard}>
+                        <h2>🎯 How to Make Predictions</h2>
+                        <div className={styles.instructionSteps}>
+                            <div className={styles.step}>
+                                <span className={styles.stepNumber}>1</span>
+                                <p><strong>Select a League</strong><br />Tap any league above to see live matches</p>
+                            </div>
+                            <div className={styles.step}>
+                                <span className={styles.stepNumber}>2</span>
+                                <p><strong>Swipe the Cards</strong><br />Swipe right or left to make your prediction</p>
+                            </div>
+                            <div className={styles.step}>
+                                <span className={styles.stepNumber}>3</span>
+                                <p><strong>Earn Rewards</strong><br />Correct predictions earn you points and prize tickets!</p>
+                            </div>
+                        </div>
+                        <div className={styles.instructionsActions}>
+                            <label className={styles.checkbox}>
+                                <input
+                                    type="checkbox"
+                                    id="dontShowAgain"
+                                />
+                                <span>Don't show this again</span>
+                            </label>
+                            <button
+                                onClick={() => {
+                                    const checkbox = document.getElementById('dontShowAgain') as HTMLInputElement;
+                                    handleCloseInstructions(checkbox?.checked || false);
+                                }}
+                                className={styles.gotItBtn}
+                            >
+                                Got It!
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            ))}
-        </div>
+            )}
+        </>
     );
 };
 
