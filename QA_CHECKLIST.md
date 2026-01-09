@@ -29,10 +29,10 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 - `[ ]` **Admin User View:** Admin can view the full list of registered supporters in the Command Center.
 - `[ ]` **Admin Prediction Count:** The "Predictions" count in the admin user view is accurate.
 - `[ ]` **Admin Role Update:** Admin can successfully promote another user to 'admin' via the Command Center.
-- `[ ]` **Sponsor Application:** The `/sponsors/apply` page and its live preview sandbox are functional.
-
-### Gamification & Draws (v1.2 Update)
-- `[ ]` **Enter Draw:** "Enter Draw" button correctly triggers entry flow (requires tickets).
-- `[ ]` **Mock Draw:** Clicking "Try Mock Draw" triggers the 3-second drawing animation and winner celebration.
+### Sponsor & Draw Management (v1.5 Update)
+- `[ ]` **Application Submission:** Founding Package forms correctly save to `sponsor_applications`.
+- `[ ]` **Admin Hub Approval:** Approving an application instantly creates a Room Sponsor and a Prize Draw.
+- `[ ]` **Draw Visibility:** New draws appear in the `/draw` room immediately after approval.
+- `[ ]` **Draw Removal:** Admin can successfully delete an active draw from the Sponsor Hub.
 - `[ ]` **Navigation Flow:** Completing soccer predictions successfully shows the "Go to Draw Room" button.
 - `[ ]` **Multilingual:** Draw room titles and descriptions correctly reflect selected language (EN, ID, TH).

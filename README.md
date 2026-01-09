@@ -1,9 +1,9 @@
 # Events Arena (Sports Prophecy)
 
-**Version**: 3.3.0  
+**Version**: 3.4.0  
 **Release**: January 9, 2026
 
-A multi-room prediction platform with premium UI, Google Login, and real-time chat.
+A multi-room prediction platform with premium UI, Google Login, Sponsor & Draw Management Hub, and real-time chat.
 
 ## Structure
 

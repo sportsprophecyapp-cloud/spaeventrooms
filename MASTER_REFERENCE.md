@@ -5,7 +5,7 @@
 - **Frontend:** Next.js (located in `/frontend`). Styling: Outfit Font, Glassmorphism.
 - **Backend:** Node.js/Express (located in `/backend`).
 - **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Creator Events).
-- **Gamification:** Sponsor Draw Room (`/draw`) powered by Prize Tickets.
+- **Gamification:** Sponsor & Draw Hub (`/draw`) powered by Prize Tickets and Admin-verified partner campaigns.
 
 ## 📡 Data Architecture (API & Limits)
 - **Resilient Dual-API Sync:** API-Football (20m) + The Odds API (4h Savings Mode).
@@ -23,3 +23,4 @@
 2. **Room Isolation:** Maintain strict separation between Pure Soccer (`/rooms/soccer`) and Interactive Creator Hubs.
 3. **Regionally Intelligent:** Every UI text string must pass through the `useLanguage()` hook.
 4. **Safety Buffer:** Keep schedulers 25% under free-tier limits to allow for manual admin refreshes.
+5. **Sponsor Review:** Manual approval is required for all new applications before they go live in an arena.

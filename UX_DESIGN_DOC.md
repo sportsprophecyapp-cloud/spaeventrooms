@@ -1,14 +1,14 @@
 # Events Arena - UX Design Document
-**Version 2.18 | January 2026**
+**Version 2.20 | January 2026**
 
 ## 🎯 Overview
 Events Arena is a full-stack interactive engagement platform optimized for sports, TV, and creator-led events. It is build-stabilized, branding-unified, and runs on a "Pure Live" production data infrastructure.
 
 ### Core Philosophy:
 - **Events Arena Strategy:** Inclusive branding to capture all major cultural moments.
-- **Sponsor Sandbox Strategy:** Interactive, self-serve campaign design for partners.
+- **Sponsor Hub Strategy:** Centralized review and instant deployment of branded campaigns.
 - **Digital-First Prize Economy:** All rewards are Digital Redemption Codes for zero liability and instant scalability.
-- **Sponsor Draw Strategy:** Interactive branded rooms for high-value prize distribution.
+- **Sponsor Draw Strategy:** Active branded rooms for high-value prize distribution, tied to verified sponsors.
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
 - **Dual-Sync Data Layer:** API-Football (20m) + The Odds API (4h Savings Mode).
@@ -24,10 +24,10 @@ Events Arena is a full-stack interactive engagement platform optimized for sport
     - **Automated:** "PIONEER" (1-100), "SETTLER" (101-500), etc. are granted automatically based on user ID.
     - **Manual:** Special badges ("Day One") can be granted by admins.
 
-## 🎁 SPONSOR DRAW SYSTEM (v1.2)
+## 🎁 SPONSOR DRAW SYSTEM (v1.5)
 - **Draw Room (`/draw`):** A dedicated arena where users use Prize Tickets to enter sponsored draws.
-- **Demo Mode:** "Mock Draw" functionality allows for zero-token simulation of winner selection for presentations.
-- **Visuals:** Winner celebration overlays and real-time winner announcements.
+- **Admin Review Hub:** Centralized dashboard to approve applications and instantly create matching draws.
+- **Visuals:** Winner celebration overlays and real-time announcements for live events.
 
 ## 🛠️ USER ROLES & HIERARCHY
 1. **Supporter (User):** Earns Prize Tickets and XP. Can unlock and equip cosmetic badges.
