@@ -13,6 +13,17 @@ import { SocketProvider } from '../../context/SocketContext';
 import Leaderboard from '../../components/Leaderboard';
 import RoomChat from '../../components/RoomChat';
 
+const RoomPage = () => {
+    const params = useParams();
+    const roomId = params.roomId as string;
+
+    return (
+        <SocketProvider roomId={roomId}>
+            <RoomContent />
+        </SocketProvider>
+    );
+};
+
 function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
@@ -83,14 +94,4 @@ function RoomContent() {
     );
 }
 
-// RESTORED: This default export is essential for Next.js pages.
-export default function RoomPage() {
-    const params = useParams();
-    const roomId = params.roomId as string;
-
-    return (
-        <SocketProvider roomId={roomId}>
-            <RoomContent />
-        </SocketProvider>
-    );
-}
+export default RoomPage;
