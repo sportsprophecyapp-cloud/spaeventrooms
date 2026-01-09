@@ -1,14 +1,47 @@
+/* The Container holds the stack */
 .deckContainer {
     width: 100%;
-    height: 80vh;
+    /* Fill available height but leave room for header/footer */
+    height: 70vh;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    overflow: hidden;
+    /* Prevent cards flying off screen triggering scrollbars */
 }
 
-.loading, .empty {
+/* Each Card Wrapper */
+.deck {
+    position: absolute;
+    width: 340px;
+    height: 500px;
+    /* Fixed height for consistency */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    cursor: grab;
+    touch-action: none;
+    /* Crucial for touch gestures */
+}
+
+.deck:active {
+    cursor: grabbing;
+}
+
+.loading,
+.empty {
     text-align: center;
     color: var(--neutral);
     font-style: italic;
+    font-size: 1.2rem;
+}
+
+/* Mobile Tweak */
+@media (max-width: 500px) {
+    .deck {
+        width: 90vw;
+        height: 65vh;
+    }
 }
