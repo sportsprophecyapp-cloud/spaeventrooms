@@ -49,26 +49,13 @@ const DrawRoom = () => {
                 }
             } catch (err) {
                 console.error('Error fetching draw data:', err);
-                // Mock data for demo if API fails
-                setDraws([
-                    { id: 1, title: 'Weekly Jackpot', prize: '$100 Amazon Voucher', description: 'Sponsored by Global Sports', room_id: 'soccer', status: 'active' }
-                ]);
+                setDraws([]);
             }
         };
 
         fetchData();
     }, [token]);
 
-    const handleMockDraw = () => {
-        setIsDrawing(true);
-        setWinner(null);
-
-        // Mock animation delay
-        setTimeout(() => {
-            setIsDrawing(false);
-            setWinner(user?.username || 'You');
-        }, 3000);
-    };
 
     return (
         <div className={styles.drawRoom}>
@@ -97,35 +84,11 @@ const DrawRoom = () => {
                                 <button className={styles.enterBtn} disabled={ticketCount === 0 || isDrawing}>
                                     {t('enter_draw')}
                                 </button>
-                                <button
-                                    onClick={handleMockDraw}
-                                    className={styles.mockBtn}
-                                    disabled={isDrawing}
-                                >
-                                    {isDrawing ? 'Drawing...' : t('mock_draw_btn')}
-                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {winner && (
-                    <div className={styles.winnerCelebrate}>
-                        <div className={styles.celebrateContent}>
-                            <span className={styles.confetti}>🎊</span>
-                            <h2>We have a winner!</h2>
-                            <p className={styles.winnerName}>{winner}</p>
-                            <button onClick={() => setWinner(null)} className={styles.closeBtn}>Close</button>
-                        </div>
-                    </div>
-                )}
-
-                {isDrawing && (
-                    <div className={styles.drawingOverlay}>
-                        <div className={styles.spinner}></div>
-                        <p>Picking a random winner...</p>
-                    </div>
-                )}
             </main>
         </div>
     );

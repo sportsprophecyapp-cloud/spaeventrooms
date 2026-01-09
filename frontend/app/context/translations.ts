@@ -34,7 +34,6 @@ export const translations: any = {
         your_tickets: "Your Tickets",
         active_draws: "Active Draws",
         enter_draw: "Enter Draw",
-        mock_draw_btn: "Try Mock Draw (Demo)",
         go_to_draw_room: "Go to Draw Room",
         tickets_earned: "Tickets Earned",
     },
