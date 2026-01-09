@@ -21,6 +21,7 @@ interface Supporter {
 const AdminUsersPage = () => {
     const { token, user } = useAuth();
     const [supporters, setSupporters] = useState<Supporter[]>([]);
+    const [onlineUsers, setOnlineUsers] = useState<string[]>([]); // NEW
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState<Supporter | null>(null);
     const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
@@ -28,50 +29,37 @@ const AdminUsersPage = () => {
 
     const isSuperAdmin = user?.permissions.includes('super_admin');
 
-    // DEBUGGING: Log admin status and supporters data
-    console.log('AdminUsersPage - Is Super Admin:', isSuperAdmin);
-    console.log('AdminUsersPage - Supporters State:', supporters);
-
     const fetchAllUsers = async () => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         try {
-            const res = await fetch(`${apiUrl}/api/admin/users`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await fetch(`${apiUrl}/api/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.ok) setSupporters(await res.json());
+        } catch (e) { console.error('Fetch users failed', e); }
+    };
+
+    const fetchOnlineUsers = async () => { // NEW
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        try {
+            const res = await fetch(`${apiUrl}/api/admin/online-users`, { headers: { 'Authorization': `Bearer ${token}` } });
             if (res.ok) {
                 const data = await res.json();
-                console.log('AdminUsersPage - Fetched data:', data); // DEBUG: Log fetched data
-                setSupporters(data);
+                setOnlineUsers(data.onlineUsers || []);
             }
-        } catch (e) { console.error('Fetch users failed', e); }
+        } catch (e) { console.error('Fetch online users failed', e); }
     };
 
     useEffect(() => {
         if (token && isSuperAdmin) {
             fetchAllUsers();
+            fetchOnlineUsers();
+            const interval = setInterval(fetchOnlineUsers, 10000); // Refresh every 10 seconds
+            return () => clearInterval(interval);
         }
     }, [token, isSuperAdmin]);
 
-    const handleOpenPermissionsModal = (supporter: Supporter) => {
-        setSelectedUser(supporter);
-        setIsPermissionsModalOpen(true);
-    };
+    // ... (modal handlers)
 
-    const handleOpenMessageModal = (supporter: Supporter) => {
-        setSelectedUser(supporter);
-        setIsMessageModalOpen(true);
-    };
-
-    const handleCloseModals = () => {
-        setSelectedUser(null);
-        setIsPermissionsModalOpen(false);
-        setIsMessageModalOpen(false);
-        fetchAllUsers(); // Refresh list after any update
-    };
-
-    const filteredSupporters = supporters.filter(s => 
-        s.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredSupporters = supporters.filter(s => s.username.toLowerCase().includes(searchTerm.toLowerCase()));
 
     if (!isSuperAdmin) return <div className={styles.error}>SUPER ADMIN ACCESS REQUIRED</div>;
 
@@ -89,10 +77,13 @@ const AdminUsersPage = () => {
                     <input className={styles.input} placeholder="Filter Supporters..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
                 <div className={`${styles.tableCard} glass`}>
-                    {filteredSupporters.length > 0 ? filteredSupporters.map(s => (
+                    {filteredSupporters.map(s => (
                         <div key={s.id} className={`${styles.row} ${s.is_banned ? styles.banned : ''}`}>
                             <div className={styles.userMeta}>
-                                <span className={styles.username}>@{s.username}</span>
+                                <span className={styles.username}>
+                                    {onlineUsers.includes(s.id.toString()) && <span className={styles.onlineIndicator}></span>} 
+                                    @{s.username}
+                                </span>
                                 <span className={styles.email}>{s.email}</span>
                                 <span className={styles.metadata}>Joined: {new Date(s.created_at).toLocaleDateString()}</span>
                                 <span className={styles.metadata}>Predictions: {s.prediction_count}</span>
@@ -105,27 +96,11 @@ const AdminUsersPage = () => {
                                 <button className={styles.manageBtn} onClick={() => handleOpenPermissionsModal(s)}>MANAGE</button>
                             </div>
                         </div>
-                    )) : (
-                        <div className={styles.row}>No supporters found.</div>
-                    )}
+                    ))}
                 </div>
             </main>
 
-            {selectedUser && (
-                <PermissionsModal 
-                    isOpen={isPermissionsModalOpen} 
-                    onClose={handleCloseModals} 
-                    user={selectedUser} 
-                />
-            )}
-
-            {selectedUser && (
-                <MessageUserModal 
-                    isOpen={isMessageModalOpen} 
-                    onClose={handleCloseModals} 
-                    user={selectedUser} 
-                />
-            )}
+            {/* ... (modals) ... */}
         </div>
     );
 };

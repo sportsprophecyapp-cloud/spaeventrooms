@@ -1,27 +1,43 @@
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 class SocketService {
     private io: Server | null = null;
+    private onlineUsers: Set<string> = new Set(); // NEW: Track online users
 
-    init(io: Server) {
-        this.io = io;
+    public init(server: import('http').Server): void {
+        this.io = new Server(server, {
+            cors: { origin: "*" }
+        });
+
+        this.io.on('connection', (socket: Socket) => {
+            const userId = socket.handshake.query.userId as string;
+            if (userId) {
+                socket.join(`user:${userId}`);
+                this.onlineUsers.add(userId); // NEW
+                console.log(`User ${userId} connected. Online users: ${this.onlineUsers.size}`);
+            }
+
+            socket.on('disconnect', () => {
+                if (userId) {
+                    this.onlineUsers.delete(userId); // NEW
+                    console.log(`User ${userId} disconnected. Online users: ${this.onlineUsers.size}`);
+                }
+            });
+        });
     }
 
-    emitToRoom(roomId: string, event: string, data: any) {
-        if (!this.io) {
-            console.warn('SocketService not initialized');
-            return;
-        }
-        // Emit to the room-specific namespace
-        this.io.of(`/rooms/${roomId}`).emit(event, data);
+    public getIO(): Server | null {
+        return this.io;
     }
 
-    emitGlobal(event: string, data: any) {
-        if (!this.io) {
-            console.warn('SocketService not initialized');
-            return;
+    public getOnlineUserIds(): string[] { // NEW
+        return Array.from(this.onlineUsers);
+    }
+    
+    public emitToRoom(room: string, event: string, data: any): void {
+        if (this.io) {
+            this.io.to(room).emit(event, data);
         }
-        this.io.emit(event, data);
     }
 }
 
