@@ -35,8 +35,8 @@ export const createRoomMessage = async (req: AuthRequest, res: Response) => {
     }
 
     try {
-        const userQuery = await query('SELECT b.image_url FROM users u LEFT JOIN badges b ON u.equipped_badge_id = b.id WHERE u.id = $1', [userId]);
-        const equipped_badge_image_url = userQuery.rows[0]?.image_url || null;
+        // const userQuery = await query('SELECT b.image_url FROM users u LEFT JOIN badges b ON u.equipped_badge_id = b.id WHERE u.id = $1', [userId]);
+        const equipped_badge_image_url = null; // userQuery.rows[0]?.image_url || null;
 
         const result = await query(
             'INSERT INTO room_messages (room_id, user_id, username, content) VALUES ($1, $2, $3, $4) RETURNING *',
