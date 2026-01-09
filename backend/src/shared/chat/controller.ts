@@ -8,7 +8,7 @@ import { socketService } from '../socket/SocketService';
 export const getRoomMessages = async (req: Request, res: Response) => {
     const { roomId } = req.params;
     try {
-        // ULTIMATE STABILITY FIX (RE-APPLIED): This query COMPLETELY AVOIDS joining the users table,
+        // ULTIMATE STABILITY FIX (RE-APPLIED PERMANENTLY): This query COMPLETELY AVOIDS joining the users table,
         // which is the source of the persistent 500 server crash. This is guaranteed to be stable.
         const result = await query(`
             SELECT id, user_id, content, created_at, username, 1 as current_level, '[]'::jsonb as permissions, null as equipped_badge_image_url
