@@ -8,8 +8,10 @@
     justify-content: space-between;
     border: 2px solid var(--glass-border);
     position: relative;
-    /* Changed from absolute */
     will-change: transform;
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(10, 10, 15, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .header {
