@@ -1,17 +1,23 @@
 import { Router } from 'express';
-import { getMe, login, register, updateUsername, getProfile, resetAdminPassword, deleteAccount } from './controller';
+import { getMe, login, register, updateUsername, getProfile, resetAdminPassword, deleteAccount, forgotPassword } from './controller'; // NEW: Added forgotPassword
 import { authenticate } from './middleware';
 
 const router = Router();
 
-router.get('/me', authenticate, getMe);
+// Public routes
 router.post('/login', login);
 router.post('/register', register);
+router.post('/forgot-password', forgotPassword); // NEW
+
+// Protected routes
+router.get('/me', authenticate, getMe);
 router.put('/username', authenticate, updateUsername);
-router.get('/profile/:userId', getProfile);
 router.delete('/delete-account', authenticate, deleteAccount);
 
-// Temporary route for resetting admin password
+// Profile route (can be public or protected depending on desired visibility)
+router.get('/profile/:userId', getProfile);
+
+// Temporary Admin route
 router.post('/reset-admin-password', resetAdminPassword);
 
 export default router;
