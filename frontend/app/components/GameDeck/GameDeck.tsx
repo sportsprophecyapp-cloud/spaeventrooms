@@ -7,6 +7,7 @@ import MatchCard from '../MatchCard/MatchCard';
 import styles from './GameDeck.module.css';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useAuth } from '@/app/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 interface Match {
     id: string;
@@ -27,8 +28,12 @@ const trans = (r: number, s: number) => `rotateZ(${r}deg) scale(${s})`;
 const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
     const { token } = useAuth();
+    const router = useRouter();
     const [gone] = useState(() => new Set());
     const [matches, setMatches] = useState<Match[]>([]);
+    const [showCompletion, setShowCompletion] = useState(false);
+    const [countdown, setCountdown] = useState(3);
+    const [predictionCount, setPredictionCount] = useState(0);
 
     useEffect(() => {
         if (!token) return;
@@ -46,11 +51,24 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         fetchMatches();
     }, [leagueId, token]);
 
+    // Countdown timer for auto-return
+    useEffect(() => {
+        if (showCompletion && countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        } else if (showCompletion && countdown === 0) {
+            router.push('/rooms/soccer');
+        }
+    }, [showCompletion, countdown, router]);
+
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
         const trigger = vx > 0.2;
-        if (!active && trigger) gone.add(index);
+        if (!active && trigger) {
+            gone.add(index);
+            setPredictionCount(prev => prev + 1);
+        }
         api.start(i => {
             if (index !== i) return;
             const isGone = gone.has(index);
@@ -59,11 +77,34 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const scale = active ? 1.1 : 1;
             return { x, rot, scale, delay: undefined, config: { friction: 50, tension: active ? 800 : isGone ? 200 : 500 } };
         });
-        if (!active && gone.size === matches.length) setTimeout(() => { gone.clear(); api.start(i => to(i)); }, 600);
+
+        // Check if all cards are swiped
+        if (!active && gone.size === matches.length) {
+            setTimeout(() => setShowCompletion(true), 600);
+        }
     });
 
     if (matches.length === 0) {
         return <div className={styles.empty}>{t('no_matches_available')}</div>;
+    }
+
+    if (showCompletion) {
+        return (
+            <div className={styles.completionScreen}>
+                <div className={styles.completionCard}>
+                    <div className={styles.completionIcon}>🎉</div>
+                    <h2>All Predictions Complete!</h2>
+                    <p className={styles.completionStats}>You made {predictionCount} predictions</p>
+                    <button
+                        onClick={() => router.push('/rooms/soccer')}
+                        className={styles.completionButton}
+                    >
+                        Back to Leagues
+                    </button>
+                    <p className={styles.completionCountdown}>Auto-returning in {countdown}...</p>
+                </div>
+            </div>
+        );
     }
 
     return (
