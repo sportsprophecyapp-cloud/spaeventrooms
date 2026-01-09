@@ -1,0 +1,14 @@
+.deckContainer {
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.loading, .empty {
+    text-align: center;
+    color: var(--neutral);
+    font-style: italic;
+}

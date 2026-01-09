@@ -3,134 +3,64 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import styles from './page.module.css';
-import MatchList from '../../components/MatchList';
-import CustomPollCard from '../../components/CustomPollCard';
+import LeagueGrid from '../../components/LeagueGrid/LeagueGrid';
+import GameDeck from '../../components/GameDeck/GameDeck'; // NEW
 import SponsorWidget from '../../components/SponsorWidget';
-import { useAuth } from '../../context/AuthContext';
-import LoginModal from '@/app/components/LoginModal';
-import { SocketProvider, useSocket } from '../../context/SocketContext';
-import UserTray from '../../components/UserTray';
-import Leaderboard from '../../components/Leaderboard';
-import RoomChat from '../../components/RoomChat';
-import FlashCallAlerter from '../../components/FlashCallAlerter';
+// ... other imports
 
 function RoomContent() {
     const params = useParams();
     const roomId = params.roomId as string;
-    const isSoccerRoom = roomId === 'soccer'; // Identification Logic
+    const isSoccerRoom = roomId === 'soccer';
     
-    const { isAuthenticated, token } = useAuth();
-    const { socket } = useSocket();
+    const [selectedLeague, setSelectedLeague] = useState<string | null>(null); // NEW
+    // ... other state
 
-    const [isLoginOpen, setIsLoginOpen] = useState(false);
-    const [predictions, setPredictions] = useState<any[]>([]);
-    const [activeSidebar, setActiveSidebar] = useState<'chat' | 'standings'>('chat');
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-    const fetchPredictions = async () => {
-        // Only fetch manual custom polls if NOT in the pure soccer room
-        if (isSoccerRoom) return;
-
-        try {
-            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions`);
-            const data = await res.json();
-            setPredictions(Array.isArray(data) ? data : (data.predictions || []));
-        } catch (err) {
-            setPredictions([]);
-        }
+    const handleLeagueSelect = (leagueId: string) => { // NEW
+        setSelectedLeague(leagueId);
     };
 
-    useEffect(() => {
-        fetchPredictions();
-    }, [roomId, isSoccerRoom]);
+    const handleReturnToGrid = () => { // NEW
+        setSelectedLeague(null);
+    };
 
-    useEffect(() => {
-        if (!socket || isSoccerRoom) return;
-        socket.on('prediction_new', (newPrediction: any) => {
-            setPredictions(prev => [newPrediction, ...prev]);
-        });
-        return () => { socket.off('prediction_new'); };
-    }, [socket, isSoccerRoom]);
+    // ... other logic
 
     return (
         <div className={styles.container}>
-            {/* Haptic Alerts only for Creator Rooms */}
-            {!isSoccerRoom && <FlashCallAlerter />}
-
-            <header className={styles.minimalHeader}>
-                <h1 className={styles.arenaTitle}>{roomId.toUpperCase()} ARENA</h1>
-                <div className={styles.headerActions}>
-                    {isAuthenticated ? <UserTray /> : <button onClick={() => setIsLoginOpen(true)} className={styles.loginBtn}>LOGIN</button>}
-                </div>
-            </header>
+            <header className={styles.minimalHeader}>{/* ... */}</header>
 
             <main className={styles.dualLayout}>
-                {/* PRIMARY COLUMN: MATCHES OR CREATOR CONTENT */}
                 <div className={styles.mainContent}>
                     <SponsorWidget roomId={roomId} />
                     
-                    {/* ONLY SHOW CUSTOM POLLS IN CREATOR ROOMS */}
-                    {!isSoccerRoom && predictions.length > 0 && (
-                        <div className={styles.flashSection}>
-                            <h3 className={styles.sectionHeading}>Active Live Polls</h3>
-                            {predictions.map(p => (
-                                <CustomPollCard key={p.id} prediction={p} roomId={roomId} onVote={() => {}} />
-                            ))}
-                        </div>
-                    )}
-
                     <div className={styles.matchesWrapper}>
                         {isSoccerRoom ? (
                             <>
-                                <h3 className={styles.sectionHeading}>Official Match Schedule</h3>
-                                <MatchList />
+                                {selectedLeague ? (
+                                    <>
+                                        <button onClick={handleReturnToGrid} className={styles.backToGridBtn}>← Back to Leagues</button>
+                                        <GameDeck leagueId={selectedLeague} />
+                                    </>
+                                ) : (
+                                    <>
+                                        <h3 className={styles.sectionHeading}>SELECT AN ARENA</h3>
+                                        <LeagueGrid onLeagueSelect={handleLeagueSelect} />
+                                    </>
+                                )}
                             </>
                         ) : (
-                            <div className={styles.creatorWelcome}>
-                                <h3 className={styles.sectionHeading}>Creator Event Hub</h3>
-                                <p className={styles.welcomeText}>Watch the stream and participate in live polls below!</p>
-                                {/* We can add specialized Creator modules here later */}
-                            </div>
+                            <div className={styles.creatorWelcome}>{/* ... */}</div>
                         )}
                     </div>
                 </div>
 
-                {/* SECONDARY COLUMN: SOCIAL & STANDINGS */}
-                <aside className={styles.sidebar}>
-                    <div className={styles.sidebarTabs}>
-                        <button 
-                            className={`${styles.sideTab} ${activeSidebar === 'chat' ? styles.activeSideTab : ''}`}
-                            onClick={() => setActiveSidebar('chat')}
-                        >
-                            FAN ARENA
-                        </button>
-                        <button 
-                            className={`${styles.sideTab} ${activeSidebar === 'standings' ? styles.activeSideTab : ''}`}
-                            onClick={() => setActiveSidebar('standings')}
-                        >
-                            STANDINGS
-                        </button>
-                    </div>
-                    
-                    <div className={styles.sidebarContent}>
-                        {activeSidebar === 'chat' ? <RoomChat roomId={roomId} /> : <Leaderboard />}
-                    </div>
-                </aside>
+                <aside className={styles.sidebar}>{/* ... */}</aside>
             </main>
 
-            <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+            {/* ... (LoginModal) */}
         </div>
     );
 }
 
-export default function RoomPage() {
-    const params = useParams();
-    const roomId = params.roomId as string;
-
-    return (
-        <SocketProvider roomId={roomId}>
-            <RoomContent />
-        </SocketProvider>
-    );
-}
+// ... (RoomPage wrapper remains the same)
