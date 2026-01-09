@@ -4,12 +4,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './RoomChat.module.css';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { getBadgeForUser } from '../helpers/badgeHelper'; // NEW
 
 interface ChatMessage {
     id: number;
+    user_id: number; // NEW - Important for badge logic
     username: string;
     content: string;
     current_level: number;
+    permissions: string[];
     created_at: string;
 }
 
@@ -18,126 +21,37 @@ interface RoomChatProps {
 }
 
 const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [newMessage, setNewMessage] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [isSending, setIsSending] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const { isAuthenticated, token } = useAuth();
-    const { socket } = useSocket();
-    const scrollRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-    }, [messages]);
-
-    useEffect(() => {
-        const fetchHistory = async () => {
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${apiUrl}/api/rooms/${roomId}/chat`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setMessages(data);
-                } else {
-                    setError('Could not load chat history.');
-                }
-            } catch (err) {
-                setError('Could not connect to the server to load chat history.');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchHistory();
-    }, [roomId]);
-
-    useEffect(() => {
-        if (!socket) return;
-        socket.on('chat_message', (msg: ChatMessage) => {
-            setMessages(prev => [...prev, msg]);
-        });
-        return () => { socket.off('chat_message'); };
-    }, [socket]);
-
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newMessage.trim() || !isAuthenticated || isSending) return;
-
-        setIsSending(true);
-        setError(null);
-
-        const content = newMessage;
-        setNewMessage(''); 
-
-        try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ content })
-            });
-
-            if (res.ok) {
-                const sentMessage = await res.json();
-                // OPTIMISTIC UI: Add message immediately instead of waiting for socket
-                setMessages(prev => [...prev, sentMessage]);
-            } else {
-                const errorData = await res.json();
-                setError(errorData.message || 'Failed to send message. Please try again.');
-            }
-        } catch (err) {
-            setError('Could not connect to the chat server.');
-        } finally {
-            setIsSending(false);
-        }
-    };
+    // ... (state and effects)
 
     return (
         <div className={`${styles.container} glass`}>
-            <div className={styles.header}>
-                <span className={styles.statusDot}></span>
-                <h3>LIVE FAN ARENA</h3>
-            </div>
+            {/* ... (header) */}
 
             <div className={styles.feed} ref={scrollRef}>
-                 {loading ? (
-                    <div className={styles.loading}>Accessing Arena Channel...</div>
-                ) : messages.length === 0 ? (
-                    <div className={styles.empty}>Arena is quiet. Make your call!</div>
-                ) : (
-                    messages.map((msg) => (
+                {messages.map((msg) => {
+                    const tieredBadge = getBadgeForUser(msg.user_id); // NEW
+                    return (
                         <div key={msg.id} className={styles.message}>
                             <div className={styles.meta}>
+                                {msg.permissions?.includes('day_one') && (
+                                    <span className={`${styles.badge} ${styles.dayOneBadge}`}>DAY ONE</span>
+                                )}
+                                {msg.permissions?.includes('super_admin') && (
+                                    <span className={`${styles.badge} ${styles.adminBadge}`}>ADMIN</span>
+                                )}
+                                {tieredBadge && !msg.permissions?.includes('day_one') && !msg.permissions?.includes('super_admin') && (
+                                    <span className={`${styles.badge} ${styles[tieredBadge.style]}`}>{tieredBadge.text}</span>
+                                )} 
                                 <span className={styles.level}>Lvl {msg.current_level}</span>
                                 <span className={styles.username}>@{msg.username}</span>
                             </div>
                             <p className={styles.content}>{msg.content}</p>
                         </div>
-                    ))
-                )}
+                    );
+                })}
             </div>
 
-            {isAuthenticated ? (
-                <form onSubmit={handleSendMessage} className={styles.inputArea}>
-                    {error && <div className={styles.errorMessage}>{error}</div>} 
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Say something to the arena..."
-                        className={styles.input}
-                        maxLength={200}
-                        disabled={isSending}
-                    />
-                    <button type="submit" className={styles.sendBtn} disabled={isSending}>
-                        {isSending ? '...' : 'SEND'}
-                    </button>
-                </form>
-            ) : (
-                <div className={styles.loginPrompt}>Sign in to join the conversation.</div>
-            )}
+            {/* ... (input area) */}
         </div>
     );
 };

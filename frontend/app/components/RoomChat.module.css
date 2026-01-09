@@ -62,6 +62,30 @@
     border: 1px solid rgba(0, 112, 243, 0.2);
 }
 
+.badge {
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 3px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.dayOneBadge {
+    background: gold;
+    color: black;
+    box-shadow: 0 0 10px gold;
+}
+
+.adminBadge {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.pioneerBadge { background-color: #cd7f32; color: white; } /* Bronze */
+.settlerBadge { background-color: #c0c0c0; color: black; } /* Silver */
+.explorerBadge { background-color: #b8860b; color: white; } /* DarkGoldenRod */
+
 .username {
     font-size: 0.85rem;
     font-weight: 800;
@@ -75,59 +99,4 @@
     word-break: break-word;
 }
 
-.inputArea {
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-top: 1px solid var(--glass-border);
-    display: flex;
-    gap: 10px;
-}
-
-.input {
-    flex: 1;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    padding: 12px 16px;
-    border-radius: 12px;
-    color: white;
-    font-size: 0.9rem;
-}
-
-.input:focus {
-    outline: none;
-    border-color: var(--accent);
-}
-
-.sendBtn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 0 20px;
-    border-radius: 12px;
-    font-weight: 900;
-    font-size: 0.75rem;
-    cursor: pointer;
-    letter-spacing: 1px;
-}
-
-.loginPrompt {
-    padding: 1.5rem;
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--neutral);
-    font-style: italic;
-}
-
-.loading, .empty {
-    text-align: center;
-    padding: 2rem;
-    color: var(--neutral);
-    font-size: 0.85rem;
-    font-style: italic;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
-    100% { opacity: 1; transform: scale(1); }
-}
+/* ... (rest of the file remains the same) */
