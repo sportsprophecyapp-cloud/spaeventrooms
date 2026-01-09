@@ -47,7 +47,7 @@ const HomePage = () => {
                 </div>
                 <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
                 <div className={styles.logo}>
-                    <h1>EVENTS <span style={{color: 'var(--accent)'}}>ARENA</span></h1>
+                    <h1>EVENTS <span style={{ color: 'var(--accent)' }}>ARENA</span></h1>
                 </div>
                 <p className={styles.tagline}>{t('tagline')}</p>
                 <div className={styles.quickNav}>
@@ -64,7 +64,7 @@ const HomePage = () => {
                 <div className={styles.sectionTitle}>{t('select_arena')}</div>
                 <div className={styles.roomGrid}>
                     {rooms.map(room => (
-                        <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`}>
+                        <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`} style={{ borderColor: room.active ? room.color : undefined }}>
                             <div className={styles.roomIcon} style={{ borderColor: room.color }}>{room.icon}</div>
                             <h3>{room.name}</h3>
                             <p>{room.description}</p>
