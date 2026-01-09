@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { query as dbQuery } from '../database';
 import { AuthRequest } from '../auth/middleware';
 import { getLevelFromXp } from '../utils/xpMath';
+import { pickWinner } from '../services/drawService';
 
 // GET /api/gamification/me
 export const handleGetMe = async (req: AuthRequest, res: Response) => {
@@ -136,6 +137,33 @@ export const getShop = async (req: AuthRequest, res: Response) => {
         const result = await dbQuery(`SELECT * FROM cosmetics WHERE is_active = true`);
         res.json({ success: true, cosmetics: result.rows });
     } catch (e) { res.json({ success: true, cosmetics: [] }); }
+};
+
+export const handlePickWinner = async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    try {
+        const winner = await pickWinner(parseInt(id));
+        if (!winner) return res.status(404).json({ success: false, error: 'No entries found or draw already completed' });
+        res.json({ success: true, winner });
+    } catch (err) {
+        res.status(500).json({ error: 'Pick winner failed' });
+    }
+};
+
+export const handleGetWins = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        const result = await dbQuery(
+            `SELECT d.id, d.title, d.prize, d.draw_date 
+             FROM prize_draws d
+             WHERE d.winner_id = $1 AND d.status = 'completed'
+             ORDER BY d.draw_date DESC`,
+            [userId]
+        );
+        res.json({ success: true, wins: result.rows });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Error fetching wins' });
+    }
 };
 
 export const handleDeleteDraw = async (req: AuthRequest, res: Response) => {

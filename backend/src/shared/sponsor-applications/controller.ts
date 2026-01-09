@@ -99,5 +99,31 @@ export const getAllSponsors = async (req: Request, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Fetch failed' }); }
 };
 
+export const updateApplication = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        const keys = Object.keys(updates);
+        if (keys.length === 0) return res.status(400).json({ error: 'No updates provided' });
+
+        const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(', ');
+        await dbQuery(`UPDATE sponsor_applications SET ${setClause} WHERE id = $${keys.length + 1}`, [...Object.values(updates), id]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: 'Update failed' }); }
+};
+
+export const updateSponsor = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        const keys = Object.keys(updates);
+        if (keys.length === 0) return res.status(400).json({ error: 'No updates provided' });
+
+        const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(', ');
+        await dbQuery(`UPDATE room_sponsors SET ${setClause} WHERE id = $${keys.length + 1}`, [...Object.values(updates), id]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: 'Update failed' }); }
+};
+
 export const generateInvoice = async (req: Request, res: Response) => res.json({ success: true });
 export const markPaymentPaid = async (req: Request, res: Response) => res.json({ success: true });

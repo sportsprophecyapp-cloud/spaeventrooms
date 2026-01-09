@@ -1,4 +1,5 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Events Arena Frontend
+This is the [Next.js](https://nextjs.org) application for the Events Arena (Sports Prophecy) platform.
 
 ## Getting Started
 

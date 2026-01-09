@@ -93,6 +93,25 @@
     cursor: pointer;
 }
 
+.pickWinnerBtn {
+    background: #ffaa00;
+    color: black;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.winnerAnnounce {
+    color: #ffd700;
+    font-weight: 800;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
 .contactBtn {
     background: rgba(255, 255, 255, 0.1);
     color: white;

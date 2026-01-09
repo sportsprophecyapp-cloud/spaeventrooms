@@ -7,9 +7,12 @@ import { useAuth } from '@/app/context/AuthContext';
 
 const AdminSponsorsPage = () => {
     const { user, token } = useAuth();
-    const [activeTab, setActiveTab] = useState<'stats' | 'apps' | 'draws'>('stats');
+    const [activeTab, setActiveTab] = useState<'stats' | 'apps' | 'draws' | 'placements'>('stats');
     const [applications, setApplications] = useState<any[]>([]);
     const [draws, setDraws] = useState<any[]>([]);
+    const [placements, setPlacements] = useState<any[]>([]);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editData, setEditData] = useState<any>({});
     const [loading, setLoading] = useState(false);
 
     const canViewSponsors = user?.permissions.includes('can_view_sponsors') || user?.permissions.includes('super_admin');
@@ -31,6 +34,12 @@ const AdminSponsorsPage = () => {
                 });
                 const data = await res.json();
                 if (res.ok) setDraws(data.draws || []);
+            } else if (activeTab === 'placements') {
+                const res = await fetch(`${apiUrl}/api/sponsor-applications/placements`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) setPlacements(data.sponsors || []);
             }
         } catch (e) {
             console.error('Fetch failed', e);
@@ -69,6 +78,22 @@ const AdminSponsorsPage = () => {
         }
     };
 
+    const handlePickWinner = async (id: number) => {
+        if (!confirm('Ready to pick a random winner for this draw?')) return;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/api/gamification/draws/${id}/pick-winner`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert(`Winner selected: ${data.winner.username} (${data.winner.email})`);
+            fetchData();
+        } else {
+            alert(data.error || 'Failed to pick winner.');
+        }
+    };
+
     if (!canViewSponsors) {
         return <div className={styles.error}>ACCESS DENIED: Requires 'can_view_sponsors' permission.</div>;
     }
@@ -80,6 +105,7 @@ const AdminSponsorsPage = () => {
                 <div className={styles.tabs}>
                     <button className={activeTab === 'stats' ? styles.activeTab : ''} onClick={() => setActiveTab('stats')}>Overview</button>
                     <button className={activeTab === 'apps' ? styles.activeTab : ''} onClick={() => setActiveTab('apps')}>Incoming Applications</button>
+                    <button className={activeTab === 'placements' ? styles.activeTab : ''} onClick={() => setActiveTab('placements')}>Live Placements</button>
                     <button className={activeTab === 'draws' ? styles.activeTab : ''} onClick={() => setActiveTab('draws')}>Active Draws</button>
                 </div>
             </header>
@@ -119,9 +145,45 @@ const AdminSponsorsPage = () => {
                                     <span className={styles.statusBadge}>{draw.status.toUpperCase()}</span>
                                 </div>
                                 <p><strong>Prize:</strong> {draw.prize}</p>
+                                {draw.winner_id && <p className={styles.winnerAnnounce}>Winner ID: {draw.winner_id}</p>}
                                 <div className={styles.cardActions}>
+                                    {!draw.winner_id && (
+                                        <button onClick={() => handlePickWinner(draw.id)} className={styles.pickWinnerBtn}>PICK WINNER</button>
+                                    )}
                                     <button onClick={() => handleDeleteDraw(draw.id)} className={styles.deleteBtn}>REMOVE DRAW</button>
                                 </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {activeTab === 'placements' && (
+                    <div className={styles.appList}>
+                        {loading && <p>Loading placements...</p>}
+                        {placements.length === 0 && !loading && <p>No active placements.</p>}
+                        {placements.map(sp => (
+                            <div key={sp.id} className={`${styles.card} glass`}>
+                                {editingId === sp.id ? (
+                                    <div className={styles.editForm}>
+                                        <input value={editData.sponsor_name || sp.sponsor_name} onChange={e => setEditData({ ...editData, sponsor_name: e.target.value })} />
+                                        <input value={editData.website_url || sp.website_url} onChange={e => setEditData({ ...editData, website_url: e.target.value })} />
+                                        <div className={styles.cardActions}>
+                                            <button onClick={() => handleUpdateSponsor(sp.id)} className={styles.approveBtn}>SAVE</button>
+                                            <button onClick={() => setEditingId(null)} className={styles.deleteBtn}>CANCEL</button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className={styles.cardHeader}>
+                                            <h3>{sp.sponsor_name}</h3>
+                                            <span className={styles.targetBadge}>{sp.room_id.toUpperCase()}</span>
+                                        </div>
+                                        <p><strong>Website:</strong> {sp.website_url || 'N/A'}</p>
+                                        <div className={styles.cardActions}>
+                                            <button onClick={() => { setEditingId(sp.id); setEditData(sp); }} className={styles.pickWinnerBtn}>EDIT</button>
+                                            <button className={styles.contactBtn} onClick={() => window.location.href = sp.website_url}>VISIT SITE</button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         ))}
                     </div>

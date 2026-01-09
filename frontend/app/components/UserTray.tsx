@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import styles from './UserTray.module.css';
+import WinnerAlerter from './WinnerAlerter/WinnerAlerter';
 
 const UserTray = () => {
     const { user, logout } = useAuth();
@@ -19,6 +20,7 @@ const UserTray = () => {
 
     return (
         <div className={styles.wrapper}>
+            <WinnerAlerter />
             <div className={styles.tray} onClick={() => setIsExpanded(!isExpanded)}>
                 <div className={styles.stat}>
                     <span className={styles.icon}>🪙</span>
@@ -44,6 +46,7 @@ const UserTray = () => {
                         {isAdmin && (
                             <>
                                 <Link href="/admin/users" className={styles.item}>🛡️ Command Center</Link>
+                                <Link href="/admin/sponsors" className={styles.item}>💎 Sponsor Hub</Link>
                                 <Link href="/admin/rooms/create" className={styles.item}>🪄 Arena Wizard</Link>
                             </>
                         )}
