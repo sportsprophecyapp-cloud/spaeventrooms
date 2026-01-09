@@ -94,6 +94,23 @@ const AdminSponsorsPage = () => {
         }
     };
 
+    const handleUpdateSponsor = async (id: number) => {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/api/sponsor-applications/placements/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(editData)
+        });
+        if (res.ok) {
+            alert('Sponsor updated!');
+            setEditingId(null);
+            fetchData();
+        }
+    };
+
     if (!canViewSponsors) {
         return <div className={styles.error}>ACCESS DENIED: Requires 'can_view_sponsors' permission.</div>;
     }
