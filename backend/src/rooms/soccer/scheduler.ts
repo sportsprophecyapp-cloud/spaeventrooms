@@ -1,11 +1,11 @@
 import { fetchLiveMatches } from '../../shared/services/footballApi';
 import { resolveSoccerPredictions } from '../../shared/services/resolver';
 
-// Interval for syncing data - using 45 minutes to be safe with limits
-const ODDS_API_INTERVAL = 45 * 60 * 1000;
+// Very Low Frequency Data Sync - 4 Hour Interval (Savings Mode)
+const ODDS_API_INTERVAL = 240 * 60 * 1000;
 
 export const startSoccerScheduler = () => {
-    console.log('🎯 Arena Data Scheduler: Standard Mode (45m Interval)');
+    console.log('🎯 Arena Data Scheduler: Savings Mode (4h Interval)');
 
     const initialRun = async () => {
         console.log('🚀 Performing initial Arena sync...');

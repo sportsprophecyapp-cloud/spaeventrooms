@@ -11,7 +11,7 @@ Events Arena is a full-stack interactive engagement platform optimized for sport
 - **Sponsor Draw Strategy:** Interactive branded rooms for high-value prize distribution.
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
-- **Dual-Sync Data Layer:** API-Football (20m) + The Odds API (45m).
+- **Dual-Sync Data Layer:** API-Football (20m) + The Odds API (4h Savings Mode).
 - **Auto-Resolution (v1.1):** Automated 15-minute checks for Results, awarding **XP** and **Prize Tickets** instantly.
 - **Real-Time Communication:** Global Socket.io layer for chat, private admin messages, and live online status.
 

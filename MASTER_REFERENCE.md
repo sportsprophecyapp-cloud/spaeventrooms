@@ -8,7 +8,7 @@
 - **Gamification:** Sponsor Draw Room (`/draw`) powered by Prize Tickets.
 
 ## 📡 Data Architecture (API & Limits)
-- **Resilient Dual-API Sync:** API-Football (20m) + The Odds API (45m).
+- **Resilient Dual-API Sync:** API-Football (20m) + The Odds API (4h Savings Mode).
 - **Sequential Key Rotation:** Supports comma-separated lists for both `THE_ODDS_API_KEY` and `API_FOOTBALL_KEY`.
 - **Fail-Over Logic:** Automatic rotation to the next key index on 401/429 errors.
 - **Accuracy:** Frontend fuzzy-match logic (`home-away-time`) ensures unique match cards across multiple APIs.
