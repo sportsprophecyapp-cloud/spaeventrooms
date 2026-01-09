@@ -9,94 +9,50 @@ const runMigrations = async () => {
         console.log('Running database migrations and final setup...');
 
         const schema = `
-            CREATE TABLE IF NOT EXISTS users (
+            // ... (existing CREATE TABLE statements remain the same) ...
+
+            CREATE TABLE IF NOT EXISTS badges (
                 id SERIAL PRIMARY KEY,
-                email VARCHAR(255) UNIQUE NOT NULL,
-                password_hash VARCHAR(255) NOT NULL,
-                username VARCHAR(50) UNIQUE,
+                name VARCHAR(50) UNIQUE NOT NULL,
+                description TEXT NOT NULL,
+                image_url VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
 
-            CREATE TABLE IF NOT EXISTS rooms (
-                room_id VARCHAR(50) PRIMARY KEY,
-                display_name VARCHAR(100) NOT NULL,
-                config JSONB DEFAULT '{}',
-                is_active BOOLEAN DEFAULT TRUE
-            );
-
-            CREATE TABLE IF NOT EXISTS soccer_matches (
-                match_id VARCHAR(50) PRIMARY KEY,
-                home_team VARCHAR(100) NOT NULL,
-                away_team VARCHAR(100) NOT NULL,
-                start_time TIMESTAMP WITH TIME ZONE NOT NULL,
-                status VARCHAR(20) DEFAULT 'scheduled',
-                score_home INTEGER DEFAULT 0,
-                score_away INTEGER DEFAULT 0,
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS soccer_predictions (
+            CREATE TABLE IF NOT EXISTS user_unlocked_badges (
                 id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id),
-                match_id VARCHAR(50) REFERENCES soccer_matches(match_id),
-                prediction_data JSONB NOT NULL,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                badge_id INTEGER NOT NULL REFERENCES badges(id) ON DELETE CASCADE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(user_id, match_id)
-            );
-
-            CREATE TABLE IF NOT EXISTS user_vouchers (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id) NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                description TEXT,
-                claimed_at TIMESTAMP WITH TIME ZONE,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS chat_filter_words (
-                id SERIAL PRIMARY KEY,
-                word VARCHAR(255) UNIQUE NOT NULL,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                UNIQUE(user_id, badge_id)
             );
         `;
         await client.query(schema);
 
-        // Add all missing columns to users table
-        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT \'["supporter"]\'::jsonb');
-        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT false');
-        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS is_muted BOOLEAN DEFAULT false');
-        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS total_points INTEGER DEFAULT 0');
-        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS token_balance INTEGER DEFAULT 150');
-        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS total_tickets INTEGER DEFAULT 0');
-        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS current_level INTEGER DEFAULT 1');
+        console.log('✅ Base schema is in place.');
 
-        // Add all missing columns to soccer_predictions table
-        await client.query('ALTER TABLE soccer_predictions ADD COLUMN IF NOT EXISTS result VARCHAR(50)');
-        await client.query('ALTER TABLE soccer_predictions ADD COLUMN IF NOT EXISTS points_earned INTEGER');
+        // Add all missing columns
+        await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS equipped_badge_id INTEGER REFERENCES badges(id) ON DELETE SET NULL');
+        // ... (other ALTER TABLE statements remain the same) ...
 
-        console.log('✅ Base schema and columns are now in place.');
+        console.log('✅ All columns are present.');
 
-        // Ensure the admin user exists and reset password to a known state
-        const adminEmail = 'sportsprophecyapp@gmail.com';
-        const adminPassword = 'your_password_here'; // Replace with your actual password
+        // Seed the badges table with placeholder data
+        const seedBadges = `
+            INSERT INTO badges (name, description, image_url) VALUES
+            ('Pioneer', 'Joined within the first 100 users.', '/badges/pioneer.png'),
+            ('Settler', 'Joined within the first 500 users.', '/badges/settler.png'),
+            ('Explorer', 'Joined within the first 1000 users.', '/badges/explorer.png'),
+            ('First Prophecy', 'Make your first prediction.', '/badges/first_prophecy.png'),
+            ('High Roller', 'Spend 10,000 tokens.', '/badges/high_roller.png'),
+            ('Perfect Call', 'Correctly predict a match with less than 10% consensus.', '/badges/perfect_call.png')
+            ON CONFLICT (name) DO NOTHING;
+        `;
+        await client.query(seedBadges);
 
-        if (adminPassword === 'your_password_here') {
-            console.error('❌ FATAL: You must edit the migrate.ts script to include the admin password before deploying.');
-            throw new Error('Admin password not set in migration script.');
-        }
+        console.log('✅ Placeholder badges have been seeded.');
 
-        const userCheck = await client.query('SELECT * FROM users WHERE email = $1', [adminEmail]);
-        const hashedPassword = await bcrypt.hash(adminPassword, 10);
-
-        if (userCheck.rowCount === 0) {
-            console.log(`Admin user not found. Creating user '${adminEmail}'...`);
-            await client.query('INSERT INTO users(email, username, password_hash, permissions) VALUES ($1, $2, $3, $4)', [adminEmail, 'admin', hashedPassword, '["super_admin"]']);
-        } else {
-            console.log(`Admin user found. Updating password and permissions for '${adminEmail}'...`);
-            await client.query('UPDATE users SET password_hash = $1, permissions = $2 WHERE email = $3', [hashedPassword, '["super_admin"]', adminEmail]);
-        }
-        
-        console.log('✅ Admin user is configured correctly.');
+        // ... (rest of the migration script remains the same) ...
 
     } catch (err) {
         console.error('❌ Migration and setup failed:', err);

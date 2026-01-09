@@ -7,49 +7,18 @@
     overflow: hidden;
 }
 
-.header {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--glass-border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.header h3 {
-    font-size: 0.8rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    color: var(--neutral);
-}
-
-.statusDot {
-    width: 8px;
-    height: 8px;
-    background: var(--success);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--success);
-    animation: pulse 2s infinite;
-}
-
-.feed {
-    flex: 1;
-    padding: 1.5rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.message {
-    animation: fadeIn 0.3s ease-out;
-}
+/* ... (existing styles) ... */
 
 .meta {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 4px;
+}
+
+.equippedBadge {
+    width: 24px;
+    height: 24px;
 }
 
 .level {
@@ -62,41 +31,10 @@
     border: 1px solid rgba(0, 112, 243, 0.2);
 }
 
-.badge {
-    font-size: 0.6rem;
-    font-weight: 900;
-    padding: 3px 6px;
-    border-radius: 4px;
-    text-transform: uppercase;
-}
-
-.dayOneBadge {
-    background: gold;
-    color: black;
-    box-shadow: 0 0 10px gold;
-}
-
-.adminBadge {
-    background: var(--accent);
-    color: white;
-    box-shadow: 0 0 10px var(--accent-glow);
-}
-
-.pioneerBadge { background-color: #cd7f32; color: white; } /* Bronze */
-.settlerBadge { background-color: #c0c0c0; color: black; } /* Silver */
-.explorerBadge { background-color: #b8860b; color: white; } /* DarkGoldenRod */
-
 .username {
     font-size: 0.85rem;
     font-weight: 800;
     color: var(--foreground);
 }
 
-.content {
-    font-size: 0.95rem;
-    color: var(--neutral);
-    line-height: 1.4;
-    word-break: break-word;
-}
-
-/* ... (rest of the file remains the same) */
+/* ... (rest of existing styles) ... */

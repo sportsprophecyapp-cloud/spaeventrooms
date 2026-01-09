@@ -1,173 +1,66 @@
 .container {
-    min-height: 100vh;
-    padding: 3rem 1.5rem;
-    background: var(--background);
-    color: white;
+    padding-bottom: 4rem;
 }
 
-.header {
-    max-width: 900px;
-    margin: 0 auto 4rem auto;
-    animation: fadeIn 0.8s ease-out;
+/* ... (existing styles) ... */
+
+.badgeLocker {
+    margin-top: 3rem;
+    padding: 2rem;
+    border-radius: 24px;
 }
 
-.profileHeader {
-    display: flex;
-    align-items: center;
-    gap: 3rem;
+.sectionTitle {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
-.avatarWrapper {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    border: 4px solid var(--accent);
-    padding: 8px;
-    box-shadow: 0 0 30px var(--accent-glow);
-}
-
-.avatar {
-    width: 100%;
-    height: 100%;
-    background: var(--glass);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4rem;
-    font-weight: 900;
-}
-
-.userInfo {
-    flex: 1;
-}
-
-.nameDisplay {
-    display: flex;
-    align-items: center;
+.badgesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1.5rem;
+}
+
+.badgeCard {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.badgeImage {
+    width: 80px;
+    height: 80px;
     margin-bottom: 1rem;
 }
 
-.username {
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: -2px;
-}
-
-.editBtn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    color: var(--neutral);
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.editBtn:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-}
-
-/* REFERRAL CARD */
-.referralCard {
-    max-width: 900px;
-    margin: 0 auto 3rem auto;
-    padding: 2rem;
-    border-radius: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid var(--glass-border);
-    background: linear-gradient(135deg, rgba(0, 112, 243, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
-}
-
-.refInfo h3 {
-    font-size: 0.9rem;
-    font-weight: 900;
-    letter-spacing: 2px;
+.badgeCard h4 {
+    font-size: 1rem;
+    font-weight: 700;
     margin-bottom: 0.5rem;
-    color: var(--accent);
 }
 
-.refInfo p {
-    font-size: 0.85rem;
+.badgeCard p {
+    font-size: 0.8rem;
     color: var(--neutral);
+    flex-grow: 1;
+    margin-bottom: 1rem;
 }
 
-.copyBtn {
+.equipBtn {
+    width: 100%;
+    padding: 10px;
     background: var(--accent);
     color: white;
     border: none;
-    padding: 14px 24px;
-    border-radius: 12px;
-    font-weight: 900;
-    font-size: 0.8rem;
+    border-radius: 8px;
     cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
+    font-weight: 700;
 }
 
-.copyBtn:hover {
-    box-shadow: 0 0 20px var(--accent-glow);
-    transform: translateY(-2px);
-}
-
-.statsGrid {
-    max-width: 900px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-}
-
-.statCard {
-    padding: 2.5rem;
-    border-radius: 24px;
-    text-align: center;
-    transition: transform 0.3s ease;
-}
-
-.statCard:hover {
-    transform: translateY(-10px);
-}
-
-.statLabel {
-    display: block;
-    font-size: 0.7rem;
-    font-weight: 900;
-    color: var(--neutral);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-}
-
-.statValue {
-    font-size: 2rem;
-    font-weight: 900;
-}
-
-.navBar {
-    max-width: 900px;
-    margin: 0 auto 2rem auto;
-}
-
-.backBtn {
-    background: transparent;
-    border: none;
-    color: var(--neutral);
-    font-weight: 900;
-    font-size: 0.8rem;
-    cursor: pointer;
-    letter-spacing: 1px;
-}
-
-@media (max-width: 768px) {
-    .referralCard { flex-direction: column; text-align: center; gap: 1.5rem; }
-    .statsGrid { grid-template-columns: 1fr; }
-    .profileHeader { flex-direction: column; text-align: center; gap: 2rem; }
-    .nameDisplay { justify-content: center; }
-}
+/* ... (rest of existing styles) ... */
