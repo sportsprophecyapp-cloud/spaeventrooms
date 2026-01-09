@@ -1,42 +1,41 @@
 # Events Arena - UX Design Document
-**Version 2.17 | January 2026**
+**Version 2.18 | January 2026**
 
 ## 🎯 Overview
 Events Arena is a full-stack interactive engagement platform optimized for sports, TV, and creator-led events. It is build-stabilized, branding-unified, and strategically optimized for rapid global growth via a "Digital-First" economy.
 
 ### Core Philosophy:
-- **Events Arena Strategy:** Transitioned from "Sports Prophecy" to the more inclusive "Events Arena" to capture all major cultural moments (Sports, Reality TV, Creator Events, Gaming).
-- **Sponsor Sandbox Strategy:** Potential partners can design their own campaigns via an interactive sandbox with real-time logo/prize adjustment sliders.
-- **Digital-First Prize Economy:** All rewards are delivered as **Digital Redemption Codes**. This model ensures zero physical liability, zero shipping costs, and instant global scalability.
-- **The "Founding 5" Strategy:** The first 5 partners receive a $0 monthly fee in exchange for monthly digital prize codes.
-
----
+- **Events Arena Strategy:** Inclusive branding to capture all major cultural moments.
+- **Sponsor Sandbox Strategy:** Interactive, self-serve campaign design for partners.
+- **Digital-First Prize Economy:** All rewards are Digital Redemption Codes for zero liability and instant scalability.
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
-- **Dual-Sync Data Layer:** API-Football (20m) + The Odds API (45m) with 4-key sequential rotation.
-- **Auto-Resolution:** Automated 15-minute checks for Results, awarding XP and Prize Tickets instantly.
-- **Compliance Architecture:** Verified Privacy Policy (`/privacy`) and Account Deletion (`/delete-account`) routes are live and linked for app store submission.
+- **Dual-Sync Data Layer:** API-Football (20m) + The Odds API (45m).
+- **Auto-Resolution (v1.1):** Automated 15-minute checks for Results, awarding **XP** and **Prize Tickets** instantly.
+- **Real-Time Communication:** Global Socket.io layer for chat, private admin messages, and live online status.
 
----
-
-## 🛠️ STORE IDENTITY (Google Play / App Store)
-- **App Name:** `Events Arena: Sports Prophecy` (29/30 Characters)
-- **Short Description:** `Predict live sports & events, climb the standings, and win exclusive prizes.` (79/80 Characters)
-- **Privacy URL:** `https://www.sportsprophecyapp.com/privacy`
-- **Deletion URL:** `https://www.sportsprophecyapp.com/delete-account`
-
----
+## 🏆 ENGAGEMENT & REWARDS (v1)
+- **Badge & Inventory System:**
+    - Users can unlock a variety of badges for their achievements.
+    - A "My Badge Locker" on the profile page allows users to equip their favorite unlocked badge.
+    - Equipped badges are displayed next to usernames in the chat.
+- **Tiered & Special Badges:**
+    - **Automated:** "PIONEER" (1-100), "SETTLER" (101-500), etc. are granted automatically based on user ID.
+    - **Manual:** Special badges ("Day One") can be granted by admins.
 
 ## 🛠️ USER ROLES & HIERARCHY
-1. **Supporter (User):** Earns digital prize codes (e.g., $50 Google/7-11 cards) through accurate pre-game calls across all event categories.
-2. **Founding Partner (Sponsor):** The first 5 brands. Providing digital vouchers in exchange for premium arena exposure.
-3. **Admin (Moderator):** Reviews sandbox proposals, verifies codes, and triggers the automated draws.
+1. **Supporter (User):** Earns Prize Tickets and XP. Can unlock and equip cosmetic badges.
+2. **Admin (Moderator):** Manages users, grants special badges, and sends both private and site-wide announcements.
 
----
+## 🛡️ ADMIN & MODERATION TOOLS
+- **Command Center:** Central hub for user management.
+- **Live Online Status:** Admins can see which users are currently online.
+- **Private Messaging:** Admins can send real-time private messages to individual users.
+- **Global Announcements:** Admins can broadcast a "toast" notification to all online users instantly.
 
-## 🌏 GLOBAL ACCESSIBILITY
-- **Multi-Language Support:** English, ID, and TH with automatic detection and manual overrides.
-- **SEO Ready:** Professional metadata and OG tags optimized for global social sharing.
+## ⚖️ COMPLIANCE & TRUST
+- **Account Deletion:** Full, secure, backend-powered account deletion is implemented.
+- **Footer Links:** Homepage footer contains links to `/corporate`, `/privacy`, and `/delete-account`.
 
 ---
 *This document serves as the master blueprint for the Events Arena platform.*
