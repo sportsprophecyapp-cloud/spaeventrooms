@@ -11,49 +11,108 @@ import OnboardingModal from '@/app/components/OnboardingModal';
 import SponsorMarquee from '@/app/components/SponsorMarquee';
 
 const HomePage = () => {
-  const { t, language, setLanguage } = useLanguage();
-  const { user, isAuthenticated } = useAuth();
-  const router = useRouter();
-  const [showOnboarding, setShowOnboarding] = React.useState(false);
+    const { t, language, setLanguage } = useLanguage();
+    const { user, isAuthenticated } = useAuth();
+    const router = useRouter();
+    const [showOnboarding, setShowOnboarding] = React.useState(false);
 
-  // ... (rooms array and logic)
+    const rooms = [
+        { id: 'soccer', name: 'Soccer Arena', description: 'Forecast match winners and events from the world\'s top leagues.', icon: '◈', color: 'var(--accent)', active: true },
+        { id: 'nfl', name: 'NFL Hub', description: 'Pro predictions and game scripts. Coming for the playoffs!', icon: '🏈', color: '#ff4b4b', active: false },
+        { id: 'f1', name: 'F1 Paddock', description: 'Podium picks and fastest lap prophecies. Season starts soon.', icon: '🏎️', color: '#ffd700', active: false }
+    ];
 
-  return (
-    <div className={styles.container}>
-        <header className={styles.header}>
-            {/* ... (language switcher and logo) ... */}
-        </header>
+    React.useEffect(() => {
+        const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+        if (!hasSeenOnboarding) setShowOnboarding(true);
+    }, []);
 
-        <main className={styles.main}>
-            <h2 className={styles.sectionTitle}>{t('select_arena')}</h2>
-            {/* ... (roomGrid) ... */}
+    const handleOnboardingClose = () => {
+        setShowOnboarding(false);
+        localStorage.setItem('hasSeenOnboarding', 'true');
+    };
 
-            <section className={styles.economyPreview}>
-                <div className={`${styles.ecoCard} glass`}>
-                    <span className={styles.ecoIcon}>🎫</span>
-                    <h2>WIN PRIZES</h2>
-                    <p>Every correct call awards a <strong>Prize Draw Ticket</strong>.</p>
+    const handleEnterRoom = (roomId: string) => {
+        if (isAuthenticated) router.push(`/rooms/${roomId}`);
+        else router.push(`/auth/login?redirect=/rooms/${roomId}`);
+    };
+
+    return (
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <div className={styles.languageSwitcher}>
+                    <button onClick={() => setLanguage('en')} className={language === 'en' ? styles.activeLang : ''}>EN</button>
+                    <button onClick={() => setLanguage('id')} className={language === 'id' ? styles.activeLang : ''}>ID</button>
+                    <button onClick={() => setLanguage('th')} className={language === 'th' ? styles.activeLang : ''}>TH</button>
                 </div>
-                <div className={`${styles.ecoCard} glass`}>
-                    <span className={styles.ecoIcon}>📈</span>
-                    <h2>LEVEL UP</h2>
-                    <p>Climb the standings and earn elite status in the community.</p>
+                <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
+                <div className={styles.logo}>
+                    <h1>EVENTS <span style={{color: 'var(--accent)'}}>ARENA</span></h1>
                 </div>
-                <div className={`${styles.ecoCard} glass`}>
-                    <span className={styles.ecoIcon}>🤝</span>
-                    <h2>RECRUIT</h2>
-                    <p>Invite friends and both get <strong>+50 Bonus Tokens</strong>.</p>
+                <p className={styles.tagline}>{t('tagline')}</p>
+                <div className={styles.quickNav}>
+                    <Link href="/leaderboard" className={styles.navLink}>🏆 {t('standings')}</Link>
+                    {isAuthenticated ? (
+                        <Link href={`/profile/${user?.id}`} className={styles.navLink}>👤 Profile</Link>
+                    ) : (
+                        <Link href="/auth/register" className={styles.navLink}>⚡ {t('join_free')}</Link>
+                    )}
                 </div>
-            </section>
-        </main>
+            </header>
 
-        <footer className={styles.footer}>
-            {/* ... */}
-        </footer>
+            <main className={styles.main}>
+                <h2 className={styles.sectionTitle}>{t('select_arena')}</h2>
+                <div className={styles.roomGrid}>
+                    {rooms.map(room => (
+                        <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`}>
+                            <div className={styles.roomIcon} style={{ borderColor: room.color }}>{room.icon}</div>
+                            <h3>{room.name}</h3>
+                            <p>{room.description}</p>
+                            {room.active ? (
+                                <button onClick={() => handleEnterRoom(room.id)} className={styles.enterBtn}>{t('enter_arena')}</button>
+                            ) : (
+                                <span className={styles.comingSoon}>COMING SOON</span>
+                            )}
+                        </div>
+                    ))}
+                </div>
 
-        <OnboardingModal isOpen={showOnboarding} onClose={() => {setShowOnboarding(false); localStorage.setItem('hasSeenOnboarding', 'true');}} />
-    </div>
-  );
+                <section className={styles.economyPreview}>
+                    <div className={`${styles.ecoCard} glass`}>
+                        <span className={styles.ecoIcon}>🎫</span>
+                        <h2>WIN PRIZES</h2>
+                        <p>Every correct call awards a <strong>Prize Draw Ticket</strong>.</p>
+                    </div>
+                    <div className={`${styles.ecoCard} glass`}>
+                        <span className={styles.ecoIcon}>📈</span>
+                        <h2>LEVEL UP</h2>
+                        <p>Climb the standings and earn elite status in the community.</p>
+                    </div>
+                    <div className={`${styles.ecoCard} glass`}>
+                        <span className={styles.ecoIcon}>🤝</span>
+                        <h2>RECRUIT</h2>
+                        <p>Invite friends and both get <strong>+50 Bonus Tokens</strong>.</p>
+                    </div>
+                </section>
+            </main>
+
+            <footer className={styles.footer}>
+                <SponsorMarquee />
+                <div className={styles.footerInfo}>
+                    <div className={styles.footerLinks}>
+                        <Link href="/corporate">Corporate</Link>
+                        <Link href="/privacy">Privacy Policy</Link>
+                        <Link href="/delete-account">Delete Account</Link>
+                    </div>
+                    <p>&copy; 2026 Events Arena | Powered by Sports Prophecy</p>
+                    <p className={styles.disclaimer}>Events Arena is a social platform for entertainment purposes only. No real money can be won or wagered on this site.</p>
+                    <span className={styles.version}>v{APP_VERSION}</span>
+                </div>
+            </footer>
+
+            <OnboardingModal isOpen={showOnboarding} onClose={handleOnboardingClose} />
+        </div>
+    );
 };
 
 export default HomePage;
