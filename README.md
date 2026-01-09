@@ -1,6 +1,6 @@
 # Events Arena (Sports Prophecy)
 
-**Version**: 3.2.0  
+**Version**: 3.3.0  
 **Release**: January 9, 2026
 
 A multi-room prediction platform with premium UI, Google Login, and real-time chat.
@@ -40,8 +40,10 @@ A multi-room prediction platform with premium UI, Google Login, and real-time ch
    ```bash
    cd backend
    npm run build
-   # Run the migration script (ensure DB is running)
-   npx ts-node src/scripts/migrate.ts
+    # Run the migration script (ensure DB is running)
+    npx ts-node src/scripts/migrate.ts
+    # Seed initial demo draws
+    npx ts-node src/scripts/seed-draws.ts
    ```
 
 4. **Running Locally**

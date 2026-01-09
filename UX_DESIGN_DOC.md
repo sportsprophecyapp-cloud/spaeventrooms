@@ -8,6 +8,7 @@ Events Arena is a full-stack interactive engagement platform optimized for sport
 - **Events Arena Strategy:** Inclusive branding to capture all major cultural moments.
 - **Sponsor Sandbox Strategy:** Interactive, self-serve campaign design for partners.
 - **Digital-First Prize Economy:** All rewards are Digital Redemption Codes for zero liability and instant scalability.
+- **Sponsor Draw Strategy:** Interactive branded rooms for high-value prize distribution.
 
 ## 🏗️ SYSTEM ARCHITECTURE (Real-Time Data)
 - **Dual-Sync Data Layer:** API-Football (20m) + The Odds API (45m).
@@ -22,6 +23,11 @@ Events Arena is a full-stack interactive engagement platform optimized for sport
 - **Tiered & Special Badges:**
     - **Automated:** "PIONEER" (1-100), "SETTLER" (101-500), etc. are granted automatically based on user ID.
     - **Manual:** Special badges ("Day One") can be granted by admins.
+
+## 🎁 SPONSOR DRAW SYSTEM (v1.2)
+- **Draw Room (`/draw`):** A dedicated arena where users use Prize Tickets to enter sponsored draws.
+- **Demo Mode:** "Mock Draw" functionality allows for zero-token simulation of winner selection for presentations.
+- **Visuals:** Winner celebration overlays and real-time winner announcements.
 
 ## 🛠️ USER ROLES & HIERARCHY
 1. **Supporter (User):** Earns Prize Tickets and XP. Can unlock and equip cosmetic badges.

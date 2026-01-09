@@ -29,6 +29,14 @@ export const translations: any = {
         // New for Rewards / Invites
         recruit_invite: "Share your link and earn 50 tokens for every signup!",
         ticket_win_message: "Correct! You won 1 Prize Draw Ticket.",
+        draw_room_title: "Sponsor Draw Room",
+        draw_room_desc: "Use your tickets to enter active sponsor draws and win real prizes!",
+        your_tickets: "Your Tickets",
+        active_draws: "Active Draws",
+        enter_draw: "Enter Draw",
+        mock_draw_btn: "Try Mock Draw (Demo)",
+        go_to_draw_room: "Go to Draw Room",
+        tickets_earned: "Tickets Earned",
     },
     id: { // Bahasa Indonesia
         welcome_bridge: "Sports Prophecy menyambut Anda di",
@@ -57,6 +65,14 @@ export const translations: any = {
         no_matches_available: "Tidak ada pertandingan yang tersedia untuk liga ini.",
         recruit_invite: "Bagikan tautan Anda dan dapatkan 50 token untuk setiap pendaftaran!",
         ticket_win_message: "Benar! Anda memenangkan 1 Tiket Undian Hadiah.",
+        draw_room_title: "Ruang Undian Sponsor",
+        draw_room_desc: "Gunakan tiket Anda untuk mengikuti undian sponsor yang aktif dan menangkan hadiah nyata!",
+        your_tickets: "Tiket Anda",
+        active_draws: "Undian Aktif",
+        enter_draw: "Ikuti Undian",
+        mock_draw_btn: "Coba Simulasi Undian (Demo)",
+        go_to_draw_room: "Buka Ruang Undian",
+        tickets_earned: "Tiket Diperoleh",
     },
     th: { // Thai
         welcome_bridge: "Sports Prophecy ยินดีต้อนรับคุณสู่",
@@ -85,5 +101,13 @@ export const translations: any = {
         no_matches_available: "ไม่มีแมตช์สำหรับลีกนี้ในขณะนี้",
         recruit_invite: "แชร์ลิงก์ของคุณและรับ 50 โทเค็นสำหรับการสมัครทุกครั้ง!",
         ticket_win_message: "ถูกต้อง! คุณได้รับตั๋วชิงโชค 1 ใบ",
+        draw_room_title: "ห้องชิงโชคจากสปอนเซอร์",
+        draw_room_desc: "ใช้ตั๋วของคุณเพื่อเข้าร่วมการชิงโชคจากสปอนเซอร์และลุ้นรับรางวัลจริง!",
+        your_tickets: "ตั๋วของคุณ",
+        active_draws: "การชิงโชคที่กำลังเปิดอยู่",
+        enter_draw: "เข้าร่วมการชิงโชค",
+        mock_draw_btn: "ลองจำลองการจับรางวัล (สาธิต)",
+        go_to_draw_room: "ไปยังห้องชิงโชค",
+        tickets_earned: "ตั๋วที่ได้รับ",
     }
 };

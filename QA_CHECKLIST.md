@@ -13,6 +13,7 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 ### New User Onboarding (v1.1 Update)
 - `[ ]` **Chat Access:** A newly registered user can successfully send a message in the chat.
 - `[ ]` **Initial Balance:** A newly registered user starts with 150 Tokens and 0 Tickets.
+- `[ ]` **Draw Room Access:** User can navigate to `/draw` from the `UserTray` or Prediction Completion screen.
 
 ### Economy & Balances
 - `[ ]` **Balance Visibility:** The `UserTray` correctly displays the logged-in user's Token and Ticket balances.
@@ -29,3 +30,9 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 - `[ ]` **Admin Prediction Count:** The "Predictions" count in the admin user view is accurate.
 - `[ ]` **Admin Role Update:** Admin can successfully promote another user to 'admin' via the Command Center.
 - `[ ]` **Sponsor Application:** The `/sponsors/apply` page and its live preview sandbox are functional.
+
+### Gamification & Draws (v1.2 Update)
+- `[ ]` **Enter Draw:** "Enter Draw" button correctly triggers entry flow (requires tickets).
+- `[ ]` **Mock Draw:** Clicking "Try Mock Draw" triggers the 3-second drawing animation and winner celebration.
+- `[ ]` **Navigation Flow:** Completing soccer predictions successfully shows the "Go to Draw Room" button.
+- `[ ]` **Multilingual:** Draw room titles and descriptions correctly reflect selected language (EN, ID, TH).

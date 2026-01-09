@@ -5,6 +5,7 @@
 - **Frontend:** Next.js (located in `/frontend`). Styling: Outfit Font, Glassmorphism.
 - **Backend:** Node.js/Express (located in `/backend`).
 - **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Creator Events).
+- **Gamification:** Sponsor Draw Room (`/draw`) powered by Prize Tickets.
 
 ## 📡 Data Architecture (API & Limits)
 - **Resilient Dual-API Sync:** API-Football (20m) + The Odds API (45m).

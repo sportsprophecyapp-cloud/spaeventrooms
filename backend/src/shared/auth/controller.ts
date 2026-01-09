@@ -47,7 +47,20 @@ export const register = async (req: Request, res: Response) => {
         );
         const newUser = result.rows[0];
         const token = jwt.sign({ id: newUser.id, email: newUser.email, username: newUser.username, permissions: newUser.permissions }, JWT_SECRET, { expiresIn: '7d' });
-        res.status(201).json({ success: true, user: newUser, token });
+        res.status(201).json({
+            success: true,
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                username: newUser.username,
+                permissions: newUser.permissions,
+                tokens: newUser.token_balance,
+                tickets: newUser.total_tickets,
+                points: newUser.total_points,
+                level: newUser.current_level
+            },
+            token
+        });
     } catch (error) {
         console.error("[FATAL] User registration failed:", error);
         res.status(500).json({ success: false, error: 'Server error during registration.' });

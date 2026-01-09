@@ -35,7 +35,7 @@ export const handleGetMe = async (req: AuthRequest, res: Response) => {
                  WHERE uc.user_id = $1 AND c.type = 'badge'`, [userId]
             );
             badges = badgesResult.rows;
-        } catch (e) {}
+        } catch (e) { }
 
         res.json({ success: true, stats, badges });
     } catch (error) {
@@ -52,7 +52,7 @@ export const handleGetLeaderboard = async (req: Request, res: Response) => {
             `SELECT username, total_points as points FROM users 
              WHERE total_points IS NOT NULL ORDER BY total_points DESC LIMIT 100`
         );
-        
+
         const leaderboard = result.rows.map((r, i) => {
             const { level } = getLevelFromXp(r.points || 0);
             return {
@@ -104,10 +104,19 @@ export const handleClaimVoucher = async (req: AuthRequest, res: Response) => {
 
 export const handleGetTickets = async (req: AuthRequest, res: Response) => {
     try {
-        const result = await dbQuery(`SELECT COUNT(*) as count FROM prize_draw_entries WHERE user_id = $1`, [req.user?.id]);
-        res.json({ success: true, count: parseInt(result.rows[0].count) || 0 });
+        const result = await dbQuery(`SELECT total_tickets as count FROM users WHERE id = $1`, [req.user?.id]);
+        res.json({ success: true, count: result.rows[0]?.count || 0 });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Error fetching tickets' });
+    }
+};
+
+export const handleGetActiveDraws = async (req: Request, res: Response) => {
+    try {
+        const result = await dbQuery(`SELECT * FROM prize_draws WHERE status = 'active' ORDER BY created_at DESC`);
+        res.json({ success: true, draws: result.rows });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Error fetching draws' });
     }
 };
 

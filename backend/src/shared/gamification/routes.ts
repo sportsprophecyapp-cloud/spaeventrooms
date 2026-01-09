@@ -9,7 +9,8 @@ import {
     handleGetLeaderboard,
     handleGetTickets,
     handleGetVouchers,
-    handleClaimVoucher
+    handleClaimVoucher,
+    handleGetActiveDraws
 } from './controller';
 import { authenticate } from '../auth/middleware';
 
@@ -24,6 +25,7 @@ router.get('/leaderboard', handleGetLeaderboard);
 router.get('/tickets', authenticate, handleGetTickets); // New Tickets Route
 router.get('/vouchers', authenticate, handleGetVouchers);
 router.post('/vouchers/claim', authenticate, handleClaimVoucher);
+router.get('/draws/active', authenticate, handleGetActiveDraws);
 
 router.post('/daily-login', authenticate, handleDailyLogin);
 router.post('/purchase', authenticate, purchaseCosmetic);

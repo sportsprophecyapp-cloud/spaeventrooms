@@ -93,15 +93,23 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             <div className={styles.completionScreen}>
                 <div className={styles.completionCard}>
                     <div className={styles.completionIcon}>🎉</div>
-                    <h2>All Predictions Complete!</h2>
-                    <p className={styles.completionStats}>You made {predictionCount} predictions</p>
-                    <button
-                        onClick={() => router.push('/rooms/soccer')}
-                        className={styles.completionButton}
-                    >
-                        Back to Leagues
-                    </button>
-                    <p className={styles.completionCountdown}>Auto-returning in {countdown}...</p>
+                    <h2>{t('completion_title') || 'All Predictions Complete!'}</h2>
+                    <p className={styles.completionStats}>{`You made ${predictionCount} predictions`}</p>
+                    <div className={styles.completionActions}>
+                        <button
+                            onClick={() => router.push('/draw')}
+                            className={styles.drawButton}
+                        >
+                            🎟️ {t('go_to_draw_room')}
+                        </button>
+                        <button
+                            onClick={() => router.push('/rooms/soccer')}
+                            className={styles.completionButton}
+                        >
+                            {t('back_to_leagues')}
+                        </button>
+                    </div>
+                    <p className={styles.completionCountdown}>{`Auto-returning in ${countdown}...`}</p>
                 </div>
             </div>
         );

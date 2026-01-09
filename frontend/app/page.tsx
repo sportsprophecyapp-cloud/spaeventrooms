@@ -40,24 +40,11 @@ const HomePage = () => {
     return (
         <div className={styles.container}>
             <header className={styles.header}>
-                <div className={styles.languageSwitcher}>
-                    <button onClick={() => setLanguage('en')} className={language === 'en' ? styles.activeLang : ''}>EN</button>
-                    <button onClick={() => setLanguage('id')} className={language === 'id' ? styles.activeLang : ''}>ID</button>
-                    <button onClick={() => setLanguage('th')} className={language === 'th' ? styles.activeLang : ''}>TH</button>
-                </div>
                 <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
                 <div className={styles.logo}>
                     <h1>EVENTS <span style={{ color: 'var(--accent)' }}>ARENA</span></h1>
                 </div>
                 <p className={styles.tagline}>{t('tagline')}</p>
-                <div className={styles.quickNav}>
-                    <Link href="/leaderboard" className={styles.navLink}>🏆 {t('standings')}</Link>
-                    {isAuthenticated ? (
-                        <Link href={`/profile/${user?.id}`} className={styles.navLink}>👤 Profile</Link>
-                    ) : (
-                        <Link href="/auth/register" className={styles.navLink}>⚡ {t('join_free')}</Link>
-                    )}
-                </div>
             </header>
 
             <main className={styles.main}>
@@ -78,21 +65,21 @@ const HomePage = () => {
                 </div>
 
                 {/* How It Works Section */}
-                <section style={{ marginTop: '4rem', textAlign: 'center' }}>
+                <section style={{ marginTop: '4rem', textAlign: 'center', width: '100%', maxWidth: '1000px' }}>
                     <div className={styles.sectionTitle}>{t('how_it_works_title')}</div>
-                    <div className={styles.economyPreview} style={{ marginTop: '2rem' }}>
+                    <div className={styles.economyPreview} style={{ marginTop: '2.5rem' }}>
                         <div className={`${styles.ecoCard} glass`}>
-                            <span className={styles.ecoIcon}>1️⃣</span>
+                            <div className={styles.ecoIconBg} style={{ background: 'rgba(0, 112, 243, 0.1)' }}>🎯</div>
                             <h4>{t('how_step_1')}</h4>
                             <p>{t('how_step_1_desc')}</p>
                         </div>
                         <div className={`${styles.ecoCard} glass`}>
-                            <span className={styles.ecoIcon}>2️⃣</span>
+                            <div className={styles.ecoIconBg} style={{ background: 'rgba(255, 75, 75, 0.1)' }}>⚡</div>
                             <h4>{t('how_step_2')}</h4>
                             <p>{t('how_step_2_desc')}</p>
                         </div>
                         <div className={`${styles.ecoCard} glass`}>
-                            <span className={styles.ecoIcon}>3️⃣</span>
+                            <div className={styles.ecoIconBg} style={{ background: 'rgba(255, 215, 0, 0.1)' }}>🎁</div>
                             <h4>{t('how_step_3')}</h4>
                             <p>{t('how_step_3_desc')}</p>
                         </div>
@@ -102,18 +89,11 @@ const HomePage = () => {
                 <section className={styles.economyPreview}>
                     <div className={`${styles.ecoCard} glass`}>
                         <span className={styles.ecoIcon}>🎫</span>
-                        <h4>WIN PRIZES</h4>
-                        <p>Every correct call awards a <strong>Prize Draw Ticket</strong>.</p>
-                    </div>
-                    <div className={`${styles.ecoCard} glass`}>
-                        <span className={styles.ecoIcon}>📈</span>
-                        <h4>LEVEL UP</h4>
-                        <p>Climb the standings and earn elite status in the community.</p>
-                    </div>
-                    <div className={`${styles.ecoCard} glass`}>
-                        <span className={styles.ecoIcon}>🤝</span>
-                        <h4>RECRUIT</h4>
-                        <p>Invite friends and both get <strong>+50 Bonus Tokens</strong>.</p>
+                        <h4>{t('tickets_earned')}</h4>
+                        <p>{t('draw_room_desc')}</p>
+                        <Link href="/draw" className={styles.actionLink} style={{ marginTop: '1rem', color: 'var(--accent)', fontWeight: 'bold' }}>
+                            {t('go_to_draw_room')} →
+                        </Link>
                     </div>
                 </section>
             </main>

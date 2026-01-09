@@ -22,6 +22,27 @@ const initDB = async () => {
             ALTER TABLE users ADD COLUMN IF NOT EXISTS total_tickets INTEGER DEFAULT 0;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS current_level INTEGER DEFAULT 1;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
+
+            -- 5. Prize Draw System
+            CREATE TABLE IF NOT EXISTS prize_draws (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(100) NOT NULL,
+                prize VARCHAR(255) NOT NULL,
+                description TEXT,
+                room_id VARCHAR(50) DEFAULT 'soccer',
+                status VARCHAR(20) DEFAULT 'active', -- 'active', 'completed'
+                winner_id INTEGER REFERENCES users(id),
+                draw_date TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS prize_draw_entries (
+                id SERIAL PRIMARY KEY,
+                draw_id INTEGER REFERENCES prize_draws(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                entry_type VARCHAR(20) NOT NULL, -- 'streak', 'referral', 'accuracy'
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
 
