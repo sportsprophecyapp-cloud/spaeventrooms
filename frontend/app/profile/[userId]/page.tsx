@@ -19,6 +19,18 @@ interface UserProfile {
     correct_predictions: number;
     streak: number;
     draw_entries?: number;
+    referral_count?: number;
+    history?: Array<{
+        id: string;
+        pick: string;
+        created_at: string;
+        home_team: string;
+        away_team: string;
+        status: string;
+        score_home?: number;
+        score_away?: number;
+        start_time: string;
+    }>;
 }
 
 interface Badge {
@@ -50,6 +62,7 @@ const ProfilePage = () => {
                     const data = await res.json();
                     const ticketRes = await fetch(`${apiUrl}/api/gamification/tickets`, { headers: { 'Authorization': `Bearer ${token}` } });
                     const ticketData = await ticketRes.json();
+                    // data.user now contains referral_count and history from my backend change
                     setProfile({ ...data.user, draw_entries: ticketData.count || 0 });
                 }
             } catch (err) { console.error('Error fetching profile data:', err); }
@@ -104,7 +117,12 @@ const ProfilePage = () => {
                 </div>
                 <div className={styles.profileInfo}>
                     <h1>{profile.username}</h1>
-                    <p className={styles.levelBadge}>LVL {profile.level} EXPERT</p>
+                    <p className={styles.levelBadge}>
+                        {profile.points >= 5000 ? 'LEGENDARY' :
+                            profile.points >= 2500 ? 'ELITE' :
+                                profile.points >= 1000 ? 'VETERAN' :
+                                    'NOVICE'}
+                    </p>
                 </div>
             </header>
 
@@ -130,20 +148,45 @@ const ProfilePage = () => {
                             <div className={styles.refHeader}>
                                 <div className={styles.refInfo}>
                                     <h3>RECRUIT NEW PLAYERS</h3>
-                                    <p>Earn 50 tokens for every signup. Current: <strong>0 / 50</strong> recruits</p>
+                                    <p>Earn 50 tokens for every signup. Current: <strong>{profile.referral_count || 0} / 50</strong> recruits</p>
                                 </div>
                                 <button onClick={handleCopyReferral} className={styles.copyBtn}>
                                     {copyMessage || 'COPY LINK'}
                                 </button>
                             </div>
                             <div className={styles.milestoneBar}>
-                                <div className={styles.milestoneProgress} style={{ width: '0%' }}></div>
+                                <div className={styles.milestoneProgress} style={{ width: `${Math.min(((profile.referral_count || 0) / 50) * 100, 100)}%` }}></div>
                                 <div className={styles.milestonePoints}>
                                     <span>1</span>
                                     <span>5</span>
                                     <span>25</span>
                                     <span className={styles.finalGoal}>50 (AVATAR)</span>
                                 </div>
+                            </div>
+                        </section>
+
+                        <section className={`${styles.historyCard} glass`}>
+                            <h3 className={styles.sectionTitle}>📅 RECENT SWIPES</h3>
+                            <div className={styles.historyList}>
+                                {profile.history && profile.history.length > 0 ? (
+                                    profile.history.map((item) => (
+                                        <div key={item.id} className={styles.historyItem}>
+                                            <div className={styles.historyMain}>
+                                                <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
+                                                <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
+                                            </div>
+                                            <div className={styles.historyStatus}>
+                                                {item.status === 'finished' ? (
+                                                    <span className={styles.historyScore}>{item.score_home} - {item.score_away}</span>
+                                                ) : (
+                                                    <span className={styles.historyLive}>PENDING</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className={styles.emptyHistory}>No predictions made yet. Go to the Arena!</p>
+                                )}
                             </div>
                         </section>
 

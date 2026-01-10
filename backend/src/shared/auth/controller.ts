@@ -102,10 +102,40 @@ export const updateUsername = async (req: AuthRequest, res: Response) => {
 export const getProfile = async (req: Request, res: Response) => {
     const { userId } = req.params;
     try {
-        const result = await dbQuery(`SELECT id, username, email, token_balance, total_points, current_level FROM users WHERE id = $1`, [userId]);
-        if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
-        res.json({ success: true, user: result.rows[0] });
-    } catch (err) { res.status(500).json({ error: 'Server error' }); }
+        // 1. Fetch Core User Data
+        const userResult = await dbQuery(`
+            SELECT id, username, email, token_balance, total_points, current_level, referral_code 
+            FROM users WHERE id = $1`, [userId]);
+
+        if (userResult.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        const user = userResult.rows[0];
+
+        // 2. Fetch Referral Count
+        const referralResult = await dbQuery(`SELECT COUNT(*) as count FROM users WHERE referred_by_id = $1`, [userId]);
+        const referralCount = parseInt(referralResult.rows[0].count) || 0;
+
+        // 3. Fetch Recent Prediction History
+        const historyResult = await dbQuery(`
+            SELECT p.id, p.pick, p.created_at, m.home_team, m.away_team, m.status, m.score_home, m.score_away, m.start_time
+            FROM predictions p
+            JOIN matches m ON p.match_id = m.match_id
+            WHERE p.user_id = $1
+            ORDER BY p.created_at DESC
+            LIMIT 5
+        `, [userId]);
+
+        res.json({
+            success: true,
+            user: {
+                ...user,
+                referral_count: referralCount,
+                history: historyResult.rows
+            }
+        });
+    } catch (err) {
+        console.error("Error in getProfile:", err);
+        res.status(500).json({ error: 'Server error' });
+    }
 };
 
 export const deleteAccount = async (req: AuthRequest, res: Response) => {
