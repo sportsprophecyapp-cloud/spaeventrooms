@@ -44,6 +44,7 @@ const HomePage = () => {
                 <div className={styles.logo}>
                     <h1>EVENTS <span style={{ color: 'var(--accent)' }}>ARENA</span></h1>
                 </div>
+                <SponsorMarquee />
                 <p className={styles.tagline}>{t('tagline')}</p>
             </header>
 
@@ -99,7 +100,6 @@ const HomePage = () => {
             </main>
 
             <footer className={styles.footer}>
-                <SponsorMarquee />
                 <div className={styles.footerInfo}>
                     <div className={styles.footerLinks}>
                         <Link href="/corporate">Corporate</Link>
