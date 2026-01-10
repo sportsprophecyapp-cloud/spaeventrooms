@@ -1,23 +1,27 @@
 .container {
     width: 100%;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.5);
-    border-top: 1px solid var(--glass-border);
-    padding: 1.5rem 0;
-    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 0;
+    margin: 1.5rem 0;
+    user-select: none;
 }
 
 /* FORCES EVERYTHING ONTO ONE LINE */
 .track {
     display: flex;
-    flex-wrap: nowrap; /* PREVENTS WRAPPING */
+    flex-wrap: nowrap;
+    /* PREVENTS WRAPPING */
     gap: 5rem;
     width: fit-content;
     animation: scroll 30s linear infinite;
 }
 
 .item {
-    flex-shrink: 0; /* PREVENTS SQUEEZING */
+    flex-shrink: 0;
+    /* PREVENTS SQUEEZING */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -31,16 +35,23 @@
 }
 
 .nameOnly {
-    font-size: 0.8rem;
-    font-weight: 900;
+    font-size: 0.75rem;
+    font-weight: 700;
     letter-spacing: 2px;
-    color: white;
-    white-space: nowrap; /* PREVENTS TEXT WRAPPING */
+    color: var(--foreground);
+    opacity: 0.5;
+    white-space: nowrap;
+    /* PREVENTS TEXT WRAPPING */
 }
 
 @keyframes scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 /* Pause on hover for easier clicking */
