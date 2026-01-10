@@ -190,8 +190,9 @@
     }
 
     .sidebarContent {
-        height: 500px;
-        /* Controlled height for mobile social section */
+        height: auto;
+        min-height: 500px;
+        /* Natural height on mobile */
     }
 
     .minimalHeader {
@@ -200,5 +201,7 @@
 
     .mainContent {
         padding: 1.5rem;
+        overflow-y: visible;
+        height: auto;
     }
 }

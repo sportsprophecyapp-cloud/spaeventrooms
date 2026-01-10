@@ -37,13 +37,16 @@
 /* Mobile - Fill even more space */
 @media (max-width: 600px) {
     .deckContainer {
-        height: 70vh;
+        height: 55vh;
         margin-top: 20px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .deck {
-        width: 94vw;
-        height: 70vh;
+        width: 85vw;
+        /* Smaller width for scroll gutters */
+        height: 55vh;
     }
 }
 
