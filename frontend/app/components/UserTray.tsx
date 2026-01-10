@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import styles from './UserTray.module.css';
 import WinnerAlerter from './WinnerAlerter/WinnerAlerter';
@@ -9,6 +10,12 @@ import WinnerAlerter from './WinnerAlerter/WinnerAlerter';
 const UserTray = () => {
     const { user, logout } = useAuth();
     const [isExpanded, setIsExpanded] = useState(false);
+    const pathname = usePathname();
+
+    // Auto-close dropdown when route changes
+    useEffect(() => {
+        setIsExpanded(false);
+    }, [pathname]);
 
     // GUARD CLAUSE: Do not render anything if the user object is not yet loaded.
     if (!user) {
