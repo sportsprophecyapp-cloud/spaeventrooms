@@ -193,6 +193,44 @@ export const getShop = async (req: AuthRequest, res: Response) => {
     } catch (e) { res.json({ success: true, cosmetics: [] }); }
 };
 
+export const handleEnterDraw = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        const { id: drawId } = req.params;
+
+        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+        // 1. Check user tickets
+        const userResult = await dbQuery(`SELECT total_tickets FROM users WHERE id = $1`, [userId]);
+        const tickets = userResult.rows[0]?.total_tickets || 0;
+
+        if (tickets <= 0) {
+            return res.status(400).json({ success: false, error: 'You do not have enough tickets to enter.' });
+        }
+
+        // 2. Check if draw exists and is active
+        const drawResult = await dbQuery(`SELECT id FROM prize_draws WHERE id = $1 AND status = 'active'`, [drawId]);
+        if (drawResult.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Target draw is no longer active or does not exist.' });
+        }
+
+        // 3. Deduct ticket and record entry
+        await dbQuery('BEGIN');
+        await dbQuery(`UPDATE users SET total_tickets = total_tickets - 1 WHERE id = $1`, [userId]);
+        await dbQuery(
+            `INSERT INTO prize_draw_entries (draw_id, user_id, entry_type) VALUES ($1, $2, 'manual')`,
+            [drawId, userId]
+        );
+        await dbQuery('COMMIT');
+
+        res.json({ success: true, message: 'Successfully entered draw!' });
+    } catch (error) {
+        await dbQuery('ROLLBACK');
+        console.error('Error in handleEnterDraw:', error);
+        res.status(500).json({ success: false, error: 'Failed to enter draw.' });
+    }
+};
+
 export const handlePickWinner = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     try {

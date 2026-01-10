@@ -193,7 +193,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                             x: springProps.x,
                             y: springProps.y,
                             opacity: springProps.opacity,
-                            zIndex: isGone ? 0 : (matches.length - i),
+                            zIndex: (matches.length - i) + (isGone ? 100 : 0), // Push swiped cards to VERY front during flight
                             visibility: springProps.opacity.to(o => o === 0 && isGone ? 'hidden' : 'visible'),
                             pointerEvents: isGone ? 'none' : 'auto',
                             transform: interpolate([springProps.rot, springProps.scale], trans)

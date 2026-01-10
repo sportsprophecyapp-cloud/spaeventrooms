@@ -34,6 +34,7 @@ router.get('/tickets', authenticate, handleGetTickets); // New Tickets Route
 router.get('/vouchers', authenticate, handleGetVouchers);
 router.post('/vouchers/claim', authenticate, handleClaimVoucher);
 router.get('/draws/active', authenticate, handleGetActiveDraws);
+router.post('/draws/:id/enter', authenticate, handleEnterDraw);
 router.post('/draws/:id/pick-winner', authenticate, isAdmin, handlePickWinner);
 router.delete('/draws/:id', authenticate, isAdmin, handleDeleteDraw);
 router.post('/daily-login', authenticate, handleDailyLogin);

@@ -172,6 +172,31 @@
     color: white;
 }
 
+.messageToast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    z-index: 2000;
+    animation: fadeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    letter-spacing: 1px;
+}
+
+.success {
+    background: #00c853;
+    color: white;
+}
+
+.error {
+    background: #ff1744;
+    color: white;
+}
+
 /* Overlays */
 .drawingOverlay,
 .winnerCelebrate {
