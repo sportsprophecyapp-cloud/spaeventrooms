@@ -1,6 +1,6 @@
 # Events Arena (Sports Prophecy)
 
-**Version**: 3.4.0  
+**Version**: 4.0.0  
 **Release**: January 9, 2026
 
 A multi-room prediction platform with premium UI, Google Login, Sponsor & Draw Management Hub, and real-time chat.
@@ -63,7 +63,7 @@ A multi-room prediction platform with premium UI, Google Login, Sponsor & Draw M
 - **Extraction**: To spinoff a room, copy the respective folders to a new repo.
 
 ## Data Modes
-- **Production Data**: Enabled via `THE_ODDS_API_KEY`. The system uses a "Savings Mode" 4-hour sync interval to preserve limits.
+- **Pure Live Data**: The platform relies exclusively on live production API data (`THE_ODDS_API_KEY`). The system uses a "Savings Mode" 4-hour sync interval to preserve limits and ensure fresh matches.
 
 ## Deployment
 See [DEPLOYMENT_SETUP.md](./DEPLOYMENT_SETUP.md) for full details.

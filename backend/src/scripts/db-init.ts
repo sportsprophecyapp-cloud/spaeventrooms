@@ -24,6 +24,7 @@ const initDB = async () => {
             ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS home_logo TEXT;
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS away_logo TEXT;
+            ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
             -- 5. Prize Draw System
             CREATE TABLE IF NOT EXISTS prize_draws (
