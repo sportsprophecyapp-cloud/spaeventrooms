@@ -12,14 +12,14 @@ This release introduces a complete **Card Deck UX Overhaul** with true Tinder-st
 
 ### ✅ COMPLETED (Phase 11.5 - Card Deck UX Overhaul - January 9, 2026):
 1.  **True Tinder-Style Mechanics:**
-    *   Rewrote swipe logic to remove cards from DOM after animation (no bounce-back).
+    *   Rewrote swipe logic with stable React keys and gone Set for smooth animations.
+    *   Cards fade out with opacity and are hidden once swiped (no glitches or bounce-back).
     *   Increased trigger threshold for more intentional swipes (velocity > 0.2 OR distance > 100px).
-    *   Cards permanently disappear once swiped, just like Tinder.
 2.  **Visual Improvements:**
     *   Replaced transparent glass with solid dark gradient background (98% opacity).
-    *   Increased card size: 500×600px desktop, 95%×75% mobile.
+    *   Increased card size: 550×650px desktop, 96%×80% mobile, filling 90vh of screen.
+    *   **Fixed team logos**: Added `home_logo` and `away_logo` to backend API - all cards now show team crests.
     *   Added premium "Back to Leagues" button with gradient, hover glow, and auto-arrow.
-    *   Optimized layout to fill all available vertical space.
 
 ### ✅ COMPLETED (Phase 11 - Winner Feedback & Social Proof - January 9, 2026):
 1.  **Winner Engagement Loop:**
