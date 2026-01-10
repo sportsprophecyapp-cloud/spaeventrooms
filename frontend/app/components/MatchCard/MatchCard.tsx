@@ -5,51 +5,80 @@ import styles from './MatchCard.module.css';
 import { useLanguage } from '@/app/context/LanguageContext';
 
 interface Match {
-    id: string;
+    match_id: string;
     home_team: string;
     away_team: string;
     start_time: string;
-    league_logo: string;
+    status: string;
+    score_home?: number;
+    score_away?: number;
+    league?: string;
+    home_logo?: string;
+    away_logo?: string;
+    isPulsing?: boolean;
 }
 
-// CORRECTED: The missing interface is now defined.
 interface MatchCardProps {
     match: Match;
+    onPredict?: (match: Match) => void;
+    hasPredicted?: boolean;
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
+const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted }) => {
     const { t } = useLanguage();
-    const matchDate = new Date(match.start_time);
-    const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
-    const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric' };
-
-    const formattedTime = matchDate.toLocaleTimeString('en-US', timeOptions);
-    const formattedDate = matchDate.toLocaleDateString('en-US', dateOptions);
+    // FAIR PLAY LOGIC: Only allow prediction if game is 'scheduled' AND hasn't started yet.
+    const isPastKickoff = new Date(match.start_time) <= new Date();
+    const canPredict = match.status === 'scheduled' && !isPastKickoff && !hasPredicted;
 
     return (
-        <div className={`${styles.card} glass`}>
-            <div className={styles.header}>
-                <img src={match.league_logo} alt="League Logo" className={styles.leagueLogo} />
-                <div className={styles.dateTime}>
-                    <span>{formattedDate}</span>
-                    <span>{formattedTime}</span>
+        <div className={`${styles.card} ${match.isPulsing ? styles.pulsar : ''}`}>
+            <div className={styles.teamsSection}>
+                <div className={styles.teams}>
+                    <div className={styles.teamCol}>
+                        {match.home_logo && <img src={match.home_logo} className={styles.teamLogo} alt="" />}
+                        <span className={styles.team}>{match.home_team}</span>
+                    </div>
+                    <span className={styles.vs}>VS</span>
+                    <div className={styles.teamCol}>
+                        {match.away_logo && <img src={match.away_logo} className={styles.teamLogo} alt="" />}
+                        <span className={styles.team}>{match.away_team}</span>
+                    </div>
+                </div>
+                <div className={styles.info}>
+                    <span className={`${styles.status} ${match.status === 'live' ? styles.live : ''}`}>
+                        {match.status.toUpperCase()}
+                    </span>
+                    <span className={styles.time}>
+                        {new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                 </div>
             </div>
 
-            <div className={styles.teams}>
-                <div className={styles.team}>
-                    <div className={styles.teamLogoPlaceholder} />
-                    <span className={styles.teamName}>{match.home_team}</span>
-                </div>
-                <span className={styles.vs}>VS</span>
-                <div className={styles.team}>
-                    <div className={styles.teamLogoPlaceholder} />
-                    <span className={styles.teamName}>{match.away_team}</span>
-                </div>
+            <div className={styles.actions}>
+                {hasPredicted ? (
+                    <div className={styles.lockedState}>
+                        <span className={styles.lockIcon}>✅</span>
+                        <span className={styles.lockText}>CALL SUBMITTED</span>
+                    </div>
+                ) : canPredict ? (
+                    <div className={styles.predictWrapper}>
+                        <div className={styles.swipeLabels}>
+                            <span>← Away</span>
+                            <span>Home →</span>
+                        </div>
+                    </div>
+                ) : (
+                    /* LOCK STATE: Game started or finished */
+                    <div className={styles.scoreDisplay}>
+                        <span className={styles.scoreNum}>{match.score_home}</span>
+                        <span className={styles.scoreDivider}>-</span>
+                        <span className={styles.scoreNum}>{match.score_away}</span>
+                    </div>
+                )}
             </div>
 
-            <div className={styles.footer}>
-                <p>{t('predict_winner_prompt')}</p>
+            <div className={styles.cardFooter}>
+                <span className={styles.prizeTag}>🎫 EARN 1 TICKET</span>
             </div>
         </div>
     );

@@ -10,11 +10,11 @@ import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 interface Match {
-    id: string;
+    match_id: string;
     home_team: string;
     away_team: string;
     start_time: string;
-    league_logo: string;
+    status: string;
     home_logo?: string;
     away_logo?: string;
 }
@@ -65,21 +65,50 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
-    const bind = useDrag(({ args: [index], active, movement: [mx, my], direction: [xDir, yDir], velocity: [vx, vy], distance }) => {
+    const bind = useDrag(({ args: [index], active, movement: [mx, my], velocity: [vx, vy] }) => {
         // ULTRA-SENSITIVE TRIGGER: 0.03 velocity OR 50px distance.
-        // This ensures even lazy or short "flicks" register as a swipe.
         const trigger = Math.abs(vx) > 0.03 || Math.abs(mx) > 50;
 
-        if (!active && trigger) {
+        // Determine pick based on swipe side: mx > 0 is Home (Right), mx < 0 is Away (Left)
+        const pickSide = mx > 0 ? 'home' : 'away';
+
+        if (!active && trigger && !gone.has(index)) {
+            const match = matches[index];
             gone.add(index);
             setPredictionCount(prev => prev + 1);
+
+            // SAVE TO BACKEND
+            const submitPrediction = async () => {
+                try {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    const pickName = pickSide === 'home' ? match.home_team : match.away_team;
+
+                    await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            matchId: match.match_id,
+                            pick: pickName
+                        })
+                    });
+                } catch (err) {
+                    console.error("Prediction failed to save:", err);
+                }
+            };
+            submitPrediction();
         }
+
         api.start(i => {
             if (index !== i) return;
             const isGone = gone.has(index);
 
-            // PHYSICS: If NOT gone, keep it tethered. If GONE, send it flying.
-            // Increased exit distance (innerWidth + 500) and rotation influence.
+            // DIRECTION LOCK: Use the sign of mx to determine fly-out direction, 
+            // preventing the "bounce back" if direction jumps at the end of the gesture.
+            const xDir = mx > 0 ? 1 : -1;
+
             const x = isGone ? (500 + window.innerWidth) * xDir : active ? mx : 0;
             const rot = mx / 15 + (isGone ? xDir * 20 * vx : 0);
             const scale = active ? 1.05 : 1;

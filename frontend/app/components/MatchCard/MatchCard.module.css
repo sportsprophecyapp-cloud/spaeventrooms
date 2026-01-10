@@ -1,77 +1,198 @@
 .card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
     width: 100%;
     height: 100%;
-    border-radius: 24px;
-    padding: 2rem;
+}
+
+.teamsSection {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    border: 2px solid var(--glass-border);
-    position: relative;
-    will-change: transform;
-    background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(10, 10, 15, 0.98) 100%);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 1rem;
-}
-
-.leagueLogo {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-}
-
-.dateTime {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--neutral);
+    gap: 8px;
+    flex: 1;
 }
 
 .teams {
     display: flex;
-    justify-content: space-around;
     align-items: center;
-    text-align: center;
+    gap: 12px;
 }
 
-.team {
+.teamCol {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 10px;
+    flex: 1;
 }
 
-.teamLogoPlaceholder {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
+.teamLogo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+}
+
+.team {
+    font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+}
+
+.vs {
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: var(--accent);
+    opacity: 0.6;
+}
+
+.info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.status {
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: var(--neutral);
+    letter-spacing: 1px;
+}
+
+.live {
+    color: #ff0055;
+    animation: blink 1.5s infinite;
+}
+
+.time {
+    font-size: 0.7rem;
+    color: var(--neutral);
+    opacity: 0.6;
+}
+
+/* PREDICT BUTTON & HINT */
+.actions {
+    text-align: center;
+    width: 100%;
+}
+
+.predictWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.swipeLabels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 10px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--accent);
+    letter-spacing: 1px;
+    opacity: 0.4;
+    animation: pulse 2s infinite;
+}
+
+/* SCORE DISPLAY */
+.scoreDisplay {
     background: rgba(255, 255, 255, 0.05);
+    padding: 8px 16px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
 }
 
-.teamName {
+.scoreNum {
     font-size: 1.2rem;
     font-weight: 900;
 }
 
-.vs {
-    font-size: 1.5rem;
-    font-weight: 900;
+.scoreDivider {
     color: var(--accent);
+    opacity: 0.5;
 }
 
-.footer {
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--neutral);
-    font-weight: 700;
+.lockedState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.lockIcon {
+    font-size: 1.2rem;
+}
+
+.lockText {
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: #00ff88;
+}
+
+/* FOOTER / PRIZE TAG */
+.cardFooter {
+    width: 100%;
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 10px;
+}
+
+.prizeTag {
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
+}
+
+@media (max-width: 600px) {
+    .card {
+        padding: 1.2rem;
+        gap: 1rem;
+    }
 }
