@@ -30,6 +30,11 @@ const DrawRoom = () => {
     const [enteringId, setEnteringId] = useState<number | null>(null);
     const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
+    // ADMIN STATE
+    const [editingDrawId, setEditingDrawId] = useState<number | null>(null);
+    const [editDate, setEditDate] = useState('');
+    const [editStatus, setEditStatus] = useState<'active' | 'completed'>('active');
+
     useEffect(() => {
         if (!token) {
             router.push('/auth/login');
@@ -131,6 +136,41 @@ const DrawRoom = () => {
         }
     };
 
+    const handleUpdate = async (drawId: number) => {
+        if (!token) return;
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${apiUrl}/api/gamification/draws/${drawId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    draw_date: editDate ? new Date(editDate).toISOString() : undefined,
+                    status: editStatus
+                })
+            });
+
+            if (res.ok) {
+                setMessage({ text: 'Draw Updated!', type: 'success' });
+                setEditingDrawId(null);
+                // Refresh list
+                const drawRes = await fetch(`${apiUrl}/api/gamification/draws/active`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (drawRes.ok) {
+                    const data = await drawRes.json();
+                    setDraws(data.draws || []);
+                }
+            } else {
+                setMessage({ text: 'Update failed', type: 'error' });
+            }
+        } catch (e) {
+            setMessage({ text: 'Update Error', type: 'error' });
+        }
+    };
+
 
     return (
         <div className={styles.drawRoom}>
@@ -171,6 +211,50 @@ const DrawRoom = () => {
 
                         return (
                             <div key={draw.id} className={`${styles.drawCard} glass`}>
+                                {/* ADMIN EDIT OVERLAY */}
+                                {user?.role === 'admin' && (
+                                    <div className={styles.adminControls}>
+                                        <button
+                                            className={styles.adminEditBtn}
+                                            onClick={() => {
+                                                setEditingDrawId(draw.id);
+                                                setEditStatus(draw.status);
+                                                // Default to +1 hour if no date
+                                                const d = draw.draw_date ? new Date(draw.draw_date) : new Date(Date.now() + 3600000);
+                                                setEditDate(d.toISOString().slice(0, 16)); // Format for datetime-local
+                                            }}
+                                        >
+                                            ✏️ Edit
+                                        </button>
+                                    </div>
+                                )}
+
+                                {editingDrawId === draw.id && (
+                                    <div className={styles.editOverlay}>
+                                        <h4>Admin Edit</h4>
+                                        <label>Countdown Time:</label>
+                                        <input
+                                            type="datetime-local"
+                                            value={editDate}
+                                            onChange={(e) => setEditDate(e.target.value)}
+                                            style={{ color: 'black', marginBottom: '10px' }}
+                                        />
+                                        <label>Status:</label>
+                                        <select
+                                            value={editStatus}
+                                            onChange={(e) => setEditStatus(e.target.value as any)}
+                                            style={{ color: 'black', marginBottom: '10px' }}
+                                        >
+                                            <option value="active">Active</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <button onClick={() => handleUpdate(draw.id)} style={{ background: 'green', padding: '5px' }}>Save</button>
+                                            <button onClick={() => setEditingDrawId(null)} style={{ background: 'red', padding: '5px' }}>Cancel</button>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Sponsor Logo */}
                                 {draw.sponsor_logo && (
                                     <img

@@ -7,6 +7,7 @@ import styles from './GameDeck.module.css';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import ToastNotification from '../ToastNotification/ToastNotification';
 
 interface Match {
     match_id: string;
@@ -33,6 +34,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [predictionCount, setPredictionCount] = useState(0);
     const [hoveredRegion, setHoveredRegion] = useState<'home' | 'away' | null>(null);
     const [dragX, setDragX] = useState(0);
+    const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' | 'info' } | null>(null);
 
     useEffect(() => {
         if (!token) return;
@@ -86,6 +88,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const match = matches[index];
             const pickSide = mx > 0 ? 'home' : 'away';
 
+            // OPTIMISTIC UPDATE: Remove card immediately
             setGone(prev => new Set(prev).add(index));
             setPredictionCount(prev => prev + 1);
             setDragX(0);
@@ -104,13 +107,14 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 };
             });
 
-            // Save prediction
+            // FIRE-AND-FORGET API CALL (Don't await to block UI)
             const submitPrediction = async () => {
                 try {
                     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                     const pickName = pickSide === 'home' ? match.home_team : match.away_team;
 
-                    await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                    // We intentionally do NOT await the fetch response to block the UI
+                    fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -120,9 +124,19 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                             matchId: match.match_id,
                             pick: pickName
                         })
+                    }).then(res => {
+                        if (!res.ok && res.status !== 402) {
+                            console.error('Prediction save warning:', res.status);
+                            setMessage({ text: 'Error saving prediction', type: 'error' });
+                        }
+                    }).catch(err => {
+                        console.error("Prediction network error:", err);
+                        setMessage({ text: 'Network error saving prediction', type: 'error' });
                     });
+
                 } catch (err) {
                     console.error("Prediction failed to save:", err);
+                    setMessage({ text: 'Failed to save prediction', type: 'error' });
                 }
             };
             submitPrediction();
@@ -192,6 +206,13 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     return (
         <div className={styles.deckWrapper}>
+            {message && (
+                <ToastNotification
+                    message={message.text}
+                    type={message.type}
+                    onClose={() => setMessage(null)}
+                />
+            )}
             <div className={styles.deckHeader}>
                 <p className={styles.cardsRemaining}>{remainingCards} {remainingCards === 1 ? 'Match' : 'Matches'} Left</p>
                 <p className={styles.swipeHint}>Tap or Swipe to Predict</p>
@@ -263,7 +284,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                                 const submitPrediction = async () => {
                                                     try {
                                                         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                                                        await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                                                        const pickName = match.home_team;
+
+                                                        fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Content-Type': 'application/json',
@@ -271,11 +294,20 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                                             },
                                                             body: JSON.stringify({
                                                                 matchId: match.match_id,
-                                                                pick: match.home_team
+                                                                pick: pickName
                                                             })
+                                                        }).then(res => {
+                                                            if (!res.ok && res.status !== 402) {
+                                                                console.error('Prediction save warning:', res.status);
+                                                                setMessage({ text: 'Error saving prediction', type: 'error' });
+                                                            }
+                                                        }).catch(err => {
+                                                            console.error("Prediction network error:", err);
+                                                            setMessage({ text: 'Network error saving prediction', type: 'error' });
                                                         });
                                                     } catch (err) {
                                                         console.error("Prediction failed to save:", err);
+                                                        setMessage({ text: 'Failed to save prediction', type: 'error' });
                                                     }
                                                 };
                                                 submitPrediction();
@@ -337,7 +369,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                                 const submitPrediction = async () => {
                                                     try {
                                                         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                                                        await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                                                        const pickName = match.away_team;
+
+                                                        fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Content-Type': 'application/json',
@@ -345,11 +379,20 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                                             },
                                                             body: JSON.stringify({
                                                                 matchId: match.match_id,
-                                                                pick: match.away_team
+                                                                pick: pickName
                                                             })
+                                                        }).then(res => {
+                                                            if (!res.ok && res.status !== 402) {
+                                                                console.error('Prediction save warning:', res.status);
+                                                                setMessage({ text: 'Error saving prediction', type: 'error' });
+                                                            }
+                                                        }).catch(err => {
+                                                            console.error("Prediction network error:", err);
+                                                            setMessage({ text: 'Network error saving prediction', type: 'error' });
                                                         });
                                                     } catch (err) {
                                                         console.error("Prediction failed to save:", err);
+                                                        setMessage({ text: 'Failed to save prediction', type: 'error' });
                                                     }
                                                 };
                                                 submitPrediction();

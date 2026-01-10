@@ -13,6 +13,7 @@ interface User {
     tickets: number;
     points: number;
     level: number;
+    role?: string;
 }
 
 interface AuthContextType {

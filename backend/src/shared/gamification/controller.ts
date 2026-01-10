@@ -271,6 +271,45 @@ export const handleGetWins = async (req: AuthRequest, res: Response) => {
     }
 };
 
+export const handleUpdateDraw = async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    const { draw_date, status } = req.body;
+
+    try {
+        let updateQuery = 'UPDATE prize_draws SET ';
+        const params: any[] = [];
+        let paramIndex = 1;
+
+        if (draw_date !== undefined) {
+            updateQuery += `draw_date = $${paramIndex}, `;
+            params.push(draw_date);
+            paramIndex++;
+        }
+
+        if (status !== undefined) {
+            updateQuery += `status = $${paramIndex}, `;
+            params.push(status);
+            paramIndex++;
+        }
+
+        // Remove trailing comma and space
+        updateQuery = updateQuery.slice(0, -2);
+        updateQuery += ` WHERE id = $${paramIndex} RETURNING *`;
+        params.push(id);
+
+        const result = await dbQuery(updateQuery, params);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Draw not found' });
+        }
+
+        res.json({ success: true, draw: result.rows[0] });
+    } catch (error) {
+        console.error('Error updating draw:', error);
+        res.status(500).json({ success: false, error: 'Failed to update draw' });
+    }
+};
+
 export const handleDeleteDraw = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     try {

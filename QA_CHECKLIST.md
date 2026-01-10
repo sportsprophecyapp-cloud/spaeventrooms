@@ -25,6 +25,11 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 - `[ ]` **Prediction Lock:** User cannot predict on a match that is `live` or `finished`.
 - `[ ]` **Duplicate Lock:** User cannot make a second prediction on a match they have already entered.
 
+### Card Interactions (v4.6 Update)
+- `[ ]` **Visual Feedback:** Tapping a team region triggers a visible "press" animation.
+- `[ ]` **Swipe Stability:** Swiping a card follows the finger smoothly without jitter or flipping.
+- `[ ]` **Hybrid Consistency:** Static cards (`MatchCard`) and interactive cards (`GameDeck`) look identical.
+
 ### Sponsor & Admin
 - `[ ]` **Admin User View:** Admin can view the full list of registered supporters in the Command Center.
 - `[ ]` **Admin Prediction Count:** The "Predictions" count in the admin user view is accurate.

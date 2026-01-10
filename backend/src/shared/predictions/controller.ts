@@ -19,20 +19,23 @@ export const submitMatchPrediction = async (req: AuthRequest, res: Response) => 
     }
 
     try {
-        // 1. Check user exists and has enough tokens
+        // 1. Check user exists
         const userResult = await query('SELECT token_balance FROM users WHERE id = $1', [userId]);
         if (userResult.rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        // REMOVED TOKEN COST FOR BETA TESTING
+        /*
         const user = userResult.rows[0];
         if (user.token_balance < PREDICTION_COST) {
             return res.status(402).json({ message: 'Not enough tokens' });
         }
+        */
 
-        // 2. Deduct tokens and insert prediction in a transaction
+        // 2. Insert prediction in a transaction (Token deduction removed)
         await query('BEGIN');
-        await query('UPDATE users SET token_balance = token_balance - $1 WHERE id = $2', [PREDICTION_COST, userId]);
+        // await query('UPDATE users SET token_balance = token_balance - $1 WHERE id = $2', [PREDICTION_COST, userId]);
         await query(
             `INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
              VALUES ($1, $2, $3)

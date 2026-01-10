@@ -5,10 +5,38 @@
 **PATH:** `/Users/williamcommu/Desktop/mobileV31crashed`
 
 ## 🚀 CURRENT STATUS (Phase 14 - COMPLETE ✅)
-**Version**: 4.5.0  
-**Release Date**: January 9, 2026
+**Version**: 4.6.0  
+**Release Date**: January 10, 2026
 
-This release delivers an **Emergency Card UI/UX Refinement**. We've fixed the "glitchy" right-swipe by locking animation directions and overhauled the visuals with a high-contrast Neon/Cyber-Sports aesthetic. Cards are now 10% larger and feature "Official Sports Crest" placeholders.
+This release delivers a **Premium Card UX/UX Overhaul**. We have unified the card architecture into a "Hybrid Card" system, introducing deep glassmorphism (`blur(30px)`), multi-layered lighting (rim lights, inner shadows), and tactile tap interactions. The visual fidelity has been significantly increased to match a "Tier 1" sports app aesthetic.
+
+### ✅ COMPLETED (Phase 16 - Card UX/UI Refinement - January 10, 2026):
+1.  **Premium Visual System:**
+    *   **Deep Glassmorphism**: Implemented `backdrop-filter: blur(30px)` with rich dark gradients for a true glass feel.
+    *   **Lighting Engine**: Added top rim-lights and inner shadows to create depth and volume.
+    *   **Refined Typography**: Modernized font weights and spacing for headers, team names, and badges.
+2.  **Interaction Design:**
+    *   **Tactile Feedback**: "Press" animation on team regions provides instant confidence in selection.
+    *   **Smart Indicators**: Context-aware "PICK HOME" / "PICK AWAY" overlays with blur backdrops.
+    *   **Unified Architecture**: Consolidated `MatchCard` and `GameDeck` visual logic for 1:1 consistency.
+
+### ✅ COMPLETED (Phase 15 - Stabilization & Fixes - January 10, 2026):
+1.  **Draw Entry System:**
+    *   Full backend implementation with ticket validation and database transactions.
+    *   Frontend integration with loading states and error handling.
+2.  **Demo Draw Labeling:**
+    *   Visual badge overlay with `[TESTING] DEMO` indicator.
+    *   Title suffix `(TEST)` for clear identification.
+3.  **Card Animation Polish:**
+    *   Direction-locked swipe animations with no jitter.
+    *   Smooth off-screen transitions with rotation and fade effects.
+4.  **User Balance Display Fix:**
+    *   Added `refreshUser()` to `AuthContext` for manual balance updates.
+    *   Fixed zero balance display in header/profile by syncing state after draw entry.
+5.  **Header Overlap Fix:**
+    *   Added global `padding-top: 60px` to account for fixed navbar.
+    *   Ensured consistent spacing across all pages (Home, Rooms, Profile).
+
 
 ### ✅ COMPLETED (Phase 14 - Next-Gen Card UI & Swipe Stability - January 9, 2026):
 1.  **Swipe Stability Engine:**
@@ -166,24 +194,6 @@ This roadmap details how we will expand the new swipeable UI to include multiple
 
 ---
 
-## 🐛 KNOWN ISSUES (Active Development)
-
-### ✅ COMPLETED (Phase 15 - Stabilization & Fixes - January 10, 2026):
-1.  **Draw Entry System:**
-    *   Full backend implementation with ticket validation and database transactions.
-    *   Frontend integration with loading states and error handling.
-2.  **Demo Draw Labeling:**
-    *   Visual badge overlay with `[TESTING] DEMO` indicator.
-    *   Title suffix `(TEST)` for clear identification.
-3.  **Card Animation Polish:**
-    *   Direction-locked swipe animations with no jitter.
-    *   Smooth off-screen transitions with rotation and fade effects.
-4.  **User Balance Display Fix:**
-    *   Added `refreshUser()` to `AuthContext` for manual balance updates.
-    *   Fixed zero balance display in header/profile by syncing state after draw entry.
-5.  **Header Overlap Fix:**
-    *   Added global `padding-top: 60px` to account for fixed navbar.
-    *   Ensured consistent spacing across all pages (Home, Rooms, Profile).
 
 ### 🐛 KNOWN ISSUES (Active Development)
 
