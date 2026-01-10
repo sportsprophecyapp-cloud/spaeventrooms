@@ -308,7 +308,48 @@
 
 @media (max-width: 600px) {
     .card {
-        padding: 1.2rem;
-        gap: 1rem;
+        padding: 1.8rem 1rem;
+        gap: 0.8rem;
+        border-radius: 32px;
+    }
+
+    .logoWrapper {
+        width: 80px;
+        height: 100px;
+        padding: 10px;
+        border-radius: 10px 10px 40px 40px;
+    }
+
+    .placeholderLogo {
+        font-size: 2.2rem;
+    }
+
+    .team {
+        font-size: 1rem;
+        min-height: 2rem;
+        max-width: 120px;
+        margin-top: 8px;
+    }
+
+    .vs {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+        margin-top: -20px;
+    }
+
+    .status {
+        font-size: 0.6rem;
+    }
+
+    .prizeTag {
+        font-size: 0.75rem;
+        padding: 6px 14px;
+        margin-bottom: 0;
+    }
+
+    .cardFooter {
+        margin-top: 1rem;
+        padding-top: 10px;
     }
 }

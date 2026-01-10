@@ -110,24 +110,33 @@ export const getProfile = async (req: Request, res: Response) => {
         if (userResult.rows.length === 0) return res.status(404).json({ error: 'User not found' });
         const user = userResult.rows[0];
 
-        // 2. Fetch Referral Count
+        // 2. Fetch Global Rank
+        const rankResult = await dbQuery(`
+            SELECT COUNT(*) + 1 as rank FROM users WHERE total_points > $1
+        `, [user.total_points || 0]);
+        const globalRank = parseInt(rankResult.rows[0].rank);
+
+        // 3. Fetch Referral Count
         const referralResult = await dbQuery(`SELECT COUNT(*) as count FROM users WHERE referred_by_id = $1`, [userId]);
         const referralCount = parseInt(referralResult.rows[0].count) || 0;
 
-        // 3. Fetch Recent Prediction History
+        // 4. Fetch Recent Prediction History (Joining Soccer data for logos)
         const historyResult = await dbQuery(`
-            SELECT p.id, p.pick, p.created_at, m.home_team, m.away_team, m.status, m.score_home, m.score_away, m.start_time
-            FROM predictions p
-            JOIN matches m ON p.match_id = m.match_id
+            SELECT 
+                p.id, p.prediction_data->>'pick' as pick, p.created_at, p.result as status,
+                m.home_team, m.away_team, m.home_logo, m.away_logo, m.score_home, m.score_away, m.start_time
+            FROM soccer_predictions p
+            JOIN soccer_matches m ON p.match_id = m.match_id
             WHERE p.user_id = $1
             ORDER BY p.created_at DESC
-            LIMIT 5
+            LIMIT 10
         `, [userId]);
 
         res.json({
             success: true,
             user: {
                 ...user,
+                global_rank: globalRank,
                 referral_count: referralCount,
                 history: historyResult.rows
             }

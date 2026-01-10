@@ -84,7 +84,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const match = matches[index];
             const pickSide = mx > 0 ? 'home' : 'away';
 
-            setGone(new Set(gone.add(index)));
+            setGone(prev => new Set(prev).add(index));
             setPredictionCount(prev => prev + 1);
 
             // SAVE TO BACKEND
@@ -184,20 +184,20 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 const isGone = gone.has(i);
                 return (
                     <animated.div
+                        {...bind(i)}
                         className={styles.deck}
                         key={matches[i]?.match_id || i}
                         style={{
                             x: springProps.x,
                             y: springProps.y,
                             opacity: springProps.opacity,
-                            zIndex: matches.length - i, // Index 0 is on TOP
+                            zIndex: isGone ? 0 : (matches.length - i),
                             visibility: springProps.opacity.to(o => o === 0 && isGone ? 'hidden' : 'visible'),
-                            pointerEvents: isGone ? 'none' : 'auto'
+                            pointerEvents: isGone ? 'none' : 'auto',
+                            transform: interpolate([springProps.rot, springProps.scale], trans)
                         }}
                     >
-                        <animated.div {...bind(i)} style={{ transform: interpolate([springProps.rot, springProps.scale], trans) }}>
-                            <MatchCard match={matches[i]} />
-                        </animated.div>
+                        <MatchCard match={matches[i]} />
                     </animated.div>
                 );
             })}

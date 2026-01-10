@@ -5,6 +5,24 @@
     margin: 0 auto;
     padding-left: 1rem;
     padding-right: 1rem;
+    transition: all 0.5s ease;
+}
+
+.tierNovice {
+    background: radial-gradient(circle at 50% 0%, rgba(0, 112, 243, 0.05) 0%, transparent 70%);
+}
+
+.tierVeteran {
+    background: radial-gradient(circle at 50% 0%, rgba(121, 40, 202, 0.1) 0%, transparent 70%);
+}
+
+.tierElite {
+    background: radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+}
+
+.tierLegendary {
+    background: radial-gradient(circle at 50% 0%, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
+    border: 1px solid rgba(0, 255, 136, 0.2);
 }
 
 .navBar {
@@ -42,10 +60,43 @@
     box-shadow: 0 0 30px rgba(0, 112, 243, 0.3);
 }
 
-.profileInfo h1 {
-    font-size: 2.2rem;
+.profileInfo {
+    flex: 1;
+}
+
+.nameRow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.rankBadge {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.7rem;
     font-weight: 900;
-    margin-bottom: 0.25rem;
+    color: var(--neutral);
+    letter-spacing: 1px;
+}
+
+.tierElite .rankBadge {
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.tierLegendary .rankBadge {
+    border-color: #00ff88;
+    color: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .levelBadge {
@@ -53,6 +104,24 @@
     color: var(--accent);
     letter-spacing: 1.5px;
     font-size: 0.9rem;
+}
+
+.shareStatsBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.shareStatsBtn:hover {
+    background: white;
+    color: black;
+    transform: translateY(-2px);
 }
 
 .statsGrid {
@@ -250,40 +319,52 @@
     transform: translateX(5px);
 }
 
-.historyMain {
+.historyTeamsWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.miniLogo {
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.miniLogo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.historyMeta {
+    text-align: right;
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.historyTeams {
-    font-weight: 800;
-    font-size: 0.95rem;
-    color: white;
-}
-
-.historyPick {
-    font-size: 0.75rem;
-    color: var(--neutral);
-    letter-spacing: 0.5px;
-}
-
-.historyPick strong {
-    color: var(--accent);
-}
-
-.historyStatus {
-    text-align: right;
-}
-
-.historyScore {
-    font-size: 1.1rem;
-    font-weight: 900;
+.statusCorrect {
     color: #00ff88;
+    font-weight: 900;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+}
+
+.statusIncorrect {
+    color: #ff4b4b;
+    font-weight: 900;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
 }
 
 .historyLive {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 900;
     color: #ff9900;
     letter-spacing: 1px;

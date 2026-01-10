@@ -20,12 +20,15 @@ interface UserProfile {
     streak: number;
     draw_entries?: number;
     referral_count?: number;
+    global_rank?: number;
     history?: Array<{
         id: string;
         pick: string;
         created_at: string;
         home_team: string;
         away_team: string;
+        home_logo?: string;
+        away_logo?: string;
         status: string;
         score_home?: number;
         score_away?: number;
@@ -100,13 +103,27 @@ const ProfilePage = () => {
         setTimeout(() => setCopyMessage(''), 3000);
     };
 
+    const handleShareStats = () => {
+        if (!profile) return;
+        const text = `🏆 I'm Rank #${profile.global_rank || '??'} in the Events Arena! \n\n🎯 Level ${profile.level} ${profile.points >= 5000 ? 'LEGENDARY' : 'PRO'} Supporter. \n\nThink you can beat me? Join here: \n${window.location.origin}/auth/register?ref=${profile.referral_code}`;
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+    };
+
+    const getTierClass = (points: number) => {
+        if (points >= 5000) return styles.tierLegendary;
+        if (points >= 2500) return styles.tierElite;
+        if (points >= 1000) return styles.tierVeteran;
+        return styles.tierNovice;
+    };
+
     if (isLoading) return <div className={styles.loading}>Accessing Records...</div>;
     if (!profile) return <div className={styles.error}>User not found.</div>;
 
     const isOwnProfile = user?.id.toString() === userId;
 
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${getTierClass(profile.points)}`}>
             <div className={styles.navBar}>
                 <button onClick={() => router.back()} className={styles.backBtn}>← RETURN TO ARENA</button>
             </div>
@@ -116,13 +133,21 @@ const ProfilePage = () => {
                     {profile.username[0].toUpperCase()}
                 </div>
                 <div className={styles.profileInfo}>
-                    <h1>{profile.username}</h1>
-                    <p className={styles.levelBadge}>
-                        {profile.points >= 5000 ? 'LEGENDARY' :
-                            profile.points >= 2500 ? 'ELITE' :
-                                profile.points >= 1000 ? 'VETERAN' :
-                                    'NOVICE'}
-                    </p>
+                    <div className={styles.nameRow}>
+                        <h1>{profile.username}</h1>
+                        <div className={styles.rankBadge}>GLOBAL RANK #{profile.global_rank || '??'}</div>
+                    </div>
+                    <div className={styles.titleRow}>
+                        <p className={styles.levelBadge}>
+                            {profile.points >= 5000 ? 'LEGENDARY' :
+                                profile.points >= 2500 ? 'ELITE' :
+                                    profile.points >= 1000 ? 'VETERAN' :
+                                        'NOVICE'}
+                        </p>
+                        {isOwnProfile && (
+                            <button onClick={handleShareStats} className={styles.shareStatsBtn}>SHARE MY STATS</button>
+                        )}
+                    </div>
                 </div>
             </header>
 
@@ -171,16 +196,26 @@ const ProfilePage = () => {
                                 {profile.history && profile.history.length > 0 ? (
                                     profile.history.map((item) => (
                                         <div key={item.id} className={styles.historyItem}>
-                                            <div className={styles.historyMain}>
+                                            <div className={styles.historyTeamsWrapper}>
+                                                <div className={styles.miniLogo}>
+                                                    <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                </div>
                                                 <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
-                                                <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
+                                                <div className={styles.miniLogo}>
+                                                    <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                </div>
                                             </div>
-                                            <div className={styles.historyStatus}>
-                                                {item.status === 'finished' ? (
-                                                    <span className={styles.historyScore}>{item.score_home} - {item.score_away}</span>
-                                                ) : (
-                                                    <span className={styles.historyLive}>PENDING</span>
-                                                )}
+                                            <div className={styles.historyMeta}>
+                                                <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
+                                                <div className={styles.historyStatus}>
+                                                    {item.status === 'correct' ? (
+                                                        <span className={styles.statusCorrect}>✅ CORRECT</span>
+                                                    ) : item.status === 'incorrect' ? (
+                                                        <span className={styles.statusIncorrect}>❌ INCORRECT</span>
+                                                    ) : (
+                                                        <span className={styles.historyLive}>PENDING</span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))

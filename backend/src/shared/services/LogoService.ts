@@ -25,7 +25,7 @@ export class LogoService {
                 return url;
             }
 
-            // 3. Heuristic Fallback
+            // 3. Heuristic Fallback (Necessary until official seed is successful)
             const heuristicUrl = `https://media.api-sports.io/football/teams/${teamName.replace(/\s+/g, '').toLowerCase()}.png`;
             // Register as unverified so we can audit later
             await query(
