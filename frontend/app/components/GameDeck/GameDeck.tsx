@@ -77,8 +77,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
-        // Trigger when user releases with enough velocity or distance
-        const trigger = !active && (Math.abs(vx) > 0.2 || Math.abs(mx) > 100);
+        // Lower thresholds for better mobile flicking
+        const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 80);
 
         if (trigger && !gone.has(index)) {
             const match = matches[index];
@@ -111,7 +111,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             submitPrediction();
 
             // Check if all cards are swiped
-            if (gone.size === matches.length) {
+            if (gone.size + 1 === matches.length) { // +1 because state hasn't updated yet
                 setTimeout(() => setShowCompletion(true), 600);
             }
         }
@@ -119,18 +119,20 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         // Update animation for this card
         api.start(i => {
             if (index !== i) return;
-            const isGone = gone.has(index);
+            // Use the local trigger for the fly-away to ensure zero-lag response
+            const isGone = trigger || gone.has(index);
+            const dir = xDir || (mx > 0 ? 1 : -1);
 
             if (isGone) {
-                // Ensure the card definitely flies off based on the last movement direction
-                const x = (200 + window.innerWidth) * (xDir || (mx > 0 ? 1 : -1));
+                // Fly far off screen
+                const x = (200 + window.innerWidth) * dir;
                 return {
                     x,
-                    rot: (xDir || (mx > 0 ? 1 : -1)) * 60,
+                    rot: dir * 60,
                     scale: 0.8,
                     opacity: 0,
                     immediate: false,
-                    config: { tension: 150, friction: 20 }
+                    config: { tension: 200, friction: 30 }
                 };
             } else {
                 const rot = mx / 20;
@@ -141,7 +143,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                     scale,
                     opacity: 1,
                     immediate: false,
-                    config: { tension: active ? 800 : 500, friction: 50 }
+                    config: { tension: active ? 800 : 500, friction: 40 }
                 };
             }
         });
