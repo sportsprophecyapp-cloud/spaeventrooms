@@ -66,9 +66,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx, my], direction: [xDir, yDir], velocity: [vx, vy], distance }) => {
-        // VELOCITY SENSITIVITY: 0.1 is quite low, but 0.2 is industry standard.
-        // DISTANCE SENSITIVITY: 80px on mobile is better than 100px.
-        const trigger = Math.abs(vx) > 0.05 || Math.abs(mx) > 80;
+        // ULTRA-SENSITIVE TRIGGER: 0.03 velocity OR 50px distance.
+        // This ensures even lazy or short "flicks" register as a swipe.
+        const trigger = Math.abs(vx) > 0.03 || Math.abs(mx) > 50;
 
         if (!active && trigger) {
             gone.add(index);
@@ -79,8 +79,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const isGone = gone.has(index);
 
             // PHYSICS: If NOT gone, keep it tethered. If GONE, send it flying.
-            const x = isGone ? (250 + window.innerWidth) * xDir : active ? mx : 0;
-            const rot = mx / 20 + (isGone ? xDir * 15 * vx : 0); // Normalized rotation
+            // Increased exit distance (innerWidth + 500) and rotation influence.
+            const x = isGone ? (500 + window.innerWidth) * xDir : active ? mx : 0;
+            const rot = mx / 15 + (isGone ? xDir * 20 * vx : 0);
             const scale = active ? 1.05 : 1;
 
             return {
@@ -89,8 +90,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 scale,
                 delay: undefined,
                 config: {
-                    friction: 40,
-                    tension: active ? 800 : isGone ? 150 : 400
+                    friction: isGone ? 20 : 40,
+                    tension: active ? 800 : isGone ? 250 : 400
                 }
             };
         });
