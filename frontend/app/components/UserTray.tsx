@@ -50,6 +50,7 @@ const UserTray = () => {
                     </div>
                     <div className={styles.menu}>
                         <Link href={`/profile/${user.id}`} className={styles.item}>👤 My Profile</Link>
+                        <Link href="/draw" className={styles.item}>🎁 Prize Draws</Link>
                         {isAdmin && (
                             <>
                                 <Link href="/admin/users" className={styles.item}>🛡️ Command Center</Link>

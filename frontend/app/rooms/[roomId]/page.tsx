@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import styles from './page.module.css';
 import LeagueGrid from '../../components/LeagueGrid/LeagueGrid';
 import GameDeck from '../../components/GameDeck/GameDeck';
@@ -47,6 +48,10 @@ function RoomContent() {
         <div className={styles.container}>
             <header className={styles.minimalHeader}>
                 <h1 className={styles.arenaTitle}>{(roomId || 'ARENA').toUpperCase()} ARENA</h1>
+                <Link href="/draw" className={styles.prizesPill}>
+                    <span className={styles.pillIcon}>🎁</span>
+                    <span className={styles.pillText}>{t('active_draws')}</span>
+                </Link>
                 {/* ... other header elements */}
             </header>
 

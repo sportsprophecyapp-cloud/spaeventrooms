@@ -78,6 +78,9 @@ const DrawRoom = () => {
                 <div className={styles.drawGrid}>
                     {draws.map(draw => (
                         <div key={draw.id} className={`${styles.drawCard} glass`}>
+                            {(draw.description.toLowerCase().includes('megabet') || draw.description.toLowerCase().includes('fanatics')) && (
+                                <div className={styles.demoBadge}>DEMO MODE</div>
+                            )}
                             <div className={styles.prizeIcon}>🎁</div>
                             <h3>{draw.title}</h3>
                             <p className={styles.prizeName}>{draw.prize}</p>
