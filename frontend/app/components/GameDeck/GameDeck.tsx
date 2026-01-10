@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSprings, animated, to as interpolate } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
-import MatchCard from '../MatchCard/MatchCard';
 import styles from './GameDeck.module.css';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useAuth } from '@/app/context/AuthContext';
@@ -23,17 +22,6 @@ interface GameDeckProps {
     leagueId: string;
 }
 
-const to = (i: number) => ({
-    x: 0,
-    y: 0, // Keep them all centered y, or slight tilt
-    scale: 1,
-    rot: -10 + Math.random() * 20,
-    opacity: 1,
-    delay: i * 100
-});
-const from = (_i: number) => ({ x: 0, rot: 0, scale: 1.5, y: -1000, opacity: 0 });
-const trans = (r: number, s: number) => `rotateZ(${r}deg) scale(${s})`;
-
 const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
     const { token } = useAuth();
@@ -43,6 +31,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [showCompletion, setShowCompletion] = useState(false);
     const [countdown, setCountdown] = useState(3);
     const [predictionCount, setPredictionCount] = useState(0);
+    const [hoveredRegion, setHoveredRegion] = useState<'home' | 'away' | null>(null);
+    const [dragX, setDragX] = useState(0);
 
     useEffect(() => {
         if (!token) return;
@@ -55,12 +45,13 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 if (res.ok) {
                     setMatches(await res.json());
                 }
-            } catch (err) { console.error("Error fetching matches:", err); }
+            } catch (err) {
+                console.error("Error fetching matches:", err);
+            }
         };
         fetchMatches();
     }, [leagueId, token]);
 
-    // Countdown timer for auto-return
     useEffect(() => {
         if (showCompletion && countdown > 0) {
             const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
@@ -71,23 +62,49 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     }, [showCompletion, countdown, router]);
 
     const [props, api] = useSprings(matches.length, i => ({
-        ...to(i),
-        from: from(i),
-        immediate: (key) => gone.has(i)
+        x: 0,
+        y: 0,
+        scale: 1,
+        rot: 0,
+        opacity: 1,
+        config: { tension: 500, friction: 40 }
     }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
-        // Lower thresholds for better mobile flicking
-        const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 80);
+        const isGone = gone.has(index);
+        if (isGone) return;
 
-        if (trigger && !gone.has(index)) {
+        // Track drag amount for visual feedback
+        if (active) {
+            setDragX(mx);
+        }
+
+        const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 100);
+        const dir = mx > 0 ? 1 : -1;
+
+        if (trigger) {
             const match = matches[index];
             const pickSide = mx > 0 ? 'home' : 'away';
 
             setGone(prev => new Set(prev).add(index));
             setPredictionCount(prev => prev + 1);
+            setDragX(0);
 
-            // SAVE TO BACKEND
+            // Animate card flying off
+            api.start(i => {
+                if (index !== i) return;
+                const x = (window.innerWidth + 200) * dir;
+                return {
+                    x,
+                    y: 100 * dir,
+                    rot: dir * 45,
+                    scale: 0.9,
+                    opacity: 0,
+                    config: { tension: 200, friction: 25 }
+                };
+            });
+
+            // Save prediction
             const submitPrediction = async () => {
                 try {
                     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -110,47 +127,38 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             };
             submitPrediction();
 
-            // Check if all cards are swiped
-            if (gone.size + 1 === matches.length) { // +1 because state hasn't updated yet
-                setTimeout(() => setShowCompletion(true), 600);
+            // Check completion
+            if (gone.size + 1 === matches.length) {
+                setTimeout(() => setShowCompletion(true), 500);
             }
-        }
+        } else {
+            // While dragging or idle
+            const rot = mx / 25;
+            const scale = active ? 1.02 : 1;
+            const opacity = 1 - Math.abs(mx) / 500;
 
-        // Update animation for this card
-        api.start(i => {
-            if (index !== i) return;
-            // Use the local trigger for the fly-away to ensure zero-lag response
-            const isGone = trigger || gone.has(index);
-            const dir = xDir || (mx > 0 ? 1 : -1);
-
-            if (isGone) {
-                // Fly far off screen
-                const x = (200 + window.innerWidth) * dir;
-                return {
-                    x,
-                    rot: dir * 60,
-                    scale: 0.8,
-                    opacity: 0,
-                    immediate: false,
-                    config: { tension: 200, friction: 30 }
-                };
-            } else {
-                const rot = mx / 20;
-                const scale = active ? 1.05 : 1;
+            api.start(i => {
+                if (index !== i) return;
                 return {
                     x: active ? mx : 0,
                     rot: active ? rot : 0,
                     scale,
-                    opacity: 1,
-                    immediate: false,
+                    opacity: Math.max(0.5, opacity),
                     config: { tension: active ? 800 : 500, friction: 40 }
                 };
-            }
-        });
+            });
+        }
     });
 
     if (matches.length === 0) {
-        return <div className={styles.empty}>{t('no_matches_available')}</div>;
+        return (
+            <div className={styles.emptyContainer}>
+                <div className={styles.emptyContent}>
+                    <div className={styles.emptyIcon}>⚽</div>
+                    <p className={styles.emptyText}>{t('no_matches_available')}</p>
+                </div>
+            </div>
+        );
     }
 
     if (showCompletion) {
@@ -158,7 +166,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             <div className={styles.completionScreen}>
                 <div className={styles.completionCard}>
                     <div className={styles.completionIcon}>🎉</div>
-                    <h2>{t('completion_title') || 'All Predictions Complete!'}</h2>
+                    <h2 className={styles.completionTitle}>{t('completion_title') || 'All Predictions Complete!'}</h2>
                     <p className={styles.completionStats}>{`You made ${predictionCount} predictions`}</p>
                     <div className={styles.completionActions}>
                         <button
@@ -174,35 +182,219 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                             {t('back_to_leagues')}
                         </button>
                     </div>
-                    <p className={styles.completionCountdown}>{`Auto-returning in ${countdown}...`}</p>
+                    <p className={styles.completionCountdown}>{`Auto-returning in ${countdown}s`}</p>
                 </div>
             </div>
         );
     }
 
+    const remainingCards = matches.length - gone.size;
+
     return (
-        <div className={styles.deckContainer}>
-            {props.map((springProps, i) => {
-                const isGone = gone.has(i);
-                return (
-                    <animated.div
-                        {...bind(i)}
-                        className={styles.deck}
-                        key={matches[i]?.match_id || i}
-                        style={{
-                            x: springProps.x,
-                            y: springProps.y,
-                            opacity: springProps.opacity,
-                            zIndex: (matches.length - i) + (isGone ? 100 : 0), // Push swiped cards to VERY front during flight
-                            visibility: springProps.opacity.to(o => o === 0 && isGone ? 'hidden' : 'visible'),
-                            pointerEvents: isGone ? 'none' : 'auto',
-                            transform: interpolate([springProps.rot, springProps.scale], trans)
-                        }}
-                    >
-                        <MatchCard match={matches[i]} />
-                    </animated.div>
-                );
-            })}
+        <div className={styles.deckWrapper}>
+            <div className={styles.deckHeader}>
+                <p className={styles.cardsRemaining}>{remainingCards} {remainingCards === 1 ? 'Match' : 'Matches'} Left</p>
+                <p className={styles.swipeHint}>Tap or Swipe to Predict</p>
+            </div>
+
+            <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>
+                {props.map((springProps, i) => {
+                    const isGone = gone.has(i);
+                    const match = matches[i];
+
+                    // Safely extract date parts if available
+                    let timeDisplay = match?.start_time;
+                    try {
+                        const dateObj = new Date(match.start_time);
+                        if (!isNaN(dateObj.getTime())) {
+                            timeDisplay = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                    } catch (e) {
+                        // fallback
+                    }
+
+                    return (
+                        <animated.div
+                            {...bind(i)}
+                            className={`${styles.cardWrapper} ${isGone ? styles.cardGone : ''}`}
+                            key={match?.match_id || i}
+                            style={{
+                                x: springProps.x,
+                                y: springProps.y,
+                                opacity: springProps.opacity,
+                                zIndex: matches.length - i,
+                                pointerEvents: isGone ? 'none' : 'auto',
+                                transform: interpolate([springProps.rot, springProps.scale], (r, s) =>
+                                    `rotateZ(${r}deg) scale(${s})`
+                                )
+                            }}
+                        >
+                            <div className={styles.hybridCard}>
+                                {/* Header */}
+                                <div className={styles.cardHeader}>
+                                    <p className={styles.predictionType}>MATCH WINNER</p>
+                                    <p className={styles.matchTime}>{timeDisplay}</p>
+                                </div>
+
+                                {/* Teams Container with Tap Regions */}
+                                <div className={styles.teamsContainer}>
+
+                                    {/* HOME TEAM REGION */}
+                                    <div
+                                        className={`${styles.teamRegion} ${styles.homeRegion} ${hoveredRegion === 'home' ? styles.hoveredRegion : ''}`}
+                                        onMouseEnter={() => setHoveredRegion('home')}
+                                        onMouseLeave={() => setHoveredRegion(null)}
+                                        onClick={() => {
+                                            if (!isGone) {
+                                                setGone(prev => new Set(prev).add(i));
+                                                setPredictionCount(prev => prev + 1);
+                                                api.start(idx => {
+                                                    if (i !== idx) return;
+                                                    return {
+                                                        x: window.innerWidth + 200,
+                                                        y: 100,
+                                                        rot: 45,
+                                                        scale: 0.9,
+                                                        opacity: 0,
+                                                        config: { tension: 200, friction: 25 }
+                                                    };
+                                                });
+                                                // Save prediction
+                                                const submitPrediction = async () => {
+                                                    try {
+                                                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                                                        await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                                'Authorization': `Bearer ${token}`
+                                                            },
+                                                            body: JSON.stringify({
+                                                                matchId: match.match_id,
+                                                                pick: match.home_team
+                                                            })
+                                                        });
+                                                    } catch (err) {
+                                                        console.error("Prediction failed to save:", err);
+                                                    }
+                                                };
+                                                submitPrediction();
+                                                if (gone.size + 1 === matches.length) {
+                                                    setTimeout(() => setShowCompletion(true), 500);
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        <div className={styles.logoWrapper}>
+                                            {match?.home_logo && !match.home_logo.includes('.toLowerCase()') ? (
+                                                <img
+                                                    src={match.home_logo}
+                                                    alt={match.home_team}
+                                                    className={styles.teamLogo}
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none';
+                                                        e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex;');
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <div
+                                                className={styles.placeholderLogo}
+                                                style={{ display: !match?.home_logo || match.home_logo.includes('.toLowerCase()') ? 'flex' : 'none' }}
+                                            >
+                                                {match?.home_team?.charAt(0) || '?'}
+                                            </div>
+                                        </div>
+                                        <p className={styles.teamName}>{match?.home_team}</p>
+                                        <p className={styles.pickLabel}>PICK</p>
+                                    </div>
+
+                                    {/* VS */}
+                                    <div className={styles.vsContainer}>
+                                        <span className={styles.vs}>VS</span>
+                                    </div>
+
+                                    {/* AWAY TEAM REGION */}
+                                    <div
+                                        className={`${styles.teamRegion} ${styles.awayRegion} ${hoveredRegion === 'away' ? styles.hoveredRegion : ''}`}
+                                        onMouseEnter={() => setHoveredRegion('away')}
+                                        onMouseLeave={() => setHoveredRegion(null)}
+                                        onClick={() => {
+                                            if (!isGone) {
+                                                setGone(prev => new Set(prev).add(i));
+                                                setPredictionCount(prev => prev + 1);
+                                                api.start(idx => {
+                                                    if (i !== idx) return;
+                                                    return {
+                                                        x: -(window.innerWidth + 200),
+                                                        y: -100,
+                                                        rot: -45,
+                                                        scale: 0.9,
+                                                        opacity: 0,
+                                                        config: { tension: 200, friction: 25 }
+                                                    };
+                                                });
+                                                // Save prediction
+                                                const submitPrediction = async () => {
+                                                    try {
+                                                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                                                        await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                                'Authorization': `Bearer ${token}`
+                                                            },
+                                                            body: JSON.stringify({
+                                                                matchId: match.match_id,
+                                                                pick: match.away_team
+                                                            })
+                                                        });
+                                                    } catch (err) {
+                                                        console.error("Prediction failed to save:", err);
+                                                    }
+                                                };
+                                                submitPrediction();
+                                                if (gone.size + 1 === matches.length) {
+                                                    setTimeout(() => setShowCompletion(true), 500);
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        <div className={styles.logoWrapper}>
+                                            {match?.away_logo && !match.away_logo.includes('.toLowerCase()') ? (
+                                                <img
+                                                    src={match.away_logo}
+                                                    alt={match.away_team}
+                                                    className={styles.teamLogo}
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none';
+                                                        e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex;');
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <div
+                                                className={styles.placeholderLogo}
+                                                style={{ display: !match?.away_logo || match.away_logo.includes('.toLowerCase()') ? 'flex' : 'none' }}
+                                            >
+                                                {match?.away_team?.charAt(0) || '?'}
+                                            </div>
+                                        </div>
+                                        <p className={styles.teamName}>{match?.away_team}</p>
+                                        <p className={styles.pickLabel}>PICK</p>
+                                    </div>
+                                </div>
+
+                                {/* Swipe Indicator - shows during drag */}
+                                <div style={{ opacity: Math.max(0, (dragX - 50) / 100) }} className={styles.swipeIndicatorLeft}>
+                                    ✓ PICK HOME
+                                </div>
+                                <div style={{ opacity: Math.max(0, (-dragX - 50) / 100) }} className={styles.swipeIndicatorRight}>
+                                    PICK AWAY ✓
+                                </div>
+                            </div>
+                        </animated.div>
+                    );
+                })}
+            </div>
         </div>
     );
 };

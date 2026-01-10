@@ -168,10 +168,27 @@ This roadmap details how we will expand the new swipeable UI to include multiple
 
 ## 🐛 KNOWN ISSUES (Active Development)
 
+### ✅ COMPLETED (Phase 15 - Stabilization & Fixes - January 10, 2026):
+1.  **Draw Entry System:**
+    *   Full backend implementation with ticket validation and database transactions.
+    *   Frontend integration with loading states and error handling.
+2.  **Demo Draw Labeling:**
+    *   Visual badge overlay with `[TESTING] DEMO` indicator.
+    *   Title suffix `(TEST)` for clear identification.
+3.  **Card Animation Polish:**
+    *   Direction-locked swipe animations with no jitter.
+    *   Smooth off-screen transitions with rotation and fade effects.
+4.  **User Balance Display Fix:**
+    *   Added `refreshUser()` to `AuthContext` for manual balance updates.
+    *   Fixed zero balance display in header/profile by syncing state after draw entry.
+5.  **Header Overlap Fix:**
+    *   Added global `padding-top: 60px` to account for fixed navbar.
+    *   Ensured consistent spacing across all pages (Home, Rooms, Profile).
+
+### 🐛 KNOWN ISSUES (Active Development)
+
 ### In Progress
-1. **Draw Entry Button**: Implementing full backend logic for prize draw entry system
-2. **Demo Draw Labeling**: Adding clear "Demo" or "Testing" labels to distinguish test draws from real draws
-3. **Card Animation Polish**: Fine-tuning swipe animations to ensure smooth off-screen transitions
+- **Multi-Prediction System**: Planning for "Match Winner + 2 Extras" (Team to Score First, BTTS).
 
 ### Under Investigation
 - None at this time

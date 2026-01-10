@@ -20,7 +20,7 @@ interface Draw {
 }
 
 const DrawRoom = () => {
-    const { token, user } = useAuth();
+    const { token, user, refreshUser } = useAuth();
     const { t } = useLanguage();
     const router = useRouter();
     const [draws, setDraws] = useState<Draw[]>([]);
@@ -116,6 +116,10 @@ const DrawRoom = () => {
             if (res.ok) {
                 setTicketCount(prev => Math.max(0, prev - 1));
                 setMessage({ text: 'GOOD LUCK! Entry Confirmed.', type: 'success' });
+                // Refresh user balances in AuthContext
+                if (user) {
+                    await refreshUser();
+                }
             } else {
                 setMessage({ text: data.error || 'Entry failed', type: 'error' });
             }

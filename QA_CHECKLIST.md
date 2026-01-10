@@ -36,3 +36,9 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 - `[ ]` **Draw Removal:** Admin can successfully delete an active draw from the Sponsor Hub.
 - `[ ]` **Navigation Flow:** Completing soccer predictions successfully shows the "Go to Draw Room" button.
 - `[ ]` **Multilingual:** Draw room titles and descriptions correctly reflect selected language (EN, ID, TH).
+
+### Balance & Layout (v1.7 Update)
+- `[ ]` **Header Balance:** User's tokens and tickets display correctly in UserTray (no zero defaults).
+- `[ ]` **Real-time Sync:** Ticket count decreases immediately in header after entering a draw.
+- `[ ]` **Header Layout:** Navbar (60px) does not overlap content on Home, Rooms, or Profile pages.
+- `[ ]` **Mobile Spacing:** Layout remains consistent and accessible on mobile viewports.

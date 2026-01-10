@@ -1,94 +1,462 @@
+/* ===== DECK WRAPPER ===== */
+.deckWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    height: 100%;
+}
+
+.deckHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cardsRemaining {
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.swipeHint {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* ===== DECK CONTAINER ===== */
 .deckContainer {
     width: 100%;
-    height: 70vh;
+    height: 72vh;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    perspective: 1000px;
-    margin-top: 20px;
-    overflow-x: hidden;
-    /* Clip cards as they fly away */
+    perspective: 1200px;
+    overflow: hidden;
+    /* Removed background for cleaner look, can re-add if needed */
 }
 
-/* Each Card Wrapper */
-.deck {
+/* ===== CARD WRAPPER ===== */
+.cardWrapper {
     position: absolute;
-    width: 550px;
-    height: 650px;
+    width: 100%;
+    max-width: 480px;
+    /* Constrain max width for better aesthetic on desktop */
+    height: 68vh;
+    max-height: 700px;
     will-change: transform, opacity;
     display: flex;
     align-items: center;
     justify-content: center;
     touch-action: none;
+    cursor: grab;
+    transition: cursor 0.2s;
     z-index: 10;
 }
 
-.deck:active {
+.cardWrapper:active {
     cursor: grabbing;
 }
 
-.loading,
-.empty {
+.cardWrapper.cardGone {
+    pointer-events: none;
+}
+
+/* ===== HYBRID CARD ===== */
+.hybridCard {
+    /* Deeper, richer gradient */
+    background: linear-gradient(145deg, rgba(20, 20, 35, 0.95) 0%, rgba(10, 10, 18, 0.98) 100%);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow:
+        0 50px 100px -20px rgba(0, 0, 0, 0.9),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        inset 0 -10px 40px rgba(0, 0, 0, 0.4);
+    /* Inner shadow for depth */
+    position: relative;
+    width: 90vw;
+    /* Responsive width base */
+    max-width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Glass shine effect */
+.hybridCard::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Top rim light */
+.hybridCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    z-index: 1;
+}
+
+/* ===== CARD HEADER ===== */
+.cardHeader {
+    padding-top: 0.5rem;
     text-align: center;
-    color: var(--neutral);
-    font-style: italic;
+    z-index: 2;
+    width: 100%;
+}
+
+.predictionType {
+    margin: 0;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+    opacity: 0.8;
+}
+
+.matchTime {
+    margin: 0.3rem 0 0 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+}
+
+/* ===== TEAMS CONTAINER ===== */
+.teamsContainer {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0;
+    z-index: 2;
+    position: relative;
+}
+
+/* ===== TEAM REGIONS ===== */
+.teamRegion {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    padding: 0 0.5rem;
+}
+
+/* Active State Feedback */
+.teamRegion:active {
+    transform: scale(0.96);
+}
+
+/* Gradients for Regions - clearer separation */
+.homeRegion {
+    background: linear-gradient(90deg, transparent 0%, rgba(46, 213, 115, 0.05) 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.homeRegion.hoveredRegion,
+.homeRegion:active {
+    background: linear-gradient(90deg, rgba(46, 213, 115, 0.1) 0%, rgba(46, 213, 115, 0.2) 100%);
+}
+
+.awayRegion {
+    background: linear-gradient(90deg, rgba(255, 71, 87, 0.05) 0%, transparent 100%);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.awayRegion.hoveredRegion,
+.awayRegion:active {
+    background: linear-gradient(90deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 71, 87, 0.1) 100%);
+}
+
+/* ===== LOGO ===== */
+.logoWrapper {
+    width: 110px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* More glass-like wrapper */
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+    /* Circular for cleaner look or 24px for soft square */
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.homeRegion .logoWrapper {
+    box-shadow: 0 10px 30px rgba(46, 213, 115, 0.15);
+    border: 1px solid rgba(46, 213, 115, 0.2);
+}
+
+.awayRegion .logoWrapper {
+    box-shadow: 0 10px 30px rgba(255, 71, 87, 0.15);
+    border: 1px solid rgba(255, 71, 87, 0.2);
+}
+
+.logoWrapper:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.teamLogo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
+}
+
+.placeholderLogo {
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ===== TEAM NAME ===== */
+.teamName {
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-align: center;
+    color: #fff;
+    margin: 0;
+    text-transform: uppercase;
+    line-height: 1.3;
+    max-width: 160px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.pickLabel {
+    margin-top: 0.8rem;
+    font-size: 0.7rem;
+    color: #2ed573;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(46, 213, 115, 0.15);
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+    opacity: 0;
+    /* Hidden by default */
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.awayRegion .pickLabel {
+    color: #ff4757;
+    background: rgba(255, 71, 87, 0.15);
+    border-color: rgba(255, 71, 87, 0.3);
+}
+
+/* Show label on hover/active */
+.teamRegion:hover .pickLabel,
+.teamRegion:active .pickLabel {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== VS ===== */
+.vsContainer {
+    position: absolute;
+    /* Float in middle */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.vs {
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.6);
+    background: #0f0f13;
+    /* match card bg roughly */
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== SWIPE INDICATORS ===== */
+.swipeIndicatorLeft,
+.swipeIndicatorRight {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    opacity: 0;
+    /* Hidden initially */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 20;
+    padding: 2.5rem;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+}
+
+.swipeIndicatorLeft {
+    left: 2rem;
+    color: #2ed573;
+    border: 2px solid #2ed573;
+}
+
+.swipeIndicatorRight {
+    right: 2rem;
+    color: #ff4757;
+    border: 2px solid #ff4757;
+}
+
+/* ===== EMPTY STATE ===== */
+.emptyContainer {
+    width: 100%;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.emptyContent {
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.emptyIcon {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.emptyText {
     font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-weight: 600;
 }
 
-/* Mobile - Fill even more space */
-@media (max-width: 600px) {
-    .deckContainer {
-        height: 55vh;
-        margin-top: 20px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .deck {
-        width: 85vw;
-        /* Smaller width for scroll gutters */
-        height: 55vh;
-    }
-}
-
-/* Completion Screen */
+/* ===== COMPLETION SCREEN ===== */
 .completionScreen {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 85vh;
+    height: 80vh;
     width: 100%;
+    animation: fadeIn 0.4s ease-out;
 }
 
 .completionCard {
     text-align: center;
     padding: 3rem 2rem;
     background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(10, 10, 15, 0.98) 100%);
-    border-radius: 24px;
-    border: 2px solid var(--glass-border);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+    width: 90%;
     max-width: 400px;
-    animation: fadeIn 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+.completionCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(46, 213, 115, 0.15), transparent 60%);
+    pointer-events: none;
 }
 
 .completionIcon {
     font-size: 4rem;
     margin-bottom: 1rem;
-    animation: bounce 1s infinite;
+    display: block;
+    animation: bounce 1.5s ease-in-out infinite;
 }
 
 @keyframes bounce {
@@ -99,66 +467,132 @@
     }
 
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-15px);
     }
 }
 
-.completionCard h2 {
+.completionTitle {
     font-size: 1.8rem;
-    margin-bottom: 1rem;
+    font-weight: 900;
+    margin: 0 0 0.5rem 0;
     color: white;
+    text-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
 .completionStats {
-    font-size: 1.1rem;
-    color: var(--neutral);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
     margin-bottom: 2rem;
+    opacity: 0.9;
 }
 
 .completionActions {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .drawButton {
-    background: var(--accent);
+    background: linear-gradient(135deg, #0070f3 0%, #00c6ff 100%);
     color: white;
     border: none;
-    padding: 1rem 2.5rem;
-    border-radius: 12px;
+    padding: 1rem 2rem;
+    border-radius: 16px;
     font-weight: 800;
     font-size: 1rem;
+    letter-spacing: 0.5px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 0 20px var(--accent-glow);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 112, 243, 0.3);
 }
 
 .drawButton:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(0, 112, 243, 0.4);
 }
 
 .completionButton {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.8rem 2rem;
-    border-radius: 12px;
-    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.9rem 2rem;
+    border-radius: 16px;
+    font-weight: 700;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .completionButton:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: white;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .completionCountdown {
-    font-size: 0.9rem;
-    color: #666;
-    font-style: italic;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 600px) {
+    .deckWrapper {
+        gap: 1rem;
+    }
+
+    .deckHeader {
+        padding: 0 1rem;
+    }
+
+    .cardWrapper {
+        width: 100%;
+        max-width: none;
+        padding: 0 1rem;
+        /* Horizontal margins */
+        height: 65vh;
+    }
+
+    .hybridCard {
+        border-radius: 32px;
+        padding: 1.5rem 0;
+        width: 100%;
+    }
+
+    .logoWrapper {
+        width: 80px;
+        height: 80px;
+        padding: 12px;
+    }
+
+    .teamName {
+        font-size: 0.9rem;
+        max-width: 120px;
+    }
+
+    .matchTime {
+        font-size: 0.75rem;
+    }
+
+    .vs {
+        width: 30px;
+        height: 30px;
+        font-size: 0.7rem;
+    }
+
+    .swipeIndicatorLeft,
+    .swipeIndicatorRight {
+        padding: 1.5rem;
+        font-size: 1.2rem;
+    }
 }

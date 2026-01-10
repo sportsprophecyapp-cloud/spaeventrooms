@@ -8,7 +8,7 @@ interface User {
     id: number;
     email: string;
     username: string;
-    permissions: string[]; 
+    permissions: string[];
     tokens: number;
     tickets: number;
     points: number;
@@ -20,6 +20,7 @@ interface AuthContextType {
     token: string | null;
     login: (token: string, user: User) => void;
     logout: () => void;
+    refreshUser: () => Promise<void>;
     isAuthenticated: boolean;
 }
 
@@ -66,8 +67,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push('/'); // NEW: Redirect to homepage
     };
 
+    const refreshUser = async () => {
+        if (!token) return;
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${apiUrl}/api/auth/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUser(data.user);
+            }
+        } catch (e) {
+            console.error('Failed to refresh user:', e);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
+        <AuthContext.Provider value={{ user, token, login, logout, refreshUser, isAuthenticated: !!token }}>
             {children}
         </AuthContext.Provider>
     );

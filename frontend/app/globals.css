@@ -38,6 +38,8 @@ body {
   font-family: 'Outfit', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  padding-top: 60px;
+  /* Account for fixed navbar */
 }
 
 /* Custom Scrollbar */
