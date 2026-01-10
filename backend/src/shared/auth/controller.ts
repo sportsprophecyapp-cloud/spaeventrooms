@@ -135,7 +135,13 @@ export const getProfile = async (req: Request, res: Response) => {
         res.json({
             success: true,
             user: {
-                ...user,
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                tokens: user.token_balance,
+                points: user.total_points,
+                level: user.current_level,
+                referral_code: user.referral_code,
                 global_rank: globalRank,
                 referral_count: referralCount,
                 history: historyResult.rows

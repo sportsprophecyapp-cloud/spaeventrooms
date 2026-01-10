@@ -53,6 +53,7 @@ const ProfilePage = () => {
     const [unlockedBadgeIds, setUnlockedBadgeIds] = useState<Set<string>>(new Set());
     const [isLoading, setIsLoading] = useState(true);
     const [copyMessage, setCopyMessage] = useState('');
+    const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated || !token) return;
@@ -191,34 +192,67 @@ const ProfilePage = () => {
                         </section>
 
                         <section className={`${styles.historyCard} glass`}>
-                            <h3 className={styles.sectionTitle}>📅 RECENT SWIPES</h3>
+                            <div className={styles.historyHeader}>
+                                <h3 className={styles.sectionTitle}>📅 RECENT SWIPES</h3>
+                                {profile.history && profile.history.length > 5 && (
+                                    <button
+                                        onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+                                        className={styles.expandToggle}
+                                    >
+                                        {isHistoryExpanded ? 'SHOW LESS' : `VIEW ALL (${profile.history.length})`}
+                                    </button>
+                                )}
+                            </div>
+
                             <div className={styles.historyList}>
                                 {profile.history && profile.history.length > 0 ? (
-                                    profile.history.map((item) => (
-                                        <div key={item.id} className={styles.historyItem}>
-                                            <div className={styles.historyTeamsWrapper}>
-                                                <div className={styles.miniLogo}>
-                                                    <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                    (() => {
+                                        const displayedHistory = isHistoryExpanded ? profile.history : profile.history.slice(0, 5);
+
+                                        // Group by date
+                                        const groups: { [key: string]: typeof profile.history } = {};
+                                        displayedHistory.forEach(item => {
+                                            const date = new Date(item.created_at).toLocaleDateString('en-US', {
+                                                month: 'short', day: 'numeric', year: 'numeric'
+                                            });
+                                            if (!groups[date]) groups[date] = [];
+                                            groups[date].push(item);
+                                        });
+
+                                        return Object.entries(groups).map(([date, items]) => (
+                                            <div key={date} className={styles.historyGroup}>
+                                                <div className={styles.dateDivider}>
+                                                    <span>{date}</span>
+                                                    <div className={styles.dividerLine}></div>
                                                 </div>
-                                                <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
-                                                <div className={styles.miniLogo}>
-                                                    <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                                </div>
+                                                {items.map((item) => (
+                                                    <div key={item.id} className={styles.historyItem}>
+                                                        <div className={styles.historyTeamsWrapper}>
+                                                            <div className={styles.miniLogo}>
+                                                                <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                            </div>
+                                                            <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
+                                                            <div className={styles.miniLogo}>
+                                                                <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                            </div>
+                                                        </div>
+                                                        <div className={styles.historyMeta}>
+                                                            <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
+                                                            <div className={styles.historyStatus}>
+                                                                {item.status === 'correct' ? (
+                                                                    <span className={styles.statusCorrect}>✅ CORRECT</span>
+                                                                ) : item.status === 'incorrect' ? (
+                                                                    <span className={styles.statusIncorrect}>❌ INCORRECT</span>
+                                                                ) : (
+                                                                    <span className={styles.historyLive}>PENDING</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
-                                            <div className={styles.historyMeta}>
-                                                <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
-                                                <div className={styles.historyStatus}>
-                                                    {item.status === 'correct' ? (
-                                                        <span className={styles.statusCorrect}>✅ CORRECT</span>
-                                                    ) : item.status === 'incorrect' ? (
-                                                        <span className={styles.statusIncorrect}>❌ INCORRECT</span>
-                                                    ) : (
-                                                        <span className={styles.historyLive}>PENDING</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
+                                        ));
+                                    })()
                                 ) : (
                                     <p className={styles.emptyHistory}>No predictions made yet. Go to the Arena!</p>
                                 )}
