@@ -32,7 +32,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [showCompletion, setShowCompletion] = useState(false);
     const [countdown, setCountdown] = useState(3);
     const [predictionCount, setPredictionCount] = useState(0);
-    const [hoveredRegion, setHoveredRegion] = useState<'home' | 'away' | null>(null);
     const [dragX, setDragX] = useState(0);
     const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' | 'info' } | null>(null);
 
@@ -216,7 +215,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             )}
             <div className={styles.deckHeader}>
                 <p className={styles.cardsRemaining}>{remainingCards} {remainingCards === 1 ? 'Match' : 'Matches'} Left</p>
-                <p className={styles.swipeHint}>Tap or Swipe to Predict</p>
+                <p className={styles.swipeHint}>Swipe to Predict or Drag to Decide</p>
             </div>
 
             <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>
@@ -263,61 +262,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
                                     {/* HOME TEAM REGION */}
                                     <div
-                                        className={`${styles.teamRegion} ${styles.homeRegion} ${hoveredRegion === 'home' ? styles.hoveredRegion : ''}`}
-                                        onMouseEnter={() => setHoveredRegion('home')}
-                                        onMouseLeave={() => setHoveredRegion(null)}
-                                        onClick={() => {
-                                            if (!isGone) {
-                                                setGone(prev => new Set(prev).add(i));
-                                                setMatches(matches.slice(1));
-                                                setPredictionCount(prev => prev + 1);
-                                                api.start(idx => {
-                                                    if (i !== idx) return;
-                                                    return {
-                                                        x: window.innerWidth + 200,
-                                                        y: 100,
-                                                        rot: 45,
-                                                        scale: 0.9,
-                                                        opacity: 0,
-                                                        config: { tension: 200, friction: 25 }
-                                                    };
-                                                });
-                                                // Save prediction
-                                                const submitPrediction = async () => {
-                                                    try {
-                                                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                                                        const pickName = match.home_team;
-
-                                                        fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
-                                                            method: 'POST',
-                                                            headers: {
-                                                                'Content-Type': 'application/json',
-                                                                'Authorization': `Bearer ${token}`
-                                                            },
-                                                            body: JSON.stringify({
-                                                                matchId: match.match_id,
-                                                                pick: pickName
-                                                            })
-                                                        }).then(res => {
-                                                            if (!res.ok && res.status !== 402) {
-                                                                console.error('Prediction save warning:', res.status);
-                                                                setMessage({ text: 'Error saving prediction', type: 'error' });
-                                                            }
-                                                        }).catch(err => {
-                                                            console.error("Prediction network error:", err);
-                                                            setMessage({ text: 'Network error saving prediction', type: 'error' });
-                                                        });
-                                                    } catch (err) {
-                                                        console.error("Prediction failed to save:", err);
-                                                        setMessage({ text: 'Failed to save prediction', type: 'error' });
-                                                    }
-                                                };
-                                                submitPrediction();
-                                                if (gone.size + 1 === matches.length) {
-                                                    setTimeout(() => setShowCompletion(true), 500);
-                                                }
-                                            }
-                                        }}
+                                        className={`${styles.teamRegion} ${styles.homeRegion}`}
                                     >
                                         <div className={styles.logoWrapper}>
                                             {match?.home_logo && !match.home_logo.includes('.toLowerCase()') ? (
@@ -349,61 +294,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
                                     {/* AWAY TEAM REGION */}
                                     <div
-                                        className={`${styles.teamRegion} ${styles.awayRegion} ${hoveredRegion === 'away' ? styles.hoveredRegion : ''}`}
-                                        onMouseEnter={() => setHoveredRegion('away')}
-                                        onMouseLeave={() => setHoveredRegion(null)}
-                                        onClick={() => {
-                                            if (!isGone) {
-                                                setGone(prev => new Set(prev).add(i));
-                                                setMatches(matches.slice(1));
-                                                setPredictionCount(prev => prev + 1);
-                                                api.start(idx => {
-                                                    if (i !== idx) return;
-                                                    return {
-                                                        x: -(window.innerWidth + 200),
-                                                        y: -100,
-                                                        rot: -45,
-                                                        scale: 0.9,
-                                                        opacity: 0,
-                                                        config: { tension: 200, friction: 25 }
-                                                    };
-                                                });
-                                                // Save prediction
-                                                const submitPrediction = async () => {
-                                                    try {
-                                                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                                                        const pickName = match.away_team;
-
-                                                        fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
-                                                            method: 'POST',
-                                                            headers: {
-                                                                'Content-Type': 'application/json',
-                                                                'Authorization': `Bearer ${token}`
-                                                            },
-                                                            body: JSON.stringify({
-                                                                matchId: match.match_id,
-                                                                pick: pickName
-                                                            })
-                                                        }).then(res => {
-                                                            if (!res.ok && res.status !== 402) {
-                                                                console.error('Prediction save warning:', res.status);
-                                                                setMessage({ text: 'Error saving prediction', type: 'error' });
-                                                            }
-                                                        }).catch(err => {
-                                                            console.error("Prediction network error:", err);
-                                                            setMessage({ text: 'Network error saving prediction', type: 'error' });
-                                                        });
-                                                    } catch (err) {
-                                                        console.error("Prediction failed to save:", err);
-                                                        setMessage({ text: 'Failed to save prediction', type: 'error' });
-                                                    }
-                                                };
-                                                submitPrediction();
-                                                if (gone.size + 1 === matches.length) {
-                                                    setTimeout(() => setShowCompletion(true), 500);
-                                                }
-                                            }
-                                        }}
+                                        className={`${styles.teamRegion} ${styles.awayRegion}`}
                                     >
                                         <div className={styles.logoWrapper}>
                                             {match?.away_logo && !match.away_logo.includes('.toLowerCase()') ? (

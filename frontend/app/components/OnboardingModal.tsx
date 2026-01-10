@@ -16,7 +16,7 @@ const steps = [
     },
     {
         title: "Submit Your Call",
-        description: "Watch the event and answer live questions. Calls are <span class='highlight'>Risk-Free</span> (0 tokens).",
+        description: "Swipe cards left or right to predict match winners. Calls are <span class='highlight'>Risk-Free</span> (0 tokens).",
         icon: "⚡"
     },
     {
@@ -45,7 +45,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
             setMounted(true);
             document.body.style.overflow = 'hidden';
         } else {
-            const timer = setTimeout(() => setMounted(false), 500); 
+            const timer = setTimeout(() => setMounted(false), 500);
             document.body.style.overflow = 'unset';
             return () => clearTimeout(timer);
         }
