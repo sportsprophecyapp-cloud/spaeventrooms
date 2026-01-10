@@ -82,6 +82,8 @@
 .mainContent {
     padding: 2rem;
     overflow-y: auto;
+    overflow-x: hidden;
+    /* Prevent swiped cards from pushing the sidebar */
     display: flex;
     flex-direction: column;
     gap: 2.5rem;

@@ -7,6 +7,8 @@
     position: relative;
     perspective: 1000px;
     margin-top: 20px;
+    overflow-x: hidden;
+    /* Clip cards as they fly away */
 }
 
 /* Each Card Wrapper */
