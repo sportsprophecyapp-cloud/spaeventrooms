@@ -8,7 +8,12 @@
 **Version**: 4.0.0  
 **Release Date**: January 9, 2026
 
-This release marks the transition to a **Pure Live** architecture. We have successfully integrated team logos, refined swipe physics, completed the winner notification loop, and purged all legacy mock data.
+This release marks the transition to a **Pure Live** architecture. We have successfully integrated team logos, refined swipe physics, completed the winner notification loop, relocated the Sponsor Marquee for maximum visibility, and purged all legacy mock data.
+
+### ✅ COMPLETED (Phase 8.0 - January 9, 2026):
+1.  **Main Page UI Optimization (Marquee Relocation):**
+    *   **Header Placement**: Relocated the `SponsorMarquee` to the header area for instant "above-the-fold" exposure.
+    *   **Premium Polish**: Adjusted typography and opacity for a sleeker, integrated look.
 
 ### ✅ COMPLETED (Phase 7.0 - January 9, 2026):
 1.  **UI/UX Overhaul (Prediction Cards):**
