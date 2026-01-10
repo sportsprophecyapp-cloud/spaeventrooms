@@ -15,6 +15,8 @@ interface Match {
     away_team: string;
     start_time: string;
     league_logo: string;
+    home_logo?: string;
+    away_logo?: string;
 }
 
 interface GameDeckProps {
@@ -63,8 +65,11 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
-    const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx], distance }) => {
-        const trigger = Math.abs(vx) > 0.1 || Math.abs(mx) > 100; // Velocity OR distance threshold
+    const bind = useDrag(({ args: [index], active, movement: [mx, my], direction: [xDir, yDir], velocity: [vx, vy], distance }) => {
+        // VELOCITY SENSITIVITY: 0.1 is quite low, but 0.2 is industry standard.
+        // DISTANCE SENSITIVITY: 80px on mobile is better than 100px.
+        const trigger = Math.abs(vx) > 0.05 || Math.abs(mx) > 80;
+
         if (!active && trigger) {
             gone.add(index);
             setPredictionCount(prev => prev + 1);
@@ -72,10 +77,22 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         api.start(i => {
             if (index !== i) return;
             const isGone = gone.has(index);
-            const x = isGone ? (200 + window.innerWidth) * xDir : active ? mx : 0;
-            const rot = mx / 100 + (isGone ? xDir * 10 * vx : 0);
-            const scale = active ? 1.1 : 1;
-            return { x, rot, scale, delay: undefined, config: { friction: 50, tension: active ? 800 : isGone ? 200 : 500 } };
+
+            // PHYSICS: If NOT gone, keep it tethered. If GONE, send it flying.
+            const x = isGone ? (250 + window.innerWidth) * xDir : active ? mx : 0;
+            const rot = mx / 20 + (isGone ? xDir * 15 * vx : 0); // Normalized rotation
+            const scale = active ? 1.05 : 1;
+
+            return {
+                x,
+                rot,
+                scale,
+                delay: undefined,
+                config: {
+                    friction: 40,
+                    tension: active ? 800 : isGone ? 150 : 400
+                }
+            };
         });
 
         // Check if all cards are swiped

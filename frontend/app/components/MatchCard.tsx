@@ -12,6 +12,8 @@ interface Match {
     score_home?: number;
     score_away?: number;
     league?: string;
+    home_logo?: string;
+    away_logo?: string;
     isPulsing?: boolean;
 }
 
@@ -30,9 +32,15 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
         <div className={`${styles.card} ${match.isPulsing ? styles.pulsar : ''}`}>
             <div className={styles.teamsSection}>
                 <div className={styles.teams}>
-                    <span className={styles.team}>{match.home_team}</span>
+                    <div className={styles.teamCol}>
+                        {match.home_logo && <img src={match.home_logo} className={styles.teamLogo} alt="" />}
+                        <span className={styles.team}>{match.home_team}</span>
+                    </div>
                     <span className={styles.vs}>VS</span>
-                    <span className={styles.team}>{match.away_team}</span>
+                    <div className={styles.teamCol}>
+                        {match.away_logo && <img src={match.away_logo} className={styles.teamLogo} alt="" />}
+                        <span className={styles.team}>{match.away_team}</span>
+                    </div>
                 </div>
                 <div className={styles.info}>
                     <span className={`${styles.status} ${match.status === 'live' ? styles.live : ''}`}>

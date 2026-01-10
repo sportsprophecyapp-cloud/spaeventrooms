@@ -17,15 +17,24 @@ export class SoccerRoom extends BaseRoom {
         // CORRECT, SINGLE DEFINITION FOR MATCHES
         this.router.get('/matches', async (req, res) => {
             try {
+                const { league } = req.query;
+                let leagueClause = "";
+                const params: any[] = [];
+
+                if (league) {
+                    leagueClause = "AND league = $1";
+                    params.push(league);
+                }
+
                 const result = await query(`
                     SELECT * FROM soccer_matches 
                     WHERE start_time > NOW() - INTERVAL '6 hours' 
-                    AND start_time < NOW() + INTERVAL '36 hours'
+                    AND start_time < NOW() + INTERVAL '48 hours'
+                    ${leagueClause}
                     ORDER BY 
                         CASE WHEN status = 'live' THEN 1 ELSE 2 END,
-                        start_time ASC,
-                        league ASC
-                `);
+                        start_time ASC
+                `, params);
                 res.json(Array.isArray(result.rows) ? result.rows : []);
             } catch (err) {
                 res.json([]);

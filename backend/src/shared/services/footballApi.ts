@@ -82,21 +82,26 @@ export const fetchLiveMatches = async () => {
                         if (m.completed) status = 'finished';
                         else if (new Date(m.commence_time) < new Date()) status = 'live';
 
+                        const home_logo = `https://media.api-sports.io/football/teams/${m.home_team.replace(/\s+/g, '').toLowerCase()}.png`; // Heuristic or fallback
+                        const away_logo = `https://media.api-sports.io/football/teams/${m.away_team.replace(/\s+/g, '').toLowerCase()}.png`;
+
                         await query(`
                             INSERT INTO soccer_matches (
                                 match_id, home_team, away_team, start_time, status, 
-                                league, league_logo, score_home, score_away, updated_at
+                                league, league_logo, score_home, score_away, home_logo, away_logo, updated_at
                             )
-                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+                            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
                             ON CONFLICT (match_id) DO UPDATE SET 
                                 status = EXCLUDED.status,
                                 score_home = EXCLUDED.score_home,
                                 score_away = EXCLUDED.score_away,
+                                home_logo = EXCLUDED.home_logo,
+                                away_logo = EXCLUDED.away_logo,
                                 updated_at = NOW()
                         `, [
                             String(m.id), m.home_team, m.away_team, m.commence_time,
                             status, LEAGUE_NAMES[sportKey] || sportKey, LEAGUE_LOGOS[sportKey] || '',
-                            score_home, score_away
+                            score_home, score_away, home_logo, away_logo
                         ]);
                         count++;
                     }

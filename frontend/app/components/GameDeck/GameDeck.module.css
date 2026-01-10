@@ -15,7 +15,7 @@
 .deck {
     position: absolute;
     width: 450px;
-    height: 600px;
+    height: 550px;
     /* Increased from 500px */
     /* Fixed height for consistency */
     display: flex;
