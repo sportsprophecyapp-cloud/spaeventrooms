@@ -56,6 +56,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const login = (newToken: string, newUser: User) => {
+        // DERIVE ROLE FROM PERMISSIONS (Fix for Admin UI)
+        if (newUser.permissions && (newUser.permissions.includes('admin') || newUser.permissions.includes('super_admin'))) {
+            newUser.role = 'admin';
+        }
         setToken(newToken);
         setUser(newUser);
         localStorage.setItem('auth_token', newToken);
@@ -77,7 +81,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setUser(data.user);
+                const updatedUser = data.user;
+                // DERIVE ROLE FROM PERMISSIONS (Fix for Admin UI)
+                if (updatedUser.permissions && (updatedUser.permissions.includes('admin') || updatedUser.permissions.includes('super_admin'))) {
+                    updatedUser.role = 'admin';
+                }
+                setUser(updatedUser);
             }
         } catch (e) {
             console.error('Failed to refresh user:', e);
