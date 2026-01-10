@@ -6,6 +6,8 @@
 - **Backend:** Node.js/Express (located in `/backend`).
 - **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Creator Events).
 - **Gamification:** Sponsor & Draw Hub (`/draw`) powered by Prize Tickets and Admin-verified partner campaigns.
+- **Social Proof:** Winner Feedback System with star ratings, testimonials, and viral sharing incentives (X, WhatsApp, native).
+- **Referral Engine:** Unique 8-character codes, tiered rewards, and milestone tracking (50 referrals = Custom Avatar unlock).
 
 ## 📡 Data Architecture (API & Limits)
 - **Resilient Dual-API Sync:** API-Football (20m) + The Odds API (4h Savings Mode).
