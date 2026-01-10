@@ -31,7 +31,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
     const { token } = useAuth();
     const router = useRouter();
-    const [gone] = useState(() => new Set());
     const [matches, setMatches] = useState<Match[]>([]);
     const [showCompletion, setShowCompletion] = useState(false);
     const [countdown, setCountdown] = useState(3);
@@ -65,17 +64,13 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
-    const bind = useDrag(({ args: [index], active, movement: [mx, my], velocity: [vx, vy] }) => {
-        // ULTRA-SENSITIVE TRIGGER: 0.03 velocity OR 50px distance.
-        const trigger = Math.abs(vx) > 0.03 || Math.abs(mx) > 50;
+    const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
+        // Trigger swipe when velocity is high OR distance is far enough
+        const trigger = !active && (Math.abs(vx) > 0.2 || Math.abs(mx) > 100);
 
-        // Determine pick based on swipe side: mx > 0 is Home (Right), mx < 0 is Away (Left)
-        const pickSide = mx > 0 ? 'home' : 'away';
-
-        if (!active && trigger && !gone.has(index)) {
+        if (trigger) {
             const match = matches[index];
-            gone.add(index);
-            setPredictionCount(prev => prev + 1);
+            const pickSide = mx > 0 ? 'home' : 'away';
 
             // SAVE TO BACKEND
             const submitPrediction = async () => {
@@ -99,35 +94,40 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 }
             };
             submitPrediction();
-        }
 
-        api.start(i => {
-            if (index !== i) return;
-            const isGone = gone.has(index);
+            setPredictionCount(prev => prev + 1);
 
-            // DIRECTION LOCK: Use the sign of mx to determine fly-out direction, 
-            // preventing the "bounce back" if direction jumps at the end of the gesture.
-            const xDir = mx > 0 ? 1 : -1;
+            // FLY CARD OFF SCREEN
+            api.start(i => {
+                if (index !== i) return;
+                return {
+                    x: (200 + window.innerWidth) * xDir,
+                    rot: xDir * 20,
+                    scale: 1,
+                    config: { tension: 200, friction: 20 }
+                };
+            });
 
-            // CRITICAL FIX: Once gone, card MUST stay off-screen permanently
-            const x = isGone ? (500 + window.innerWidth) * xDir : active ? mx : 0;
-            const rot = mx / 15 + (isGone ? xDir * 20 * vx : 0);
-            const scale = active ? 1.05 : 1;
-
-            return {
-                x,
-                rot,
-                scale,
-                delay: undefined,
-                config: isGone
-                    ? { tension: 200, friction: 30 } // Smooth exit, no return
-                    : { tension: active ? 800 : 400, friction: 40 }
-            };
-        });
-
-        // Check if all cards are swiped
-        if (!active && gone.size === matches.length) {
-            setTimeout(() => setShowCompletion(true), 600);
+            // REMOVE CARD FROM ARRAY after animation
+            setTimeout(() => {
+                setMatches(prev => prev.filter((_, i) => i !== index));
+                if (matches.length === 1) {
+                    setShowCompletion(true);
+                }
+            }, 300);
+        } else {
+            // DURING DRAG - follow finger
+            api.start(i => {
+                if (index !== i) return;
+                const rot = mx / 15;
+                const scale = active ? 1.05 : 1;
+                return {
+                    x: active ? mx : 0,
+                    rot: active ? rot : 0,
+                    scale,
+                    config: { tension: 800, friction: 50 }
+                };
+            });
         }
     });
 
