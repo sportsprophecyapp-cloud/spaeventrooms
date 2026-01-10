@@ -4,11 +4,22 @@
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
 **PATH:** `/Users/williamcommu/Desktop/mobileV3`
 
-## 🚀 CURRENT STATUS (Phase 11 - COMPLETE ✅)
-**Version**: 4.2.0  
+## 🚀 CURRENT STATUS (Phase 11.5 - COMPLETE ✅)
+**Version**: 4.2.1  
 **Release Date**: January 9, 2026
 
-This release introduces a complete **Social Proof & Engagement Loop**. We have successfully implemented Player Profiles with Badge Lockers, a Referral Program with tiered rewards, and a Winner Feedback system that encourages viral sharing through X, WhatsApp, and native mobile links. Admins now have a dedicated Testimonials dashboard to monitor ratings and track organic growth.
+This release introduces a complete **Card Deck UX Overhaul** with true Tinder-style swipe mechanics. Cards are now solid and readable, fill more screen space, and are permanently removed from the DOM once swiped (eliminating the bounce-back issue). The "Back to Leagues" button now features premium gradient styling.
+
+### ✅ COMPLETED (Phase 11.5 - Card Deck UX Overhaul - January 9, 2026):
+1.  **True Tinder-Style Mechanics:**
+    *   Rewrote swipe logic to remove cards from DOM after animation (no bounce-back).
+    *   Increased trigger threshold for more intentional swipes (velocity > 0.2 OR distance > 100px).
+    *   Cards permanently disappear once swiped, just like Tinder.
+2.  **Visual Improvements:**
+    *   Replaced transparent glass with solid dark gradient background (98% opacity).
+    *   Increased card size: 500×600px desktop, 95%×75% mobile.
+    *   Added premium "Back to Leagues" button with gradient, hover glow, and auto-arrow.
+    *   Optimized layout to fill all available vertical space.
 
 ### ✅ COMPLETED (Phase 11 - Winner Feedback & Social Proof - January 9, 2026):
 1.  **Winner Engagement Loop:**
