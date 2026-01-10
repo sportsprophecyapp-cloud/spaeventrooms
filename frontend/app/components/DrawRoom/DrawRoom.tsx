@@ -13,6 +13,10 @@ interface Draw {
     description: string;
     room_id: string;
     status: 'active' | 'completed';
+    entry_count?: number;
+    sponsor_logo?: string;
+    sponsor_name?: string;
+    draw_date?: string;
 }
 
 const DrawRoom = () => {
@@ -28,7 +32,7 @@ const DrawRoom = () => {
 
     useEffect(() => {
         if (!token) {
-            router.push('/auth/login?redirect=/draw');
+            router.push('/auth/login');
             return;
         }
 
@@ -145,8 +149,33 @@ const DrawRoom = () => {
                             draw.description.toLowerCase().includes('fanatics') ||
                             draw.id < 100; // Mock IDs
 
+                        // Calculate countdown
+                        let countdown = '';
+                        if (draw.draw_date) {
+                            const now = new Date().getTime();
+                            const target = new Date(draw.draw_date).getTime();
+                            const diff = target - now;
+
+                            if (diff > 0) {
+                                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                countdown = days > 0 ? `${days}d ${hours}h` : `${hours}h`;
+                            } else {
+                                countdown = 'Drawing soon!';
+                            }
+                        }
+
                         return (
                             <div key={draw.id} className={`${styles.drawCard} glass`}>
+                                {/* Sponsor Logo */}
+                                {draw.sponsor_logo && (
+                                    <img
+                                        src={draw.sponsor_logo}
+                                        className={styles.sponsorLogo}
+                                        alt={draw.sponsor_name || 'Sponsor'}
+                                    />
+                                )}
+
                                 {isDemo && (
                                     <div className={styles.demoBadge}>[TESTING] DEMO</div>
                                 )}
@@ -154,6 +183,18 @@ const DrawRoom = () => {
                                 <h3>{draw.title} {isDemo && '(TEST)'}</h3>
                                 <p className={styles.prizeName}>{draw.prize}</p>
                                 <p className={styles.drawDesc}>{draw.description}</p>
+
+                                {/* Entry Count */}
+                                <div className={styles.entryCount}>
+                                    👥 {draw.entry_count || 0} {draw.entry_count === 1 ? 'entry' : 'entries'}
+                                </div>
+
+                                {/* Countdown Timer */}
+                                {countdown && (
+                                    <div className={styles.countdown}>
+                                        ⏰ Draws in: <strong>{countdown}</strong>
+                                    </div>
+                                )}
 
                                 <div className={styles.cardActions}>
                                     <button

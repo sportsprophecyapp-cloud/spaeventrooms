@@ -122,8 +122,49 @@
 .drawDesc {
     color: var(--neutral);
     font-size: 0.9rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
+
+.sponsorLogo {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.sponsorLogo:hover {
+    opacity: 1;
+}
+
+.entryCount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.6rem 1rem;
+    background: rgba(0, 112, 243, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 112, 243, 0.3);
+    width: 100%;
+}
+
+.countdown {
+    font-size: 0.9rem;
+    color: #FFD700;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.countdown strong {
+    color: var(--accent);
+}
+
 
 .cardActions {
     display: flex;

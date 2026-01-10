@@ -114,7 +114,19 @@ export const handleGetTickets = async (req: AuthRequest, res: Response) => {
 
 export const handleGetActiveDraws = async (req: Request, res: Response) => {
     try {
-        const result = await dbQuery(`SELECT * FROM prize_draws WHERE status = 'active' ORDER BY created_at DESC`);
+        const result = await dbQuery(`
+            SELECT 
+                d.*,
+                COUNT(e.id) as entry_count,
+                rs.name as sponsor_name,
+                rs.logo_url as sponsor_logo
+            FROM prize_draws d
+            LEFT JOIN prize_draw_entries e ON d.id = e.draw_id
+            LEFT JOIN room_sponsors rs ON d.sponsor_id = rs.id
+            WHERE d.status = 'active'
+            GROUP BY d.id, rs.name, rs.logo_url
+            ORDER BY d.created_at DESC
+        `);
         res.json({ success: true, draws: result.rows });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Error fetching draws' });
@@ -274,6 +286,29 @@ export const handleGetUserTickets = handleGetTickets; // Alias for route consist
 export const purchaseCosmetic = async (req: AuthRequest, res: Response) => res.json({ success: false });
 export const equipCosmetic = async (req: AuthRequest, res: Response) => res.json({ success: false });
 export const shareRoom = async (req: AuthRequest, res: Response) => res.json({ success: false });
+
+export const handleGetRecentWinners = async (req: Request, res: Response) => {
+    try {
+        const result = await dbQuery(`
+            SELECT 
+                u.username,
+                d.title as draw_title,
+                d.prize,
+                d.draw_date,
+                rs.name as sponsor_name
+            FROM prize_draws d
+            JOIN users u ON d.winner_id = u.id
+            LEFT JOIN room_sponsors rs ON d.sponsor_id = rs.id
+            WHERE d.status = 'completed' AND d.winner_id IS NOT NULL
+            ORDER BY d.draw_date DESC
+            LIMIT 5
+        `);
+        res.json({ success: true, winners: result.rows });
+    } catch (error) {
+        console.error('Error fetching recent winners:', error);
+        res.status(500).json({ success: false, error: 'Error fetching winners' });
+    }
+};
 
 export const handleGetAllBadges = async (req: Request, res: Response) => {
     try {

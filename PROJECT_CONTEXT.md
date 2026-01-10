@@ -2,7 +2,7 @@
 
 **PROJECT:** Events Arena
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
-**PATH:** `/Users/williamcommu/Desktop/mobileV3`
+**PATH:** `/Users/williamcommu/Desktop/mobileV31crashed`
 
 ## 🚀 CURRENT STATUS (Phase 14 - COMPLETE ✅)
 **Version**: 4.5.0  
@@ -163,3 +163,17 @@ This roadmap details how we will expand the new swipeable UI to include multiple
 ## 🔧 WORKFLOW SUMMARY & KEY LESSONS:
 - **Build Failures are Part of the Process:** Critical build failures (missing exports, syntax errors) are a normal part of rapid development. Our process of deploying, inspecting, and immediately fixing is working.
 - **Site Inspect is CRITICAL:** The browser's **console output** is the only reliable way to distinguish between silent failures, `404` errors, and `500` server crashes.
+
+---
+
+## 🐛 KNOWN ISSUES (Active Development)
+
+### In Progress
+1. **Draw Entry Button**: Implementing full backend logic for prize draw entry system
+2. **Demo Draw Labeling**: Adding clear "Demo" or "Testing" labels to distinguish test draws from real draws
+3. **Card Animation Polish**: Fine-tuning swipe animations to ensure smooth off-screen transitions
+
+### Under Investigation
+- None at this time
+
+*Last Updated: January 10, 2026*

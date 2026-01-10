@@ -9,6 +9,7 @@ import styles from './page.module.css';
 import { APP_VERSION } from './version';
 import OnboardingModal from '@/app/components/OnboardingModal';
 import SponsorMarquee from '@/app/components/SponsorMarquee';
+import RecentWinners from '@/app/components/RecentWinners';
 
 const HomePage = () => {
     const { t, language, setLanguage } = useLanguage();
@@ -64,6 +65,9 @@ const HomePage = () => {
                         </div>
                     ))}
                 </div>
+
+                {/* Recent Winners Showcase */}
+                <RecentWinners />
 
                 {/* How It Works Section */}
                 <section style={{ marginTop: '4rem', textAlign: 'center', width: '100%', maxWidth: '1000px' }}>

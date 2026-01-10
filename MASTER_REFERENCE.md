@@ -8,6 +8,7 @@
 - **Gamification:** Sponsor & Draw Hub (`/draw`) powered by Prize Tickets and Admin-verified partner campaigns.
 - **Social Proof:** Winner Feedback System with star ratings, testimonials, and viral sharing incentives (X, WhatsApp, native).
 - **Referral Engine:** Unique 8-character codes, tiered rewards, and milestone tracking (50 referrals = Custom Avatar unlock).
+- **Profile System:** Dynamic routing at `/profile/[userId]` with Badge Locker, Referral Progress, and Recent Swipes.
 
 ## 📡 Data Architecture (API & Limits)
 - **Resilient Dual-API Sync:** API-Football (20m) + The Odds API (4h Savings Mode).
