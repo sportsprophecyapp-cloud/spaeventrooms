@@ -46,7 +46,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
                 </div>
                 <div className={styles.info}>
                     <span className={`${styles.status} ${match.status === 'live' ? styles.live : ''}`}>
-                        {match.status.toUpperCase()}
+                        {(match.status || 'Scheduled').toUpperCase()}
                     </span>
                     <span className={styles.time}>
                         {new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
