@@ -8,7 +8,14 @@
 **Version**: 4.0.0  
 **Release Date**: January 9, 2026
 
-This release marks the transition to a **Pure Live** architecture. We have successfully integrated team logos, refined swipe physics, completed the winner notification loop, relocated the Sponsor Marquee for maximum visibility, and purged all legacy mock data.
+This release marks the transition to a **Pure Live** architecture. We have successfully integrated team logos, refined swipe physics with direction-locking to fix "bounce-back" bugs, implemented prediction persistence (API saving), relocated the Sponsor Marquee, and purged all legacy mock data.
+
+### ✅ COMPLETED (Phase 7.5 - January 9, 2026):
+1.  **Interactivity & Data Persistence:**
+    *   **Swipe Stability**: Implemented direction-locking in `GameDeck.tsx` to prevent cards from bouncing back.
+    *   **Prediction Saving**: Every swipe now officially saves a prediction to the database via API.
+    *   **Key Rotation**: Configured API key rotation in `footballApi.ts` to support multi-key sustainability.
+    *   **Architectural Cleanup**: Consolidated `MatchCard` logic and resolved all production build failures.
 
 ### ✅ COMPLETED (Phase 8.0 - January 9, 2026):
 1.  **Main Page UI Optimization (Marquee Relocation):**
