@@ -38,7 +38,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
     const { token } = useAuth();
     const router = useRouter();
-    const [gone] = useState(() => new Set<number>());
+    const [gone, setGone] = useState<Set<number>>(() => new Set());
     const [matches, setMatches] = useState<Match[]>([]);
     const [showCompletion, setShowCompletion] = useState(false);
     const [countdown, setCountdown] = useState(3);
@@ -73,7 +73,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [props, api] = useSprings(matches.length, i => ({
         ...to(i),
         from: from(i),
-        immediate: key => gone.has(i) // If gone, be immediate for all properties to stay off-screen
+        immediate: (key) => gone.has(i)
     }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
@@ -84,7 +84,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const match = matches[index];
             const pickSide = mx > 0 ? 'home' : 'away';
 
-            gone.add(index);
+            setGone(new Set(gone.add(index)));
             setPredictionCount(prev => prev + 1);
 
             // SAVE TO BACKEND
@@ -122,17 +122,18 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const isGone = gone.has(index);
 
             if (isGone) {
-                const finalXDir = mx > 0 ? 1 : -1;
+                // Ensure the card definitely flies off based on the last movement direction
+                const x = (200 + window.innerWidth) * (xDir || (mx > 0 ? 1 : -1));
                 return {
-                    x: (500 + window.innerWidth) * finalXDir, // Fly further out
-                    rot: finalXDir * 60, // Stronger rotation
-                    scale: 0.5, // Shrink more
+                    x,
+                    rot: (xDir || (mx > 0 ? 1 : -1)) * 60,
+                    scale: 0.8,
                     opacity: 0,
                     immediate: false,
-                    config: { tension: 200, friction: 30 }
+                    config: { tension: 150, friction: 20 }
                 };
             } else {
-                const rot = mx / 15;
+                const rot = mx / 20;
                 const scale = active ? 1.05 : 1;
                 return {
                     x: active ? mx : 0,
