@@ -12,7 +12,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     border-bottom: 1px solid var(--glass-border);
 }
 
@@ -63,9 +63,49 @@
     border: 1px dashed var(--accent);
 }
 
+/* BACK TO LEAGUES BUTTON - Premium styling */
+.backToGridBtn {
+    background: linear-gradient(135deg, rgba(0, 112, 243, 0.15) 0%, rgba(0, 80, 200, 0.2) 100%);
+    border: 1px solid rgba(0, 112, 243, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 112, 243, 0.2);
+}
+
+.backToGridBtn:hover {
+    background: linear-gradient(135deg, rgba(0, 112, 243, 0.25) 0%, rgba(0, 80, 200, 0.3) 100%);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 112, 243, 0.3);
+}
+
+.backToGridBtn::before {
+    content: '←';
+    font-size: 1.2rem;
+}
+
+/* MATCHES WRAPPER - Fill available space */
+.matchesWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* Allow flex child to shrink */
+}
+
 /* SIDEBAR (SOCIAL & STANDINGS) */
 .sidebar {
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     border-left: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
@@ -74,7 +114,7 @@
 
 .sidebarTabs {
     display: flex;
-    background: rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
     border-bottom: 1px solid var(--glass-border);
 }
 
@@ -119,9 +159,15 @@
     }
 
     .sidebarContent {
-        height: 500px; /* Controlled height for mobile social section */
+        height: 500px;
+        /* Controlled height for mobile social section */
     }
 
-    .minimalHeader { padding: 0 1rem; }
-    .mainContent { padding: 1.5rem; }
+    .minimalHeader {
+        padding: 0 1rem;
+    }
+
+    .mainContent {
+        padding: 1.5rem;
+    }
 }
