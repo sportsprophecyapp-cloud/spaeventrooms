@@ -162,6 +162,7 @@ export const handleGetWins = async (req: AuthRequest, res: Response) => {
         );
         res.json({ success: true, wins: result.rows });
     } catch (error) {
+        console.error('Error in handleGetWins:', error);
         res.status(500).json({ success: false, error: 'Error fetching wins' });
     }
 };

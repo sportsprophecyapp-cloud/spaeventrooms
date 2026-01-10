@@ -29,7 +29,7 @@ function RoomContent() {
     const roomId = params.roomId as string;
     const isSoccerRoom = roomId === 'soccer';
     const { t } = useLanguage();
-    
+
     const [selectedLeague, setSelectedLeague] = useState<string | null>(null);
     const { isAuthenticated } = useAuth();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -46,14 +46,14 @@ function RoomContent() {
     return (
         <div className={styles.container}>
             <header className={styles.minimalHeader}>
-                <h1 className={styles.arenaTitle}>{roomId.toUpperCase()} ARENA</h1>
+                <h1 className={styles.arenaTitle}>{(roomId || 'ARENA').toUpperCase()} ARENA</h1>
                 {/* ... other header elements */}
             </header>
 
             <main className={styles.dualLayout}>
                 <div className={styles.mainContent}>
                     <SponsorWidget roomId={roomId} />
-                    
+
                     <div className={styles.matchesWrapper}>
                         {isSoccerRoom ? (
                             <>

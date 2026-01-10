@@ -33,8 +33,6 @@ router.post('/vouchers/claim', authenticate, handleClaimVoucher);
 router.get('/draws/active', authenticate, handleGetActiveDraws);
 router.post('/draws/:id/pick-winner', authenticate, isAdmin, handlePickWinner);
 router.delete('/draws/:id', authenticate, isAdmin, handleDeleteDraw);
-router.get('/tickets', authenticate, handleGetUserTickets);
-
 router.post('/daily-login', authenticate, handleDailyLogin);
 router.post('/purchase', authenticate, purchaseCosmetic);
 router.post('/equip', authenticate, equipCosmetic);

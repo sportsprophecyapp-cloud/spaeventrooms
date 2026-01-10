@@ -47,6 +47,13 @@ const initDB = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
+            -- 5.1 Ensure prize_draws columns (Safety for existing tables)
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS title VARCHAR(100);
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS prize VARCHAR(255);
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS draw_date TIMESTAMP;
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS winner_id INTEGER REFERENCES users(id);
+
             -- 6. Sponsor Application & Review System (Consolidated v3.9)
             CREATE TABLE IF NOT EXISTS sponsor_applications (
                 id SERIAL PRIMARY KEY,
