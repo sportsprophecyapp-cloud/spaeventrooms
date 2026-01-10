@@ -22,11 +22,11 @@ export const resolveSoccerPredictions = async () => {
             const { id, user_id, prediction_data, score_home, score_away, total_points, total_tickets } = row;
             const pick = prediction_data.pick;
 
-            let actual: 'home' | 'draw' | 'away' = 'draw';
-            if (score_home > score_away) actual = 'home';
-            else if (score_away > score_home) actual = 'away';
+            let actualWinner: string = 'draw';
+            if (score_home > score_away) actualWinner = row.home_team;
+            else if (score_away > score_home) actualWinner = row.away_team;
 
-            const isCorrect = pick === actual;
+            const isCorrect = pick === actualWinner;
             const pointsEarned = isCorrect ? 100 : 0;
             const ticketsEarned = isCorrect ? 1 : 0; // NEW: +1 ticket for a correct call
             const resultStatus = isCorrect ? 'correct' : 'incorrect';
