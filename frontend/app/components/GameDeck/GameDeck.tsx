@@ -112,12 +112,14 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             if (isGone) {
                 // Card is gone - fly off screen and stay there
+                // We use mx for initial pull, but then force it to continue in the swipe direction
+                const finalXDir = mx > 0 ? 1 : -1;
                 return {
-                    x: (200 + window.innerWidth) * xDir,
-                    rot: xDir * 20,
+                    x: (300 + window.innerWidth) * finalXDir,
+                    rot: finalXDir * 45, // More dramatic rotation on exit
                     scale: 0.8,
                     opacity: 0,
-                    config: { tension: 200, friction: 20 }
+                    config: { tension: 250, friction: 30 }
                 };
             } else {
                 // Card is being dragged or at rest
@@ -177,7 +179,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                             x: springProps.x,
                             y: springProps.y,
                             opacity: springProps.opacity,
-                            display: isGone ? 'none' : 'flex'
+                            pointerEvents: isGone ? 'none' : 'auto' // Use pointerEvents instead of display:none to avoid jumpiness
                         }}
                     >
                         <animated.div {...bind(i)} style={{ transform: interpolate([springProps.rot, springProps.scale], trans) }}>

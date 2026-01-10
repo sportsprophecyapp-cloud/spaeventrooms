@@ -34,7 +34,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
         <div className={`${styles.card} ${match.isPulsing ? styles.pulsar : ''}`}>
             <div className={styles.teamsSection}>
                 <div className={styles.teams}>
-                    <div className={styles.teamCol}>
+                    <div className={`${styles.teamCol} ${styles.homeSide}`}>
                         <div className={styles.logoWrapper}>
                             {match.home_logo ? (
                                 <img
@@ -52,7 +52,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
                         <span className={styles.team}>{match.home_team}</span>
                     </div>
                     <span className={styles.vs}>VS</span>
-                    <div className={styles.teamCol}>
+                    <div className={`${styles.teamCol} ${styles.awaySide}`}>
                         <div className={styles.logoWrapper}>
                             {match.away_logo ? (
                                 <img

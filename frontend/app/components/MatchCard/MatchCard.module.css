@@ -1,24 +1,29 @@
 .card {
-    /* Glassmorphism background */
-    background: linear-gradient(165deg, rgba(30, 30, 45, 0.7) 0%, rgba(10, 10, 20, 0.9) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 32px;
-    padding: 2rem;
+    background: linear-gradient(135deg, rgba(20, 20, 35, 0.85) 0%, rgba(5, 5, 10, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    padding: 2.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    gap: 1.5rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 40px 100px -20px rgba(0, 0, 0, 1),
+        inset 0 1px 2px rgba(255, 255, 255, 0.05);
     position: relative;
     width: 100%;
     height: 100%;
-    box-shadow:
-        0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        inset 0 1px 1px rgba(255, 255, 255, 0.1);
     overflow: hidden;
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(0, 112, 243, 0.05), transparent 40%);
+    pointer-events: none;
 }
 
 .card::before {
@@ -53,16 +58,29 @@
 }
 
 .logoWrapper {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 20px;
-    padding: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-radius: 50% 50% 50% 50% / 10% 10% 90% 90%;
+    /* Crest shape */
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.homeSide .logoWrapper {
+    border-bottom: 3px solid #00d4ff;
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+}
+
+.awaySide .logoWrapper {
+    border-bottom: 3px solid #ff0055;
+    box-shadow: 0 10px 30px rgba(255, 0, 85, 0.1);
 }
 
 .teamLogo {
@@ -78,26 +96,48 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    font-weight: 800;
-    color: rgba(255, 255, 255, 0.2);
-    text-transform: uppercase;
+    font-size: 3rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .team {
-    font-size: 1.3rem;
-    font-weight: 800;
-    letter-spacing: -1px;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
     text-align: center;
     color: white;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    margin-top: 10px;
+    text-transform: uppercase;
 }
 
 .vs {
-    font-size: 0.7rem;
+    font-size: 1rem;
     font-weight: 900;
-    color: var(--accent);
-    opacity: 0.6;
+    color: #555;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 50%;
+    animation: vsPulse 2s infinite;
+}
+
+@keyframes vsPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+        color: #fff;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
 }
 
 .info {
@@ -209,15 +249,15 @@
 }
 
 .prizeTag {
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: #ffd700;
-    background: rgba(255, 215, 0, 0.1);
-    border: 1px solid rgba(255, 215, 0, 0.2);
-    padding: 6px 14px;
-    border-radius: 20px;
-    letter-spacing: 1px;
+    font-size: 0.85rem;
+    font-weight: 950;
+    color: #fff;
+    background: linear-gradient(90deg, #ff8c00, #ff0055);
+    padding: 10px 24px;
+    border-radius: 30px;
+    letter-spacing: 2px;
     text-transform: uppercase;
+    box-shadow: 0 10px 25px rgba(255, 0, 85, 0.3);
 }
 
 @keyframes blink {
