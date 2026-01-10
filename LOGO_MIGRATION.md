@@ -38,34 +38,23 @@ Once deployed, Render will automatically serve these files.
 ### Step C: Update Database
 Run the provided SQL script (`backend/src/scripts/update_logos.sql`) to link the teams to these new URLs.
 
-## 4. Team List & Filenames
+## 4. Current Status (Automated Migration)
+
+- **Database**: All teams have been updated to point to local paths (e.g., `https://www.sportsprophecyapp.com/logos/premier-league/arsenal.png`).
+- **Files**: An automated script attempted to download logos.
+    - **If you see a team initial (e.g., "A")**: The logo file is missing from the folder.
+    - **Action**: Download the logo manually and place it in the corresponding folder in `frontend/public/logos`.
+
+## 5. Team List & Filenames (Reference)
 
 ### Premier League (`/premier-league/`)
 | Team Name | Filename |
 | :--- | :--- |
 | Arsenal | `arsenal.png` |
-| Aston Villa | `aston-villa.png` |
-| Bournemouth | `bournemouth.png` |
-| Brentford | `brentford.png` |
-| Brighton | `brighton.png` |
-| Chelsea | `chelsea.png` |
-| Crystal Palace | `crystal-palace.png` |
-| Everton | `everton.png` |
-| Fulham | `fulham.png` |
-| Liverpool | `liverpool.png` |
-| Luton Town | `luton-town.png` |
-| Man City | `man-city.png` |
-| Man United | `man-united.png` |
-| Newcastle | `newcastle.png` |
-| Nottm Forest | `nottingham-forest.png` |
-| Sheffield Utd | `sheffield-united.png` |
-| Tottenham | `tottenham.png` |
-| West Ham | `west-ham.png` |
-| Wolves | `wolves.png` |
-| Burnley | `burnley.png` |
+| ... | ... |
 
-*(Repeat this pattern for other leagues: La Liga, Bundesliga, Serie A, Ligue 1, MLS)*
+*(Refer to `backend/src/scripts/update_logos_auto.sql` for the full list of mapped paths)*
 
-## 5. Testing
+## 6. Testing
 1.  **Direct URL Access**: Try opening a logo URL in your browser.
-2.  **App Verification**: Open the app and check the Game Deck. If a logo fails to load, it will fall back to the placeholder letter (e.g., "A" for Arsenal).
+2.  **App Verification**: Open the app and check the Game Deck. If a logo fails to load, it will fall back to the placeholder letter.
