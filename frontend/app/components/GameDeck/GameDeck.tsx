@@ -109,6 +109,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             // preventing the "bounce back" if direction jumps at the end of the gesture.
             const xDir = mx > 0 ? 1 : -1;
 
+            // CRITICAL FIX: Once gone, card MUST stay off-screen permanently
             const x = isGone ? (500 + window.innerWidth) * xDir : active ? mx : 0;
             const rot = mx / 15 + (isGone ? xDir * 20 * vx : 0);
             const scale = active ? 1.05 : 1;
@@ -118,10 +119,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 rot,
                 scale,
                 delay: undefined,
-                config: {
-                    friction: isGone ? 20 : 40,
-                    tension: active ? 800 : isGone ? 250 : 400
-                }
+                config: isGone
+                    ? { tension: 200, friction: 30 } // Smooth exit, no return
+                    : { tension: active ? 800 : 400, friction: 40 }
             };
         });
 
