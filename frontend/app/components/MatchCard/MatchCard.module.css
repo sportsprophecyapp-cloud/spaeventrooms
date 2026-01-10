@@ -85,11 +85,22 @@
     width: 100%;
 }
 
-.predictWrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+.predictBtn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.predictBtn:hover {
+    box-shadow: 0 0 15px var(--accent-glow);
+    transform: scale(1.05);
 }
 
 .swipeLabels {

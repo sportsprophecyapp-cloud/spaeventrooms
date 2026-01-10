@@ -62,10 +62,22 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
                     </div>
                 ) : canPredict ? (
                     <div className={styles.predictWrapper}>
-                        <div className={styles.swipeLabels}>
-                            <span>← Away</span>
-                            <span>Home →</span>
-                        </div>
+                        {onPredict ? (
+                            <button
+                                onClick={() => {
+                                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+                                    onPredict(match);
+                                }}
+                                className={styles.predictBtn}
+                            >
+                                Predict
+                            </button>
+                        ) : (
+                            <div className={styles.swipeLabels}>
+                                <span>← Away</span>
+                                <span>Home →</span>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     /* LOCK STATE: Game started or finished */

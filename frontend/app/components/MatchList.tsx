@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import MatchCard from './MatchCard';
+import MatchCard from './MatchCard/MatchCard';
 import { PredictionModal } from './PredictionModal';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
@@ -34,18 +34,18 @@ const MatchList: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+
     const { socket } = useSocket();
     const { isAuthenticated, token } = useAuth();
 
     const fetchMatches = async () => {
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            
+
             // 1. Fetch Matches
             const res = await fetch(`${apiUrl}/api/rooms/soccer/matches`);
             const data = await res.json();
-            
+
             // 2. Fetch User's Calls (if logged in)
             if (isAuthenticated && token) {
                 const callsRes = await fetch(`${apiUrl}/api/rooms/soccer/my-calls`, {
@@ -60,9 +60,9 @@ const MatchList: React.FC = () => {
             if (Array.isArray(data)) {
                 const grouped: Record<string, LeagueSection> = {};
                 const seenMatches = new Set();
-                
+
                 data.forEach((match: Match) => {
-                    const matchKey = `${match.home_team.substring(0,5)}-${match.away_team.substring(0,5)}-${match.start_time}`;
+                    const matchKey = `${match.home_team.substring(0, 5)}-${match.away_team.substring(0, 5)}-${match.start_time}`;
                     if (seenMatches.has(matchKey)) return;
                     seenMatches.add(matchKey);
 
@@ -129,8 +129,8 @@ const MatchList: React.FC = () => {
             ) : (
                 sections.map(section => (
                     <div key={section.title} className={styles.leagueBlock}>
-                        <div 
-                            className={styles.leagueHeader} 
+                        <div
+                            className={styles.leagueHeader}
                             onClick={() => toggleLeague(section.title)}
                         >
                             {section.logo && <img src={section.logo} alt="" className={styles.leagueLogo} />}
@@ -143,7 +143,7 @@ const MatchList: React.FC = () => {
                                 </span>
                             </div>
                         </div>
-                        
+
                         {expandedLeagues[section.title] && (
                             <div className={`${styles.matchGrid} animate-fade-in`}>
                                 {section.matches.map(match => (
