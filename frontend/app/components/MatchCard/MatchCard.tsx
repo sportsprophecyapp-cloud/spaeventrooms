@@ -35,12 +35,38 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
             <div className={styles.teamsSection}>
                 <div className={styles.teams}>
                     <div className={styles.teamCol}>
-                        {match.home_logo && <img src={match.home_logo} className={styles.teamLogo} alt="" />}
+                        <div className={styles.logoWrapper}>
+                            {match.home_logo ? (
+                                <img
+                                    src={match.home_logo}
+                                    className={styles.teamLogo}
+                                    alt={match.home_team}
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/logos/soccer-placeholder.png';
+                                    }}
+                                />
+                            ) : (
+                                <div className={styles.placeholderLogo}>{match.home_team?.[0]}</div>
+                            )}
+                        </div>
                         <span className={styles.team}>{match.home_team}</span>
                     </div>
                     <span className={styles.vs}>VS</span>
                     <div className={styles.teamCol}>
-                        {match.away_logo && <img src={match.away_logo} className={styles.teamLogo} alt="" />}
+                        <div className={styles.logoWrapper}>
+                            {match.away_logo ? (
+                                <img
+                                    src={match.away_logo}
+                                    className={styles.teamLogo}
+                                    alt={match.away_team}
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/logos/soccer-placeholder.png';
+                                    }}
+                                />
+                            ) : (
+                                <div className={styles.placeholderLogo}>{match.away_team?.[0]}</div>
+                            )}
+                        </div>
                         <span className={styles.team}>{match.away_team}</span>
                     </div>
                 </div>

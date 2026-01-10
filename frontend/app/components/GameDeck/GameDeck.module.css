@@ -1,20 +1,22 @@
 /* The Container holds the stack */
 .deckContainer {
     width: 100%;
-    /* Fill almost entire screen below header */
-    height: 90vh;
+    /* Fill available space but move content up */
+    height: 75vh;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* Move cards to top of container */
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    padding-top: 20px;
+    /* Slight gap from the 'Back' tab */
 }
 
 /* Each Card Wrapper */
 .deck {
     position: absolute;
-    width: 550px;
-    height: 650px;
+    width: 600px;
+    height: 700px;
     /* Larger for more immersive experience */
     display: flex;
     align-items: center;
@@ -38,9 +40,14 @@
 
 /* Mobile - Fill even more space */
 @media (max-width: 500px) {
-    .deck {
-        width: 96vw;
+    .deckContainer {
         height: 80vh;
+        padding-top: 10px;
+    }
+
+    .deck {
+        width: 94vw;
+        height: 75vh;
     }
 }
 
