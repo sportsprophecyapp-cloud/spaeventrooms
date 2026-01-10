@@ -23,7 +23,14 @@ interface GameDeckProps {
     leagueId: string;
 }
 
-const to = (i: number) => ({ x: 0, y: i * -4, scale: 1, rot: -10 + Math.random() * 20, opacity: 1, delay: i * 100 });
+const to = (i: number) => ({
+    x: 0,
+    y: 0, // Keep them all centered y, or slight tilt
+    scale: 1,
+    rot: -10 + Math.random() * 20,
+    opacity: 1,
+    delay: i * 100
+});
 const from = (_i: number) => ({ x: 0, rot: 0, scale: 1.5, y: -1000, opacity: 0 });
 const trans = (r: number, s: number) => `rotateZ(${r}deg) scale(${s})`;
 
@@ -66,7 +73,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [props, api] = useSprings(matches.length, i => ({
         ...to(i),
         from: from(i),
-        immediate: key => key === 'x' && gone.has(i) // Don't animate x if it's already gone on re-init
+        immediate: key => gone.has(i) // If gone, be immediate for all properties to stay off-screen
     }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
@@ -182,6 +189,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                             x: springProps.x,
                             y: springProps.y,
                             opacity: springProps.opacity,
+                            zIndex: matches.length - i, // Index 0 is on TOP
                             visibility: springProps.opacity.to(o => o === 0 && isGone ? 'hidden' : 'visible'),
                             pointerEvents: isGone ? 'none' : 'auto'
                         }}
