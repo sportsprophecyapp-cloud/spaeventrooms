@@ -63,7 +63,11 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         }
     }, [showCompletion, countdown, router]);
 
-    const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
+    const [props, api] = useSprings(matches.length, i => ({
+        ...to(i),
+        from: from(i),
+        immediate: key => key === 'x' && gone.has(i) // Don't animate x if it's already gone on re-init
+    }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
         // Trigger when user releases with enough velocity or distance
@@ -111,18 +115,16 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const isGone = gone.has(index);
 
             if (isGone) {
-                // Card is gone - fly off screen and stay there
-                // We use mx for initial pull, but then force it to continue in the swipe direction
                 const finalXDir = mx > 0 ? 1 : -1;
                 return {
-                    x: (300 + window.innerWidth) * finalXDir,
-                    rot: finalXDir * 45, // More dramatic rotation on exit
-                    scale: 0.8,
+                    x: (500 + window.innerWidth) * finalXDir, // Fly further out
+                    rot: finalXDir * 60, // Stronger rotation
+                    scale: 0.5, // Shrink more
                     opacity: 0,
-                    config: { tension: 250, friction: 30 }
+                    immediate: false,
+                    config: { tension: 200, friction: 30 }
                 };
             } else {
-                // Card is being dragged or at rest
                 const rot = mx / 15;
                 const scale = active ? 1.05 : 1;
                 return {
@@ -130,6 +132,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                     rot: active ? rot : 0,
                     scale,
                     opacity: 1,
+                    immediate: false,
                     config: { tension: active ? 800 : 500, friction: 50 }
                 };
             }
@@ -179,7 +182,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                             x: springProps.x,
                             y: springProps.y,
                             opacity: springProps.opacity,
-                            pointerEvents: isGone ? 'none' : 'auto' // Use pointerEvents instead of display:none to avoid jumpiness
+                            visibility: springProps.opacity.to(o => o === 0 && isGone ? 'hidden' : 'visible'),
+                            pointerEvents: isGone ? 'none' : 'auto'
                         }}
                     >
                         <animated.div {...bind(i)} style={{ transform: interpolate([springProps.rot, springProps.scale], trans) }}>
