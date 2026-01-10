@@ -28,10 +28,13 @@ export const getMatchesByLeague = async (req: Request, res: Response) => {
 
         const result = await query(`
             SELECT 
-                match_id as id, 
+                match_id, 
                 home_team, 
-                away_team, 
-                start_time, 
+                away_team,
+                home_logo,
+                away_logo,
+                start_time,
+                status,
                 league_logo
             FROM soccer_matches
             WHERE league = $1 AND status = 'scheduled'
