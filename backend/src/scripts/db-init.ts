@@ -147,6 +147,14 @@ const initDB = async () => {
                 claimed_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- 9. Centralized Team Logos
+            CREATE TABLE IF NOT EXISTS team_logos (
+                team_name VARCHAR(100) PRIMARY KEY,
+                logo_url TEXT NOT NULL,
+                is_verified BOOLEAN DEFAULT false,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
 

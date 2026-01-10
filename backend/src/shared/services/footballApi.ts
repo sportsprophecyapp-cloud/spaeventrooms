@@ -1,6 +1,5 @@
-import axios from 'axios';
 import { query } from '../database';
-import { getTeamLogo } from '../utils/teamLogos';
+import { LogoService } from './LogoService';
 
 // Configuration - Focused solely on Soccer for now
 const SPORTS = [
@@ -82,8 +81,8 @@ export const fetchLiveMatches = async () => {
                         if (m.completed) status = 'finished';
                         else if (new Date(m.commence_time) < new Date()) status = 'live';
 
-                        const home_logo = getTeamLogo(m.home_team);
-                        const away_logo = getTeamLogo(m.away_team);
+                        const home_logo = await LogoService.getLogo(m.home_team);
+                        const away_logo = await LogoService.getLogo(m.away_team);
 
                         await query(`
                             INSERT INTO soccer_matches (
