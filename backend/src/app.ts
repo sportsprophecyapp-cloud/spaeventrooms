@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './shared/auth/routes';
 import adminRoutes from './shared/admin/routes';
-// import badgeRoutes from './shared/badges/routes'; // REVERTED
+import badgeRoutes from './shared/badges/routes';
 import moderationRoutes from './shared/moderation/routes';
 import announcementRoutes from './shared/announcements/routes';
 import predictionRoutes from './shared/predictions/routes';
@@ -21,7 +21,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
-// app.use('/api/badges', badgeRoutes); // REVERTED
+app.use('/api/badges', badgeRoutes);
 app.use('/api/moderation', moderationRoutes);
 app.use('/api/rooms/soccer/matches', matchRoutes);
 app.use('/api/rooms/:roomId/announcements', announcementRoutes);

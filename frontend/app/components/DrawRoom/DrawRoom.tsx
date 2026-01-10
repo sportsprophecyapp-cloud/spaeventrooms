@@ -25,7 +25,10 @@ const DrawRoom = () => {
     const [winner, setWinner] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!token) return;
+        if (!token) {
+            router.push('/auth/login?redirect=/draw');
+            return;
+        }
 
         const fetchData = async () => {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

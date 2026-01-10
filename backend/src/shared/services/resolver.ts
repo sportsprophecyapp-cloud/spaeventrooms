@@ -46,9 +46,13 @@ export const resolveSoccerPredictions = async () => {
                     'UPDATE users SET total_points = $1, total_tickets = $2, current_level = $3 WHERE id = $4',
                     [newTotalPoints, newTotalTickets, newLevel, user_id]
                 );
-                
+
                 // Log the entry for future prize draws
                 await awardDrawEntry(user_id, 'accuracy', 'soccer');
+
+                // NEW: Trigger Milestone check
+                const { BadgeService } = require('../gamification/BadgeService');
+                await BadgeService.checkPredictionMilestones(user_id);
 
                 // Log the reward transaction
                 await query(

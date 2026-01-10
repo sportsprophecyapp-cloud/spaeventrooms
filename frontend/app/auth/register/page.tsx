@@ -10,7 +10,7 @@ const RegisterContent = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { login } = useAuth();
-    
+
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -27,7 +27,7 @@ const RegisterContent = () => {
             fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/public-profile/${refId}`)
                 .then(res => res.json())
                 .then(data => setRefName(data.username))
-                .catch(() => {});
+                .catch(() => { });
         }
     }, [searchParams]);
 
@@ -50,7 +50,7 @@ const RegisterContent = () => {
                     username: formData.username,
                     email: formData.email,
                     password: formData.password,
-                    referred_by: searchParams.get('ref')
+                    referralCode: searchParams.get('ref')
                 })
             });
 
@@ -73,7 +73,7 @@ const RegisterContent = () => {
             <div className={`${styles.card} glass`}>
                 <h1 className={styles.title}>Join the Arena</h1>
                 <p className={styles.subtitle}>Forecast. Compete. Win Status.</p>
-                
+
                 {refName && (
                     <div className={styles.refBadge}>
                         Invited by <span>{refName}</span>
@@ -83,54 +83,54 @@ const RegisterContent = () => {
                 <form onSubmit={handleRegister} className={styles.form}>
                     <div className={styles.inputGroup}>
                         <label htmlFor="username">Username</label>
-                        <input 
+                        <input
                             id="username"
                             name="username"
-                            type="text" 
+                            type="text"
                             autoComplete="username"
-                            required 
+                            required
                             placeholder="user_name"
                             value={formData.username}
-                            onChange={(e) => setFormData({...formData, username: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                         />
                     </div>
                     <div className={styles.inputGroup}>
                         <label htmlFor="email">Email</label>
-                        <input 
+                        <input
                             id="email"
                             name="email"
-                            type="email" 
+                            type="email"
                             autoComplete="email"
-                            required 
+                            required
                             placeholder="your@email.com"
                             value={formData.email}
-                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
                     </div>
                     <div className={styles.inputGroup}>
                         <label htmlFor="password">Password</label>
-                        <input 
+                        <input
                             id="password"
                             name="password"
-                            type="password" 
+                            type="password"
                             autoComplete="new-password"
-                            required 
+                            required
                             placeholder="••••••••"
                             value={formData.password}
-                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         />
                     </div>
                     <div className={styles.inputGroup}>
                         <label htmlFor="confirmPassword">Confirm Password</label>
-                        <input 
+                        <input
                             id="confirmPassword"
                             name="confirmPassword"
-                            type="password" 
+                            type="password"
                             autoComplete="new-password"
-                            required 
+                            required
                             placeholder="••••••••"
                             value={formData.confirmPassword}
-                            onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                         />
                     </div>
 

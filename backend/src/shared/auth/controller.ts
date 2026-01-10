@@ -5,6 +5,8 @@ import { Request, Response } from 'express';
 import { AuthRequest } from './middleware';
 import { sendEmail } from '../services/emailService';
 import { OAuth2Client } from 'google-auth-library';
+import { generateReferralCode } from '../utils/referralCode';
+import { ReferralService } from '../gamification/ReferralService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
@@ -13,10 +15,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 export const getMe = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
-        const result = await dbQuery(`SELECT id, email, username, permissions, token_balance, total_points, total_tickets, current_level FROM users WHERE id = $1`, [userId]);
+        const result = await dbQuery(`SELECT id, email, username, permissions, token_balance, total_points, total_tickets, current_level, referral_code FROM users WHERE id = $1`, [userId]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Session expired' });
+
         const user = result.rows[0];
-        res.json({ success: true, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level } });
+
+        // Lazy initialization of referral code for existing users
+        if (!user.referral_code) {
+            user.referral_code = generateReferralCode();
+            await dbQuery('UPDATE users SET referral_code = $1 WHERE id = $2', [user.referral_code, userId]);
+        }
+
+        res.json({ success: true, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level, referralCode: user.referral_code } });
     } catch (err) {
         res.status(500).json({ error: 'Verification failed' });
     }
@@ -39,13 +49,22 @@ export const login = async (req: Request, res: Response) => {
 
 export const register = async (req: Request, res: Response) => {
     try {
-        const { email, password, username } = req.body;
+        const { email, password, username, referralCode } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
+        const myReferralCode = generateReferralCode();
+
         const result = await dbQuery(
-            `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets, total_points, current_level) VALUES ($1, $2, $3, false, 150, 0, 0, 1) RETURNING *`,
-            [email.toLowerCase(), username, hashedPassword]
+            `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets, total_points, current_level, referral_code) 
+             VALUES ($1, $2, $3, false, 150, 0, 0, 1, $4) RETURNING *`,
+            [email.toLowerCase(), username, hashedPassword, myReferralCode]
         );
         const newUser = result.rows[0];
+
+        // Process referral if provided
+        if (referralCode) {
+            await ReferralService.processReferral(newUser.id, referralCode);
+        }
+
         const token = jwt.sign({ id: newUser.id, email: newUser.email, username: newUser.username, permissions: newUser.permissions }, JWT_SECRET, { expiresIn: '7d' });
         res.status(201).json({
             success: true,
@@ -57,7 +76,8 @@ export const register = async (req: Request, res: Response) => {
                 tokens: newUser.token_balance,
                 tickets: newUser.total_tickets,
                 points: newUser.total_points,
-                level: newUser.current_level
+                level: newUser.current_level,
+                referralCode: newUser.referral_code
             },
             token
         });
@@ -167,20 +187,32 @@ export const googleLogin = async (req: Request, res: Response) => {
             const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
             const username = (name || 'user').replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000) || `user${Math.floor(Math.random() * 10000)}`;
+            const myReferralCode = generateReferralCode();
 
             const newUser = await dbQuery(
-                `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets, total_points, current_level, permissions) 
-                 VALUES ($1, $2, $3, false, 150, 0, 0, 1, '["supporter"]') RETURNING *`,
-                [email, username, hashedPassword]
+                `INSERT INTO users (email, username, password_hash, is_muted, token_balance, total_tickets, total_points, current_level, permissions, referral_code) 
+                 VALUES ($1, $2, $3, false, 150, 0, 0, 1, '["supporter"]', $4) RETURNING *`,
+                [email, username, hashedPassword, myReferralCode]
             );
             user = newUser.rows[0];
+
+            // Processing referral for Google signups (if we can pass referralCode in the body)
+            const { referralCode } = req.body;
+            if (referralCode) {
+                await ReferralService.processReferral(user.id, referralCode);
+            }
         } else {
             user = result.rows[0];
+            // Lazy init referral code for existing Google users
+            if (!user.referral_code) {
+                user.referral_code = generateReferralCode();
+                await dbQuery('UPDATE users SET referral_code = $1 WHERE id = $2', [user.referral_code, user.id]);
+            }
         }
 
         const jwtToken = jwt.sign({ id: user.id, email: user.email, username: user.username, permissions: user.permissions }, JWT_SECRET, { expiresIn: '7d' });
 
-        res.json({ success: true, token: jwtToken, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level } });
+        res.json({ success: true, token: jwtToken, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level, referralCode: user.referral_code } });
 
     } catch (error) {
         console.error("Google Auth Error:", error);
@@ -204,5 +236,16 @@ export const resetPassword = async (req: Request, res: Response) => {
         res.json({ success: true, message: 'Password successfully reset' });
     } catch (err) {
         res.status(400).json({ error: 'Invalid or expired token' });
+    }
+};
+
+export const getPublicProfileByReferralCode = async (req: Request, res: Response) => {
+    const { referralCode } = req.params;
+    try {
+        const result = await dbQuery('SELECT username FROM users WHERE referral_code = $1', [referralCode.toUpperCase()]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+        res.json({ success: true, username: result.rows[0].username });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
     }
 };

@@ -14,7 +14,8 @@ import {
     handleGetUserTickets,
     handleDeleteDraw,
     handlePickWinner,
-    handleGetWins
+    handleGetWins,
+    handleGetAllBadges
 } from './controller';
 import { authenticate, isAdmin } from '../auth/middleware';
 
@@ -26,6 +27,7 @@ const router = Router();
 
 router.get('/me', authenticate, handleGetMe);
 router.get('/wins', authenticate, handleGetWins);
+router.get('/badges/all', handleGetAllBadges);
 router.get('/leaderboard', handleGetLeaderboard);
 router.get('/tickets', authenticate, handleGetTickets); // New Tickets Route
 router.get('/vouchers', authenticate, handleGetVouchers);

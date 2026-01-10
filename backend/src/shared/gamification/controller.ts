@@ -124,10 +124,64 @@ export const handleGetActiveDraws = async (req: Request, res: Response) => {
 export const handleDailyLogin = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
-        const result = await dbQuery(`UPDATE users SET token_balance = token_balance + 5 WHERE id = $1 RETURNING token_balance`, [userId]);
-        const newBalance = result.rows[0]?.token_balance || 0;
-        res.json({ success: true, streak: { current: 1, nextBonus: 7 }, tokenBalance: newBalance, reward: { amount: 5, message: 'Tokens received! (+5)' } });
+        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+        // 1. Get current streak info
+        const userResult = await dbQuery(
+            'SELECT consecutive_login_days, last_login_at, token_balance FROM users WHERE id = $1',
+            [userId]
+        );
+        const user = userResult.rows[0];
+
+        const now = new Date();
+        const lastLogin = user.last_login_at ? new Date(user.last_login_at) : null;
+
+        let newStreak = user.consecutive_login_days || 0;
+        let alreadyClaimed = false;
+
+        if (lastLogin) {
+            const diffTime = now.getTime() - lastLogin.getTime();
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+            if (diffDays < 1 && now.getDate() === lastLogin.getDate()) {
+                alreadyClaimed = true;
+            } else if (diffDays < 2) {
+                newStreak += 1;
+            } else {
+                newStreak = 1; // Reset streak
+            }
+        } else {
+            newStreak = 1; // First login
+        }
+
+        if (alreadyClaimed) {
+            return res.json({
+                success: true,
+                alreadyClaimed: true,
+                streak: newStreak,
+                message: 'Daily reward already claimed today!'
+            });
+        }
+
+        // 2. Update user streak and last login
+        const updateResult = await dbQuery(
+            'UPDATE users SET consecutive_login_days = $1, last_login_at = $2, token_balance = token_balance + 5 WHERE id = $3 RETURNING token_balance',
+            [newStreak, now, userId]
+        );
+
+        // 3. Check for streak milestones
+        const { BadgeService } = require('./BadgeService');
+        await BadgeService.checkStreakMilestones(userId, newStreak);
+
+        const newBalance = updateResult.rows[0]?.token_balance || 0;
+        res.json({
+            success: true,
+            streak: { current: newStreak, nextBonus: 7 },
+            tokenBalance: newBalance,
+            reward: { amount: 5, message: `Tokens received! Streak: ${newStreak} days` }
+        });
     } catch (error) {
+        console.error('Error in handleDailyLogin:', error);
         res.status(500).json({ success: false, error: 'Server error' });
     }
 };
@@ -182,3 +236,18 @@ export const handleGetUserTickets = handleGetTickets; // Alias for route consist
 export const purchaseCosmetic = async (req: AuthRequest, res: Response) => res.json({ success: false });
 export const equipCosmetic = async (req: AuthRequest, res: Response) => res.json({ success: false });
 export const shareRoom = async (req: AuthRequest, res: Response) => res.json({ success: false });
+
+export const handleGetAllBadges = async (req: Request, res: Response) => {
+    try {
+        const result = await dbQuery(
+            `SELECT id, name, description, requirement, asset_url 
+             FROM cosmetics 
+             WHERE type = 'badge' AND is_active = true 
+             ORDER BY created_at ASC`
+        );
+        res.json({ success: true, badges: result.rows });
+    } catch (error) {
+        console.error('Error fetching all badges:', error);
+        res.status(500).json({ success: false, error: 'Error fetching badges' });
+    }
+};

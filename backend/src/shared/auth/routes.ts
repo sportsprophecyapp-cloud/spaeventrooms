@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getMe, login, register, updateUsername, getProfile, resetAdminPassword, deleteAccount, forgotPassword, resetPassword, googleLogin } from './controller';
+import { getMe, login, register, updateUsername, getProfile, resetAdminPassword, deleteAccount, forgotPassword, resetPassword, googleLogin, getPublicProfileByReferralCode } from './controller';
 import { authenticate } from './middleware';
 
 const router = Router();
@@ -19,6 +19,7 @@ router.delete('/delete-account', authenticate, deleteAccount);
 
 // Profile route
 router.get('/profile/:userId', getProfile);
+router.get('/public-profile/:referralCode', getPublicProfileByReferralCode);
 
 // Temporary Admin route
 router.post('/reset-admin-password', resetAdminPassword);

@@ -89,6 +89,43 @@ const initDB = async () => {
                 prize_escrow_received BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- 8. Gamification & Cosmetics (Phase 9 & 10)
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code VARCHAR(20) UNIQUE;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by_id INTEGER REFERENCES users(id);
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS consecutive_login_days INTEGER DEFAULT 0;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
+            CREATE TABLE IF NOT EXISTS cosmetics (
+                id VARCHAR(50) PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                type VARCHAR(50) NOT NULL, -- 'avatar', 'frame', 'badge', 'background'
+                cost INTEGER NOT NULL DEFAULT 0,
+                asset_url TEXT,
+                description TEXT,
+                requirement TEXT, -- Description of how to earn it
+                is_active BOOLEAN DEFAULT true,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            ALTER TABLE cosmetics ADD COLUMN IF NOT EXISTS requirement TEXT;
+
+            CREATE TABLE IF NOT EXISTS user_cosmetics (
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                cosmetic_id VARCHAR(50) REFERENCES cosmetics(id) ON DELETE CASCADE,
+                is_equipped BOOLEAN DEFAULT false,
+                acquired_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, cosmetic_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS user_achievements (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                achievement_key VARCHAR(50) NOT NULL, -- e.g. 'picks_25', 'streak_7'
+                awarded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, achievement_key)
+            );
         `;
         await client.query(schema);
 
