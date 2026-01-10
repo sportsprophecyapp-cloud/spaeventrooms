@@ -47,6 +47,7 @@ const UserTray = () => {
                             <>
                                 <Link href="/admin/users" className={styles.item}>🛡️ Command Center</Link>
                                 <Link href="/admin/sponsors" className={styles.item}>💎 Sponsor Hub</Link>
+                                <Link href="/admin/feedback" className={styles.item}>💬 Testimonials</Link>
                                 <Link href="/admin/rooms/create" className={styles.item}>🪄 Arena Wizard</Link>
                             </>
                         )}

@@ -74,7 +74,7 @@ export const handleGetVouchers = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
         const result = await dbQuery(
-            `SELECT id, title, description, claimed_at IS NOT NULL as claimed FROM user_vouchers WHERE user_id = $1 ORDER BY created_at DESC`,
+            `SELECT id, draw_id, title, description, claimed_at IS NOT NULL as claimed FROM user_vouchers WHERE user_id = $1 ORDER BY created_at DESC`,
             [userId]
         );
         res.json({ success: true, vouchers: result.rows });

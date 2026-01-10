@@ -110,6 +110,17 @@ const initDB = async () => {
             );
 
             ALTER TABLE cosmetics ADD COLUMN IF NOT EXISTS requirement TEXT;
+            
+            CREATE TABLE IF NOT EXISTS winner_feedback (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                draw_id INTEGER REFERENCES prize_draws(id) ON DELETE CASCADE,
+                rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                comment TEXT,
+                is_shared BOOLEAN DEFAULT false,
+                shared_platform VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
             CREATE TABLE IF NOT EXISTS user_cosmetics (
                 user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -125,6 +136,16 @@ const initDB = async () => {
                 achievement_key VARCHAR(50) NOT NULL, -- e.g. 'picks_25', 'streak_7'
                 awarded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(user_id, achievement_key)
+            );
+
+            CREATE TABLE IF NOT EXISTS user_vouchers (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                draw_id INTEGER REFERENCES prize_draws(id) ON DELETE CASCADE,
+                title VARCHAR(100) NOT NULL,
+                description TEXT,
+                claimed_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `;
         await client.query(schema);

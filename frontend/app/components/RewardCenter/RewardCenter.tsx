@@ -3,9 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import styles from './RewardCenter.module.css';
 import { useAuth } from '@/app/context/AuthContext';
+import FeedbackModal from '../FeedbackModal/FeedbackModal';
 
 interface Voucher {
     id: string;
+    draw_id?: number;
     title: string;
     description: string;
     claimed: boolean;
@@ -14,6 +16,7 @@ interface Voucher {
 const RewardCenter = () => {
     const { token } = useAuth();
     const [vouchers, setVouchers] = useState<Voucher[]>([]);
+    const [showFeedbackFor, setShowFeedbackFor] = useState<{ drawId: number, prizeName: string } | null>(null);
 
     useEffect(() => {
         const fetchVouchers = async () => {
@@ -24,7 +27,7 @@ const RewardCenter = () => {
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    setVouchers(data.vouchers);
+                    setVouchers(data.vouchers || []);
                 }
             } catch (err) {
                 console.error('Error fetching vouchers:', err);
@@ -49,7 +52,12 @@ const RewardCenter = () => {
             });
 
             if (res.ok) {
+                const voucher = vouchers.find(v => v.id === voucherId);
                 setVouchers(vouchers.map(v => v.id === voucherId ? { ...v, claimed: true } : v));
+
+                if (voucher?.draw_id) {
+                    setShowFeedbackFor({ drawId: voucher.draw_id, prizeName: voucher.title });
+                }
             }
         } catch (err) {
             console.error('Error claiming voucher:', err);
@@ -58,6 +66,13 @@ const RewardCenter = () => {
 
     return (
         <section className={`${styles.rewardCenter} glass`}>
+            {showFeedbackFor && (
+                <FeedbackModal
+                    drawId={showFeedbackFor.drawId}
+                    prizeName={showFeedbackFor.prizeName}
+                    onClose={() => setShowFeedbackFor(null)}
+                />
+            )}
             <h3>REWARD CENTER</h3>
             <p>Your collection of claimed prize vouchers.</p>
             <div className={styles.voucherList}>

@@ -17,6 +17,7 @@ import {
     handleGetWins,
     handleGetAllBadges
 } from './controller';
+import { submitFeedback, trackShare, getAllFeedback } from './feedback.controller';
 import { authenticate, isAdmin } from '../auth/middleware';
 
 const router = Router();
@@ -39,5 +40,10 @@ router.post('/daily-login', authenticate, handleDailyLogin);
 router.post('/purchase', authenticate, purchaseCosmetic);
 router.post('/equip', authenticate, equipCosmetic);
 router.post('/share', authenticate, shareRoom);
+
+// FEEDBACK ENDPOINTS
+router.post('/feedback', authenticate, submitFeedback);
+router.post('/feedback/share', authenticate, trackShare);
+router.get('/feedback/all', authenticate, isAdmin, getAllFeedback);
 
 export default router;
