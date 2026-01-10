@@ -215,7 +215,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             )}
             <div className={styles.deckHeader}>
                 <p className={styles.cardsRemaining}>{remainingCards} {remainingCards === 1 ? 'Match' : 'Matches'} Left</p>
-                <p className={styles.swipeHint}>Swipe to Predict or Drag to Decide</p>
+                <p className={styles.swipeHint}>&larr; Swipe Left or Right &rarr;</p>
             </div>
 
             <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>

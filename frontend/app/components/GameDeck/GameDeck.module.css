@@ -210,20 +210,14 @@
     border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.homeRegion.hoveredRegion,
-.homeRegion:active {
-    background: linear-gradient(90deg, rgba(46, 213, 115, 0.1) 0%, rgba(46, 213, 115, 0.2) 100%);
-}
+
 
 .awayRegion {
     background: linear-gradient(90deg, rgba(255, 71, 87, 0.05) 0%, transparent 100%);
     border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.awayRegion.hoveredRegion,
-.awayRegion:active {
-    background: linear-gradient(90deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 71, 87, 0.1) 100%);
-}
+
 
 /* ===== LOGO ===== */
 .logoWrapper {
