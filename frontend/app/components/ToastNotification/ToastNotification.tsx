@@ -9,12 +9,22 @@ interface Announcement {
     timestamp: string;
 }
 
-const ToastNotification = () => {
+interface ToastProps {
+    message?: string | null;
+    type?: 'info' | 'error' | 'success';
+    onClose?: () => void;
+}
+
+const ToastNotification = ({ message: propMessage, type = 'info', onClose }: ToastProps = {}) => {
+    // Global Socket Logic (Only overrides if no propMessage is passed)
     const { socket } = useGlobalSocket();
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
 
+    // Only subscribe to socket if we are acting as the global toaster (no props)
+    const isGlobal = propMessage === undefined;
+
     useEffect(() => {
-        if (!socket) return;
+        if (!isGlobal || !socket) return;
 
         const handleAnnouncement = (data: Announcement) => {
             setAnnouncement(data);
@@ -28,14 +38,23 @@ const ToastNotification = () => {
         return () => {
             socket.off('global_announcement', handleAnnouncement);
         };
-    }, [socket]);
+    }, [socket, isGlobal]);
 
-    if (!announcement) return null;
+    // Derived state
+    const displayMessage = propMessage || announcement?.message;
+    const isError = type === 'error';
+
+    if (!displayMessage) return null;
 
     return (
-        <div className={styles.toast}>
-            <div className={styles.header}>📢 SITE ANNOUNCEMENT</div>
-            <div className={styles.body}>{announcement.message}</div>
+        <div className={`${styles.toast} ${isError ? styles.error : ''}`}>
+            {onClose && (
+                <button className={styles.closeBtn} onClick={onClose}>×</button>
+            )}
+            <div className={styles.header}>
+                {isError ? '⚠️ ERROR' : '📢 SITE ANNOUNCEMENT'}
+            </div>
+            <div className={styles.body}>{displayMessage}</div>
         </div>
     );
 };

@@ -35,7 +35,7 @@ interface ShopResponse {
 }
 
 export const useGamification = () => {
-    const { user, token } = useAuth();
+    const { user, token, refreshUser } = useAuth();
     const [tokenBalance, setTokenBalance] = useState<number>(0);
     const [streak, setStreak] = useState<Streak>({ current: 0, nextBonus: 7 });
     const [cosmetics, setCosmetics] = useState<Cosmetic[]>([]);
@@ -92,6 +92,7 @@ export const useGamification = () => {
             const data: DailyLoginResponse = await res.json();
             setTokenBalance(data.tokenBalance);
             setStreak(data.streak);
+            refreshUser(); // Sync global user state
             return data;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to claim reward');
@@ -125,6 +126,7 @@ export const useGamification = () => {
 
             const data = await res.json();
             setTokenBalance(data.newBalance);
+            refreshUser(); // Sync global user state
 
             // Refetch shop to update owned status
             await fetchGamificationData();
@@ -189,6 +191,7 @@ export const useGamification = () => {
             }
 
             setTokenBalance(data.newBalance);
+            refreshUser(); // Sync global user state
             return { success: true, message: data.message };
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Share failed';

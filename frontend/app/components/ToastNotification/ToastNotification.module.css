@@ -1,6 +1,7 @@
 .toast {
     position: fixed;
-    top: 80px; /* Below the main navbar */
+    top: 80px;
+    /* Below the main navbar */
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
@@ -10,7 +11,7 @@
     border-radius: 12px;
     padding: 1.5rem;
     z-index: 2000;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: slideInDown 0.5s ease-out;
 }
 
@@ -26,7 +27,36 @@
     font-size: 1rem;
 }
 
+
+.error {
+    background: #FF4444;
+    /* Bright Red */
+}
+
+.closeBtn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.closeBtn:hover {
+    opacity: 1;
+}
+
 @keyframes slideInDown {
-    from { top: -100px; opacity: 0; }
-    to { top: 80px; opacity: 1; }
+    from {
+        top: -100px;
+        opacity: 0;
+    }
+
+    to {
+        top: 80px;
+        opacity: 1;
+    }
 }
