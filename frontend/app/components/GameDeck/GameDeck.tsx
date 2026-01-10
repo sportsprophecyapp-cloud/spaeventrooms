@@ -90,6 +90,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             // OPTIMISTIC UPDATE: Remove card immediately
             setGone(prev => new Set(prev).add(index));
+            setMatches(matches.slice(1));
             setPredictionCount(prev => prev + 1);
             setDragX(0);
 
@@ -268,6 +269,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                         onClick={() => {
                                             if (!isGone) {
                                                 setGone(prev => new Set(prev).add(i));
+                                                setMatches(matches.slice(1));
                                                 setPredictionCount(prev => prev + 1);
                                                 api.start(idx => {
                                                     if (i !== idx) return;
@@ -353,6 +355,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                         onClick={() => {
                                             if (!isGone) {
                                                 setGone(prev => new Set(prev).add(i));
+                                                setMatches(matches.slice(1));
                                                 setPredictionCount(prev => prev + 1);
                                                 api.start(idx => {
                                                     if (i !== idx) return;
