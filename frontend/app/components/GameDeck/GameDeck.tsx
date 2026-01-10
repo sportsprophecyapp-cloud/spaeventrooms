@@ -31,6 +31,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
     const { token } = useAuth();
     const router = useRouter();
+    const [gone] = useState(() => new Set<number>());
     const [matches, setMatches] = useState<Match[]>([]);
     const [showCompletion, setShowCompletion] = useState(false);
     const [countdown, setCountdown] = useState(3);
@@ -65,12 +66,15 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const [props, api] = useSprings(matches.length, i => ({ ...to(i), from: from(i) }));
 
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
-        // Trigger swipe when velocity is high OR distance is far enough
+        // Trigger when user releases with enough velocity or distance
         const trigger = !active && (Math.abs(vx) > 0.2 || Math.abs(mx) > 100);
 
-        if (trigger) {
+        if (trigger && !gone.has(index)) {
             const match = matches[index];
             const pickSide = mx > 0 ? 'home' : 'away';
+
+            gone.add(index);
+            setPredictionCount(prev => prev + 1);
 
             // SAVE TO BACKEND
             const submitPrediction = async () => {
@@ -95,40 +99,39 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             };
             submitPrediction();
 
-            setPredictionCount(prev => prev + 1);
+            // Check if all cards are swiped
+            if (gone.size === matches.length) {
+                setTimeout(() => setShowCompletion(true), 600);
+            }
+        }
 
-            // FLY CARD OFF SCREEN
-            api.start(i => {
-                if (index !== i) return;
+        // Update animation for this card
+        api.start(i => {
+            if (index !== i) return;
+            const isGone = gone.has(index);
+
+            if (isGone) {
+                // Card is gone - fly off screen and stay there
                 return {
                     x: (200 + window.innerWidth) * xDir,
                     rot: xDir * 20,
-                    scale: 1,
+                    scale: 0.8,
+                    opacity: 0,
                     config: { tension: 200, friction: 20 }
                 };
-            });
-
-            // REMOVE CARD FROM ARRAY after animation
-            setTimeout(() => {
-                setMatches(prev => prev.filter((_, i) => i !== index));
-                if (matches.length === 1) {
-                    setShowCompletion(true);
-                }
-            }, 300);
-        } else {
-            // DURING DRAG - follow finger
-            api.start(i => {
-                if (index !== i) return;
+            } else {
+                // Card is being dragged or at rest
                 const rot = mx / 15;
                 const scale = active ? 1.05 : 1;
                 return {
                     x: active ? mx : 0,
                     rot: active ? rot : 0,
                     scale,
-                    config: { tension: 800, friction: 50 }
+                    opacity: 1,
+                    config: { tension: active ? 800 : 500, friction: 50 }
                 };
-            });
-        }
+            }
+        });
     });
 
     if (matches.length === 0) {
@@ -164,13 +167,25 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     return (
         <div className={styles.deckContainer}>
-            {props.map((springProps, i) => (
-                <animated.div className={styles.deck} key={i} style={{ x: springProps.x, y: springProps.y }}>
-                    <animated.div {...bind(i)} style={{ transform: interpolate([springProps.rot, springProps.scale], trans) }}>
-                        <MatchCard match={matches[i]} />
+            {props.map((springProps, i) => {
+                const isGone = gone.has(i);
+                return (
+                    <animated.div
+                        className={styles.deck}
+                        key={matches[i]?.match_id || i}
+                        style={{
+                            x: springProps.x,
+                            y: springProps.y,
+                            opacity: springProps.opacity,
+                            display: isGone ? 'none' : 'flex'
+                        }}
+                    >
+                        <animated.div {...bind(i)} style={{ transform: interpolate([springProps.rot, springProps.scale], trans) }}>
+                            <MatchCard match={matches[i]} />
+                        </animated.div>
                     </animated.div>
-                </animated.div>
-            ))}
+                );
+            })}
         </div>
     );
 };

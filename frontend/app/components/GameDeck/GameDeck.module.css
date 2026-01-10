@@ -1,29 +1,27 @@
 /* The Container holds the stack */
 .deckContainer {
     width: 100%;
-    /* Increased from 70vh to fill more screen - Tinder-style */
-    height: 85vh;
+    /* Fill almost entire screen below header */
+    height: 90vh;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
-    /* Prevent cards flying off screen triggering scrollbars */
 }
 
 /* Each Card Wrapper */
 .deck {
     position: absolute;
-    width: 500px;
-    height: 600px;
-    /* Increased for more immersive experience */
+    width: 550px;
+    height: 650px;
+    /* Larger for more immersive experience */
     display: flex;
     align-items: center;
     justify-content: center;
     will-change: transform;
     cursor: grab;
     touch-action: none;
-    /* Crucial for touch gestures */
 }
 
 .deck:active {
@@ -38,11 +36,11 @@
     font-size: 1.2rem;
 }
 
-/* Mobile Tweak - Fill even more space on mobile */
+/* Mobile - Fill even more space */
 @media (max-width: 500px) {
     .deck {
-        width: 95vw;
-        height: 75vh;
+        width: 96vw;
+        height: 80vh;
     }
 }
 
