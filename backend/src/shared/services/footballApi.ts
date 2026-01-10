@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { query } from '../database';
-// import { injectMockMatches } from './mockFootballService'; // REMOVED
+import { getTeamLogo } from '../utils/teamLogos';
 
 // Configuration - Focused solely on Soccer for now
 const SPORTS = [
@@ -82,8 +82,8 @@ export const fetchLiveMatches = async () => {
                         if (m.completed) status = 'finished';
                         else if (new Date(m.commence_time) < new Date()) status = 'live';
 
-                        const home_logo = `https://media.api-sports.io/football/teams/${m.home_team.replace(/\s+/g, '').toLowerCase()}.png`; // Heuristic or fallback
-                        const away_logo = `https://media.api-sports.io/football/teams/${m.away_team.replace(/\s+/g, '').toLowerCase()}.png`;
+                        const home_logo = getTeamLogo(m.home_team);
+                        const away_logo = getTeamLogo(m.away_team);
 
                         await query(`
                             INSERT INTO soccer_matches (

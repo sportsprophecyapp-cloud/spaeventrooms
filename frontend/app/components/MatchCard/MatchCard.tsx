@@ -36,36 +36,37 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
                 <div className={styles.teams}>
                     <div className={`${styles.teamCol} ${styles.homeSide}`}>
                         <div className={styles.logoWrapper}>
-                            {match.home_logo ? (
+                            {match.home_logo && !match.home_logo.includes('.toLowerCase()') ? (
                                 <img
                                     src={match.home_logo}
                                     className={styles.teamLogo}
                                     alt={match.home_team}
                                     onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/logos/soccer-placeholder.png';
+                                        // If primary fails, use a high-quality initials-based generator
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                        (e.target as HTMLImageElement).parentElement?.classList.add(styles.showPlaceholder);
                                     }}
                                 />
-                            ) : (
-                                <div className={styles.placeholderLogo}>{match.home_team?.[0]}</div>
-                            )}
+                            ) : null}
+                            <div className={styles.placeholderLogo}>{match.home_team?.[0]}</div>
                         </div>
                         <span className={styles.team}>{match.home_team}</span>
                     </div>
                     <span className={styles.vs}>VS</span>
                     <div className={`${styles.teamCol} ${styles.awaySide}`}>
                         <div className={styles.logoWrapper}>
-                            {match.away_logo ? (
+                            {match.away_logo && !match.away_logo.includes('.toLowerCase()') ? (
                                 <img
                                     src={match.away_logo}
                                     className={styles.teamLogo}
                                     alt={match.away_team}
                                     onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/logos/soccer-placeholder.png';
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                        (e.target as HTMLImageElement).parentElement?.classList.add(styles.showPlaceholder);
                                     }}
                                 />
-                            ) : (
-                                <div className={styles.placeholderLogo}>{match.away_team?.[0]}</div>
-                            )}
+                            ) : null}
+                            <div className={styles.placeholderLogo}>{match.away_team?.[0]}</div>
                         </div>
                         <span className={styles.team}>{match.away_team}</span>
                     </div>
