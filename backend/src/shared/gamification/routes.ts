@@ -11,6 +11,7 @@ import {
     handleGetVouchers,
     handleClaimVoucher,
     handleGetActiveDraws,
+    handleEnterDraw,
     handleGetUserTickets,
     handleDeleteDraw,
     handlePickWinner,
