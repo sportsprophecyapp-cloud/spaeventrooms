@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const verifySession = async () => {
             if (savedToken) {
                 try {
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.sportsprophecyapp.com';
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
                     const res = await fetch(`${apiUrl}/api/auth/me`, {
                         headers: { 'Authorization': `Bearer ${savedToken}` }
                     });
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const refreshUser = async () => {
         if (!token) return;
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
             const res = await fetch(`${apiUrl}/api/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });

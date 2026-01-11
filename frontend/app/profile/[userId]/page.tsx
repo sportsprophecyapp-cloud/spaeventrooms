@@ -67,7 +67,7 @@ const ProfilePage = () => {
 
         const fetchProfileData = async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
                 const res = await fetch(`${apiUrl}/api/auth/profile/${userId}`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (res.ok) {
                     const data = await res.json();
@@ -81,7 +81,7 @@ const ProfilePage = () => {
 
         const fetchBadges = async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
                 // 1. Fetch all possible badges
                 const allRes = await fetch(`${apiUrl}/api/gamification/badges/all`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if (allRes.ok) {
@@ -172,7 +172,7 @@ const ProfilePage = () => {
                                 onClick={() => {
                                     const url = prompt('Enter image URL for your custom avatar:');
                                     if (url) {
-                                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
                                         fetch(`${apiUrl}/api/auth/upload-avatar`, {
                                             method: 'POST',
                                             headers: {

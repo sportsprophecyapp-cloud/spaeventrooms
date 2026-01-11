@@ -43,6 +43,7 @@ router.post('/draws/:id/pick-winner', authenticate, isAdmin, handlePickWinner);
 router.patch('/draws/:id', authenticate, isAdmin, handleUpdateDraw);
 router.delete('/draws/:id', authenticate, isAdmin, handleDeleteDraw);
 router.post('/daily-login', authenticate, handleDailyLogin);
+router.get('/shop', authenticate, getShop);
 router.post('/purchase', authenticate, purchaseCosmetic);
 router.post('/equip', authenticate, equipCosmetic);
 router.post('/share', authenticate, shareRoom);

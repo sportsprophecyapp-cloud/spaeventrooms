@@ -45,7 +45,7 @@ export const useGamification = () => {
     const ticketBalance = user?.tickets ?? 0;
     const streak = { current: user?.points ?? 0, nextBonus: 7 }; // TBD: Backend doesn't return full streak obj yet
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
 
     // Fetch user's gamification data
     const fetchGamificationData = useCallback(async () => {
