@@ -265,7 +265,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                         className={`${styles.teamRegion} ${styles.homeRegion}`}
                                     >
                                         <div className={styles.logoWrapper}>
-                                            {match?.home_logo && !match.home_logo.includes('.toLowerCase()') ? (
+                                            {match?.home_logo ? (
                                                 <img
                                                     src={match.home_logo}
                                                     alt={match.home_team}
@@ -275,13 +275,11 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                                         e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex;');
                                                     }}
                                                 />
-                                            ) : null}
-                                            <div
-                                                className={styles.placeholderLogo}
-                                                style={{ display: !match?.home_logo || match.home_logo.includes('.toLowerCase()') ? 'flex' : 'none' }}
-                                            >
-                                                {match?.home_team?.charAt(0) || '?'}
-                                            </div>
+                                            ) : (
+                                                <div className={styles.placeholderLogo}>
+                                                    {match?.home_team?.charAt(0) || '?'}
+                                                </div>
+                                            )}
                                         </div>
                                         <p className={styles.teamName}>{match?.home_team}</p>
                                         <p className={styles.pickLabel}>PICK</p>
@@ -297,7 +295,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                         className={`${styles.teamRegion} ${styles.awayRegion}`}
                                     >
                                         <div className={styles.logoWrapper}>
-                                            {match?.away_logo && !match.away_logo.includes('.toLowerCase()') ? (
+                                            {match?.away_logo ? (
                                                 <img
                                                     src={match.away_logo}
                                                     alt={match.away_team}
@@ -307,13 +305,11 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                                         e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex;');
                                                     }}
                                                 />
-                                            ) : null}
-                                            <div
-                                                className={styles.placeholderLogo}
-                                                style={{ display: !match?.away_logo || match.away_logo.includes('.toLowerCase()') ? 'flex' : 'none' }}
-                                            >
-                                                {match?.away_team?.charAt(0) || '?'}
-                                            </div>
+                                            ) : (
+                                                <div className={styles.placeholderLogo}>
+                                                    {match?.away_team?.charAt(0) || '?'}
+                                                </div>
+                                            )}
                                         </div>
                                         <p className={styles.teamName}>{match?.away_team}</p>
                                         <p className={styles.pickLabel}>PICK</p>

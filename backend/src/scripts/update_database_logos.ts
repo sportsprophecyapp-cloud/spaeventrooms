@@ -133,7 +133,7 @@ const updateDatabase = async () => {
             }
 
             if (foundFilename) {
-                const publicUrl = `https://www.sportsprophecyapp.com/logos/${leagueSlug}/${foundFilename}`;
+                const publicUrl = `/logos/${leagueSlug}/${foundFilename}`;
 
                 await client.query(`
                     UPDATE soccer_matches 

@@ -20,7 +20,8 @@ export const submitApplication = async (req: Request, res: Response) => {
         } = req.body;
 
         if (!brand_name || !contact_email || !prize_description) {
-            return res.status(400).json({ success: false, error: 'Incomplete campaign details.' });
+            console.error('[VALIDATION FAILED] Missing fields:', { brand_name: !!brand_name, contact_email: !!contact_email, prize_description: !!prize_description });
+            return res.status(400).json({ success: false, error: 'Incomplete campaign details.', missing: { brand_name: !brand_name, contact_email: !contact_email, prize_description: !prize_description } });
         }
 
         const result = await dbQuery(
