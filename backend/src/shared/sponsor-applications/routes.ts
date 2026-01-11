@@ -8,7 +8,9 @@ import {
     markPaymentPaid,
     getActiveSponsors,
     updateApplication,
-    updateSponsor
+    updateSponsor,
+    deleteApplication,
+    deleteSponsor
 } from './controller';
 import { authenticate, isAdmin } from '../auth/middleware';
 
@@ -22,10 +24,12 @@ router.get('/active', getActiveSponsors);
 router.get('/', authenticate, isAdmin, getApplications);
 router.post('/:appId/approve', authenticate, isAdmin, approveApplication);
 router.patch('/:id', authenticate, isAdmin, updateApplication);
+router.delete('/:id', authenticate, isAdmin, deleteApplication);
 
 // Sponsor Placements
 router.get('/placements', authenticate, isAdmin, getActiveSponsors);
 router.patch('/placements/:id', authenticate, isAdmin, updateSponsor);
+router.delete('/placements/:id', authenticate, isAdmin, deleteSponsor);
 // NEW: Instant Deploy
 router.get('/all', authenticate, isAdmin, getAllSponsors);
 router.post('/:sponsorId/invoice', authenticate, isAdmin, generateInvoice);

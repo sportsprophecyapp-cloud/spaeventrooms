@@ -143,5 +143,27 @@ export const updateSponsor = async (req: AuthRequest, res: Response) => {
     } catch (err) { res.status(500).json({ error: 'Update failed' }); }
 };
 
+export const deleteApplication = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        await dbQuery('DELETE FROM sponsor_applications WHERE id = $1', [id]);
+        res.json({ success: true, message: 'Application removed.' });
+    } catch (err) {
+        console.error('Delete application failed:', err);
+        res.status(500).json({ error: 'Delete failed' });
+    }
+};
+
+export const deleteSponsor = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        await dbQuery('DELETE FROM room_sponsors WHERE id = $1', [id]);
+        res.json({ success: true, message: 'Placement removed.' });
+    } catch (err) {
+        console.error('Delete placement failed:', err);
+        res.status(500).json({ error: 'Delete failed' });
+    }
+};
+
 export const generateInvoice = async (req: Request, res: Response) => res.json({ success: true });
 export const markPaymentPaid = async (req: Request, res: Response) => res.json({ success: true });

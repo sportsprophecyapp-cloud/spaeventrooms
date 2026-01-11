@@ -65,6 +65,32 @@ const AdminSponsorsPage = () => {
         }
     };
 
+    const handleDeleteApplication = async (id: number) => {
+        if (!confirm('Permanently delete this application?')) return;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/api/sponsor-applications/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            alert('Application deleted.');
+            fetchData();
+        }
+    };
+
+    const handleDeleteSponsor = async (id: number) => {
+        if (!confirm('Permanently remove this live placement?')) return;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/api/sponsor-applications/placements/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            alert('Placement removed.');
+            fetchData();
+        }
+    };
+
     const handleDeleteDraw = async (id: number) => {
         if (!confirm('Permanently remove this prize draw?')) return;
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -145,6 +171,7 @@ const AdminSponsorsPage = () => {
                                 <div className={styles.cardActions}>
                                     <button onClick={() => handleApprove(app.id)} className={styles.approveBtn}>APPROVE & GO LIVE</button>
                                     <button className={styles.contactBtn} onClick={() => window.location.href = `mailto:${app.contact_email}`}>CONTACT SPONSOR</button>
+                                    <button onClick={() => handleDeleteApplication(app.id)} className={styles.deleteBtn}>DELETE</button>
                                 </div>
                             </div>
                         ))}
@@ -199,6 +226,7 @@ const AdminSponsorsPage = () => {
                                         <div className={styles.cardActions}>
                                             <button onClick={() => { setEditingId(sp.id); setEditData(sp); }} className={styles.pickWinnerBtn}>EDIT</button>
                                             <button className={styles.contactBtn} onClick={() => window.location.href = sp.website_url}>VISIT SITE</button>
+                                            <button onClick={() => handleDeleteSponsor(sp.id)} className={styles.deleteBtn}>DELETE</button>
                                         </div>
                                     </>
                                 )}
