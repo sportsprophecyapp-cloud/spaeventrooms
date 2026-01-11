@@ -132,13 +132,13 @@ export const handleGetActiveDraws = async (req: Request, res: Response) => {
             SELECT 
                 d.*,
                 COUNT(e.id) as entry_count,
-                rs.name as sponsor_name,
+                rs.sponsor_name as sponsor_name,
                 rs.logo_url as sponsor_logo
             FROM prize_draws d
             LEFT JOIN prize_draw_entries e ON d.id = e.draw_id
             LEFT JOIN room_sponsors rs ON d.sponsor_id = rs.id
             WHERE d.status = 'active'
-            GROUP BY d.id, rs.name, rs.logo_url
+            GROUP BY d.id, rs.sponsor_name, rs.logo_url
             ORDER BY d.created_at DESC
         `);
         res.json({ success: true, draws: result.rows });
@@ -427,7 +427,7 @@ export const handleGetRecentWinners = async (req: Request, res: Response) => {
                 d.title as draw_title,
                 d.prize,
                 d.draw_date,
-                rs.name as sponsor_name
+                rs.sponsor_name as sponsor_name
             FROM prize_draws d
             JOIN users u ON d.winner_id = u.id
             LEFT JOIN room_sponsors rs ON d.sponsor_id = rs.id
