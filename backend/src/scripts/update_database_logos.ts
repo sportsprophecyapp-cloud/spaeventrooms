@@ -13,16 +13,20 @@ const leagueMappings: { [key: string]: string } = {
 
 const manualMappings: { [key: string]: string } = {
     // Premier League
-    'Brighton and Hove Albion': 'brighton',
-    'Leicester City': 'leicester-city',
-    'Ipswich Town': 'ipswich-town',
-    'Nottm Forest': 'nottingham-forest',
-    'Sheffield Utd': 'sheffield-united',
-    'Luton Town': 'luton-town',
+    'Manchester United': 'man-united',
+    'Manchester City': 'man-city',
+    'Aston Villa': 'aston-villa',
     'Wolverhampton Wanderers': 'wolves',
     'West Ham United': 'west-ham',
     'Newcastle United': 'newcastle',
     'Tottenham Hotspur': 'tottenham',
+    'Brighton': 'brighton',
+    'Brighton and Hove Albion': 'brighton',
+    'Leicester City': 'leicester-city',
+    'Ipswich Town': 'ipswich-town',
+    'Nottingham Forest': 'nottingham-forest',
+    'Sheffield Utd': 'sheffield-united',
+    'Luton Town': 'luton-town',
 
     // La Liga
     'CA Osasuna': 'osasuna',
@@ -84,7 +88,7 @@ const toKebabCase = (str: string) => {
         .replace(/(^-|-$)/g, '');
 };
 
-const updateDatabase = async () => {
+export const updateDatabaseLogos = async () => {
     const client = await pool.connect();
 
     try {
@@ -166,4 +170,7 @@ const updateDatabase = async () => {
     }
 };
 
-updateDatabase();
+// If running directly
+if (require.main === module) {
+    updateDatabaseLogos();
+}

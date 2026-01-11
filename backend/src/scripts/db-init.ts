@@ -1,4 +1,5 @@
 import pool from '../shared/database';
+import { updateDatabaseLogos } from './update_database_logos';
 
 const initDB = async () => {
     const client = await pool.connect();
@@ -177,6 +178,10 @@ const initDB = async () => {
         `);
 
         console.log('✅ DB Initialized: Granular permissions system is now active.');
+
+        // 11. Sync Team Logos
+        await updateDatabaseLogos();
+
     } catch (err) {
         console.error('❌ DB sync failed:', err);
     } finally {
