@@ -60,7 +60,10 @@ const SponsorApplyPage = () => {
             if (res.ok) {
                 setSubmitted(true);
             } else {
-                alert('Submission failed. Please try again.');
+                const data = await res.json();
+                const errorMsg = data.error || 'Submission failed. Please try again.';
+                const missingFields = data.missing ? Object.entries(data.missing).filter(([_, v]) => v).map(([k]) => k).join(', ') : '';
+                alert(`${errorMsg}${missingFields ? ` Missing: ${missingFields}` : ''}`);
             }
         } catch (err) {
             console.error('Submission error:', err);
