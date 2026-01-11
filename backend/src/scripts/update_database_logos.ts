@@ -67,6 +67,7 @@ const manualMappings: { [key: string]: string } = {
     'Heidenheim': 'heidenheim',
     'SC Freiburg': 'freiburg',
     'VfB Stuttgart': 'stuttgart',
+    'VfL Wolfsburg': 'wolfsburg',
     'VfL Bochum 1848': 'bochum',
     'VfL Bochum': 'bochum',
     'FC St. Pauli': 'st-pauli',

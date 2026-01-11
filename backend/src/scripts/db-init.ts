@@ -75,6 +75,29 @@ const initDB = async () => {
                 reviewed_by INTEGER REFERENCES users(id)
             );
 
+            -- 6.1 Ensure sponsor_applications columns (Schema Evolution for v4.7)
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS brand_name VARCHAR(100);
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS arena_target VARCHAR(50) DEFAULT 'soccer';
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS frequency VARCHAR(50) DEFAULT 'monthly';
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_quantity INTEGER DEFAULT 1;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_description TEXT;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_image_url TEXT;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS creative_config JSONB;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS agreed_to_terms BOOLEAN DEFAULT FALSE;
+
+            -- 6.2 Data Migration: Map old fields to new fields if necessary
+            UPDATE sponsor_applications SET brand_name = company_name WHERE brand_name IS NULL AND company_name IS NOT NULL;
+            UPDATE sponsor_applications SET prize_description = product_description WHERE prize_description IS NULL AND product_description IS NOT NULL;
+
+            -- 6.3 Cleanup: Ensure defaults for NOT NULL fields (after migration)
+            UPDATE sponsor_applications SET brand_name = 'Missing Brand' WHERE brand_name IS NULL;
+            UPDATE sponsor_applications SET prize_description = 'Missing Description' WHERE prize_description IS NULL;
+
+            -- 6.4 Apply NOT NULL constraints
+            ALTER TABLE sponsor_applications ALTER COLUMN brand_name SET NOT NULL;
+            ALTER TABLE sponsor_applications ALTER COLUMN arena_target SET NOT NULL;
+            ALTER TABLE sponsor_applications ALTER COLUMN prize_description SET NOT NULL;
+
             -- 7. Room Sponsors (Live Placements)
             CREATE TABLE IF NOT EXISTS room_sponsors (
                 id SERIAL PRIMARY KEY,
