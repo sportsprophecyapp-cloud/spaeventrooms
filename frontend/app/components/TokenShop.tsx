@@ -10,7 +10,7 @@ interface TokenShopProps {
 }
 
 export default function TokenShop({ onClose }: TokenShopProps) {
-    const { cosmetics, tokenBalance, purchaseCosmetic, loading } = useGamification();
+    const { cosmetics, tokenBalance, purchaseCosmetic, equipCosmetic, loading } = useGamification();
     const { user } = useAuth();
     const [purchasing, setPurchasing] = useState<number | null>(null);
     const [previewItem, setPreviewItem] = useState<any>(null);
@@ -31,12 +31,24 @@ export default function TokenShop({ onClose }: TokenShopProps) {
 
         if (success) {
             setMessage({ type: 'success', text: 'Prophecy Gear Acquired!' });
+            // AUTO EQUIP
+            await equipCosmetic(cosmeticId, '');
         } else {
             setMessage({ type: 'error', text: 'Acquisition Failed. Try again.' });
         }
 
         setTimeout(() => setMessage(null), 3000);
         setPurchasing(null);
+    };
+
+    const handleEquip = async (cosmeticId: number) => {
+        const success = await equipCosmetic(cosmeticId, '');
+        if (success) {
+            setMessage({ type: 'success', text: 'Gear Equipped!' });
+        } else {
+            setMessage({ type: 'error', text: 'Equip failed.' });
+        }
+        setTimeout(() => setMessage(null), 3000);
     };
 
     return (
@@ -50,8 +62,8 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                     <div className={styles.previewSection}>
                         <h2 className={styles.title}>Cosmetic Lab</h2>
                         <div className={styles.previewContainer}>
-                            <div className={styles.avatarWrapper} style={{ 
-                                borderColor: previewItem?.type === 'frame' ? 'var(--accent)' : 'var(--glass-border)' 
+                            <div className={styles.avatarWrapper} style={{
+                                borderColor: previewItem?.type === 'frame' ? 'var(--accent)' : 'var(--glass-border)'
                             }}>
                                 <div className={styles.previewAvatar}>
                                     {displayInitial}
@@ -62,7 +74,7 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                                 {previewItem ? `PREVIEWING: ${previewItem.name}` : 'Select gear to try on'}
                             </span>
                         </div>
-                        
+
                         <div className={styles.balance}>
                             <span className={styles.balanceLabel}>YOUR TOKENS</span>
                             <span className={styles.balanceAmount}>{tokenBalance.toLocaleString()}</span>
@@ -76,8 +88,8 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                                 <div className={styles.loading}>Accessing Gear...</div>
                             ) : (
                                 cosmetics.map((item) => (
-                                    <div 
-                                        key={item.id} 
+                                    <div
+                                        key={item.id}
                                         className={`${styles.card} ${previewItem?.id === item.id ? styles.activePreview : ''}`}
                                         onClick={() => setPreviewItem(item)}
                                     >
@@ -92,7 +104,15 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                                             <div className={styles.cardFooter}>
                                                 <span className={styles.cost}>{item.cost} PTS</span>
                                                 {item.owned ? (
-                                                    <span className={styles.ownedBadge}>OWNED</span>
+                                                    <button
+                                                        className={`${styles.buyBtn} ${styles.equipBtn}`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEquip(item.id);
+                                                        }}
+                                                    >
+                                                        EQUIP
+                                                    </button>
                                                 ) : (
                                                     <button
                                                         className={styles.buyBtn}

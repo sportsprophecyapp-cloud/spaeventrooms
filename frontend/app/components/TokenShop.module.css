@@ -145,7 +145,7 @@
 }
 
 .card:hover {
-    border-color: rgba(255,255,255,0.2);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .activePreview {
@@ -195,6 +195,15 @@
     color: var(--success);
 }
 
+.equipBtn {
+    background: #7928ca;
+    box-shadow: 0 4px 14px rgba(121, 40, 202, 0.4);
+}
+
+.equipBtn:hover {
+    background: #9d4edd;
+}
+
 .toast {
     position: absolute;
     bottom: 2rem;
@@ -205,11 +214,27 @@
     animation: slideUp 0.3s ease-out;
 }
 
-.success { background: var(--success); color: black; }
-.error { background: var(--error); color: white; }
+.success {
+    background: var(--success);
+    color: black;
+}
+
+.error {
+    background: var(--error);
+    color: white;
+}
 
 @media (max-width: 800px) {
-    .layout { grid-template-columns: 1fr; }
-    .previewSection { border-right: none; border-bottom: 1px solid var(--glass-border); }
-    .modal { height: 95vh; }
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .previewSection {
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .modal {
+        height: 95vh;
+    }
 }

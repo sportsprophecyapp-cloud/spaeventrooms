@@ -13,6 +13,10 @@ interface User {
     tickets: number;
     points: number;
     level: number;
+    equipped?: {
+        avatar?: string;
+        frame?: string;
+    };
     role?: string;
 }
 

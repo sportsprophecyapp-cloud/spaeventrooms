@@ -38,8 +38,19 @@ const UserTray = () => {
                     <span className={styles.icon}>🎫</span>
                     <span className={styles.value}>{user.tickets ?? 0}</span>
                 </div>
-                <div className={styles.avatar}>
-                    {user.username?.substring(0, 2).toUpperCase()}
+                <div className={`${styles.avatarWrapper} ${user.equipped?.frame ? styles.hasFrame : ''}`}>
+                    {user.equipped?.frame && (
+                        <div className={styles.frameOverlay}>
+                            <img src={user.equipped.frame} alt="Frame" />
+                        </div>
+                    )}
+                    <div className={styles.avatar}>
+                        {user.equipped?.avatar ? (
+                            <img src={user.equipped.avatar} alt={user.username} className={styles.avatarImg} />
+                        ) : (
+                            user.username?.substring(0, 2).toUpperCase()
+                        )}
+                    </div>
                 </div>
             </div>
 

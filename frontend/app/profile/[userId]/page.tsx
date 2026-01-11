@@ -21,6 +21,10 @@ interface UserProfile {
     draw_entries?: number;
     referral_count?: number;
     global_rank?: number;
+    equipped?: {
+        avatar?: string;
+        frame?: string;
+    };
     history?: Array<{
         id: string;
         pick: string;
@@ -130,8 +134,19 @@ const ProfilePage = () => {
             </div>
 
             <header className={styles.header}>
-                <div className={styles.avatarLarge}>
-                    {profile.username[0].toUpperCase()}
+                <div className={`${styles.avatarWrapper} ${profile.equipped?.frame ? styles.hasFrame : ''}`}>
+                    {profile.equipped?.frame && (
+                        <div className={styles.frameOverlay}>
+                            <img src={profile.equipped.frame} alt="Frame" />
+                        </div>
+                    )}
+                    <div className={styles.avatarLarge}>
+                        {profile.equipped?.avatar ? (
+                            <img src={profile.equipped.avatar} alt={profile.username} className={styles.avatarImg} />
+                        ) : (
+                            profile.username[0].toUpperCase()
+                        )}
+                    </div>
                 </div>
                 <div className={styles.profileInfo}>
                     <div className={styles.nameRow}>

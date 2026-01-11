@@ -15,7 +15,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 export const getMe = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
-        const result = await dbQuery(`SELECT id, email, username, permissions, token_balance, total_points, total_tickets, current_level, referral_code FROM users WHERE id = $1`, [userId]);
+        const result = await dbQuery(`
+            SELECT u.id, u.email, u.username, u.permissions, u.token_balance, u.total_points, u.total_tickets, u.current_level, u.referral_code,
+                   (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1) as equipped_avatar,
+                   (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'frame' LIMIT 1) as equipped_frame
+            FROM users u WHERE u.id = $1`, [userId]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Session expired' });
 
         const user = result.rows[0];
@@ -26,7 +30,23 @@ export const getMe = async (req: AuthRequest, res: Response) => {
             await dbQuery('UPDATE users SET referral_code = $1 WHERE id = $2', [user.referral_code, userId]);
         }
 
-        res.json({ success: true, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level, referralCode: user.referral_code } });
+        res.json({
+            success: true, user: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                permissions: user.permissions,
+                tokens: user.token_balance,
+                tickets: user.total_tickets,
+                points: user.total_points,
+                level: user.current_level,
+                referralCode: user.referral_code,
+                equipped: {
+                    avatar: user.equipped_avatar,
+                    frame: user.equipped_frame
+                }
+            }
+        });
     } catch (err) {
         res.status(500).json({ error: 'Verification failed' });
     }
@@ -102,10 +122,12 @@ export const updateUsername = async (req: AuthRequest, res: Response) => {
 export const getProfile = async (req: Request, res: Response) => {
     const { userId } = req.params;
     try {
-        // 1. Fetch Core User Data
+        // 1. Fetch Core User Data (with equipped cosmetics)
         const userResult = await dbQuery(`
-            SELECT id, username, email, token_balance, total_points, current_level, referral_code 
-            FROM users WHERE id = $1`, [userId]);
+            SELECT u.id, u.username, u.email, u.token_balance, u.total_points, u.current_level, u.referral_code,
+                   (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1) as equipped_avatar,
+                   (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'frame' LIMIT 1) as equipped_frame
+            FROM users u WHERE u.id = $1`, [userId]);
 
         if (userResult.rows.length === 0) return res.status(404).json({ error: 'User not found' });
         const user = userResult.rows[0];
@@ -145,6 +167,10 @@ export const getProfile = async (req: Request, res: Response) => {
                 referral_code: user.referral_code,
                 global_rank: globalRank,
                 referral_count: referralCount,
+                equipped: {
+                    avatar: user.equipped_avatar,
+                    frame: user.equipped_frame
+                },
                 history: historyResult.rows
             }
         });

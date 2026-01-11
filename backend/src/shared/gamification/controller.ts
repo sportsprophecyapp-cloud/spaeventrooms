@@ -20,12 +20,26 @@ export const handleGetMe = async (req: AuthRequest, res: Response) => {
         const totalXp = userResult.rows[0].total_points || 0;
         const { level, progressXp, nextLevelXp } = getLevelFromXp(totalXp);
 
+        // Fetch equipped cosmetics
+        const equippedResult = await dbQuery(
+            `SELECT c.type, c.asset_url FROM cosmetics c 
+             JOIN user_cosmetics uc ON c.id = uc.cosmetic_id 
+             WHERE uc.user_id = $1 AND uc.is_equipped = true`,
+            [userId]
+        );
+
+        const equipped: { [key: string]: string } = {};
+        equippedResult.rows.forEach(row => {
+            equipped[row.type] = row.asset_url;
+        });
+
         const stats = {
             total_points: totalXp,
             current_level: level,
             token_balance: userResult.rows[0].token_balance || 0,
             progress_xp: progressXp,
-            next_level_xp: nextLevelXp
+            next_level_xp: nextLevelXp,
+            equipped
         };
 
         let badges: any[] = [];
@@ -322,8 +336,80 @@ export const handleDeleteDraw = async (req: AuthRequest, res: Response) => {
 
 export const handleGetUserTickets = handleGetTickets; // Alias for route consistency
 
-export const purchaseCosmetic = async (req: AuthRequest, res: Response) => res.json({ success: false });
-export const equipCosmetic = async (req: AuthRequest, res: Response) => res.json({ success: false });
+export const purchaseCosmetic = async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { cosmeticId } = req.body;
+
+    try {
+        // 1. Get cosmetic info
+        const cosResult = await dbQuery('SELECT * FROM cosmetics WHERE id = $1 AND is_active = true', [cosmeticId]);
+        if (cosResult.rows.length === 0) return res.status(404).json({ error: 'Item not found' });
+        const item = cosResult.rows[0];
+
+        // 2. Check if already owned
+        const ownResult = await dbQuery('SELECT 1 FROM user_cosmetics WHERE user_id = $1 AND cosmetic_id = $2', [userId, cosmeticId]);
+        if (ownResult.rows.length > 0) return res.status(400).json({ error: 'Already owned' });
+
+        // 3. Check balance
+        const userResult = await dbQuery('SELECT token_balance FROM users WHERE id = $1', [userId]);
+        const balance = userResult.rows[0].token_balance;
+
+        if (balance < item.cost) {
+            return res.status(400).json({ error: 'Insufficient tokens' });
+        }
+
+        // 4. Transaction
+        await dbQuery('BEGIN');
+        await dbQuery('UPDATE users SET token_balance = token_balance - $1 WHERE id = $2', [item.cost, userId]);
+        await dbQuery('INSERT INTO user_cosmetics (user_id, cosmetic_id) VALUES ($1, $2)', [userId, cosmeticId]);
+        await dbQuery('COMMIT');
+
+        res.json({ success: true, newBalance: balance - item.cost });
+    } catch (err) {
+        await dbQuery('ROLLBACK');
+        res.status(500).json({ error: 'Purchase failed' });
+    }
+};
+
+export const equipCosmetic = async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { cosmeticId } = req.body;
+
+    try {
+        // 1. Verify ownership and type
+        const itemResult = await dbQuery(`
+            SELECT c.id, c.type 
+            FROM cosmetics c 
+            JOIN user_cosmetics uc ON c.id = uc.cosmetic_id 
+            WHERE uc.user_id = $1 AND c.id = $2`, [userId, cosmeticId]);
+
+        if (itemResult.rows.length === 0) return res.status(403).json({ error: 'You do not own this item' });
+        const item = itemResult.rows[0];
+
+        await dbQuery('BEGIN');
+        // 2. Unequip same types
+        await dbQuery(`
+            UPDATE user_cosmetics uc 
+            SET is_equipped = false 
+            FROM cosmetics c 
+            WHERE uc.cosmetic_id = c.id AND uc.user_id = $1 AND c.type = $2`, [userId, item.type]);
+
+        // 3. Equip new one
+        await dbQuery('UPDATE user_cosmetics SET is_equipped = true WHERE user_id = $1 AND cosmetic_id = $2', [userId, cosmeticId]);
+
+        // 4. Update users table for fast access if avatar
+        if (item.type === 'avatar') {
+            const cos = await dbQuery('SELECT asset_url FROM cosmetics WHERE id = $1', [cosmeticId]);
+            await dbQuery('UPDATE users SET avatar_url = $1 WHERE id = $2', [cos.rows[0].asset_url, userId]);
+        }
+
+        await dbQuery('COMMIT');
+        res.json({ success: true });
+    } catch (err) {
+        await dbQuery('ROLLBACK');
+        res.status(500).json({ error: 'Equip failed' });
+    }
+};
 export const shareRoom = async (req: AuthRequest, res: Response) => res.json({ success: false });
 
 export const handleGetRecentWinners = async (req: Request, res: Response) => {
