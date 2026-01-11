@@ -10,6 +10,7 @@ import { APP_VERSION } from './version';
 import OnboardingModal from '@/app/components/OnboardingModal';
 import SponsorMarquee from '@/app/components/SponsorMarquee';
 import RecentWinners from '@/app/components/RecentWinners';
+import DailyLoginButton from '@/app/components/DailyLoginButton';
 
 const HomePage = () => {
     const { t, language, setLanguage } = useLanguage();
@@ -50,6 +51,13 @@ const HomePage = () => {
                     <p className={styles.tagline}>{t('tagline')}</p>
                 </Link>
             </header>
+
+            {isAuthenticated && (
+                <div style={{ padding: '0 1rem', display: 'flex', justifyContent: 'center' }}>
+                    <DailyLoginButton />
+                </div>
+            )}
+
             <main className={styles.main}>
                 <div className={styles.roomGrid}>
                     {rooms.map(room => (
