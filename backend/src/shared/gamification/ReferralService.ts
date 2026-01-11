@@ -50,7 +50,10 @@ export class ReferralService {
                 // Milestone 25 bonus
                 await query('UPDATE users SET token_balance = token_balance + 500 WHERE id = $1', [referrerId]);
             } else if (count === 50) {
-                // Milestone 50 - Award Elite Avatar
+                // Milestone 50 - Unlock Custom Avatar Upload
+                await query('UPDATE users SET can_upload_custom = TRUE WHERE id = $1', [referrerId]);
+
+                // Also award the Elite Avatar as a bonus
                 const eliteAvatar = await query("SELECT id FROM cosmetics WHERE name = 'Elite Avatar' LIMIT 1");
                 if (eliteAvatar.rows.length > 0) {
                     await query('INSERT INTO user_cosmetics (user_id, cosmetic_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [referrerId, eliteAvatar.rows[0].id]);

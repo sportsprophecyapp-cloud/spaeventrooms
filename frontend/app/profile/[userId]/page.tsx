@@ -21,6 +21,7 @@ interface UserProfile {
     draw_entries?: number;
     referral_count?: number;
     global_rank?: number;
+    canUploadCustom?: boolean;
     equipped?: {
         avatar?: string;
         frame?: string;
@@ -160,6 +161,35 @@ const ProfilePage = () => {
                                     profile.points >= 1000 ? 'VETERAN' :
                                         'NOVICE'}
                         </p>
+                        {isOwnProfile && profile.canUploadCustom && (
+                            <button
+                                onClick={() => {
+                                    const url = prompt('Enter image URL for your custom avatar:');
+                                    if (url) {
+                                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                                        fetch(`${apiUrl}/api/auth/upload-avatar`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${token}`
+                                            },
+                                            body: JSON.stringify({ avatarUrl: url })
+                                        }).then(res => res.json()).then(data => {
+                                            if (data.success) {
+                                                setProfile(prev => prev ? { ...prev, equipped: { ...prev.equipped, avatar: url } } : null);
+                                                alert('Avatar updated! Refresh to see changes across the site.');
+                                                window.location.reload();
+                                            } else {
+                                                alert(data.error || 'Failed to update avatar');
+                                            }
+                                        });
+                                    }
+                                }}
+                                className={styles.uploadBtn}
+                            >
+                                📸 CUSTOM UPLOAD
+                            </button>
+                        )}
                         {isOwnProfile && (
                             <button onClick={handleShareStats} className={styles.shareStatsBtn}>SHARE MY STATS</button>
                         )}

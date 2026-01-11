@@ -150,6 +150,7 @@ const initDB = async () => {
             ALTER TABLE users ADD COLUMN IF NOT EXISTS consecutive_login_days INTEGER DEFAULT 0;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS can_upload_custom BOOLEAN DEFAULT FALSE;
 
             CREATE TABLE IF NOT EXISTS cosmetics (
                 id VARCHAR(50) PRIMARY KEY,

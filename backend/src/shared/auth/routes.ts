@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getMe, login, register, updateUsername, getProfile, resetAdminPassword, deleteAccount, forgotPassword, resetPassword, googleLogin, getPublicProfileByReferralCode } from './controller';
+import { getMe, login, register, updateUsername, getProfile, resetAdminPassword, deleteAccount, forgotPassword, resetPassword, googleLogin, getPublicProfileByReferralCode, uploadCustomAvatar } from './controller';
 import { authenticate } from './middleware';
 
 const router = Router();
@@ -16,6 +16,7 @@ router.post('/google', googleLogin);
 router.get('/me', authenticate, getMe);
 router.put('/username', authenticate, updateUsername);
 router.delete('/delete-account', authenticate, deleteAccount);
+router.post('/upload-avatar', authenticate, uploadCustomAvatar);
 
 // Profile route
 router.get('/profile/:userId', getProfile);

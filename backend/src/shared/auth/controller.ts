@@ -10,16 +10,64 @@ import { ReferralService } from '../gamification/ReferralService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
+// Helper function for login streak
+const processLoginStreak = async (userId: number) => {
+    try {
+        const result = await dbQuery('SELECT last_login_at, consecutive_login_days FROM users WHERE id = $1', [userId]);
+        if (result.rows.length === 0) return;
+
+        const { last_login_at, consecutive_login_days } = result.rows[0];
+        const now = new Date();
+        const lastLoginAt = last_login_at ? new Date(last_login_at) : null;
+
+        let newStreak = 1;
+        let bonusTokens = 5; // Standard daily reward
+
+        if (lastLoginAt) {
+            // Calculate day difference relative to midnight
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const last = new Date(lastLoginAt.getFullYear(), lastLoginAt.getMonth(), lastLoginAt.getDate());
+            const diffDays = Math.floor((today.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return; // Already logged in today
+
+            if (diffDays === 1) {
+                newStreak = (consecutive_login_days || 0) + 1;
+                // Periodic bonuses
+                if (newStreak % 7 === 0) bonusTokens += 50;
+                if (newStreak % 30 === 0) bonusTokens += 200;
+            }
+        }
+
+        await dbQuery(`
+            UPDATE users 
+            SET last_login_at = NOW(), 
+                consecutive_login_days = $1, 
+                token_balance = token_balance + $2 
+            WHERE id = $3
+        `, [newStreak, bonusTokens, userId]);
+
+        await dbQuery(`
+            INSERT INTO token_transactions (user_id, amount, type, description)
+            VALUES ($1, $2, 'login_streak', $3)
+        `, [userId, bonusTokens, `Day ${newStreak} Login Reward`]);
+
+        console.log(`User ${userId} login streak: ${newStreak}, tokens: +${bonusTokens}`);
+    } catch (error) {
+        console.error(`Error processing login streak for user ${userId}:`, error);
+    }
+};
+
 // RESTORED TO STABLE STATE: All original functions are fully implemented.
 
 export const getMe = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
         const result = await dbQuery(`
-            SELECT u.id, u.email, u.username, u.permissions, u.token_balance, u.total_points, u.total_tickets, u.current_level, u.referral_code,
-                   (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1) as equipped_avatar,
+            SELECT u.id, u.email, u.username, u.permissions, u.token_balance, u.total_points, u.total_tickets, u.current_level, u.referral_code, u.can_upload_custom,
+                   COALESCE(u.avatar_url, (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1)) as display_avatar,
                    (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'frame' LIMIT 1) as equipped_frame
-            FROM users u WHERE u.id = $1`, [userId]);
+             FROM users u WHERE u.id = $1`, [userId]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Session expired' });
 
         const user = result.rows[0];
@@ -41,8 +89,9 @@ export const getMe = async (req: AuthRequest, res: Response) => {
                 points: user.total_points,
                 level: user.current_level,
                 referralCode: user.referral_code,
+                canUploadCustom: user.can_upload_custom,
                 equipped: {
-                    avatar: user.equipped_avatar,
+                    avatar: user.display_avatar,
                     frame: user.equipped_frame
                 }
             }
@@ -61,7 +110,11 @@ export const login = async (req: Request, res: Response) => {
         const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) return res.status(401).json({ message: 'Invalid credentials' });
         const token = jwt.sign({ id: user.id, email: user.email, username: user.username, permissions: user.permissions }, JWT_SECRET, { expiresIn: '7d' });
-        res.json({ token, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level } });
+
+        // Process login streak
+        await processLoginStreak(user.id);
+
+        res.json({ token, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level, canUploadCustom: user.can_upload_custom } });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
@@ -124,8 +177,8 @@ export const getProfile = async (req: Request, res: Response) => {
     try {
         // 1. Fetch Core User Data (with equipped cosmetics)
         const userResult = await dbQuery(`
-            SELECT u.id, u.username, u.email, u.token_balance, u.total_points, u.current_level, u.referral_code,
-                   (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1) as equipped_avatar,
+            SELECT u.id, u.username, u.email, u.token_balance, u.total_points, u.current_level, u.referral_code, u.can_upload_custom,
+                   COALESCE(u.avatar_url, (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1)) as display_avatar,
                    (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'frame' LIMIT 1) as equipped_frame
             FROM users u WHERE u.id = $1`, [userId]);
 
@@ -168,7 +221,7 @@ export const getProfile = async (req: Request, res: Response) => {
                 global_rank: globalRank,
                 referral_count: referralCount,
                 equipped: {
-                    avatar: user.equipped_avatar,
+                    avatar: user.display_avatar,
                     frame: user.equipped_frame
                 },
                 history: historyResult.rows
@@ -284,7 +337,10 @@ export const googleLogin = async (req: Request, res: Response) => {
 
         const jwtToken = jwt.sign({ id: user.id, email: user.email, username: user.username, permissions: user.permissions }, JWT_SECRET, { expiresIn: '7d' });
 
-        res.json({ success: true, token: jwtToken, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level, referralCode: user.referral_code } });
+        // Process login streak
+        await processLoginStreak(user.id);
+
+        res.json({ success: true, token: jwtToken, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level, referralCode: user.referral_code, canUploadCustom: user.can_upload_custom } });
 
     } catch (error) {
         console.error("Google Auth Error:", error);
@@ -319,5 +375,30 @@ export const getPublicProfileByReferralCode = async (req: Request, res: Response
         res.json({ success: true, username: result.rows[0].username });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const uploadCustomAvatar = async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { avatarUrl } = req.body;
+
+    if (!avatarUrl) return res.status(400).json({ error: 'Avatar URL is required' });
+
+    try {
+        // 1. Verify eligibility
+        const userRes = await dbQuery('SELECT can_upload_custom FROM users WHERE id = $1', [userId]);
+        if (userRes.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
+        if (!userRes.rows[0].can_upload_custom) {
+            return res.status(403).json({ error: 'Unlock this feature by reaching 50 referrals!' });
+        }
+
+        // 2. Update user avatar directly
+        await dbQuery('UPDATE users SET avatar_url = $1 WHERE id = $2', [avatarUrl, userId]);
+
+        res.json({ success: true, message: 'Custom avatar updated!', avatarUrl });
+    } catch (err) {
+        console.error('Error uploading custom avatar:', err);
+        res.status(500).json({ error: 'Failed to update custom avatar' });
     }
 };
