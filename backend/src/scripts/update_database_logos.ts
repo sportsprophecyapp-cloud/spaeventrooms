@@ -87,7 +87,7 @@ const manualMappings: { [key: string]: string } = {
     'Brest': 'brest',
     'Stade Rennais': 'rennes',
     'Rennes': 'rennes',
-    'Angers SCO': 'changers',
+    'Angers SCO': 'angers',
     'Angers': 'angers',
     'Le Havre AC': 'le-havre',
     'Le Havre': 'le-havre',
@@ -143,8 +143,8 @@ export const updateDatabaseLogos = async () => {
             const manualBase = manualMappings[team.name];
             const baseKebab = manualBase || toKebabCase(team.name);
             const possibleNames = [
-                `\${baseKebab}.png`,
-                `\${baseKebab}.svg`
+                `${baseKebab}.png`,
+                `${baseKebab}.svg`
             ];
 
             let foundFilename = null;
@@ -165,30 +165,30 @@ export const updateDatabaseLogos = async () => {
             }
 
             if (foundFilename) {
-                const publicUrl = \`/logos/\${leagueSlug}/\${foundFilename}\`;
+                const publicUrl = `/logos/${leagueSlug}/${foundFilename}`;
 
-                await client.query(\`
+                await client.query(`
                     UPDATE soccer_matches 
                     SET home_logo = $1 
                     WHERE home_team = $2
-                \`, [publicUrl, team.name]);
+                `, [publicUrl, team.name]);
 
-                await client.query(\`
+                await client.query(`
                     UPDATE soccer_matches 
                     SET away_logo = $1 
                     WHERE away_team = $2
-                \`, [publicUrl, team.name]);
+                `, [publicUrl, team.name]);
 
                 updateCount++;
             } else {
-                console.warn(\`⚠️ Could not find logo for team: \${team.name} in leagues/\${leagueSlug} (tried \${baseKebab})\`);
+                console.warn(`⚠️ Could not find logo for team: ${team.name} in leagues/${leagueSlug} (tried ${baseKebab})`);
                 missingCount++;
             }
         }
 
-        console.log(\`✅ Update complete!\`);
-        console.log(\`📊 Updated: \${updateCount} teams\`);
-        console.log(\`❌ Missing: \${missingCount} teams\`);
+        console.log(`✅ Update complete!`);
+        console.log(`📊 Updated: ${updateCount} teams`);
+        console.log(`❌ Missing: ${missingCount} teams`);
 
     } catch (err) {
         console.error('❌ Update failed:', err);
