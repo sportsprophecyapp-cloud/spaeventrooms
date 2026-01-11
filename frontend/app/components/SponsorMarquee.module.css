@@ -1,47 +1,73 @@
 .container {
     width: 100%;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.03);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 0.5rem 0;
-    margin: 1.5rem 0;
+    padding: 0.75rem 0;
+    margin: 2rem 0;
     user-select: none;
+    position: relative;
 }
 
-/* FORCES EVERYTHING ONTO ONE LINE */
+.container::before,
+.container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.container::before {
+    left: 0;
+    background: linear-gradient(90deg, #0a0a0a, transparent);
+}
+
+.container::after {
+    right: 0;
+    background: linear-gradient(270deg, #0a0a0a, transparent);
+}
+
 .track {
     display: flex;
     flex-wrap: nowrap;
-    /* PREVENTS WRAPPING */
-    gap: 5rem;
+    gap: 6rem;
     width: fit-content;
-    animation: scroll 30s linear infinite;
+    animation: scroll 40s linear infinite;
 }
 
 .item {
     flex-shrink: 0;
-    /* PREVENTS SQUEEZING */
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.4;
-    transition: all 0.3s ease;
+    opacity: 0.3;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: grayscale(1);
 }
 
 .item:hover {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.15);
+    filter: grayscale(0);
 }
 
 .nameOnly {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--foreground);
-    opacity: 0.5;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #fff;
     white-space: nowrap;
-    /* PREVENTS TEXT WRAPPING */
+    text-transform: uppercase;
+}
+
+.marqueeLogo {
+    height: 35px;
+    width: auto;
+    object-fit: contain;
 }
 
 @keyframes scroll {
@@ -54,7 +80,6 @@
     }
 }
 
-/* Pause on hover for easier clicking */
 .container:hover .track {
     animation-play-state: paused;
 }

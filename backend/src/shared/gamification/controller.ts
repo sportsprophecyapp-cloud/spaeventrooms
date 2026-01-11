@@ -327,9 +327,16 @@ export const handleUpdateDraw = async (req: AuthRequest, res: Response) => {
 export const handleDeleteDraw = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     try {
+        await dbQuery('BEGIN');
+        // Explicitly delete related records if they exist
+        await dbQuery(`DELETE FROM user_vouchers WHERE draw_id = $1`, [id]);
+        await dbQuery(`DELETE FROM prize_draw_entries WHERE draw_id = $1`, [id]);
         await dbQuery(`DELETE FROM prize_draws WHERE id = $1`, [id]);
+        await dbQuery('COMMIT');
         res.json({ success: true, message: 'Draw removed successfully' });
     } catch (err) {
+        await dbQuery('ROLLBACK');
+        console.error('Delete draw failed:', err);
         res.status(500).json({ error: 'Delete failed' });
     }
 };
