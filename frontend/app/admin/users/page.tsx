@@ -14,6 +14,9 @@ interface Supporter {
     permissions: string[];
     created_at: string;
     prediction_count: string;
+    token_balance: number;
+    total_tickets: number;
+    current_level: number;
     is_banned: boolean;
     is_muted: boolean;
 }
@@ -96,16 +99,18 @@ const AdminUsersPage = () => {
                         <div key={s.id} className={`${styles.row} ${s.is_banned ? styles.banned : ''}`}>
                             <div className={styles.userMeta}>
                                 <span className={styles.username}>
-                                    {onlineUsers.includes(s.id.toString()) && <span className={styles.onlineIndicator}></span>} 
+                                    {onlineUsers.includes(s.id.toString()) && <span className={styles.onlineIndicator}></span>}
                                     @{s.username}
                                 </span>
                                 <span className={styles.email}>{s.email}</span>
                                 <span className={styles.metadata}>Joined: {new Date(s.created_at).toLocaleDateString()}</span>
-                                <span className={styles.metadata}>Predictions: {s.prediction_count}</span>
+                                <span className={styles.metadata}>
+                                    🪙 {s.token_balance ?? 0} | 🎫 {s.total_tickets ?? 0} | ⭐ {s.current_level ?? 1} | 🔮 {s.prediction_count}
+                                </span>
                             </div>
                             <div className={styles.actions}>
                                 {s.is_banned && <span className={styles.bannedBadge}>BANNED</span>}
-                                {s.is_muted && <span className={styles.mutedBadge}>MUTED</span>} 
+                                {s.is_muted && <span className={styles.mutedBadge}>MUTED</span>}
                                 {s.permissions.map(p => <span key={p} className={styles.roleBadge}>{p}</span>)}
                                 <button className={`${styles.manageBtn} ${styles.messageBtn}`} onClick={() => handleOpenMessageModal(s)}>MESSAGE</button>
                                 <button className={styles.manageBtn} onClick={() => handleOpenPermissionsModal(s)}>MANAGE</button>
@@ -116,18 +121,18 @@ const AdminUsersPage = () => {
             </main>
 
             {selectedUser && (
-                <PermissionsModal 
-                    isOpen={isPermissionsModalOpen} 
-                    onClose={handleCloseModals} 
-                    user={selectedUser} 
+                <PermissionsModal
+                    isOpen={isPermissionsModalOpen}
+                    onClose={handleCloseModals}
+                    user={selectedUser}
                 />
             )}
 
             {selectedUser && (
-                <MessageUserModal 
-                    isOpen={isMessageModalOpen} 
-                    onClose={handleCloseModals} 
-                    user={selectedUser} 
+                <MessageUserModal
+                    isOpen={isMessageModalOpen}
+                    onClose={handleCloseModals}
+                    user={selectedUser}
                 />
             )}
         </div>

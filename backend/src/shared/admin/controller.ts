@@ -11,6 +11,9 @@ export const getAllSupporters = async (req: Request, res: Response) => {
                 u.username, 
                 u.email, 
                 u.created_at,
+                u.token_balance, 
+                u.total_tickets,
+                u.current_level,
                 '[]'::jsonb as permissions, -- Placeholder
                 false as is_banned,        -- Placeholder
                 false as is_muted,         -- Placeholder
