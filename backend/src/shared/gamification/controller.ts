@@ -152,59 +152,23 @@ export const handleDailyLogin = async (req: AuthRequest, res: Response) => {
         const userId = req.user?.id;
         if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
 
-        // 1. Get current streak info
-        const userResult = await dbQuery(
-            'SELECT consecutive_login_days, last_login_at, token_balance FROM users WHERE id = $1',
-            [userId]
-        );
-        const user = userResult.rows[0];
+        const { gamificationService } = require('./GamificationService');
+        const result = await gamificationService.handleDailyLogin(userId);
 
-        const now = new Date();
-        const lastLogin = user.last_login_at ? new Date(user.last_login_at) : null;
-
-        let newStreak = user.consecutive_login_days || 0;
-        let alreadyClaimed = false;
-
-        if (lastLogin) {
-            const diffTime = now.getTime() - lastLogin.getTime();
-            const diffDays = diffTime / (1000 * 60 * 60 * 24);
-
-            if (diffDays < 1 && now.getDate() === lastLogin.getDate()) {
-                alreadyClaimed = true;
-            } else if (diffDays < 2) {
-                newStreak += 1;
-            } else {
-                newStreak = 1; // Reset streak
-            }
-        } else {
-            newStreak = 1; // First login
-        }
-
-        if (alreadyClaimed) {
+        if (result.alreadyClaimed) {
             return res.json({
                 success: true,
                 alreadyClaimed: true,
-                streak: newStreak,
+                streak: result.streak,
                 message: 'Daily reward already claimed today!'
             });
         }
 
-        // 2. Update user streak and last login
-        const updateResult = await dbQuery(
-            'UPDATE users SET consecutive_login_days = $1, last_login_at = $2, token_balance = token_balance + 5 WHERE id = $3 RETURNING token_balance',
-            [newStreak, now, userId]
-        );
-
-        // 3. Check for streak milestones
-        const { BadgeService } = require('./BadgeService');
-        await BadgeService.checkStreakMilestones(userId, newStreak);
-
-        const newBalance = updateResult.rows[0]?.token_balance || 0;
         res.json({
             success: true,
-            streak: { current: newStreak, nextBonus: 7 },
-            tokenBalance: newBalance,
-            reward: { amount: 5, message: `Tokens received! Streak: ${newStreak} days` }
+            streak: { current: result.streak, nextBonus: 7 },
+            tokenBalance: result.newBalances.newBalance,
+            reward: { amount: result.reward.tokens, message: result.reward.message || `Tokens received! Streak: ${result.streak} days` }
         });
     } catch (error) {
         console.error('Error in handleDailyLogin:', error);
@@ -214,9 +178,18 @@ export const handleDailyLogin = async (req: AuthRequest, res: Response) => {
 
 export const getShop = async (req: AuthRequest, res: Response) => {
     try {
+        const userId = req.user?.id;
         const result = await dbQuery(`SELECT * FROM cosmetics WHERE is_active = true`);
-        res.json({ success: true, cosmetics: result.rows });
-    } catch (e) { res.json({ success: true, cosmetics: [] }); }
+        const userRes = await dbQuery('SELECT token_balance, total_tickets FROM users WHERE id = $1', [userId]);
+        const user = userRes.rows[0] || { token_balance: 0, total_tickets: 0 };
+
+        res.json({
+            success: true,
+            cosmetics: result.rows,
+            balance: user.token_balance,
+            tickets: user.total_tickets
+        });
+    } catch (e) { res.json({ success: true, cosmetics: [], balance: 0, tickets: 0 }); }
 };
 
 export const handleEnterDraw = async (req: AuthRequest, res: Response) => {

@@ -10,54 +10,6 @@ import { ReferralService } from '../gamification/ReferralService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_keys_123';
 
-// Helper function for login streak
-const processLoginStreak = async (userId: number) => {
-    try {
-        const result = await dbQuery('SELECT last_login_at, consecutive_login_days FROM users WHERE id = $1', [userId]);
-        if (result.rows.length === 0) return;
-
-        const { last_login_at, consecutive_login_days } = result.rows[0];
-        const now = new Date();
-        const lastLoginAt = last_login_at ? new Date(last_login_at) : null;
-
-        let newStreak = 1;
-        let bonusTokens = 5; // Standard daily reward
-
-        if (lastLoginAt) {
-            // Calculate day difference relative to midnight
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const last = new Date(lastLoginAt.getFullYear(), lastLoginAt.getMonth(), lastLoginAt.getDate());
-            const diffDays = Math.floor((today.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
-
-            if (diffDays === 0) return; // Already logged in today
-
-            if (diffDays === 1) {
-                newStreak = (consecutive_login_days || 0) + 1;
-                // Periodic bonuses
-                if (newStreak % 7 === 0) bonusTokens += 50;
-                if (newStreak % 30 === 0) bonusTokens += 200;
-            }
-        }
-
-        await dbQuery(`
-            UPDATE users 
-            SET last_login_at = NOW(), 
-                consecutive_login_days = $1, 
-                token_balance = token_balance + $2 
-            WHERE id = $3
-        `, [newStreak, bonusTokens, userId]);
-
-        await dbQuery(`
-            INSERT INTO token_transactions (user_id, amount, type, description)
-            VALUES ($1, $2, 'login_streak', $3)
-        `, [userId, bonusTokens, `Day ${newStreak} Login Reward`]);
-
-        console.log(`User ${userId} login streak: ${newStreak}, tokens: +${bonusTokens}`);
-    } catch (error) {
-        console.error(`Error processing login streak for user ${userId}:`, error);
-    }
-};
-
 // RESTORED TO STABLE STATE: All original functions are fully implemented.
 
 export const getMe = async (req: AuthRequest, res: Response) => {
@@ -111,10 +63,28 @@ export const login = async (req: Request, res: Response) => {
         if (!validPassword) return res.status(401).json({ message: 'Invalid credentials' });
         const token = jwt.sign({ id: user.id, email: user.email, username: user.username, permissions: user.permissions }, JWT_SECRET, { expiresIn: '7d' });
 
-        // Process login streak
-        await processLoginStreak(user.id);
+        // Process unified login streak
+        const { gamificationService } = require('../gamification/GamificationService');
+        await gamificationService.handleDailyLogin(user.id).catch((e: Error) => console.error('Streak error:', e));
 
-        res.json({ token, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level, canUploadCustom: user.can_upload_custom } });
+        // Refetch user to get updated balance after streak
+        const updatedUserRes = await dbQuery('SELECT token_balance, total_tickets, total_points, current_level FROM users WHERE id = $1', [user.id]);
+        const updatedUser = updatedUserRes.rows[0];
+
+        res.json({
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                permissions: user.permissions,
+                tokens: updatedUser.token_balance,
+                tickets: updatedUser.total_tickets,
+                points: updatedUser.total_points,
+                level: updatedUser.current_level,
+                canUploadCustom: user.can_upload_custom
+            }
+        });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
@@ -220,6 +190,7 @@ export const getProfile = async (req: Request, res: Response) => {
                 referral_code: user.referral_code,
                 global_rank: globalRank,
                 referral_count: referralCount,
+                canUploadCustom: user.can_upload_custom,
                 equipped: {
                     avatar: user.display_avatar,
                     frame: user.equipped_frame
@@ -337,10 +308,15 @@ export const googleLogin = async (req: Request, res: Response) => {
 
         const jwtToken = jwt.sign({ id: user.id, email: user.email, username: user.username, permissions: user.permissions }, JWT_SECRET, { expiresIn: '7d' });
 
-        // Process login streak
-        await processLoginStreak(user.id);
+        // Process unified login streak
+        const { gamificationService } = require('../gamification/GamificationService');
+        await gamificationService.handleDailyLogin(user.id).catch((e: Error) => console.error('Streak error:', e));
 
-        res.json({ success: true, token: jwtToken, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: user.token_balance, tickets: user.total_tickets, points: user.total_points, level: user.current_level, referralCode: user.referral_code, canUploadCustom: user.can_upload_custom } });
+        // Refetch user to get updated balance after streak
+        const updatedUserRes = await dbQuery('SELECT token_balance, total_tickets, total_points, current_level FROM users WHERE id = $1', [user.id]);
+        const updatedUser = updatedUserRes.rows[0];
+
+        res.json({ success: true, token: jwtToken, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: updatedUser.token_balance, tickets: updatedUser.total_tickets, points: updatedUser.total_points, level: updatedUser.current_level, referralCode: user.referral_code, canUploadCustom: user.can_upload_custom } });
 
     } catch (error) {
         console.error("Google Auth Error:", error);

@@ -31,21 +31,16 @@ export const resolveSoccerPredictions = async () => {
             const ticketsEarned = isCorrect ? 1 : 0; // NEW: +1 ticket for a correct call
             const resultStatus = isCorrect ? 'correct' : 'incorrect';
 
-            await query(
-                'UPDATE soccer_predictions SET result = $1, points_earned = $2 WHERE id = $3',
-                [resultStatus, pointsEarned, id]
-            );
-
             if (isCorrect) {
-                const newTotalPoints = total_points + pointsEarned;
-                const newTotalTickets = total_tickets + ticketsEarned; // NEW
-                const { level: newLevel } = getLevelFromXp(newTotalPoints);
-
-                // Update user points, tokens, tickets, and level
-                await query(
-                    'UPDATE users SET total_points = $1, total_tickets = $2, current_level = $3, token_balance = token_balance + $4 WHERE id = $5',
-                    [newTotalPoints, newTotalTickets, newLevel, pointsEarned, user_id]
-                );
+                // NEW: Use unified reward engine
+                const { gamificationService } = require('../gamification/GamificationService');
+                await gamificationService.awardReward(user_id, {
+                    tokens: 10,
+                    tickets: 1,
+                    xp: 100,
+                    type: 'prediction',
+                    description: `Correct Call: ${row.home_team} vs ${row.away_team}`
+                });
 
                 // Log the entry for future prize draws
                 await awardDrawEntry(user_id, 'accuracy', 'soccer');
@@ -54,10 +49,14 @@ export const resolveSoccerPredictions = async () => {
                 const { BadgeService } = require('../gamification/BadgeService');
                 await BadgeService.checkPredictionMilestones(user_id);
 
-                // Log the reward transaction
                 await query(
-                    'INSERT INTO token_transactions (user_id, amount, type, description) VALUES ($1, $2, $3, $4)',
-                    [user_id, pointsEarned, 'prediction', `Correct Call: ${row.home_team} vs ${row.away_team}`]
+                    'UPDATE soccer_predictions SET result = $1, points_earned = $2 WHERE id = $3',
+                    [resultStatus, pointsEarned, id]
+                );
+            } else {
+                await query(
+                    'UPDATE soccer_predictions SET result = $1, points_earned = $2 WHERE id = $3',
+                    [resultStatus, pointsEarned, id]
                 );
             }
         }

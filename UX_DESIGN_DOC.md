@@ -1,5 +1,5 @@
 # Events Arena - UX Design Document
-**Version 2.30 | January 2026**
+**Version 3.1.0 | January 2026**
 
 ## 🎯 Overview
 Events Arena is a full-stack interactive engagement platform optimized for sports, TV, and creator-led events. It is build-stabilized, branding-unified, and runs on a "Pure Live" production data infrastructure.

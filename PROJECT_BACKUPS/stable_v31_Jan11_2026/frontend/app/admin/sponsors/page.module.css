@@ -1,0 +1,157 @@
+.container {
+    min-height: 100vh;
+    padding: 3rem 2rem;
+    background: var(--background);
+    color: white;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: -2px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--neutral);
+    margin-top: 0.5rem;
+}
+
+.main {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.tabs button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.tabs button.activeTab {
+    background: var(--accent);
+    box-shadow: 0 0 15px var(--accent);
+}
+
+.appList {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.card {
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.targetBadge,
+.statusBadge {
+    background: var(--accent);
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.cardActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.approveBtn {
+    background: #00ff88;
+    color: black;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.pickWinnerBtn {
+    background: #ffaa00;
+    color: black;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.winnerAnnounce {
+    color: #ffd700;
+    font-weight: 800;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.contactBtn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.deleteBtn {
+    background: #ff0055;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.error {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #ff0055;
+    font-size: 1.5rem;
+}
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.editForm input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-family: inherit;
+}

@@ -36,11 +36,14 @@ interface ShopResponse {
 
 export const useGamification = () => {
     const { user, token, refreshUser } = useAuth();
-    const [tokenBalance, setTokenBalance] = useState<number>(0);
-    const [streak, setStreak] = useState<Streak>({ current: 0, nextBonus: 7 });
     const [cosmetics, setCosmetics] = useState<Cosmetic[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Derived balances from AuthContext (Source of Truth)
+    const tokenBalance = user?.tokens ?? 0;
+    const ticketBalance = user?.tickets ?? 0;
+    const streak = { current: user?.points ?? 0, nextBonus: 7 }; // TBD: Backend doesn't return full streak obj yet
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -62,8 +65,8 @@ export const useGamification = () => {
             if (!shopRes.ok) throw new Error('Failed to fetch shop data');
 
             const shopData: ShopResponse = await shopRes.json();
-            setTokenBalance(shopData.balance);
             setCosmetics(shopData.cosmetics);
+            // Balance is now handled by refreshUser() which is called after actions
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load data');
         } finally {
@@ -90,9 +93,7 @@ export const useGamification = () => {
             if (!res.ok) throw new Error('Failed to claim daily login');
 
             const data: DailyLoginResponse = await res.json();
-            setTokenBalance(data.tokenBalance);
-            setStreak(data.streak);
-            refreshUser(); // Sync global user state
+            await refreshUser(); // Sync global user state (Source of Truth)
             return data;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to claim reward');
@@ -125,10 +126,7 @@ export const useGamification = () => {
             }
 
             const data = await res.json();
-            setTokenBalance(data.newBalance);
-            refreshUser(); // Sync global user state
-
-            // Refetch shop to update owned status
+            await refreshUser(); // Sync global user state
             await fetchGamificationData();
             return true;
         } catch (err) {
@@ -190,8 +188,7 @@ export const useGamification = () => {
                 throw new Error(data.error || 'Share failed');
             }
 
-            setTokenBalance(data.newBalance);
-            refreshUser(); // Sync global user state
+            await refreshUser(); // Sync global user state
             return { success: true, message: data.message };
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Share failed';
@@ -211,6 +208,7 @@ export const useGamification = () => {
 
     return {
         tokenBalance,
+        ticketBalance,
         streak,
         cosmetics,
         loading,

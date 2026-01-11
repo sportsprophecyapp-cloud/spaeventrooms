@@ -1,0 +1,111 @@
+.card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s;
+    border-left: 6px solid var(--accent);
+}
+
+.status {
+    font-size: 0.65rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.question {
+    font-size: 1.4rem;
+    font-weight: 900;
+    margin: 0 0 2rem 0;
+    color: #fff;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.optionBtn {
+    padding: 1.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    color: #fff;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.optionBtn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent);
+}
+
+.selected {
+    border-color: var(--accent) !important;
+    background: rgba(0, 112, 243, 0.15) !important;
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.correct {
+    background: rgba(0, 255, 65, 0.05) !important;
+    border-color: var(--success) !important;
+    color: var(--success) !important;
+}
+
+.incorrect {
+    border-color: var(--error) !important;
+    background: rgba(255, 0, 85, 0.05) !important;
+    color: var(--error) !important;
+}
+
+.discussionArea {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.discussToggle {
+    background: transparent;
+    border: none;
+    color: var(--neutral);
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+.discussToggle:hover {
+    color: var(--accent);
+}
+
+.commentsWrapper {
+    margin-top: 1.5rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .card { padding: 1.5rem; }
+    .question { font-size: 1.2rem; }
+}
