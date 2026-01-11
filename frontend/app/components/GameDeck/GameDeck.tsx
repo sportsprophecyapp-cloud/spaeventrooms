@@ -71,6 +71,50 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         config: { tension: 500, friction: 40 }
     }));
 
+    const submitPrediction = async (match: Match, pickSide: string, attemptNum = 1) => {
+        const MAX_RETRIES = 2;
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const pickName = pickSide === 'home' ? match.home_team : match.away_team;
+
+            const response = await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    matchId: match.match_id,
+                    pick: pickName
+                })
+            });
+
+            if (response.ok) {
+                setMessage({ text: `Prediction saved: ${pickName}`, type: 'success' });
+                return true;
+            } else if (response.status === 402) {
+                // Out of tokens - don't retry
+                setMessage({ text: 'Not enough tokens', type: 'error' });
+                return false;
+            } else if (attemptNum < MAX_RETRIES) {
+                // Retry on server error
+                console.warn(`Prediction failed, retrying (attempt ${attemptNum + 1})...`);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return submitPrediction(match, pickSide, attemptNum + 1);
+            } else {
+                setMessage({ text: 'Failed to save prediction', type: 'error' });
+                return false;
+            }
+        } catch (err) {
+            if (attemptNum < MAX_RETRIES) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return submitPrediction(match, pickSide, attemptNum + 1);
+            }
+            setMessage({ text: 'Network error', type: 'error' });
+            return false;
+        }
+    };
+
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
         const isGone = gone.has(index);
         if (isGone) return;
@@ -78,6 +122,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         // Track drag amount for visual feedback
         if (active) {
             setDragX(mx);
+        } else {
+            setDragX(0); // ✅ Reset when drag ends
         }
 
         const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 100);
@@ -91,7 +137,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             setGone(prev => new Set(prev).add(index));
             setMatches(matches.slice(1));
             setPredictionCount(prev => prev + 1);
-            setDragX(0);
+            // setDragX(0) is handled by the else block above
 
             // Animate card flying off
             api.start(i => {
@@ -107,39 +153,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 };
             });
 
-            // FIRE-AND-FORGET API CALL (Don't await to block UI)
-            const submitPrediction = async () => {
-                try {
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                    const pickName = pickSide === 'home' ? match.home_team : match.away_team;
-
-                    // We intentionally do NOT await the fetch response to block the UI
-                    fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            matchId: match.match_id,
-                            pick: pickName
-                        })
-                    }).then(res => {
-                        if (!res.ok && res.status !== 402) {
-                            console.error('Prediction save warning:', res.status);
-                            setMessage({ text: 'Error saving prediction', type: 'error' });
-                        }
-                    }).catch(err => {
-                        console.error("Prediction network error:", err);
-                        setMessage({ text: 'Network error saving prediction', type: 'error' });
-                    });
-
-                } catch (err) {
-                    console.error("Prediction failed to save:", err);
-                    setMessage({ text: 'Failed to save prediction', type: 'error' });
-                }
-            };
-            submitPrediction();
+            // Call robust prediction handling
+            submitPrediction(match, pickSide);
 
             // Check completion
             if (gone.size + 1 === matches.length) {

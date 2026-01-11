@@ -4,6 +4,7 @@ import './globals.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import { AuthProvider } from './context/AuthContext';
+import { SponsorProvider } from './context/SponsorContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { GlobalSocketProvider } from './context/GlobalSocketProvider';
 import Navbar from './components/Navbar';
@@ -34,13 +35,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={outfit.className}>
         <GoogleOAuthProvider clientId="690358031158-n4e5sqsu936iega8rh9ge8f0kjikveht.apps.googleusercontent.com">
           <AuthProvider>
-            <GlobalSocketProvider>
-              <LanguageProvider>
-                <Navbar />
-                <ToastNotification />
-                {children}
-              </LanguageProvider>
-            </GlobalSocketProvider>
+            <SponsorProvider>
+              <GlobalSocketProvider>
+                <LanguageProvider>
+                  <Navbar />
+                  <ToastNotification />
+                  {children}
+                </LanguageProvider>
+              </GlobalSocketProvider>
+            </SponsorProvider>
           </AuthProvider>
         </GoogleOAuthProvider>
       </body>

@@ -76,11 +76,14 @@
 /* ===== CARD WRAPPER ===== */
 .cardWrapper {
     position: absolute;
-    width: 100%;
-    max-width: 480px;
-    /* Constrain max width for better aesthetic on desktop */
-    height: 68vh;
-    max-height: 700px;
+    top: 50%;
+    left: 50%;
+    width: clamp(300px, 90vw, 550px);
+    /* ✅ Responsive */
+    height: clamp(350px, 70vh, 650px);
+    /* ✅ Won't overflow */
+    margin-left: calc(-1 * clamp(150px, 45vw, 275px));
+    margin-top: calc(-1 * clamp(175px, 35vh, 325px));
     will-change: transform, opacity;
     display: flex;
     align-items: center;
@@ -540,7 +543,15 @@
 }
 
 /* ===== MOBILE RESPONSIVENESS ===== */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+    .deckContainer {
+        min-height: 80vh;
+    }
+
+    .cardWrapper {
+        height: clamp(350px, 65vh, 600px);
+    }
+
     .deckWrapper {
         gap: 1rem;
     }

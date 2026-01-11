@@ -27,6 +27,7 @@ interface AuthContextType {
     login: (token: string, user: User) => void;
     logout: () => void;
     refreshUser: () => Promise<void>;
+    updateCosmetics: (avatar?: string, frame?: string) => Promise<void>;
     isAuthenticated: boolean;
 }
 
@@ -98,8 +99,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const updateCosmetics = async (avatar?: string, frame?: string) => {
+        if (!token) return;
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
+            const res = await fetch(`${apiUrl}/api/users/cosmetics`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ avatar, frame })
+            });
+            if (res.ok) {
+                // Determine if the backend returns the updated user or if we just optimistically update
+                // The prompt says: "if (res.ok) { ... setUser({ ...user, equipped: { avatar, frame } }); }"
+                // Using optimistic update for speed
+                if (user) {
+                    setUser({
+                        ...user,
+                        equipped: {
+                            avatar: avatar ?? user.equipped?.avatar,
+                            frame: frame ?? user.equipped?.frame
+                        }
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Failed to update cosmetics:', e);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, refreshUser, isAuthenticated: !!token }}>
+        <AuthContext.Provider value={{
+            user, token, login, logout, refreshUser,
+            updateCosmetics,
+            isAuthenticated: !!token
+        }}>
             {children}
         </AuthContext.Provider>
     );

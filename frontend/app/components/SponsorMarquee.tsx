@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styles from './SponsorMarquee.module.css';
+import { useSponsor } from '@/app/context/SponsorContext';
 
 interface Sponsor {
     id: number;
@@ -10,28 +11,12 @@ interface Sponsor {
 }
 
 const SponsorMarquee = () => {
-    const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+    const { sponsors, loading } = useSponsor();
 
-    useEffect(() => {
-        const fetchSponsors = async () => {
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${apiUrl}/api/sponsor-applications/active`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setSponsors(data.sponsors || []);
-                }
-            } catch (err) {
-                console.error('Error fetching marquee sponsors:', err);
-            }
-        };
-        fetchSponsors();
-    }, []);
+    if (loading || sponsors.length === 0) return null;
 
-    if (sponsors.length === 0) return null;
-
-    // Duplicate for seamless loop
-    const doubleSponsors = [...sponsors, ...sponsors, ...sponsors, ...sponsors];
+    // Duplicate for seamless loop (just 2x is usually enough if CSS handles it well, but keeping logic effectively similar but cleaner)
+    const doubleSponsors = [...sponsors, ...sponsors];
 
     return (
         <div className={styles.container}>
@@ -39,7 +24,12 @@ const SponsorMarquee = () => {
                 {doubleSponsors.map((s, idx) => (
                     <div key={`${s.id}-${idx}`} className={styles.item}>
                         {s.logo_url ? (
-                            <img src={s.logo_url} alt={s.sponsor_name} className={styles.marqueeLogo} />
+                            <img
+                                src={s.logo_url}
+                                alt={s.sponsor_name}
+                                className={styles.marqueeLogo}
+                                loading="lazy"
+                            />
                         ) : (
                             <span className={styles.nameOnly}>{s.sponsor_name}</span>
                         )}

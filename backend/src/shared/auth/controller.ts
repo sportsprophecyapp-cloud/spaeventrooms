@@ -147,7 +147,7 @@ export const getProfile = async (req: Request, res: Response) => {
     try {
         // 1. Fetch Core User Data (with equipped cosmetics)
         const userResult = await dbQuery(`
-            SELECT u.id, u.username, u.email, u.token_balance, u.total_points, u.current_level, u.referral_code, u.can_upload_custom,
+            SELECT u.id, u.username, u.email, u.token_balance, u.total_tickets, u.total_points, u.current_level, u.referral_code, u.can_upload_custom,
                    COALESCE(u.avatar_url, (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1)) as display_avatar,
                    (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'frame' LIMIT 1) as equipped_frame
             FROM users u WHERE u.id = $1`, [userId]);
@@ -313,10 +313,33 @@ export const googleLogin = async (req: Request, res: Response) => {
         await gamificationService.handleDailyLogin(user.id).catch((e: Error) => console.error('Streak error:', e));
 
         // Refetch user to get updated balance after streak
-        const updatedUserRes = await dbQuery('SELECT token_balance, total_tickets, total_points, current_level FROM users WHERE id = $1', [user.id]);
+        const updatedUserRes = await dbQuery(`
+            SELECT u.token_balance, u.total_tickets, u.total_points, u.current_level, u.can_upload_custom,
+                   COALESCE(u.avatar_url, (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1)) as display_avatar,
+                   (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'frame' LIMIT 1) as equipped_frame
+            FROM users u WHERE u.id = $1`, [user.id]);
         const updatedUser = updatedUserRes.rows[0];
 
-        res.json({ success: true, token: jwtToken, user: { id: user.id, email: user.email, username: user.username, permissions: user.permissions, tokens: updatedUser.token_balance, tickets: updatedUser.total_tickets, points: updatedUser.total_points, level: updatedUser.current_level, referralCode: user.referral_code, canUploadCustom: user.can_upload_custom } });
+        res.json({
+            success: true,
+            token: jwtToken,
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                permissions: user.permissions,
+                tokens: updatedUser.token_balance,
+                tickets: updatedUser.total_tickets,
+                points: updatedUser.total_points,
+                level: updatedUser.current_level,
+                referralCode: user.referral_code,
+                canUploadCustom: updatedUser.can_upload_custom,
+                equipped: {
+                    avatar: updatedUser.display_avatar,
+                    frame: updatedUser.equipped_frame
+                }
+            }
+        });
 
     } catch (error) {
         console.error("Google Auth Error:", error);

@@ -11,13 +11,14 @@ export const handleGetMe = async (req: AuthRequest, res: Response) => {
         if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
 
         const userResult = await dbQuery(
-            `SELECT token_balance, total_points FROM users WHERE id = $1`,
+            `SELECT token_balance, total_tickets, total_points FROM users WHERE id = $1`,
             [userId]
         );
 
         if (userResult.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
 
         const totalXp = userResult.rows[0].total_points || 0;
+        const totalTickets = userResult.rows[0].total_tickets || 0;
         const { level, progressXp, nextLevelXp } = getLevelFromXp(totalXp);
 
         // Fetch equipped cosmetics
@@ -37,6 +38,7 @@ export const handleGetMe = async (req: AuthRequest, res: Response) => {
             total_points: totalXp,
             current_level: level,
             token_balance: userResult.rows[0].token_balance || 0,
+            total_tickets: totalTickets,
             progress_xp: progressXp,
             next_level_xp: nextLevelXp,
             equipped

@@ -1,0 +1,70 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+interface Sponsor {
+    id: number;
+    sponsor_name: string;
+    logo_url: string;
+    // Add other fields if needed based on what other components use, 
+    // but the minimal provided in the prompt was id, name, logo_url.
+    // I'll stick to what was requested unless I see more needed in other files.
+}
+
+interface SponsorContextType {
+    sponsors: Sponsor[];
+    loading: boolean;
+    error: string | null;
+    refetch: () => Promise<void>;
+}
+
+const SponsorContext = createContext<SponsorContextType | undefined>(undefined);
+
+export const SponsorProvider = ({ children }: { children: ReactNode }) => {
+    const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchSponsors = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const res = await fetch(`${apiUrl}/api/sponsor-applications/active`, {
+                cache: 'no-store'
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setSponsors(data.sponsors || []);
+            } else {
+                setError('Failed to fetch sponsors');
+            }
+        } catch (err) {
+            setError('Network error fetching sponsors');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSponsors();
+        // Refetch every 5 minutes to keep data fresh
+        const interval = setInterval(fetchSponsors, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <SponsorContext.Provider value={{ sponsors, loading, error, refetch: fetchSponsors }}>
+            {children}
+        </SponsorContext.Provider>
+    );
+};
+
+export const useSponsor = () => {
+    const context = useContext(SponsorContext);
+    if (context === undefined) {
+        throw new Error('useSponsor must be used within SponsorProvider');
+    }
+    return context;
+};
