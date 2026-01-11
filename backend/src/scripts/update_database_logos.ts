@@ -1,6 +1,6 @@
 import pool from '../shared/database';
-import fs from 'fs';
 import path from 'path';
+import manifest from '../data/logo_manifest.json';
 
 const leagueMappings: { [key: string]: string } = {
     'Premier League': 'premier-league',
@@ -14,11 +14,10 @@ const leagueMappings: { [key: string]: string } = {
 const manualMappings: { [key: string]: string } = {
     // Premier League
     'Manchester United': 'man-united',
+    'Man United': 'man-united',
     'Manchester City': 'man-city',
-    'Aston Villa': 'aston-villa',
-    'Wolverhampton Wanderers': 'wolves',
-    'West Ham United': 'west-ham',
-    'Newcastle United': 'newcastle',
+    'Man City': 'man-city',
+    'Tottenham': 'tottenham',
     'Tottenham Hotspur': 'tottenham',
     'Brighton': 'brighton',
     'Brighton and Hove Albion': 'brighton',
@@ -27,25 +26,42 @@ const manualMappings: { [key: string]: string } = {
     'Nottingham Forest': 'nottingham-forest',
     'Sheffield Utd': 'sheffield-united',
     'Luton Town': 'luton-town',
+    'Wolverhampton Wanderers': 'wolves',
+    'West Ham United': 'west-ham',
+    'Newcastle United': 'newcastle',
+    'Fulham': 'fulham',
+    'Brentford': 'brentford',
+    'Aston Villa': 'aston-villa',
 
     // La Liga
+    'Real Sociedad': 'real-sociedad',
+    'Atletico Madrid': 'atletico-madrid',
+    'Atlético Madrid': 'atletico-madrid',
     'CA Osasuna': 'osasuna',
+    'Osasuna': 'osasuna',
     'RC Celta de Vigo': 'celta-vigo',
+    'Celta Vigo': 'celta-vigo',
+    'RC Celta': 'celta-vigo',
     'Athletic Club': 'athletic-bilbao',
+    'Athletic Bilbao': 'athletic-bilbao',
     'Alavés': 'alaves',
     'Leganés': 'leganes',
-    'Cádiz': 'cadiz',
-    'Atlético Madrid': 'atletico-madrid',
+    'Espanyol': 'espanyol',
+    'RCD Espanyol': 'espanyol',
+    'Elche CF': 'elche',
+    'Elche': 'elche',
 
     // Bundesliga
     'TSG Hoffenheim': 'hoffenheim',
     'Eintracht Frankfurt': 'frankfurt',
     'Borussia Monchengladbach': 'monchengladbach',
     'Borussia M\'gladbach': 'monchengladbach',
+    'Borussia Mönchengladbach': 'monchengladbach',
     '1. FC Köln': 'koln',
     'SV Werder Bremen': 'werder-bremen',
     'Bayer 04 Leverkusen': 'bayer-leverkusen',
     'FC Bayern München': 'bayern-munich',
+    'Bayern Munich': 'bayern-munich',
     'RB Leipzig': 'rb-leipzig',
     '1. FC Heidenheim 1846': 'heidenheim',
     'Heidenheim': 'heidenheim',
@@ -59,25 +75,39 @@ const manualMappings: { [key: string]: string } = {
     'AS Monaco': 'monaco',
     'RC Lens': 'lens',
     'Lille OSC': 'lille',
+    'Lille': 'lille',
     'OGC Nice': 'nice',
+    'Nice': 'nice',
     'Montpellier HSC': 'montpellier',
+    'Montpellier': 'montpellier',
     'Paris Saint-Germain': 'psg',
     'Paris Saint Germain': 'psg',
+    'PSG': 'psg',
     'Stade Brestois 29': 'brest',
+    'Brest': 'brest',
     'Stade Rennais': 'rennes',
-    'Angers SCO': 'angers',
+    'Rennes': 'rennes',
+    'Angers SCO': 'changers',
+    'Angers': 'angers',
     'Le Havre AC': 'le-havre',
     'Le Havre': 'le-havre',
     'Stade de Reims': 'reims',
+    'Reims': 'reims',
 
     // Serie A
     'Inter Milan': 'inter-milan',
+    'Inter': 'inter-milan',
     'AC Milan': 'ac-milan',
     'AS Roma': 'as-roma',
+    'Roma': 'as-roma',
     'Hellas Verona': 'hellas-verona',
+    'Verona': 'hellas-verona',
     'Udinese Calcio': 'udinese',
+    'Udinese': 'udinese',
     'Venezia FC': 'venezia',
+    'Venezia': 'venezia',
     'Torino FC': 'torino',
+    'Torino': 'torino',
     'Genoa': 'genoa'
 };
 
@@ -113,15 +143,14 @@ export const updateDatabaseLogos = async () => {
             const manualBase = manualMappings[team.name];
             const baseKebab = manualBase || toKebabCase(team.name);
             const possibleNames = [
-                `${baseKebab}.png`,
-                `${baseKebab}.svg`
+                `\${baseKebab}.png`,
+                `\${baseKebab}.svg`
             ];
 
             let foundFilename = null;
-            const leagueDir = path.join(__dirname, `../../../frontend/public/logos/${leagueSlug}`);
+            const files = (manifest as any)[leagueSlug] || [];
 
-            if (fs.existsSync(leagueDir)) {
-                const files = fs.readdirSync(leagueDir);
+            if (files.length > 0) {
                 for (const possible of possibleNames) {
                     if (files.includes(possible)) {
                         foundFilename = possible;
@@ -129,48 +158,46 @@ export const updateDatabaseLogos = async () => {
                     }
                 }
 
-                // Fallback: search for a file that starts with the kebab name
                 if (!foundFilename) {
-                    const match = files.find(f => f.startsWith(baseKebab));
+                    const match = files.find((f: string) => f.startsWith(baseKebab));
                     if (match) foundFilename = match;
                 }
             }
 
             if (foundFilename) {
-                const publicUrl = `/logos/${leagueSlug}/${foundFilename}`;
+                const publicUrl = \`/logos/\${leagueSlug}/\${foundFilename}\`;
 
-                await client.query(`
+                await client.query(\`
                     UPDATE soccer_matches 
                     SET home_logo = $1 
                     WHERE home_team = $2
-                `, [publicUrl, team.name]);
+                \`, [publicUrl, team.name]);
 
-                await client.query(`
+                await client.query(\`
                     UPDATE soccer_matches 
                     SET away_logo = $1 
                     WHERE away_team = $2
-                `, [publicUrl, team.name]);
+                \`, [publicUrl, team.name]);
 
                 updateCount++;
             } else {
-                console.warn(`⚠️ Could not find logo for team: ${team.name} in leagues/${leagueSlug} (tried ${baseKebab})`);
+                console.warn(\`⚠️ Could not find logo for team: \${team.name} in leagues/\${leagueSlug} (tried \${baseKebab})\`);
                 missingCount++;
             }
         }
 
-        console.log(`✅ Update complete!`);
-        console.log(`📊 Updated: ${updateCount} teams`);
-        console.log(`❌ Missing: ${missingCount} teams`);
+        console.log(\`✅ Update complete!\`);
+        console.log(\`📊 Updated: \${updateCount} teams\`);
+        console.log(\`❌ Missing: \${missingCount} teams\`);
 
     } catch (err) {
         console.error('❌ Update failed:', err);
     } finally {
         client.release();
-        process.exit(0);
     }
 };
 
 // If running directly
 if (require.main === module) {
-    updateDatabaseLogos();
+    updateDatabaseLogos().then(() => process.exit(0));
 }
