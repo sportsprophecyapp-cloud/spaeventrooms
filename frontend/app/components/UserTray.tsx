@@ -7,10 +7,12 @@ import { useAuth } from '../context/AuthContext';
 import styles from './UserTray.module.css';
 import WinnerAlerter from './WinnerAlerter/WinnerAlerter';
 import DailyLoginButton from './DailyLoginButton';
+import TokenShop from './TokenShop';
 
 const UserTray = () => {
     const { user, logout } = useAuth();
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isShopOpen, setIsShopOpen] = useState(false);
     const pathname = usePathname();
 
     // Auto-close dropdown when route changes
@@ -29,16 +31,23 @@ const UserTray = () => {
     return (
         <div className={styles.wrapper}>
             <WinnerAlerter />
-            <div className={styles.tray} onClick={() => setIsExpanded(!isExpanded)}>
-                <div className={styles.stat}>
-                    <span className={styles.icon}>🪙</span>
-                    <span className={styles.value}>{user.tokens ?? 0}</span>
+            <div className={styles.tray}>
+                <div className={styles.balances} onClick={() => setIsExpanded(!isExpanded)}>
+                    <div className={styles.stat}>
+                        <span className={styles.icon}>🪙</span>
+                        <span className={styles.value}>{user.tokens ?? 0}</span>
+                    </div>
+                    <div className={styles.stat}>
+                        <span className={styles.icon}>🎫</span>
+                        <span className={styles.value}>{user.tickets ?? 0}</span>
+                    </div>
                 </div>
-                <div className={styles.stat}>
-                    <span className={styles.icon}>🎫</span>
-                    <span className={styles.value}>{user.tickets ?? 0}</span>
-                </div>
-                <div className={`${styles.avatarWrapper} ${user.equipped?.frame ? styles.hasFrame : ''}`}>
+
+                <div
+                    className={`${styles.avatarContainer} ${user.equipped?.frame ? styles.hasFrame : ''}`}
+                    onClick={() => setIsShopOpen(true)}
+                    title="Open Cosmetic Lab"
+                >
                     {user.equipped?.frame && (
                         <div className={styles.frameOverlay}>
                             <img src={user.equipped.frame} alt="Frame" />
@@ -51,6 +60,7 @@ const UserTray = () => {
                             user.username?.substring(0, 2).toUpperCase()
                         )}
                     </div>
+                    <div className={styles.editBadge}>⚙️</div>
                 </div>
             </div>
 
@@ -79,6 +89,10 @@ const UserTray = () => {
                         <button onClick={logout} className={`${styles.item} ${styles.logoutBtn}`}>Logout</button>
                     </div>
                 </div>
+            )}
+
+            {isShopOpen && (
+                <TokenShop onClose={() => setIsShopOpen(false)} />
             )}
         </div>
     );

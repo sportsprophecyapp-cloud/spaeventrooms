@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import styles from './page.module.css';
 import RewardCenter from '@/app/components/RewardCenter/RewardCenter';
+import TokenShop from '@/app/components/TokenShop';
 
 // RESTORED: This interface is critical for the page to function.
 interface UserProfile {
@@ -59,6 +60,7 @@ const ProfilePage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [copyMessage, setCopyMessage] = useState('');
     const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
+    const [isShopOpen, setIsShopOpen] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated || !token) return;
@@ -135,7 +137,10 @@ const ProfilePage = () => {
             </div>
 
             <header className={styles.header}>
-                <div className={`${styles.avatarWrapper} ${profile.equipped?.frame ? styles.hasFrame : ''}`}>
+                <div
+                    className={`${styles.avatarWrapper} ${profile.equipped?.frame ? styles.hasFrame : ''} ${isOwnProfile ? styles.editable : ''}`}
+                    onClick={() => isOwnProfile && setIsShopOpen(true)}
+                >
                     {profile.equipped?.frame && (
                         <div className={styles.frameOverlay}>
                             <img src={profile.equipped.frame} alt="Frame" />
@@ -148,6 +153,7 @@ const ProfilePage = () => {
                             profile.username[0].toUpperCase()
                         )}
                     </div>
+                    {isOwnProfile && <div className={styles.editBadge}>⚙️</div>}
                 </div>
                 <div className={styles.profileInfo}>
                     <div className={styles.nameRow}>
@@ -331,6 +337,10 @@ const ProfilePage = () => {
                     </>
                 )}
             </div>
+
+            {isShopOpen && (
+                <TokenShop onClose={() => setIsShopOpen(false)} />
+            )}
         </div>
     );
 };

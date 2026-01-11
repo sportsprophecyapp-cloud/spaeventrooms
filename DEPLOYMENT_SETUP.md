@@ -29,7 +29,7 @@ Must be configured in Render Dashboard:
 - `DATABASE_URL`: PostgreSQL connection string (auto-provided by Render)
 - `REDIS_URL`: Redis connection string (auto-provided by Render)
 - `STRIPE_SECRET_KEY`: For automated sponsorship payments
-- `API_FOOTBALL_KEY`: Required for official team logos and high-frequency syncs
+- `API_FOOTBALL_KEY`: Required for live match data synchronizations (Logos are now served locally)
 - `RENDER_EXTERNAL_URL`: Points to the backend for the Keep-Alive service
 
 ### Frontend

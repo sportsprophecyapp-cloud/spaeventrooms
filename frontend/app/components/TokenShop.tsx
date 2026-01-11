@@ -62,11 +62,20 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                     <div className={styles.previewSection}>
                         <h2 className={styles.title}>Cosmetic Lab</h2>
                         <div className={styles.previewContainer}>
-                            <div className={styles.avatarWrapper} style={{
-                                borderColor: previewItem?.type === 'frame' ? 'var(--accent)' : 'var(--glass-border)'
-                            }}>
+                            <div className={`${styles.avatarWrapper} ${previewItem?.type === 'frame' ? styles.hasFrame : ''}`}>
+                                {previewItem?.type === 'frame' && (
+                                    <div className={styles.frameOverlay}>
+                                        <img src={previewItem.imageUrl} alt="Frame Preview" />
+                                    </div>
+                                )}
                                 <div className={styles.previewAvatar}>
-                                    {displayInitial}
+                                    {previewItem?.type === 'avatar' ? (
+                                        <img src={previewItem.imageUrl} alt="Avatar Preview" className={styles.avatarImg} />
+                                    ) : (
+                                        user?.equipped?.avatar ? (
+                                            <img src={user.equipped.avatar} alt="Current Avatar" className={styles.avatarImg} />
+                                        ) : displayInitial
+                                    )}
                                 </div>
                             </div>
                             <p className={styles.previewName}>@{displayUsername}</p>

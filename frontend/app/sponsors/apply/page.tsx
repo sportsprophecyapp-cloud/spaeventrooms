@@ -112,7 +112,7 @@ const SponsorApplyPage = () => {
 
                     <div className={styles.inputRow}>
                         <div className={styles.inputGroup}>
-                            <label>Brand Logo</label>
+                            <label>Brand Logo <span className={styles.guideline}>(512x512px Transparent PNG)</span></label>
                             <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'logo')} className={styles.fileInput} />
                         </div>
                         <div className={styles.inputGroup}>
@@ -133,7 +133,7 @@ const SponsorApplyPage = () => {
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label>Prize Image</label>
+                        <label>Prize / Promo Image <span className={styles.guideline}>(1200x400px Recommended)</span></label>
                         <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'prize')} className={styles.fileInput} />
                     </div>
 

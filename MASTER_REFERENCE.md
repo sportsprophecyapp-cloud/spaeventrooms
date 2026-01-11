@@ -15,7 +15,7 @@
 - **Sequential Key Rotation:** Supports comma-separated lists for both `THE_ODDS_API_KEY` and `API_FOOTBALL_KEY`.
 - **Fail-Over Logic:** Automatic rotation to the next key index on 401/429 errors.
 - **Accuracy:** Frontend fuzzy-match logic ensures unique match cards across live API providers.
-- **Logo Integrity System**: Powered by `backend/src/data/logo_manifest.json` for reliable production synchronization.
+- **Logo Integrity System**: Finalized. Powered by `backend/src/data/logo_manifest.json` for 100% reliable local production synchronization.
 - **Payload Limits**: Backend `express.json` is set to **50MB** to support high-resolution sponsor design uploads.
 
 ## 🚀 Deployment & Build Rules

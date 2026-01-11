@@ -61,7 +61,11 @@ const LeagueGrid: React.FC<LeagueGridProps> = ({ onLeagueSelect }) => {
             <div className={styles.grid}>
                 {leagues.map(league => (
                     <div key={league.league_id} className={`${styles.card} glass`} onClick={() => onLeagueSelect(league.league_id)}>
-                        <img src={league.logo_url} alt={`${league.name} logo`} className={styles.logo} />
+                        <img
+                            src={league.logo_url}
+                            alt={`${league.name} logo`}
+                            className={`${styles.logo} ${league.league_id === 'soccer_france_ligue_one' ? styles.ligueOne : ''}`}
+                        />
                         <span className={styles.name}>{league.name}</span>
                     </div>
                 ))}

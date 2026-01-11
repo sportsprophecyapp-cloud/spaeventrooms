@@ -4,45 +4,85 @@
 
 /* THE TRAY (INLINE VERSION) */
 .tray {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.balances {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--glass-border);
-    padding: 4px 12px;
-    border-radius: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     gap: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.tray:hover {
+.balances:hover {
     border-color: var(--accent);
     background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .stat {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
 }
 
 .icon {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
 }
 
 .value {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 900;
     color: white;
+    letter-spacing: 0.5px;
 }
 
-.avatarWrapper {
+.avatarContainer {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.avatarContainer:hover {
+    transform: scale(1.1);
+}
+
+.avatarContainer:hover .editBadge {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.editBadge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: var(--accent);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s ease;
+    border: 2px solid #000;
+    z-index: 5;
 }
 
 .frameOverlay {
