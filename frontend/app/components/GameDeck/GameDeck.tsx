@@ -25,7 +25,7 @@ interface GameDeckProps {
 
 const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
-    const { token } = useAuth();
+    const { token, refreshUser } = useAuth();
     const router = useRouter();
     const [gone, setGone] = useState<Set<number>>(() => new Set());
     const [matches, setMatches] = useState<Match[]>([]);
@@ -91,6 +91,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             if (response.ok) {
                 setMessage({ text: `Prediction saved: ${pickName}`, type: 'success' });
+                // Update balance immediately
+                refreshUser();
                 return true;
             } else if (response.status === 402) {
                 // Out of tokens - don't retry

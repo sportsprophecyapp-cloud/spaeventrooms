@@ -10,7 +10,7 @@ import DailyLoginButton from './DailyLoginButton';
 import TokenShop from './TokenShop';
 
 const UserTray = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, refreshUser } = useAuth();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isShopOpen, setIsShopOpen] = useState(false);
     const pathname = usePathname();
@@ -19,6 +19,15 @@ const UserTray = () => {
     useEffect(() => {
         setIsExpanded(false);
     }, [pathname]);
+
+    // HEARTBEAT: Keep tokens/tickets in sync across tabs or after background updates
+    useEffect(() => {
+        if (!user) return;
+        const interval = setInterval(() => {
+            refreshUser();
+        }, 30000); // 30 seconds
+        return () => clearInterval(interval);
+    }, [user, refreshUser]);
 
     // GUARD CLAUSE: Do not render anything if the user object is not yet loaded.
     if (!user) {
