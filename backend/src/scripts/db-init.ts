@@ -126,6 +126,23 @@ const initDB = async () => {
                 prize_escrow_received BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+ 
+            -- 7.1 Sync room_sponsors for v4.8
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_description TEXT;
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS application_id INTEGER REFERENCES sponsor_applications(id);
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_escrow_received BOOLEAN DEFAULT FALSE;
+ 
+            DO $$ 
+            BEGIN 
+                -- Rename 'name' to 'sponsor_name' if it exists
+                IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='room_sponsors' AND column_name='name') THEN
+                    ALTER TABLE room_sponsors RENAME COLUMN name TO sponsor_name;
+                END IF;
+                -- Rename 'link_url' to 'website_url' if it exists
+                IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='room_sponsors' AND column_name='link_url') THEN
+                    ALTER TABLE room_sponsors RENAME COLUMN link_url TO website_url;
+                END IF;
+            END $$;
 
             -- 8. Gamification & Cosmetics (Phase 9 & 10)
             ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code VARCHAR(20) UNIQUE;

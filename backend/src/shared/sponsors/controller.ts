@@ -19,7 +19,7 @@ export const getSponsors = async (req: AuthRequest, res: Response) => {
 
 export const createSponsor = async (req: AuthRequest, res: Response) => {
     const { roomId } = req.params;
-    const { name, logo_url, link_url } = req.body;
+    const { name, logo_url, website_url } = req.body;
 
     if (!name) {
         return res.status(400).json({ message: 'Sponsor name is required' });
@@ -27,10 +27,10 @@ export const createSponsor = async (req: AuthRequest, res: Response) => {
 
     try {
         const result = await query(
-            `INSERT INTO room_sponsors (room_id, sponsor_name, logo_url, link_url)
+            `INSERT INTO room_sponsors (room_id, sponsor_name, logo_url, website_url)
              VALUES ($1, $2, $3, $4)
-             RETURNING id, room_id, sponsor_name AS name, logo_url, link_url`,
-            [roomId, name, logo_url, link_url]
+             RETURNING id, room_id, sponsor_name AS name, logo_url, website_url`,
+            [roomId, name, logo_url, website_url]
         );
 
         res.status(201).json(result.rows[0]);

@@ -36,7 +36,7 @@ export const getPlacementsByRoom = async (req: Request, res: Response) => {
     const { roomId } = req.params;
     try {
         const result = await query(`
-            SELECT sponsor_name AS name, logo_url, link_url FROM room_sponsors 
+            SELECT sponsor_name AS name, logo_url, website_url FROM room_sponsors 
             WHERE (room_id = $1 OR room_id IS NULL) AND is_active = TRUE
         `, [roomId]);
         res.json(result.rows);
