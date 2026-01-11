@@ -139,6 +139,7 @@ export const getProfile = async (req: Request, res: Response) => {
                 username: user.username,
                 email: user.email,
                 tokens: user.token_balance,
+                tickets: user.total_tickets,
                 points: user.total_points,
                 level: user.current_level,
                 referral_code: user.referral_code,
