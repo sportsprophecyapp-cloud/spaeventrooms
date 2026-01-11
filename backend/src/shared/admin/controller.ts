@@ -20,9 +20,9 @@ export const getAllSupporters = async (req: Request, res: Response) => {
         `;
         const result = await query(sql);
         res.json(result.rows);
-    } catch (err) { 
+    } catch (err) {
         console.error("[FATAL] CRASH while restoring prediction_count:", err);
-        res.status(500).json({ error: 'A critical and persistent error occurred on the server.' }); 
+        res.status(500).json({ error: 'A critical and persistent error occurred on the server.' });
     }
 };
 
@@ -132,5 +132,20 @@ export const getRooms = async (req: Request, res: Response) => {
     res.status(501).json({ message: 'Not Implemented' });
 };
 export const getSponsorStats = async (req: Request, res: Response) => {
-    res.status(501).json({ message: 'Not Implemented' });
+    try {
+        const activeSponsorsRes = await query("SELECT COUNT(*) FROM sponsor_applications WHERE status = 'approved'");
+        const activeSponsorshipsRes = await query("SELECT COUNT(*) FROM room_sponsors WHERE is_active = TRUE");
+        const predictionsRes = await query("SELECT COUNT(*) FROM soccer_predictions");
+
+        const stats = {
+            totalActiveSponsors: parseInt(activeSponsorsRes.rows[0].count, 10) || 0,
+            totalActiveSponsorships: parseInt(activeSponsorshipsRes.rows[0].count, 10) || 0,
+            overallPredictionCount: parseInt(predictionsRes.rows[0].count, 10) || 0
+        };
+
+        res.json(stats);
+    } catch (err) {
+        console.error('Failed to get sponsor stats:', err);
+        res.status(500).json({ error: 'Failed to fetch sponsor stats' });
+    }
 };
