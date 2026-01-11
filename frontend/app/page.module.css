@@ -31,8 +31,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem 0 2rem;
-    /* Reduced top padding as container already has 60px */
+    padding: 1.5rem 0 1rem;
+    /* Compact header spacing */
     position: relative;
     z-index: 1;
     animation: fadeIn 0.8s ease-out;
@@ -79,7 +79,7 @@
     max-width: 600px;
     text-align: center;
     line-height: 1.6;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .quickNav {
@@ -112,8 +112,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4rem;
-    padding-bottom: 6rem;
+    gap: 2rem;
+    padding-bottom: 4rem;
     position: relative;
     z-index: 1;
 }

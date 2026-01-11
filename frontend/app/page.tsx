@@ -51,7 +51,6 @@ const HomePage = () => {
                 </Link>
             </header>
             <main className={styles.main}>
-                <div className={styles.sectionTitle}>{t('select_arena')}</div>
                 <div className={styles.roomGrid}>
                     {rooms.map(room => (
                         <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`} style={{ borderColor: room.active ? room.color : undefined }}>
