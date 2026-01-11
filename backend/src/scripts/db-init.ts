@@ -161,6 +161,21 @@ const initDB = async () => {
         // Set your user as the SUPER ADMIN
         await client.query("UPDATE users SET permissions = '[\"super_admin\"]'::jsonb WHERE email = 'sportsprophecyapp@gmail.com'");
 
+        // 10. Clean up any hardcoded production URLs in match logos
+        await client.query(`
+            UPDATE soccer_matches 
+            SET home_logo = REPLACE(home_logo, 'https://www.sportsprophecyapp.com', ''),
+                away_logo = REPLACE(away_logo, 'https://www.sportsprophecyapp.com', '')
+            WHERE home_logo LIKE 'https://www.sportsprophecyapp.com%' 
+               OR away_logo LIKE 'https://www.sportsprophecyapp.com%'
+        `);
+
+        await client.query(`
+            UPDATE team_logos 
+            SET logo_url = REPLACE(logo_url, 'https://www.sportsprophecyapp.com', '')
+            WHERE logo_url LIKE 'https://www.sportsprophecyapp.com%'
+        `);
+
         console.log('✅ DB Initialized: Granular permissions system is now active.');
     } catch (err) {
         console.error('❌ DB sync failed:', err);
