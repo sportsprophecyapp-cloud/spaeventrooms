@@ -41,10 +41,10 @@ export const resolveSoccerPredictions = async () => {
                 const newTotalTickets = total_tickets + ticketsEarned; // NEW
                 const { level: newLevel } = getLevelFromXp(newTotalPoints);
 
-                // Update user points, tickets, and level
+                // Update user points, tokens, tickets, and level
                 await query(
-                    'UPDATE users SET total_points = $1, total_tickets = $2, current_level = $3 WHERE id = $4',
-                    [newTotalPoints, newTotalTickets, newLevel, user_id]
+                    'UPDATE users SET total_points = $1, total_tickets = $2, current_level = $3, token_balance = token_balance + $4 WHERE id = $5',
+                    [newTotalPoints, newTotalTickets, newLevel, pointsEarned, user_id]
                 );
 
                 // Log the entry for future prize draws

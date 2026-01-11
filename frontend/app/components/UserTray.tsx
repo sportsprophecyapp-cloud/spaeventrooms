@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import styles from './UserTray.module.css';
 import WinnerAlerter from './WinnerAlerter/WinnerAlerter';
+import DailyLoginButton from './DailyLoginButton';
 
 const UserTray = () => {
     const { user, logout } = useAuth();
@@ -48,6 +49,11 @@ const UserTray = () => {
                         <p className={styles.name}>@{user.username}</p>
                         <p className={styles.level}>Level {user.level ?? 1} Supporter</p>
                     </div>
+
+                    <div className={styles.dailyReward}>
+                        <DailyLoginButton />
+                    </div>
+
                     <div className={styles.menu}>
                         <Link href={`/profile/${user.id}`} className={styles.item}>👤 My Profile</Link>
                         <Link href="/draw" className={styles.item}>🎁 Prize Draws</Link>

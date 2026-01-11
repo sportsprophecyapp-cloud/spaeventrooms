@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './RewardCenter.module.css';
 import { useAuth } from '@/app/context/AuthContext';
 import FeedbackModal from '../FeedbackModal/FeedbackModal';
+import DailyLoginButton from '../DailyLoginButton';
 
 interface Voucher {
     id: string;
@@ -73,8 +74,13 @@ const RewardCenter = () => {
                     onClose={() => setShowFeedbackFor(null)}
                 />
             )}
-            <h3>REWARD CENTER</h3>
-            <p>Your collection of claimed prize vouchers.</p>
+            <div className={styles.header}>
+                <div>
+                    <h3>REWARD CENTER</h3>
+                    <p>Your collection of claimed prize vouchers.</p>
+                </div>
+                <DailyLoginButton />
+            </div>
             <div className={styles.voucherList}>
                 {vouchers.map(voucher => (
                     <div key={voucher.id} className={`${styles.voucher} ${voucher.claimed ? styles.claimed : ''}`}>
