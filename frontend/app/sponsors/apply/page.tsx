@@ -8,6 +8,7 @@ const SponsorApplyPage = () => {
     const [formData, setFormData] = useState({
         brand_name: '',
         contact_email: '',
+        website_url: '',
         arena_target: 'soccer',
         prize_description: '',
         agreed: false
@@ -48,6 +49,7 @@ const SponsorApplyPage = () => {
                 body: JSON.stringify({
                     brand_name: formData.brand_name,
                     contact_email: formData.contact_email,
+                    website_url: formData.website_url,
                     arena_target: formData.arena_target,
                     prize_description: formData.prize_description,
                     logo_url: logoPreview,
@@ -95,6 +97,17 @@ const SponsorApplyPage = () => {
                     <div className={styles.inputGroup}>
                         <label>Brand Name</label>
                         <input required value={formData.brand_name} onChange={e => setFormData({ ...formData, brand_name: e.target.value })} placeholder="e.g. Takomo" />
+                    </div>
+
+                    <div className={styles.inputRow}>
+                        <div className={styles.inputGroup}>
+                            <label>Contact Email</label>
+                            <input type="email" required value={formData.contact_email} onChange={e => setFormData({ ...formData, contact_email: e.target.value })} placeholder="email@brand.com" />
+                        </div>
+                        <div className={styles.inputGroup}>
+                            <label>Website URL (Optional)</label>
+                            <input value={formData.website_url} onChange={e => setFormData({ ...formData, website_url: e.target.value })} placeholder="https://..." />
+                        </div>
                     </div>
 
                     <div className={styles.inputRow}>
