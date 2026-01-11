@@ -104,6 +104,7 @@ const manualMappings: { [key: string]: string } = {
     'Reims': 'reims',
     'Metz': 'metz',
     'FC Metz': 'metz',
+    'Paris FC': 'paris-fc',
 
     // Serie A
     'Inter Milan': 'inter-milan',

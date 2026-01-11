@@ -45,9 +45,14 @@ export const submitApplication = async (req: Request, res: Response) => {
         );
 
         res.json({ success: true, message: 'Campaign proposal received.', application_id: result.rows[0].id });
-    } catch (error) {
-        console.error('Submit application failed:', error);
-        res.status(500).json({ success: false, error: 'Transmission failed.' });
+    } catch (error: any) {
+        console.error('[SPONSOR SUBMIT ERROR]:', {
+            message: error.message,
+            detail: error.detail,
+            code: error.code,
+            stack: error.stack
+        });
+        res.status(500).json({ success: false, error: 'Transmission failed.', detail: error.message });
     }
 };
 

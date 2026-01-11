@@ -85,6 +85,19 @@ const initDB = async () => {
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS creative_config JSONB;
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS agreed_to_terms BOOLEAN DEFAULT FALSE;
 
+            -- 6.1.1 Fix column types and nullability for v4.7.1
+            ALTER TABLE sponsor_applications ALTER COLUMN logo_url TYPE TEXT;
+            ALTER TABLE sponsor_applications ALTER COLUMN prize_image_url TYPE TEXT;
+            ALTER TABLE sponsor_applications ALTER COLUMN website_url TYPE TEXT;
+            ALTER TABLE sponsor_applications ALTER COLUMN company_name DROP NOT NULL;
+            ALTER TABLE sponsor_applications ALTER COLUMN sponsor_type DROP NOT NULL;
+            ALTER TABLE sponsor_applications ALTER COLUMN contact_email DROP NOT NULL; -- Ensure legacy rows don't block
+            ALTER TABLE sponsor_applications ALTER COLUMN brand_name SET NOT NULL; -- Use brand_name going forward
+            ALTER TABLE sponsor_applications ALTER COLUMN contact_email SET NOT NULL; -- Re-enforce for consistency if needed, but safer to just let it pass if coming from new flow
+            
+            -- Ensure contact_email is 255 if it was smaller
+            ALTER TABLE sponsor_applications ALTER COLUMN contact_email TYPE VARCHAR(255);
+
             -- 6.2 Data Migration: Map old fields to new fields if necessary
             UPDATE sponsor_applications SET brand_name = company_name WHERE brand_name IS NULL AND company_name IS NOT NULL;
             UPDATE sponsor_applications SET prize_description = product_description WHERE prize_description IS NULL AND product_description IS NOT NULL;
