@@ -4,11 +4,21 @@
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
 **PATH:** `/Users/williamcommu/Desktop/mobileV31crashed`
 
-## 🚀 CURRENT STATUS (Phase 14 - COMPLETE ✅)
-**Version**: 4.6.0  
-**Release Date**: January 10, 2026
+## 🚀 CURRENT STATUS (Phase 17 - COMPLETE ✅)
+**Version**: 4.7.0  
+**Release Date**: January 11, 2026
 
 This release delivers a **Premium Card UX/UX Overhaul**. We have unified the card architecture into a "Hybrid Card" system, introducing deep glassmorphism (`blur(30px)`), multi-layered lighting (rim lights, inner shadows), and tactile tap interactions. The visual fidelity has been significantly increased to match a "Tier 1" sports app aesthetic.
+
+### ✅ COMPLETED (Phase 17 - Sponsor Stability & Logo Manifest - January 11, 2026):
+1.  **Sponsor Creative Studio Fixes:**
+    *   **Payload Limit**: Increased `express.json` limit to 50MB to support high-res Base64 designs.
+    *   **Field Alignment**: Added missing `contact_email` and `website_url` fields to the public form and backend validation.
+    *   **Error Reporting**: Implemented "Deep Inspection" alerts that identify specific missing fields to the user.
+2.  **Manifest-Guided Logo Sync:**
+    *   **Production Portability**: Created `logo_manifest.json` so the backend can sync logos in the Render environment without direct file system access.
+    *   **Automated Sync**: Integrated `update_database_logos.ts` into `db-init.ts` for 100% automated origin-consistent paths on every deploy.
+    *   **Relative Path Standard**: Converted all database logo URLs to prefix-free relative paths (`/logos/...`) for multi-domain stability.
 
 ### ✅ COMPLETED (Phase 16 - Card UX/UI Refinement - January 10, 2026):
 1.  **Premium Visual System:**
@@ -198,9 +208,9 @@ This roadmap details how we will expand the new swipeable UI to include multiple
 ### 🐛 KNOWN ISSUES (Active Development)
 
 ### In Progress
-- **Multi-Prediction System**: Planning for "Match Winner + 2 Extras" (Team to Score First, BTTS).
+- **Multi-Prediction System**: Planning for "Match Winner + 2 Extras" (Team to Score First, BTTS). [NEXT PHASE]
 
 ### Under Investigation
 - None at this time
 
-*Last Updated: January 10, 2026*
+*Last Updated: January 11, 2026*

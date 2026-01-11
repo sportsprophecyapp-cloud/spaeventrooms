@@ -29,13 +29,14 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 - `[ ]` **Visual Feedback:** Tapping a team region triggers a visible "press" animation.
 - `[ ]` **Swipe Stability:** Swiping a card follows the finger smoothly without jitter or flipping.
 - `[ ]` **Hybrid Consistency:** Static cards (`MatchCard`) and interactive cards (`GameDeck`) look identical.
+- `[x]` **Logo Synchronization:** Matches display high-quality local logos instead of external URLs (Verified via Manifest).
 
 ### Sponsor & Admin
 - `[ ]` **Admin User View:** Admin can view the full list of registered supporters in the Command Center.
 - `[ ]` **Admin Prediction Count:** The "Predictions" count in the admin user view is accurate.
 - `[ ]` **Admin Role Update:** Admin can successfully promote another user to 'admin' via the Command Center.
 ### Sponsor & Draw Management (v1.5 Update)
-- `[ ]` **Application Submission:** Founding Package forms correctly save to `sponsor_applications`.
+- `[x]` **Application Submission:** Founding Package forms correctly save to `sponsor_applications` (Verified 50MB and Field Alignment).
 - `[ ]` **Admin Hub Approval:** Approving an application instantly creates a Room Sponsor and a Prize Draw.
 - `[ ]` **Draw Visibility:** New draws appear in the `/draw` room immediately after approval.
 - `[ ]` **Draw Removal:** Admin can successfully delete an active draw from the Sponsor Hub.
@@ -45,5 +46,5 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 ### Balance & Layout (v1.7 Update)
 - `[ ]` **Header Balance:** User's tokens and tickets display correctly in UserTray (no zero defaults).
 - `[ ]` **Real-time Sync:** Ticket count decreases immediately in header after entering a draw.
-- `[ ]` **Header Layout:** Navbar (60px) does not overlap content on Home, Rooms, or Profile pages.
+- `[x]` **Header Layout:** Navbar (60px) does not overlap content on Home, Rooms, or Profile pages.
 - `[ ]` **Mobile Spacing:** Layout remains consistent and accessible on mobile viewports.
