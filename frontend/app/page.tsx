@@ -18,9 +18,9 @@ const HomePage = () => {
     const [showOnboarding, setShowOnboarding] = React.useState(false);
 
     const rooms = [
-        { id: 'soccer', name: 'Soccer Arena', description: 'Forecast match winners and events from the world\'s top leagues.', icon: '◈', color: 'var(--accent)', active: true },
-        { id: 'nfl', name: 'NFL Hub', description: 'Pro predictions and game scripts. Coming for the playoffs!', icon: '🏈', color: '#ff4b4b', active: false },
-        { id: 'f1', name: 'F1 Paddock', description: 'Podium picks and fastest lap prophecies. Season starts soon.', icon: '🏎️', color: '#ffd700', active: false }
+        { id: 'soccer', name: 'Soccer Arena', description: 'Forecast match winners and events from the world\'s top leagues.', icon: '/assets/arenas/soccer-arena.png', color: 'var(--accent)', active: true },
+        { id: 'nfl', name: 'NFL Hub', description: 'Pro predictions and game scripts. Coming for the playoffs!', icon: '/assets/arenas/nfl-hub.png', color: '#ff4b4b', active: false },
+        { id: 'f1', name: 'F1 Paddock', description: 'Podium picks and fastest lap prophecies. Season starts soon.', icon: '/assets/arenas/f1-paddock.png', color: '#ffd700', active: false }
     ];
 
     React.useEffect(() => {
@@ -50,13 +50,14 @@ const HomePage = () => {
                     <p className={styles.tagline}>{t('tagline')}</p>
                 </Link>
             </header>
-
             <main className={styles.main}>
                 <div className={styles.sectionTitle}>{t('select_arena')}</div>
                 <div className={styles.roomGrid}>
                     {rooms.map(room => (
                         <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`} style={{ borderColor: room.active ? room.color : undefined }}>
-                            <div className={styles.roomIcon} style={{ borderColor: room.color }}>{room.icon}</div>
+                            <div className={styles.roomIcon} style={{ borderColor: room.color }}>
+                                <img src={room.icon} alt={room.name} className={styles.arenaImg} />
+                            </div>
                             <h3>{room.name}</h3>
                             <p>{room.description}</p>
                             {room.active ? (
