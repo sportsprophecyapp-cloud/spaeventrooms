@@ -61,6 +61,7 @@ const manualMappings: { [key: string]: string } = {
     'Borussia M\'gladbach': 'monchengladbach',
     'Borussia Mönchengladbach': 'monchengladbach',
     '1. FC Köln': 'koln',
+    'Hamburger SV': 'hamburger-sv',
     'SV Werder Bremen': 'werder-bremen',
     'Bayer 04 Leverkusen': 'bayer-leverkusen',
     'FC Bayern München': 'bayern-munich',
@@ -78,6 +79,8 @@ const manualMappings: { [key: string]: string } = {
     'FC St. Pauli': 'st-pauli',
 
     // Ligue 1
+    'Lorient': 'lorient',
+    'FC Lorient': 'lorient',
     'AS Monaco': 'monaco',
     'RC Lens': 'lens',
     'Lille OSC': 'lille',
@@ -194,6 +197,17 @@ export const updateDatabaseLogos = async () => {
                 console.warn(`⚠️ Could not find logo for team: ${team.name} in leagues/${leagueSlug} (tried ${baseKebab})`);
                 missingCount++;
             }
+        }
+
+        // 2. Update League Logos
+        console.log('🌍 Updating League Logos...');
+        for (const [dbName, slug] of Object.entries(leagueMappings)) {
+            const leagueUrl = `/logos/leagues/${slug}.png`;
+            await client.query(`
+                UPDATE soccer_matches 
+                SET league_logo = $1 
+                WHERE league = $2
+            `, [leagueUrl, dbName]);
         }
 
         console.log(`✅ Update complete!`);
