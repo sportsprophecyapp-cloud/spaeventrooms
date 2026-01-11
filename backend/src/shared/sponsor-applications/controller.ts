@@ -28,7 +28,19 @@ export const submitApplication = async (req: Request, res: Response) => {
             (brand_name, contact_email, website_url, arena_target, frequency, prize_quantity, prize_description, logo_url, prize_image_url, creative_config, agreed_to_terms, status)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending')
             RETURNING id`,
-            [brand_name, contact_email, website_url, arena_target || 'soccer', frequency || 'monthly', prize_quantity || 1, prize_description, logo_url, prize_image_url, JSON.stringify(creative_config), agreed]
+            [
+                brand_name,
+                contact_email,
+                website_url || null,
+                arena_target || 'soccer',
+                frequency || 'monthly',
+                prize_quantity || 1,
+                prize_description,
+                logo_url || null,
+                prize_image_url || null,
+                JSON.stringify(creative_config || {}),
+                agreed || false
+            ]
         );
 
         res.json({ success: true, message: 'Campaign proposal received.', application_id: result.rows[0].id });

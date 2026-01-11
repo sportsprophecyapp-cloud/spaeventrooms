@@ -1,60 +1,41 @@
 # Local Logo Migration Guide
 
-This guide outlines the process for migrating team logos from external URLs to local storage, served directly by our Render server.
+This guide outlines the process for migrating team logos from external URLs to local storage.
+
+## 🏆 Current Status: 100% COMPLETE
+
+As of January 10, 2026, the logo database for the **Top 5 European Leagues** is fully populated and verified.
+
+### 📊 League Statistics:
+- **Premier League**: 20/20
+- **La Liga**: 20/20
+- **Serie A**: 20/20
+- **Bundesliga**: 18/18
+- **Ligue 1**: 18/18
+
+**Total Logos Migrated: 96 Teams**
 
 ## 1. Directory Structure
-
-The following directories have been created in `frontend/public/logos/`. Place your `.png` files here.
+All logos are stored in `frontend/public/logos/[league]/`.
 
 ```
 frontend/public/logos/
-  ├── premier-league/   (e.g., arsenal.png)
-  ├── la-liga/          (e.g., real-madrid.png)
-  ├── bundesliga/       (e.g., bayern-munich.png)
-  ├── serie-a/          (e.g., juventus.png)
-  ├── ligue-1/          (e.g., psg.png)
-  └── mls/              (e.g., inter-miami.png)
+  ├── premier-league/   (20 files)
+  ├── la-liga/          (20 files)
+  ├── bundesliga/       (18 files)
+  ├── serie-a/          (20 files)
+  └── ligue-1/          (18 files)
 ```
 
-## 2. Naming Standard
-- **Format**: Lowercase, hyphen-separated (kebab-case).
-- **Extension**: `.png`
-- **Dimensions**: At least 200x200px.
-- **Background**: Transparent.
+## 2. Naming & Format Standard
+- **Naming**: lowercase kebab-case (e.g., `man-city.png`).
+- **Format**: Transparent PNG or SVG.
+- **Implementation**: The app automatically loads logos based on the team's slug (kebab-case name).
 
-## 3. Implementation Workflow
-
-### Step A: Download & Name Logos
-Download logos for all teams (see list below) and place them in the correct folders locally.
-
-### Step B: Push to GitHub/Render
-Use the deploy script or git commands to push the new files.
-```bash
-./deploy.sh "chore: Add team logos"
-```
-Once deployed, Render will automatically serve these files.
-**Test URL**: `https://www.sportsprophecyapp.com/logos/premier-league/arsenal.png`
-
-### Step C: Update Database
-Run the provided SQL script (`backend/src/scripts/update_logos.sql`) to link the teams to these new URLs.
-
-## 4. Current Status (Automated Migration)
-
-- **Database**: All teams have been updated to point to local paths (e.g., `https://www.sportsprophecyapp.com/logos/premier-league/arsenal.png`).
-- **Files**: An automated script attempted to download logos.
-    - **If you see a team initial (e.g., "A")**: The logo file is missing from the folder.
-    - **Action**: Download the logo manually and place it in the corresponding folder in `frontend/public/logos`.
-
-## 5. Team List & Filenames (Reference)
-
-### Premier League (`/premier-league/`)
-| Team Name | Filename |
-| :--- | :--- |
-| Arsenal | `arsenal.png` |
-| ... | ... |
-
-*(Refer to `backend/src/scripts/update_logos_auto.sql` for the full list of mapped paths)*
-
-## 6. Testing
-1.  **Direct URL Access**: Try opening a logo URL in your browser.
-2.  **App Verification**: Open the app and check the Game Deck. If a logo fails to load, it will fall back to the placeholder letter.
+## 3. Maintenance Guide
+To add a new team or update an existing logo:
+1.  **Source**: Find the team on `football-logos.cc` or similar.
+2.  **Save**: Ensure the file has a transparent background.
+3.  **Place**: Move the file to the correct directory in `frontend/public/logos/[league]/`.
+4.  **Rename**: Ensure the filename is lowercase kebab-case (e.g., `new-team.png`).
+5.  **Verify**: The app will automatically attempt to load the file based on the team's slug.

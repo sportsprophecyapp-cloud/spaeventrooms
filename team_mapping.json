@@ -1,0 +1,510 @@
+{
+    "premier-league": [
+        [
+            "Arsenal",
+            "arsenal.png"
+        ],
+        [
+            "Aston Villa",
+            "aston-villa.png"
+        ],
+        [
+            "Bournemouth",
+            "bournemouth.png"
+        ],
+        [
+            "Brentford",
+            "brentford.png"
+        ],
+        [
+            "Brighton",
+            "brighton.png"
+        ],
+        [
+            "Chelsea",
+            "chelsea.png"
+        ],
+        [
+            "Crystal Palace",
+            "crystal-palace.png"
+        ],
+        [
+            "Everton",
+            "everton.png"
+        ],
+        [
+            "Fulham",
+            "fulham.png"
+        ],
+        [
+            "Liverpool",
+            "liverpool.png"
+        ],
+        [
+            "Luton Town",
+            "luton-town.png"
+        ],
+        [
+            "Man City",
+            "man-city.png"
+        ],
+        [
+            "Man United",
+            "man-united.png"
+        ],
+        [
+            "Newcastle",
+            "newcastle.png"
+        ],
+        [
+            "Nottingham Forest",
+            "nottingham-forest.png"
+        ],
+        [
+            "Sheffield United",
+            "sheffield-united.png"
+        ],
+        [
+            "Tottenham",
+            "tottenham.png"
+        ],
+        [
+            "West Ham",
+            "west-ham.png"
+        ],
+        [
+            "Wolves",
+            "wolves.png"
+        ],
+        [
+            "Burnley",
+            "burnley.png"
+        ]
+    ],
+    "la-liga": [
+        [
+            "Real Madrid",
+            "real-madrid.png"
+        ],
+        [
+            "Barcelona",
+            "barcelona.png"
+        ],
+        [
+            "Atletico Madrid",
+            "atletico-madrid.png"
+        ],
+        [
+            "Valencia",
+            "valencia.png"
+        ],
+        [
+            "Villarreal",
+            "villarreal.png"
+        ],
+        [
+            "Real Sociedad",
+            "real-sociedad.png"
+        ],
+        [
+            "Betis",
+            "betis.png"
+        ],
+        [
+            "Getafe",
+            "getafe.png"
+        ],
+        [
+            "Rayo Vallecano",
+            "rayo-vallecano.png"
+        ],
+        [
+            "Sevilla",
+            "sevilla.png"
+        ],
+        [
+            "Cádiz",
+            "cadiz.png"
+        ],
+        [
+            "Almería",
+            "almeria.png"
+        ],
+        [
+            "Las Palmas",
+            "las-palmas.png"
+        ],
+        [
+            "Osasuna",
+            "osasuna.png"
+        ],
+        [
+            "Girona",
+            "girona.png"
+        ],
+        [
+            "Mallorca",
+            "mallorca.png"
+        ],
+        [
+            "Celta Vigo",
+            "celta-vigo.png"
+        ],
+        [
+            "Real Valladolid",
+            "real-valladolid.png"
+        ],
+        [
+            "Elche",
+            "elche.png"
+        ],
+        [
+            "Athletic Bilbao",
+            "athletic-bilbao.png"
+        ]
+    ],
+    "serie-a": [
+        [
+            "Juventus",
+            "juventus.png"
+        ],
+        [
+            "Inter Milan",
+            "inter-milan.png"
+        ],
+        [
+            "AC Milan",
+            "ac-milan.png"
+        ],
+        [
+            "Roma",
+            "roma.png"
+        ],
+        [
+            "Lazio",
+            "lazio.png"
+        ],
+        [
+            "Napoli",
+            "napoli.png"
+        ],
+        [
+            "Fiorentina",
+            "fiorentina.png"
+        ],
+        [
+            "Atalanta",
+            "atalanta.png"
+        ],
+        [
+            "Torino",
+            "torino.png"
+        ],
+        [
+            "Sassuolo",
+            "sassuolo.png"
+        ],
+        [
+            "Bologna",
+            "bologna.png"
+        ],
+        [
+            "Monza",
+            "monza.png"
+        ],
+        [
+            "Cagliari",
+            "cagliari.png"
+        ],
+        [
+            "Empoli",
+            "empoli.png"
+        ],
+        [
+            "Lecce",
+            "lecce.png"
+        ],
+        [
+            "Sampdoria",
+            "sampdoria.png"
+        ],
+        [
+            "Frosinone",
+            "frosinone.png"
+        ],
+        [
+            "Verona",
+            "verona.png"
+        ],
+        [
+            "Venezia",
+            "venezia.png"
+        ],
+        [
+            "Salernitana",
+            "salernitana.png"
+        ]
+    ],
+    "bundesliga": [
+        [
+            "Bayern Munich",
+            "bayern-munich.png"
+        ],
+        [
+            "Borussia Dortmund",
+            "borussia-dortmund.png"
+        ],
+        [
+            "RB Leipzig",
+            "rb-leipzig.png"
+        ],
+        [
+            "Bayer Leverkusen",
+            "bayer-leverkusen.png"
+        ],
+        [
+            "Borussia Mönchengladbach",
+            "borussia-moenchengladbach.png"
+        ],
+        [
+            "Eintracht Frankfurt",
+            "eintracht-frankfurt.png"
+        ],
+        [
+            "SC Freiburg",
+            "sc-freiburg.png"
+        ],
+        [
+            "VfB Stuttgart",
+            "vfb-stuttgart.png"
+        ],
+        [
+            "TSG Hoffenheim",
+            "tsg-hoffenheim.png"
+        ],
+        [
+            "Mainz 05",
+            "mainz-05.png"
+        ],
+        [
+            "FC Cologne",
+            "fc-cologne.png"
+        ],
+        [
+            "Union Berlin",
+            "union-berlin.png"
+        ],
+        [
+            "Werder Bremen",
+            "werder-bremen.png"
+        ],
+        [
+            "VfL Wolfsburg",
+            "vfl-wolfsburg.png"
+        ],
+        [
+            "VfL Bochum",
+            "vfl-bochum.png"
+        ],
+        [
+            "FC Augsburg",
+            "fc-augsburg.png"
+        ],
+        [
+            "Schalke 04",
+            "schalke-04.png"
+        ],
+        [
+            "Hertha BSC",
+            "hertha-bsc.png"
+        ]
+    ],
+    "ligue-1": [
+        [
+            "PSG",
+            "psg.png"
+        ],
+        [
+            "Marseille",
+            "marseille.png"
+        ],
+        [
+            "Monaco",
+            "monaco.png"
+        ],
+        [
+            "Lyon",
+            "lyon.png"
+        ],
+        [
+            "Lille",
+            "lille.png"
+        ],
+        [
+            "Rennes",
+            "rennes.png"
+        ],
+        [
+            "Nice",
+            "nice.png"
+        ],
+        [
+            "Strasbourg",
+            "strasbourg.png"
+        ],
+        [
+            "Reims",
+            "reims.png"
+        ],
+        [
+            "Lorient",
+            "lorient.png"
+        ],
+        [
+            "Angers",
+            "angers.png"
+        ],
+        [
+            "Ajaccio",
+            "ajaccio.png"
+        ],
+        [
+            "Toulouse",
+            "toulouse.png"
+        ],
+        [
+            "Nantes",
+            "nantes.png"
+        ],
+        [
+            "Brest",
+            "brest.png"
+        ],
+        [
+            "Le Havre",
+            "le-havre.png"
+        ],
+        [
+            "Clermont",
+            "clermont.png"
+        ],
+        [
+            "Montpellier",
+            "montpellier.png"
+        ]
+    ],
+    "mls": [
+        [
+            "Inter Miami",
+            "inter-miami.png"
+        ],
+        [
+            "LAFC",
+            "lafc.png"
+        ],
+        [
+            "LA Galaxy",
+            "la-galaxy.png"
+        ],
+        [
+            "Seattle Sounders",
+            "seattle-sounders.png"
+        ],
+        [
+            "Portland Timbers",
+            "portland-timbers.png"
+        ],
+        [
+            "San Jose Earthquakes",
+            "san-jose-earthquakes.png"
+        ],
+        [
+            "Vancouver Whitecaps",
+            "vancouver-whitecaps.png"
+        ],
+        [
+            "Houston Dynamo",
+            "houston-dynamo.png"
+        ],
+        [
+            "FC Dallas",
+            "fc-dallas.png"
+        ],
+        [
+            "Sporting Kansas City",
+            "sporting-kansas-city.png"
+        ],
+        [
+            "Minnesota United",
+            "minnesota-united.png"
+        ],
+        [
+            "Chicago Fire",
+            "chicago-fire.png"
+        ],
+        [
+            "Columbus Crew",
+            "columbus-crew.png"
+        ],
+        [
+            "New York City FC",
+            "new-york-city-fc.png"
+        ],
+        [
+            "New York Red Bulls",
+            "new-york-red-bulls.png"
+        ],
+        [
+            "Philadelphia Union",
+            "philadelphia-union.png"
+        ],
+        [
+            "Atlanta United",
+            "atlanta-united.png"
+        ],
+        [
+            "Nashville SC",
+            "nashville-sc.png"
+        ],
+        [
+            "D.C. United",
+            "dc-united.png"
+        ],
+        [
+            "Toronto FC",
+            "toronto-fc.png"
+        ],
+        [
+            "Montreal Impact",
+            "montreal-impact.png"
+        ],
+        [
+            "Orlando City",
+            "orlando-city.png"
+        ],
+        [
+            "New England Revolution",
+            "new-england-revolution.png"
+        ],
+        [
+            "Cincinnati FC",
+            "cincinnati-fc.png"
+        ],
+        [
+            "Real Salt Lake",
+            "real-salt-lake.png"
+        ],
+        [
+            "Colorado Rapids",
+            "colorado-rapids.png"
+        ],
+        [
+            "San Diego Loyal",
+            "san-diego-loyal.png"
+        ],
+        [
+            "Austin FC",
+            "austin-fc.png"
+        ]
+    ]
+}
