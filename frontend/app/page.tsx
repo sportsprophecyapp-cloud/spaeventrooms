@@ -18,8 +18,8 @@ const HomePage = () => {
     const [showOnboarding, setShowOnboarding] = React.useState(false);
 
     const rooms = [
-        { id: 'soccer', name: 'Soccer Arena', description: 'Forecast match winners and events from the world\'s top leagues.', icon: '/assets/arenas/soccer-arena.png', color: 'var(--accent)', active: true },
-        { id: 'nfl', name: 'NFL Hub', description: 'Pro predictions and game scripts. Coming for the playoffs!', icon: '/assets/arenas/nfl-hub.png', color: '#ff4b4b', active: false },
+        { id: 'soccer', name: 'Soccer Arena', description: 'Forecast match winners and events from the world\'s top leagues.', icon: '/assets/arenas/soccer-arena.jpg', color: 'var(--accent)', active: true },
+        { id: 'nfl', name: 'NFL Hub', description: 'Pro predictions and game scripts. Coming for the playoffs!', icon: '/assets/arenas/nfl-hub.jpg', color: '#ff4b4b', active: false },
         { id: 'f1', name: 'F1 Paddock', description: 'Podium picks and fastest lap prophecies. Season starts soon.', icon: '/assets/arenas/f1-paddock.png', color: '#ffd700', active: false }
     ];
 
