@@ -32,11 +32,14 @@ const manualMappings: { [key: string]: string } = {
     'Fulham': 'fulham',
     'Brentford': 'brentford',
     'Aston Villa': 'aston-villa',
+    'Leeds United': 'leeds-united',
+    'Sunderland': 'sunderland',
 
     // La Liga
     'Real Sociedad': 'real-sociedad',
     'Atletico Madrid': 'atletico-madrid',
     'Atlético Madrid': 'atletico-madrid',
+    'Oviedo': 'real-oviedo',
     'CA Osasuna': 'osasuna',
     'Osasuna': 'osasuna',
     'RC Celta de Vigo': 'celta-vigo',
@@ -63,11 +66,13 @@ const manualMappings: { [key: string]: string } = {
     'FC Bayern München': 'bayern-munich',
     'Bayern Munich': 'bayern-munich',
     'RB Leipzig': 'rb-leipzig',
+    '1. FC Heidenheim': 'heidenheim',
     '1. FC Heidenheim 1846': 'heidenheim',
     'Heidenheim': 'heidenheim',
     'SC Freiburg': 'freiburg',
     'VfB Stuttgart': 'stuttgart',
     'VfL Wolfsburg': 'wolfsburg',
+    'FSV Mainz 05': 'mainz',
     'VfL Bochum 1848': 'bochum',
     'VfL Bochum': 'bochum',
     'FC St. Pauli': 'st-pauli',
@@ -94,6 +99,8 @@ const manualMappings: { [key: string]: string } = {
     'Le Havre': 'le-havre',
     'Stade de Reims': 'reims',
     'Reims': 'reims',
+    'Metz': 'metz',
+    'FC Metz': 'metz',
 
     // Serie A
     'Inter Milan': 'inter-milan',
@@ -109,7 +116,9 @@ const manualMappings: { [key: string]: string } = {
     'Venezia': 'venezia',
     'Torino FC': 'torino',
     'Torino': 'torino',
-    'Genoa': 'genoa'
+    'Genoa': 'genoa',
+    'Atalanta BC': 'atalanta',
+    'Sassuolo': 'sassuolo'
 };
 
 const toKebabCase = (str: string) => {
