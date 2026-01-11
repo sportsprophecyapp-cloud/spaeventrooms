@@ -62,6 +62,17 @@
     filter: drop-shadow(0 0 30px rgba(0, 112, 243, 0.2));
 }
 
+.taglineLink {
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease;
+    display: block;
+}
+
+.taglineLink:hover {
+    transform: scale(1.02);
+}
+
 .tagline {
     font-size: 1.2rem;
     color: var(--neutral);

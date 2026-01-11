@@ -2,7 +2,7 @@ export const translations: any = {
     en: {
         // Existing
         welcome_bridge: "Sports Prophecy welcomes you to the",
-        tagline: "Predict Live Sports. Compete for Prizes. 100% Free.",
+        tagline: "Predict Live Sports. Compete for Sponsor Prizes. 100% Free.",
         how_it_works_title: "How It Works",
         how_step_1: "Pick Your Sport",
         how_step_1_desc: "Choose from Soccer, NFL, F1, and more",
@@ -39,7 +39,7 @@ export const translations: any = {
     },
     id: { // Bahasa Indonesia
         welcome_bridge: "Sports Prophecy menyambut Anda di",
-        tagline: "Prediksi Olahraga Langsung. Bersaing untuk Hadiah. 100% Gratis.",
+        tagline: "Prediksi Olahraga Langsung. Bersaing untuk Hadiah Sponsor. 100% Gratis.",
         how_it_works_title: "Cara Kerjanya",
         how_step_1: "Pilih Olahraga Anda",
         how_step_1_desc: "Pilih dari Sepak Bola, NFL, F1, dan lainnya",
@@ -75,7 +75,7 @@ export const translations: any = {
     },
     th: { // Thai
         welcome_bridge: "Sports Prophecy ยินดีต้อนรับคุณสู่",
-        tagline: "ทายผลกีฬาสด แข่งขันเพื่อรางวัล ฟรี 100%",
+        tagline: "ทายผลกีฬาสด แข่งขันเพื่อรางวัลสปอนเซอร์ ฟรี 100%",
         how_it_works_title: "วิธีการทำงาน",
         how_step_1: "เลือกกีฬาของคุณ",
         how_step_1_desc: "เลือกจากฟุตบอล, NFL, F1 และอื่นๆ",

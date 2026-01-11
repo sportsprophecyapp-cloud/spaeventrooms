@@ -46,7 +46,9 @@ const HomePage = () => {
                     <h1>EVENTS <span style={{ color: 'var(--accent)' }}>ARENA</span></h1>
                 </div>
                 <SponsorMarquee />
-                <p className={styles.tagline}>{t('tagline')}</p>
+                <Link href="/draw" className={styles.taglineLink}>
+                    <p className={styles.tagline}>{t('tagline')}</p>
+                </Link>
             </header>
 
             <main className={styles.main}>

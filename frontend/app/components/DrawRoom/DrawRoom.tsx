@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './DrawRoom.module.css';
 import { useAuth } from '@/app/context/AuthContext';
 import { useLanguage } from '@/app/context/LanguageContext';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 interface Draw {
@@ -177,11 +178,16 @@ const DrawRoom = () => {
             <header className={styles.header}>
                 <button onClick={() => router.back()} className={styles.backBtn}>{t('back_to_leagues')}</button>
                 <h1>{t('draw_room_title')}</h1>
-                <div className={styles.ticketBadge}>
-                    <span className={styles.ticketIcon}>🎫</span>
-                    <div className={styles.ticketInfo}>
-                        <span className={styles.ticketLabel}>{t('your_tickets')}</span>
-                        <span className={styles.ticketValue}>{ticketCount}</span>
+                <div className={styles.headerRight}>
+                    <Link href="/sponsors/apply" className={styles.sponsorBtn}>
+                        💎 Sponsor This Arena
+                    </Link>
+                    <div className={styles.ticketBadge}>
+                        <span className={styles.ticketIcon}>🎫</span>
+                        <div className={styles.ticketInfo}>
+                            <span className={styles.ticketLabel}>{t('your_tickets')}</span>
+                            <span className={styles.ticketValue}>{ticketCount}</span>
+                        </div>
                     </div>
                 </div>
             </header>
