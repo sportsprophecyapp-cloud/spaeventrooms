@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 export interface Sponsor {
     id: number;
@@ -53,7 +53,7 @@ export const SponsorProvider = ({ children }: { children: ReactNode }) => {
         return () => clearInterval(interval);
     }, []);
 
-    const trackSponsor = async (sponsorId: number, eventType: 'impression' | 'click', roomId?: string, matchId?: string) => {
+    const trackSponsor = useCallback(async (sponsorId: number, eventType: 'impression' | 'click', roomId?: string, matchId?: string) => {
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
             // We don't wait for this - fire and forget to not block UI
@@ -70,7 +70,7 @@ export const SponsorProvider = ({ children }: { children: ReactNode }) => {
         } catch (err) {
             // Silently fail
         }
-    };
+    }, []);
 
     return (
         <SponsorContext.Provider value={{ sponsors, loading, error, refetch: fetchSponsors, trackSponsor }}>
