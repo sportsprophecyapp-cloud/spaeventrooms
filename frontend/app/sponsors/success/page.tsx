@@ -1,3 +1,10 @@
+'use client';
+
+import React, { useEffect, Suspense } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import styles from './page.module.css';
+
 const SuccessContent = () => {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
