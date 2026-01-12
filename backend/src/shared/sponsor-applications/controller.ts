@@ -39,7 +39,7 @@ export const submitApplication = async (req: Request, res: Response) => {
             'tier_premium': 59900 // $599.00
         };
 
-        const priceAmount = TIER_PRICES[package_tier] || 9900; // Default to Starter if unknown
+        const priceAmount = TIER_PRICES[package_tier] !== undefined ? TIER_PRICES[package_tier] : 9900; // Allow 0, default to 9900 only if undefined
 
         // Create Stripe Session
         let session = null;
