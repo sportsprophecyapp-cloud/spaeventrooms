@@ -353,6 +353,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             trackSponsor(sponsor.id, 'click', 'match_card', match.match_id);
+                                            if (sponsor.website_url) {
+                                                window.open(sponsor.website_url, '_blank', 'noopener,noreferrer');
+                                            }
                                         }}
                                     >
                                         <span className={styles.poweredBy}>POWERED BY</span>

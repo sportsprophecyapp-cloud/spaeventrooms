@@ -2,16 +2,17 @@
 
 import React from 'react';
 import styles from './SponsorMarquee.module.css';
-import { useSponsor } from '@/app/context/SponsorContext';
-
-interface Sponsor {
-    id: number;
-    sponsor_name: string;
-    logo_url: string;
-}
+import { useSponsor, Sponsor } from '@/app/context/SponsorContext';
 
 const SponsorMarquee = () => {
     const { sponsors, loading, trackSponsor } = useSponsor();
+
+    const handleSponsorClick = (s: Sponsor) => {
+        trackSponsor(s.id, 'click', 'global_marquee');
+        if (s.website_url) {
+            window.open(s.website_url, '_blank', 'noopener,noreferrer');
+        }
+    };
 
     React.useEffect(() => {
         if (!loading && sponsors.length > 0) {
@@ -33,7 +34,7 @@ const SponsorMarquee = () => {
                     <div
                         key={`${s.id}-${idx}`}
                         className={styles.item}
-                        onClick={() => trackSponsor(s.id, 'click', 'global_marquee')}
+                        onClick={() => handleSponsorClick(s)}
                     >
                         {s.logo_url ? (
                             <img

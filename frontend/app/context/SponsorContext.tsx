@@ -2,13 +2,11 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface Sponsor {
+export interface Sponsor {
     id: number;
     sponsor_name: string;
     logo_url: string;
-    // Add other fields if needed based on what other components use, 
-    // but the minimal provided in the prompt was id, name, logo_url.
-    // I'll stick to what was requested unless I see more needed in other files.
+    website_url?: string;
 }
 
 interface SponsorContextType {
