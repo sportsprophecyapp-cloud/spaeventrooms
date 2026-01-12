@@ -1,4 +1,5 @@
 import { query } from '../database';
+import { socketService } from '../socket/SocketService';
 
 /**
  * PRIZE DRAW SERVICE
@@ -56,6 +57,13 @@ export const pickWinner = async (drawId: number) => {
             'UPDATE prize_draws SET winner_id = $1, status = \'completed\', draw_date = NOW() WHERE id = $2',
             [winner.id, drawId]
         );
+
+        // Notify winner in-app via Socket
+        socketService.emitToRoom(`user:${winner.id}`, 'private_message', {
+            from: 'System',
+            message: `🎉 Congratulations! You have won the prize draw! Check your profile for details.`,
+            timestamp: new Date().toISOString()
+        });
 
         return winner;
     } catch (err) {
