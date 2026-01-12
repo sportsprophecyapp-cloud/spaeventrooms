@@ -11,26 +11,26 @@ const pricingTiers = [
         name: 'Founding Partner',
         price: '0',
         features: [
-            'Priority Ticker Placement',
+            'Prize Draw Hosting (REQUIRED)',
             'Exclusive "Founding Brand" Badge',
-            'Custom Campaign Sandbox',
-            'Strategic Partnership Status'
+            'Strategic Partnership Status',
+            'Full Audience Engagement Reports'
         ],
-        cta: 'APPLY NOW',
+        cta: 'START FREE',
         color: '#ffd700', // Gold
-        special: 'EARLY ACCESS - FIRST 5 ONLY'
+        special: 'EARLY ACCESS - LIMITED'
     },
     {
         id: 'starter',
         name: 'The Ticker',
         price: '99',
         features: [
+            'Includes everything in Founding',
             'Global News Marquee Visibility',
             'Rotating Brand Placement (All Pages)',
-            'Real-Time Match Integration',
-            'Audience Engagement Reports'
+            'Prize Draws: OPTIONAL'
         ],
-        cta: 'SECURE SPOT',
+        cta: 'UPGRADE TO TICKER',
         color: 'var(--neutral)'
     },
     {
@@ -38,12 +38,12 @@ const pricingTiers = [
         name: 'Prize Host',
         price: '299',
         features: [
+            'Includes everything in Ticker',
             'Dedicated Prize Card Integration',
-            'Interactive Prize Entry Hub',
             'Match Card Sponsorship Rotation',
-            'Standard Global Marquee Presence'
+            'Priority Analytics Dashboard'
         ],
-        cta: 'HOST A DRAW',
+        cta: 'GET PRIZE HOST',
         color: 'var(--accent)'
     },
     {
@@ -51,10 +51,10 @@ const pricingTiers = [
         name: 'Arena Headliner',
         price: '599',
         features: [
-            'Exclusive Room Header Branding',
-            'Premium Header Takeover Placement',
-            'Lead Prize Grid Positioning',
-            'Priority Match Card Sponsorship'
+            'Includes everything in Prize Host',
+            'Exclusive Room Header Takeover',
+            'Premium Header Branding Rights',
+            'Priority Match Card Positioning'
         ],
         cta: 'GO HEADLINE',
         color: '#764ba2'
