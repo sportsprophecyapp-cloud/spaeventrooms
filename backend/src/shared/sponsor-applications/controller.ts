@@ -238,3 +238,31 @@ export const deleteSponsor = async (req: AuthRequest, res: Response) => {
 
 export const generateInvoice = async (req: Request, res: Response) => res.json({ success: true });
 export const markPaymentPaid = async (req: Request, res: Response) => res.json({ success: true });
+
+// 4. PUBLIC/INTERNAL: VERIFY PAYMENT
+export const verifyPayment = async (req: Request, res: Response) => {
+    try {
+        const { session_id } = req.body;
+        if (!session_id) return res.status(400).json({ success: false, error: 'Session ID required' });
+
+        // Retrieve session directly from Stripe
+        const session = await stripe.checkout.sessions.retrieve(session_id);
+
+        if (session.payment_status === 'paid') {
+            // Update DB
+            await dbQuery(
+                `UPDATE sponsor_applications 
+                 SET status = 'pending_approval'
+                 WHERE stripe_session_id = $1`,
+                [session_id]
+            );
+            return res.json({ success: true, message: 'Payment confirmed.' });
+        } else {
+            return res.json({ success: false, message: 'Payment not completed.' });
+        }
+
+    } catch (error: any) {
+        console.error('[PAYMENT VERIFY ERROR]:', error);
+        res.status(500).json({ success: false, error: 'Verification failed' });
+    }
+};

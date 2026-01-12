@@ -10,7 +10,12 @@ const pricingTiers = [
         id: 'founding',
         name: 'Founding Partner',
         price: '0',
-        features: ['Priority Ticker Placement', 'Exclusive "Founding Brand" Badge', 'Custom Campaign Sandbox', 'Monthly Prize Escrow Deal'],
+        features: [
+            'Priority Ticker Placement',
+            'Exclusive "Founding Brand" Badge',
+            'Custom Campaign Sandbox',
+            'Strategic Partnership Status'
+        ],
         cta: 'APPLY NOW',
         color: '#ffd700', // Gold
         special: 'EARLY ACCESS - FIRST 5 ONLY'
@@ -19,7 +24,12 @@ const pricingTiers = [
         id: 'starter',
         name: 'The Ticker',
         price: '99',
-        features: ['Logo in Global Marquee', 'Rotates on All Pages', 'Live Match Integration', 'Supporter Insights'],
+        features: [
+            'Global News Marquee Visibility',
+            'Rotating Brand Placement (All Pages)',
+            'Real-Time Match Integration',
+            'Audience Engagement Reports'
+        ],
         cta: 'SECURE SPOT',
         color: 'var(--neutral)'
     },
@@ -27,7 +37,12 @@ const pricingTiers = [
         id: 'growth',
         name: 'Prize Host',
         price: '299',
-        features: ['Dedicated Prize Draw Card', 'Users CLICK to Enter', 'Match Card Rotation', 'Logo in Global Marquee'],
+        features: [
+            'Dedicated Prize Card Integration',
+            'Interactive Prize Entry Hub',
+            'Match Card Sponsorship Rotation',
+            'Standard Global Marquee Presence'
+        ],
         cta: 'HOST A DRAW',
         color: 'var(--accent)'
     },
@@ -35,7 +50,12 @@ const pricingTiers = [
         id: 'premium',
         name: 'Arena Headliner',
         price: '599',
-        features: ['Official Room Sponsor', 'Header Takeover Branding', '#1 Spot in Prize Grid', 'Premium Match Card Rotation'],
+        features: [
+            'Exclusive Room Header Branding',
+            'Premium Header Takeover Placement',
+            'Lead Prize Grid Positioning',
+            'Priority Match Card Sponsorship'
+        ],
         cta: 'GO HEADLINE',
         color: '#764ba2'
     }
