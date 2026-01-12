@@ -84,6 +84,7 @@ const initDB = async () => {
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_image_url TEXT;
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS creative_config JSONB;
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS agreed_to_terms BOOLEAN DEFAULT FALSE;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS stripe_session_id VARCHAR(255);
 
             -- 6.1.1 Fix column types and nullability for v4.7.1
             ALTER TABLE sponsor_applications ALTER COLUMN logo_url TYPE TEXT;
