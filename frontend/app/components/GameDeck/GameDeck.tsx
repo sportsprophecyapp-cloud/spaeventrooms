@@ -120,6 +120,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     // Use a ref for immediate feedback to avoid race conditions during drag end
     const goneRef = React.useRef<Set<number>>(new Set());
+    const exitPositions = React.useRef<Map<number, { x: number, y: number, rot: number }>>(new Map());
 
     // Sync ref with state on mount/updates
     useEffect(() => {
@@ -154,6 +155,11 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             // Calculate exit position
             const exitX = (window.innerWidth + 200) * dir;
+            const exitY = 100 * dir;
+            const exitRot = dir * 45;
+
+            // Save exit position so safety net knows where to keep it
+            exitPositions.current.set(index, { x: exitX, y: exitY, rot: exitRot });
 
             // Fire animation IMMEDIATELY with no delay
             api.start(i => {
@@ -202,7 +208,30 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         }
     });
 
-    // Safety net removed to prevent bounce-back/teleportation
+    // Enforce "gone" state on re-renders (AGGRESSIVE Safety Net)
+    // This ensures cards that are gone explicitly STAY gone at their correct exit position
+    useEffect(() => {
+        if (gone.size > 0) {
+            gone.forEach(i => {
+                const savedPos = exitPositions.current.get(i);
+                if (savedPos) {
+                    api.start(index => {
+                        if (index === i) {
+                            return {
+                                x: savedPos.x,
+                                y: savedPos.y,
+                                rot: savedPos.rot,
+                                scale: 0.9,
+                                opacity: 0,
+                                immediate: true, // Force it instantly to prevent bounce
+                                display: 'none'
+                            };
+                        }
+                    });
+                }
+            });
+        }
+    }, [gone, api]);
 
     // Tracking for sponsor impressions on cards
     useEffect(() => {
