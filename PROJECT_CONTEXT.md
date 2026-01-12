@@ -11,6 +11,21 @@
 
 This release introduces critical **Performance Refactoring & Mobile Optimization**. The app now features a centralized `SponsorContext` for efficient data handling, robust retry logic for GameDeck predictions to prevent data loss, and fluid CSS response for perfect mobile rendering. Cosmetic updates are now instant and optimistic.
 
+### ✅ COMPLETED (Phase 20 - Sponsor Optimization & Mobile Ads - January 11, 2026):
+1.  **Sponsor UX & Navigation:**
+    *   **Unified Flow**: "Sponsor This Arena" now correctly routes through the Pricing Page first.
+    *   **Pre-Selection Logic**: Selecting a tier in Pricing auto-populates the Application Form (`/sponsors/apply?tier=[id]`).
+    *   **Admin Hub Upgrade**: Added visual image previews and a responsive grid layout for managing sponsor applications.
+2.  **Advanced Ad Inventory (Card Sponsorships):**
+    *   **"Powered By" Card Footer**: Unlocked massive inventory by adding sponsor slots to the match cards themselves.
+    *   **Zero-Config Rotation**: Automatically cycles through all active sponsors in a round-robin fashion for equal exposure.
+    *   **Mobile-First Visibility**: Increased logo size (45px) and text weight to ensure readability on small screens.
+3.  **Pricing Strategy Shift:**
+    *   **Depth over Breadth**: Reframed packages to sell "Exclusivity in the Soccer Room" (e.g., "The Ticker", "Prize Host", "Arena Headliner") instead of multi-room breadth.
+    *   **Feature Tiers**: Explicitly added "Match Card Rotation" as a key benefit for Growth and Premium tiers.
+4.  **Visual Fixes:**
+    *   **Banner Sizing**: Unlocked CSS constraints to allow "Official Room Sponsor" banners to be full-width on mobile.
+
 ### ✅ COMPLETED (Phase 19 - Performance & Mobile Refactoring - January 11, 2026):
 1.  **Sponsor Performance Core:**
     *   **Context-Driven Fetching**: Implemented `SponsorContext` to fetch active sponsors **once** per session (vs 5+ duplicate calls), reducing startup network load by 80%.

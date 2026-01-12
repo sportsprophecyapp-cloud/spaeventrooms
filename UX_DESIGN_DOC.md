@@ -13,6 +13,9 @@ Events Arena is a full-stack interactive engagement platform optimized for sport
 - **Sponsor Draw Strategy:** Active branded rooms for high-value prize distribution, tied to verified sponsors.
 
 ## 🎨 VISUAL SYSTEM (v2.3)
+-   **Integrated Ad Inventory:**
+    -   **Card Footers:** Non-intrusive "Powered By" glassmorphism footer on match cards for high-frequency impressions.
+    -   **Smart Banners:** Responsive 16:9 aspect ratio containers for "Official Room Sponsors" that adapt to device width.
 -   **Hybrid Card Architecture:** Unified design for static and interactive cards with deep glassmorphism (`blur(30px)`) and premium lighting.
 -   **Neon/Cyber Aesthetic:** High-contrast dark mode with neon accents (Cyan/Magenta) for team indicators.
 -   **Fluid Mobile Response:** All core interactive elements (Marquees, Cards) utilize `clamp()` driven sizing for device-agnostic perfect rendering (320px to 4k).
