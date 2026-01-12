@@ -1,17 +1,9 @@
-'use client';
-
-import React, { useEffect } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import styles from './page.module.css';
-
-const SuccessPage = () => {
+const SuccessContent = () => {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
 
     useEffect(() => {
         if (sessionId) {
-            // Verify payment
             const verify = async () => {
                 try {
                     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -42,6 +34,14 @@ const SuccessPage = () => {
                 </Link>
             </div>
         </div>
+    );
+};
+
+const SuccessPage = () => {
+    return (
+        <Suspense fallback={<div className={styles.container}>Loading verification...</div>}>
+            <SuccessContent />
+        </Suspense>
     );
 };
 
