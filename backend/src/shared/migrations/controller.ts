@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { dbQuery } from '../database/db';
+import { query as dbQuery } from '../database';
 
 /**
  * Admin-only endpoint to run database migrations
