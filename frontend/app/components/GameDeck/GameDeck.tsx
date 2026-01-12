@@ -158,18 +158,29 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             setGone(prev => new Set(prev).add(index));
             setPredictionCount(prev => prev + 1);
 
+            // Calculate final position
+            const finalX = (window.innerWidth + 200) * dir;
+
+            console.log('SWIPING CARD:', index, 'Direction:', dir, 'Gone size:', goneRef.current.size);
+
             // Animate card flying off
             api.start(i => {
                 if (index !== i) return;
-                const x = (window.innerWidth + 200) * dir;
                 return {
-                    x,
+                    x: finalX,
                     y: 100 * dir,
                     rot: dir * 45,
                     scale: 0.9,
                     opacity: 0,
-                    immediate: key => key === 'x',
-                    config: { tension: 200, friction: 25 }
+                    config: { tension: 200, friction: 25 },
+                    onRest: () => {
+                        // Extra safety: ensure it stays gone after animation
+                        api.start(j => {
+                            if (j === index) {
+                                return { x: finalX * 2, opacity: 0, immediate: true };
+                            }
+                        });
+                    }
                 };
             });
 
