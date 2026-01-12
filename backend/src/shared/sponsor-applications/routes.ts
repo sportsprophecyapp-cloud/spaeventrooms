@@ -11,7 +11,8 @@ import {
     updateSponsor,
     deleteApplication,
     deleteSponsor,
-    verifyPayment
+    verifyPayment,
+    trackEngagement
 } from './controller';
 import { authenticate, isAdmin } from '../auth/middleware';
 
@@ -21,6 +22,7 @@ const router = Router();
 router.post('/submit', submitApplication);
 router.post('/verify-payment', verifyPayment);
 router.get('/active', getActiveSponsors);
+router.post('/track', trackEngagement); // NEW Tracking Link
 
 // ADMIN PROTECTED
 router.get('/', authenticate, isAdmin, getApplications);

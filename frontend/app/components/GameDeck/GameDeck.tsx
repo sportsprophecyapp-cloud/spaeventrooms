@@ -27,7 +27,7 @@ interface GameDeckProps {
 const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
     const { token, refreshUser } = useAuth();
-    const { sponsors } = useSponsor();
+    const { sponsors, trackSponsor } = useSponsor();
     const router = useRouter();
     const [gone, setGone] = useState<Set<number>>(() => new Set());
 
@@ -184,6 +184,18 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         }
     });
 
+    // Tracking for sponsor impressions on cards
+    useEffect(() => {
+        const topIndex = gone.size;
+        if (topIndex < matches.length && sponsors.length > 0) {
+            const currentSponsor = sponsors[topIndex % sponsors.length];
+            const currentMatch = matches[topIndex];
+            if (currentSponsor && currentMatch) {
+                trackSponsor(currentSponsor.id, 'impression', 'match_card', currentMatch.match_id);
+            }
+        }
+    }, [gone.size, matches, sponsors, trackSponsor]);
+
     if (matches.length === 0) {
         return (
             <div className={styles.emptyContainer}>
@@ -334,8 +346,15 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                 </div>
 
                                 {/* SPONSOR FOOTER */}
+                                {/* SPONSOR FOOTER */}
                                 {sponsor && (
-                                    <div className={styles.cardFooter}>
+                                    <div
+                                        className={styles.cardFooter}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            trackSponsor(sponsor.id, 'click', 'match_card', match.match_id);
+                                        }}
+                                    >
                                         <span className={styles.poweredBy}>POWERED BY</span>
                                         <img src={sponsor.logo_url} alt={sponsor.sponsor_name} className={styles.sponsorLogo} />
                                     </div>

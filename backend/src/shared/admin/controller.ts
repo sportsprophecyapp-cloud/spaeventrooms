@@ -152,3 +152,45 @@ export const getSponsorStats = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to fetch sponsor stats' });
     }
 };
+export const getSponsorReport = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params; // sponsor_id
+
+        // Impressions & Clicks
+        const analyticsRes = await query(
+            `SELECT event_type, COUNT(*) as count 
+             FROM sponsor_analytics 
+             WHERE sponsor_id = $1 
+             GROUP BY event_type`,
+            [id]
+        );
+
+        // Predictions in their room
+        const predictionsRes = await query(
+            `SELECT COUNT(*) FROM soccer_predictions sp
+             JOIN room_sponsors rs ON rs.room_id = 'soccer' -- Logic: if they sponsor soccer room
+             WHERE rs.id = $1`,
+            [id]
+        );
+
+        // Prize Draw Entries
+        const entriesRes = await query(
+            `SELECT COUNT(*) FROM prize_draw_entries pde
+             JOIN prize_draws pd ON pde.draw_id = pd.id
+             WHERE pd.sponsor_id = $1`,
+            [id]
+        );
+
+        const report = {
+            impressions: parseInt(analyticsRes.rows.find(r => r.event_type === 'impression')?.count || '0', 10),
+            clicks: parseInt(analyticsRes.rows.find(r => r.event_type === 'click')?.count || '0', 10),
+            totalPredictions: parseInt(predictionsRes.rows[0].count, 10) || 0,
+            drawEntries: parseInt(entriesRes.rows[0].count, 10) || 0
+        };
+
+        res.json(report);
+    } catch (err) {
+        console.error('Failed to generate sponsor report:', err);
+        res.status(500).json({ error: 'Failed to fetch report data' });
+    }
+};

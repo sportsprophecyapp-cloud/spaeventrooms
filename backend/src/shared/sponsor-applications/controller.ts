@@ -266,3 +266,26 @@ export const verifyPayment = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, error: 'Verification failed' });
     }
 };
+
+// 5. ANALYTICS & TRACKING
+export const trackEngagement = async (req: Request, res: Response) => {
+    try {
+        const { sponsor_id, event_type, room_id, match_id, user_id } = req.body;
+
+        if (!sponsor_id || !event_type) {
+            return res.status(400).json({ success: false, error: 'Sponsor ID and Event Type required' });
+        }
+
+        await dbQuery(
+            `INSERT INTO sponsor_analytics (sponsor_id, event_type, room_id, match_id, user_id)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [sponsor_id, event_type, room_id, match_id, user_id]
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[TRACK ERROR]:', err);
+        // Fail silently to user but log error
+        res.status(500).json({ success: false });
+    }
+};

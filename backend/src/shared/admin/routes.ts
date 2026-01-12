@@ -1,17 +1,18 @@
 import { Router } from 'express';
-import { 
+import {
     getAllSupporters,
-    getSiteStats, 
+    getSiteStats,
     getOnlineUsers,
     sendMessageToUser,
     banUser,
-    muteUser, 
+    muteUser,
     updateUserPermissions,
     sendGlobalAnnouncement, // NEW
     // Stubs
-    searchSupporters, 
+    searchSupporters,
     getRooms,
-    getSponsorStats
+    getSponsorStats,
+    getSponsorReport
 } from './controller';
 import { authenticate, hasPermission } from '../auth/middleware';
 
@@ -29,11 +30,12 @@ router.get('/users', hasPermission('can_manage_users'), getAllSupporters);
 router.put('/users/:userId/permissions', hasPermission('can_manage_users'), updateUserPermissions);
 router.post('/users/:userId/message', hasPermission('can_message_users'), sendMessageToUser);
 router.put('/users/:userId/ban', hasPermission('can_ban_users'), banUser);
-router.put('/users/:userId/mute', hasPermission('can_manage_moderation'), muteUser); 
+router.put('/users/:userId/mute', hasPermission('can_manage_moderation'), muteUser);
 
 // Stubs for build to pass
 router.get('/users/search', hasPermission('can_manage_users'), searchSupporters);
 router.get('/sponsors/stats', hasPermission('can_view_sponsors'), getSponsorStats);
+router.get('/sponsorships/:id/report', hasPermission('can_view_sponsors'), getSponsorReport);
 router.get('/rooms', hasPermission('can_manage_rooms'), getRooms);
 
 export default router;

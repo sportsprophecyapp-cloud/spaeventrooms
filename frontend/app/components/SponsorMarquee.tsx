@@ -11,7 +11,15 @@ interface Sponsor {
 }
 
 const SponsorMarquee = () => {
-    const { sponsors, loading } = useSponsor();
+    const { sponsors, loading, trackSponsor } = useSponsor();
+
+    React.useEffect(() => {
+        if (!loading && sponsors.length > 0) {
+            sponsors.forEach(s => {
+                trackSponsor(s.id, 'impression', 'global_marquee');
+            });
+        }
+    }, [loading, sponsors, trackSponsor]);
 
     if (loading || sponsors.length === 0) return null;
 
@@ -22,7 +30,11 @@ const SponsorMarquee = () => {
         <div className={styles.container}>
             <div className={styles.track}>
                 {doubleSponsors.map((s, idx) => (
-                    <div key={`${s.id}-${idx}`} className={styles.item}>
+                    <div
+                        key={`${s.id}-${idx}`}
+                        className={styles.item}
+                        onClick={() => trackSponsor(s.id, 'click', 'global_marquee')}
+                    >
                         {s.logo_url ? (
                             <img
                                 src={s.logo_url}
