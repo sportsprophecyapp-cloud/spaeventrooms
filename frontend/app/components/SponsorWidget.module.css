@@ -17,12 +17,16 @@
 }
 
 .carouselFrame {
-    height: 120px;
+    width: 100%;
+    min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 0 1rem;
+    padding: 0;
+    /* Remove padding to let banner fill */
+    overflow: hidden;
+    border-radius: 12px;
 }
 
 .sponsorLink {
@@ -32,15 +36,19 @@
 }
 
 .logo {
-    max-height: 100px;
-    max-width: 100%;
-    object-fit: contain;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.15));
+    width: 100%;
+    height: auto;
+    max-height: 350px;
+    /* Allow it to be taller */
+    object-fit: cover;
+    /* Fill the space */
+    border-radius: 12px;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
     transition: transform 0.3s ease;
 }
 
 .logo:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .nameOnly {
