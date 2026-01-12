@@ -140,7 +140,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             // OPTIMISTIC UPDATE: Remove card immediately
             setGone(prev => new Set(prev).add(index));
-            setMatches(matches.slice(1));
+            // setMatches(matches.slice(1)); // REMOVED: Caused index mismatch with 'gone' set
             setPredictionCount(prev => prev + 1);
             // setDragX(0) is handled by the else block above
 
@@ -226,7 +226,14 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     return (
         <div className={styles.deckWrapper}>
-            {/* ... */}
+            <div className={styles.deckHeader}>
+                <p className={styles.cardsRemaining}>
+                    {remainingCards} {t('matches_left') || 'Matches Left'}
+                </p>
+                <p className={styles.swipeHint}>
+                    {t('swipe_hint') || 'Swipe to Predict'}
+                </p>
+            </div>
             <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>
                 {props.map((springProps, i) => {
                     const isGone = gone.has(i);
