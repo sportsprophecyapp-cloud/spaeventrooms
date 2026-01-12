@@ -1,4 +1,4 @@
-# Events Arena (Sports Prophecy)
+# Events Arena
 
 **Version**: 3.1.0  
 **Release**: January 11, 2026

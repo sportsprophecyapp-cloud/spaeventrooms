@@ -120,7 +120,7 @@ const HomePage = () => {
                         <Link href="/privacy">Privacy Policy</Link>
                         <Link href="/delete-account">Delete Account</Link>
                     </div>
-                    <p>&copy; 2026 Events Arena | Powered by Sports Prophecy</p>
+                    <p>&copy; 2026 Events Arena | Just Me Media</p>
                     <p className={styles.disclaimer}>Events Arena is a social platform for entertainment purposes only. No real money can be won or wagered on this site.</p>
                     <span className={styles.version}>v{APP_VERSION}</span>
                 </div>

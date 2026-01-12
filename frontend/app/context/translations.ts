@@ -1,7 +1,7 @@
 export const translations: any = {
     en: {
         // Existing
-        welcome_bridge: "Sports Prophecy welcomes you to the",
+        welcome_bridge: "Events Arena welcomes you to the",
         tagline: "Predict Live Sports. Compete for Sponsor Prizes. 100% Free.",
         how_it_works_title: "How It Works",
         how_step_1: "Pick Your Sport",
@@ -38,7 +38,7 @@ export const translations: any = {
         tickets_earned: "Tickets Earned",
     },
     id: { // Bahasa Indonesia
-        welcome_bridge: "Sports Prophecy menyambut Anda di",
+        welcome_bridge: "Events Arena menyambut Anda di",
         tagline: "Prediksi Olahraga Langsung. Bersaing untuk Hadiah Sponsor. 100% Gratis.",
         how_it_works_title: "Cara Kerjanya",
         how_step_1: "Pilih Olahraga Anda",
@@ -74,7 +74,7 @@ export const translations: any = {
         tickets_earned: "Tiket Diperoleh",
     },
     th: { // Thai
-        welcome_bridge: "Sports Prophecy ยินดีต้อนรับคุณสู่",
+        welcome_bridge: "Events Arena ยินดีต้อนรับคุณสู่",
         tagline: "ทายผลกีฬาสด แข่งขันเพื่อรางวัลสปอนเซอร์ ฟรี 100%",
         how_it_works_title: "วิธีการทำงาน",
         how_step_1: "เลือกกีฬาของคุณ",

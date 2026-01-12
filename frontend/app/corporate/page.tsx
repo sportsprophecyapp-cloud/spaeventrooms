@@ -16,7 +16,7 @@ const CorporatePage = () => {
             <main className={styles.main}>
                 <section className={`${styles.card} glass`}>
                     <h2>ABOUT THE ORGANIZATION</h2>
-                    <p>Just Me Media is a cutting-edge digital infrastructure and media organization dedicated to redefining fan engagement. We are the architects and developers behind <strong>Events Arena</strong> (formerly Sports Prophecy).</p>
+                    <p>Just Me Media is a cutting-edge digital infrastructure and media organization dedicated to redefining fan engagement. We are the architects and developers behind <strong>Events Arena</strong>.</p>
                     <p>Our mission is to create frictionless, high-energy platforms that bridge the gap between live events, streaming creators, and global sports communities.</p>
                 </section>
 
@@ -35,7 +35,7 @@ const CorporatePage = () => {
                         </div>
                         <div className={styles.infoItem}>
                             <strong>Primary Product:</strong>
-                            <span>Events Arena - Sports Prophecy</span>
+                            <span>Events Arena</span>
                         </div>
                         <div className={styles.infoItem}>
                             <strong>Contact:</strong>

@@ -1,7 +1,7 @@
 # 📌 Project Master Reference: Events Arena
 
 ## 🛠 Project Identity & Tech Stack
-- **Project Name:** Events Arena (formerly Sports Prophecy)
+- **Project Name:** Events Arena
 - **Frontend:** Next.js (located in `/frontend`). Styling: Outfit Font, Glassmorphism.
 - **Backend:** Node.js/Express (located in `/backend`).
 - **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Creator Events).

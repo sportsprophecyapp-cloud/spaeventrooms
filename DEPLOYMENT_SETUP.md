@@ -1,4 +1,4 @@
-# Deployment Setup: SportsProphecyApp
+# Deployment Setup: Events Arena
 
 This project is deployed on **Render** using a full-stack blueprint.
 

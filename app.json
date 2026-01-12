@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Sports Prophecy",
-    "slug": "sportsprophecyapp",
+    "name": "Events Arena",
+    "slug": "eventsarena",
     "version": "3.1.0",
-    "scheme": "sportsprophecyapp",
+    "scheme": "eventsarena",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -16,11 +16,11 @@
     "ios": {
       "supportsTablet": true,
       "usesAppleSignIn": true,
-      "bundleIdentifier": "com.sportsprophecy.app",
+      "bundleIdentifier": "com.eventsarena.app",
       "buildNumber": "31",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSFaceIDUsageDescription": "Allow Sports Prophecy to use FaceID for quick and secure login."
+        "NSFaceIDUsageDescription": "Allow Events Arena to use FaceID for quick and secure login."
       }
     },
     "android": {
@@ -28,7 +28,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0a1628"
       },
-      "package": "com.sportsprophecy.app",
+      "package": "com.eventsarena.app",
       "versionCode": 31,
       "edgeToEdgeEnabled": true
     },
@@ -45,6 +45,6 @@
         "projectId": "312cf339-c044-409d-a4d4-59d32d2cc67a"
       }
     },
-    "owner": "sportsprophecy"
+    "owner": "eventsarena"
   }
 }

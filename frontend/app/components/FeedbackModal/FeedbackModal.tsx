@@ -45,7 +45,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ drawId, prizeName, onClos
     };
 
     const handleShare = async (platform: string) => {
-        const shareText = `I just won a ${prizeName} in the Sports Prophecy Arena! 🏆 Join me and start winning at ${window.location.origin}`;
+        const shareText = `I just won a ${prizeName} in the Events Arena! 🏆 Join me and start winning at ${window.location.origin}`;
         let shareUrl = '';
 
         if (platform === 'x') {

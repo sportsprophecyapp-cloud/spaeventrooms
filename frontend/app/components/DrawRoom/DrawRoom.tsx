@@ -57,27 +57,6 @@ const DrawRoom = () => {
                     activeDraws = data.draws || [];
                 }
 
-                // FALLBACK: If API is empty or fails, use the Demo draws the user expects
-                if (activeDraws.length === 0) {
-                    activeDraws = [
-                        {
-                            id: 1,
-                            title: "Soccer Weekly Jackpot",
-                            prize: "$100 Amazon Voucher",
-                            description: "Sponsored by MegaBet - Predict 10 matches correctly to enter!",
-                            room_id: "soccer",
-                            status: "active"
-                        },
-                        {
-                            id: 2,
-                            title: "NFL Playoff Special",
-                            prize: "Authentic NFL Jersey",
-                            description: "Sponsored by Fanatics - Daily entries for active predictors.",
-                            room_id: "soccer",
-                            status: "active"
-                        }
-                    ];
-                }
                 setDraws(activeDraws);
 
                 // Fetch user tickets
@@ -90,17 +69,7 @@ const DrawRoom = () => {
                 }
             } catch (err) {
                 console.error('Error fetching draw data:', err);
-                // Fallback on error too
-                setDraws([
-                    {
-                        id: 1,
-                        title: "Soccer Weekly Jackpot",
-                        prize: "$100 Amazon Voucher",
-                        description: "Sponsored by MegaBet - Predict 10 matches correctly to enter!",
-                        room_id: "soccer",
-                        status: "active"
-                    }
-                ]);
+                setDraws([]);
             }
         };
 
@@ -309,6 +278,13 @@ const DrawRoom = () => {
                             </div>
                         );
                     })}
+                    {draws.length === 0 && (
+                        <div className={styles.emptyState}>
+                            <div className={styles.emptyIcon}>🎁</div>
+                            <h3>No Active Draws</h3>
+                            <p>Check back soon for new prizes and events!</p>
+                        </div>
+                    )}
                 </div>
 
                 {message && (
