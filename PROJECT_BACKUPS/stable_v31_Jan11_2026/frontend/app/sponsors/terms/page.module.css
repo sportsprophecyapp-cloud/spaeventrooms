@@ -1,0 +1,68 @@
+.container {
+    min-height: 100vh;
+    padding: 4rem 2rem;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.backBtn {
+    background: transparent;
+    border: none;
+    color: var(--neutral);
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+}
+
+.card {
+    width: 100%;
+    max-width: 800px;
+    padding: 4rem;
+    border-radius: 32px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+}
+
+.lastUpdated {
+    font-size: 0.75rem;
+    color: var(--neutral);
+    margin-bottom: 3rem;
+    font-weight: 700;
+}
+
+.section {
+    margin-bottom: 2.5rem;
+}
+
+.section h2 {
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.section p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.8);
+}
+
+.section strong {
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .card { padding: 2rem; }
+    .title { font-size: 1.5rem; }
+}

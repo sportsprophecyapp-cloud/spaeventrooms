@@ -1,0 +1,32 @@
+.container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.text {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--success);
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.5), 0 0 40px rgba(0, 255, 65, 0.2);
+    animation: floatUpFade 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    white-space: nowrap;
+}
+
+@keyframes floatUpFade {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(1);
+    }
+}

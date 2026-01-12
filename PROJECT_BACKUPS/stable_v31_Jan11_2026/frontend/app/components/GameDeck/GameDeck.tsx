@@ -6,7 +6,6 @@ import { useDrag } from '@use-gesture/react';
 import styles from './GameDeck.module.css';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useAuth } from '@/app/context/AuthContext';
-import { useSponsor } from '@/app/context/SponsorContext';
 import { useRouter } from 'next/navigation';
 import ToastNotification from '../ToastNotification/ToastNotification';
 
@@ -26,11 +25,9 @@ interface GameDeckProps {
 
 const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const { t } = useLanguage();
-    const { token, refreshUser } = useAuth();
-    const { sponsors, trackSponsor } = useSponsor();
+    const { token } = useAuth();
     const router = useRouter();
     const [gone, setGone] = useState<Set<number>>(() => new Set());
-
     const [matches, setMatches] = useState<Match[]>([]);
     const [showCompletion, setShowCompletion] = useState(false);
     const [countdown, setCountdown] = useState(3);
@@ -74,52 +71,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         config: { tension: 500, friction: 40 }
     }));
 
-    const submitPrediction = async (match: Match, pickSide: string, attemptNum = 1) => {
-        const MAX_RETRIES = 2;
-        try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const pickName = pickSide === 'home' ? match.home_team : match.away_team;
-
-            const response = await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    matchId: match.match_id,
-                    pick: pickName
-                })
-            });
-
-            if (response.ok) {
-                setMessage({ text: `Prediction saved: ${pickName}`, type: 'success' });
-                // Update balance immediately
-                refreshUser();
-                return true;
-            } else if (response.status === 402) {
-                // Out of tokens - don't retry
-                setMessage({ text: 'Not enough tokens', type: 'error' });
-                return false;
-            } else if (attemptNum < MAX_RETRIES) {
-                // Retry on server error
-                console.warn(`Prediction failed, retrying (attempt ${attemptNum + 1})...`);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                return submitPrediction(match, pickSide, attemptNum + 1);
-            } else {
-                setMessage({ text: 'Failed to save prediction', type: 'error' });
-                return false;
-            }
-        } catch (err) {
-            if (attemptNum < MAX_RETRIES) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                return submitPrediction(match, pickSide, attemptNum + 1);
-            }
-            setMessage({ text: 'Network error', type: 'error' });
-            return false;
-        }
-    };
-
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
         const isGone = gone.has(index);
         if (isGone) return;
@@ -127,8 +78,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         // Track drag amount for visual feedback
         if (active) {
             setDragX(mx);
-        } else {
-            setDragX(0); // ✅ Reset when drag ends
         }
 
         const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 100);
@@ -140,9 +89,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             // OPTIMISTIC UPDATE: Remove card immediately
             setGone(prev => new Set(prev).add(index));
-            // setMatches(matches.slice(1)); // REMOVED: Caused index mismatch with 'gone' set
+            setMatches(matches.slice(1));
             setPredictionCount(prev => prev + 1);
-            // setDragX(0) is handled by the else block above
+            setDragX(0);
 
             // Animate card flying off
             api.start(i => {
@@ -158,8 +107,39 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 };
             });
 
-            // Call robust prediction handling
-            submitPrediction(match, pickSide);
+            // FIRE-AND-FORGET API CALL (Don't await to block UI)
+            const submitPrediction = async () => {
+                try {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    const pickName = pickSide === 'home' ? match.home_team : match.away_team;
+
+                    // We intentionally do NOT await the fetch response to block the UI
+                    fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            matchId: match.match_id,
+                            pick: pickName
+                        })
+                    }).then(res => {
+                        if (!res.ok && res.status !== 402) {
+                            console.error('Prediction save warning:', res.status);
+                            setMessage({ text: 'Error saving prediction', type: 'error' });
+                        }
+                    }).catch(err => {
+                        console.error("Prediction network error:", err);
+                        setMessage({ text: 'Network error saving prediction', type: 'error' });
+                    });
+
+                } catch (err) {
+                    console.error("Prediction failed to save:", err);
+                    setMessage({ text: 'Failed to save prediction', type: 'error' });
+                }
+            };
+            submitPrediction();
 
             // Check completion
             if (gone.size + 1 === matches.length) {
@@ -183,18 +163,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             });
         }
     });
-
-    // Tracking for sponsor impressions on cards
-    useEffect(() => {
-        const topIndex = gone.size;
-        if (topIndex < matches.length && sponsors.length > 0) {
-            const currentSponsor = sponsors[topIndex % sponsors.length];
-            const currentMatch = matches[topIndex];
-            if (currentSponsor && currentMatch) {
-                trackSponsor(currentSponsor.id, 'impression', 'match_card', currentMatch.match_id);
-            }
-        }
-    }, [gone.size, matches, sponsors, trackSponsor]);
 
     if (matches.length === 0) {
         return (
@@ -238,19 +206,22 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
     return (
         <div className={styles.deckWrapper}>
+            {message && (
+                <ToastNotification
+                    message={message.text}
+                    type={message.type}
+                    onClose={() => setMessage(null)}
+                />
+            )}
             <div className={styles.deckHeader}>
-                <p className={styles.cardsRemaining}>
-                    {remainingCards} {t('matches_left') || 'Matches Left'}
-                </p>
-                <p className={styles.swipeHint}>
-                    {t('swipe_hint') || 'Swipe to Predict'}
-                </p>
+                <p className={styles.cardsRemaining}>{remainingCards} {remainingCards === 1 ? 'Match' : 'Matches'} Left</p>
+                <p className={styles.swipeHint}>&larr; Swipe Left or Right &rarr;</p>
             </div>
+
             <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>
                 {props.map((springProps, i) => {
                     const isGone = gone.has(i);
                     const match = matches[i];
-                    const sponsor = sponsors.length > 0 ? sponsors[i % sponsors.length] : null;
 
                     // Safely extract date parts if available
                     let timeDisplay = match?.start_time;
@@ -273,6 +244,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                 y: springProps.y,
                                 opacity: springProps.opacity,
                                 zIndex: matches.length - i,
+                                pointerEvents: isGone ? 'none' : 'auto',
                                 transform: interpolate([springProps.rot, springProps.scale], (r, s) =>
                                     `rotateZ(${r}deg) scale(${s})`
                                 )
@@ -343,24 +315,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                         <p className={styles.pickLabel}>PICK</p>
                                     </div>
                                 </div>
-
-                                {/* SPONSOR FOOTER */}
-                                {/* SPONSOR FOOTER */}
-                                {sponsor && (
-                                    <div
-                                        className={styles.cardFooter}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            trackSponsor(sponsor.id, 'click', 'match_card', match.match_id);
-                                            if (sponsor.website_url) {
-                                                window.open(sponsor.website_url, '_blank', 'noopener,noreferrer');
-                                            }
-                                        }}
-                                    >
-                                        <span className={styles.poweredBy}>POWERED BY</span>
-                                        <img src={sponsor.logo_url} alt={sponsor.sponsor_name} className={styles.sponsorLogo} />
-                                    </div>
-                                )}
 
                                 {/* Swipe Indicator - shows during drag */}
                                 <div style={{ opacity: Math.max(0, (dragX - 50) / 100) }} className={styles.swipeIndicatorLeft}>
