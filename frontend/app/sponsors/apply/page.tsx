@@ -220,12 +220,15 @@ const ApplyFormContent = () => {
                     </div>
                 </aside>
             </div>
-        </div>
-    return (
-        <Suspense fallback={<div>Loading form...</div>}>
-            <ApplyFormContent />
-        </Suspense>
-    );
+            );
 };
 
-export default SponsorApplyPage;
+const SponsorApplyPage = () => {
+    return (
+            <Suspense fallback={<div>Loading form...</div>}>
+                <ApplyFormContent />
+            </Suspense>
+            );
+};
+
+            export default SponsorApplyPage;
