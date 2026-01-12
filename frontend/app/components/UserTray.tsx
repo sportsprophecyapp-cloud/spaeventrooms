@@ -34,11 +34,29 @@ const UserTray = () => {
         return null;
     }
 
+    const menuRef = React.useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsExpanded(false);
+            }
+        };
+
+        if (isExpanded) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isExpanded]);
+
     // SAFE PERMISSION CHECK: Check permissions only after confirming user exists.
     const isAdmin = user.permissions?.includes('super_admin') || user.permissions?.includes('can_manage_users');
 
     return (
-        <div className={styles.wrapper}>
+        <div className={styles.wrapper} ref={menuRef}>
             <WinnerAlerter />
             <div className={styles.tray}>
                 <div className={styles.balances} onClick={() => setIsExpanded(!isExpanded)}>
