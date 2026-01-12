@@ -17,6 +17,8 @@ const AdminSponsorsPage = () => {
     const [reportData, setReportData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
+    const [confirmAction, setConfirmAction] = useState<{ type: 'approve' | 'delete_app' | 'delete_sponsor' | 'delete_draw' | 'pick_winner', id: number } | null>(null);
+
     const canViewSponsors = user?.permissions.includes('can_view_sponsors') || user?.permissions.includes('super_admin');
 
     const fetchData = async () => {
@@ -54,82 +56,61 @@ const AdminSponsorsPage = () => {
         if (canViewSponsors) fetchData();
     }, [activeTab, token]);
 
-    const handleApprove = async (id: number) => {
-        if (!confirm('Approve this sponsor and make it live?')) return;
+    const performAction = async () => {
+        if (!confirmAction) return;
+        const { type, id } = confirmAction;
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/sponsor-applications/${id}/approve`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            alert('Sponsor is now LIVE!');
+
+        try {
+            if (type === 'approve') {
+                const res = await fetch(`${apiUrl}/api/sponsor-applications/${id}/approve`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) alert('Sponsor is now LIVE!');
+            } else if (type === 'delete_app') {
+                const res = await fetch(`${apiUrl}/api/sponsor-applications/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) alert('Application deleted.');
+            } else if (type === 'delete_sponsor') {
+                const res = await fetch(`${apiUrl}/api/sponsor-applications/placements/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) alert('Placement removed.');
+            } else if (type === 'delete_draw') {
+                const res = await fetch(`${apiUrl}/api/gamification/draws/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) alert('Draw removed.');
+            } else if (type === 'pick_winner') {
+                const res = await fetch(`${apiUrl}/api/gamification/draws/${id}/pick-winner`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`Winner selected: ${data.winner.username} (${data.winner.email})`);
+                } else {
+                    alert(data.error || 'Failed to pick winner.');
+                }
+            }
             fetchData();
+        } catch (error) {
+            alert('Action failed.');
+        } finally {
+            setConfirmAction(null);
         }
     };
 
-    const handleDeleteApplication = async (id: number) => {
-        if (!confirm('Permanently delete this application?')) return;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/sponsor-applications/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            alert('Application deleted.');
-            fetchData();
-        } else {
-            const err = await res.json();
-            alert(`Failed to delete: ${err.error || 'Unknown error'}`);
-        }
-    };
-
-    const handleDeleteSponsor = async (id: number) => {
-        if (!confirm('Permanently remove this live placement?')) return;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/sponsor-applications/placements/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            alert('Placement removed.');
-            fetchData();
-        } else {
-            const err = await res.json();
-            alert(`Failed to delete: ${err.error || 'Unknown error'}`);
-        }
-    };
-
-    const handleDeleteDraw = async (id: number) => {
-        if (!confirm('Permanently remove this prize draw?')) return;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/gamification/draws/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            alert('Draw removed.');
-            fetchData();
-        } else {
-            const err = await res.json();
-            alert(`Failed to delete: ${err.error || 'Unknown error'}`);
-        }
-    };
-
-    const handlePickWinner = async (id: number) => {
-        if (!confirm('Ready to pick a random winner for this draw?')) return;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/gamification/draws/${id}/pick-winner`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (res.ok) {
-            alert(`Winner selected: ${data.winner.username} (${data.winner.email})`);
-            fetchData();
-        } else {
-            alert(data.error || 'Failed to pick winner.');
-        }
-    };
+    const handleApprove = (id: number) => setConfirmAction({ type: 'approve', id });
+    const handleDeleteApplication = (id: number) => setConfirmAction({ type: 'delete_app', id });
+    const handleDeleteSponsor = (id: number) => setConfirmAction({ type: 'delete_sponsor', id });
+    const handleDeleteDraw = (id: number) => setConfirmAction({ type: 'delete_draw', id });
+    const handlePickWinner = (id: number) => setConfirmAction({ type: 'pick_winner', id });
 
     const handleUpdateSponsor = async (id: number) => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -279,6 +260,7 @@ const AdminSponsorsPage = () => {
                 )}
             </main>
 
+            {/* REPORT MODAL */}
             {selectedReportId && (
                 <div className={styles.modalOverlay} onClick={() => setSelectedReportId(null)}>
                     <div className={`${styles.modal} glass`} onClick={e => e.stopPropagation()}>
@@ -311,6 +293,26 @@ const AdminSponsorsPage = () => {
                         <div className={styles.modalActions}>
                             <button onClick={() => window.print()} className={styles.approveBtn}>PRINT / EXPORT PDF</button>
                             <button onClick={() => setSelectedReportId(null)} className={styles.deleteBtn}>CLOSE</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* CONFIRMATION MODAL */}
+            {confirmAction && (
+                <div className={styles.modalOverlay} onClick={() => setConfirmAction(null)}>
+                    <div className={`${styles.modal} glass`} onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', textAlign: 'center' }}>
+                        <h2 style={{ marginBottom: '1rem' }}>Are you sure?</h2>
+                        <p style={{ marginBottom: '2rem', fontSize: '1.1rem' }}>
+                            {confirmAction.type === 'approve' && 'Approve this sponsor and make it LIVE?'}
+                            {confirmAction.type === 'delete_app' && 'Permanently delete this application?'}
+                            {confirmAction.type === 'delete_sponsor' && 'Permanently remove this live placement?'}
+                            {confirmAction.type === 'delete_draw' && 'Permanently remove this prize draw?'}
+                            {confirmAction.type === 'pick_winner' && 'Pick a random winner for this draw?'}
+                        </p>
+                        <div className={styles.modalActions}>
+                            <button onClick={performAction} className={styles.approveBtn}>YES, PROCEED</button>
+                            <button onClick={() => setConfirmAction(null)} className={styles.deleteBtn} style={{ background: '#333' }}>CANCEL</button>
                         </div>
                     </div>
                 </div>

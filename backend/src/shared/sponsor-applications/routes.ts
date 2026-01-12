@@ -31,7 +31,7 @@ router.patch('/:id', authenticate, isAdmin, updateApplication);
 router.delete('/:id', authenticate, isAdmin, deleteApplication);
 
 // Sponsor Placements
-router.get('/placements', authenticate, isAdmin, getActiveSponsors);
+router.get('/placements', authenticate, isAdmin, getAllSponsors);
 router.patch('/placements/:id', authenticate, isAdmin, updateSponsor);
 router.delete('/placements/:id', authenticate, isAdmin, deleteSponsor);
 // NEW: Instant Deploy
