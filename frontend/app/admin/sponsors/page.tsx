@@ -166,6 +166,10 @@ const AdminSponsorsPage = () => {
                                     <h3>{app.brand_name}</h3>
                                     <span className={styles.targetBadge}>{app.arena_target.toUpperCase()}</span>
                                 </div>
+                                <div style={{ display: 'flex', gap: '10px', margin: '10px 0' }}>
+                                    {app.logo_url && <img src={app.logo_url} alt="Logo" style={{ width: '50px', height: '50px', objectFit: 'contain', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }} />}
+                                    {app.prize_image_url && <img src={app.prize_image_url} alt="Prize" style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />}
+                                </div>
                                 <p><strong>Contact:</strong> {app.contact_email}</p>
                                 <p><strong>Prize:</strong> {app.prize_description}</p>
                                 <div className={styles.cardActions}>
@@ -185,9 +189,19 @@ const AdminSponsorsPage = () => {
                         {draws.map(draw => (
                             <div key={draw.id} className={`${styles.card} glass`}>
                                 <div className={styles.cardHeader}>
-                                    <h3>{draw.title}</h3>
+                                    <div>
+                                        <h3>{draw.title}</h3>
+                                        <p style={{ fontSize: '0.8rem', color: '#888' }}>(ID: {draw.id})</p>
+                                    </div>
                                     <span className={styles.statusBadge}>{draw.status.toUpperCase()}</span>
                                 </div>
+
+                                {draw.prize_image ? (
+                                    <img src={draw.prize_image} alt="Prize" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', margin: '10px 0' }} />
+                                ) : (
+                                    <div style={{ padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', margin: '10px 0' }}>🎁 No Image</div>
+                                )}
+
                                 <p><strong>Prize:</strong> {draw.prize}</p>
                                 {draw.winner_id && <p className={styles.winnerAnnounce}>Winner ID: {draw.winner_id}</p>}
                                 <div className={styles.cardActions}>
