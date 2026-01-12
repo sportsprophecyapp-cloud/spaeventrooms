@@ -2,6 +2,12 @@ import { Request, Response } from 'express';
 import { query as dbQuery } from '../database';
 import { AuthRequest } from '../auth/middleware';
 
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2024-12-18.acacia' as any // Force verify version compatibility or upgrade package later
+});
+
 // 1. PUBLIC: SUBMIT APPLICATION
 export const submitApplication = async (req: Request, res: Response) => {
     try {
@@ -16,7 +22,8 @@ export const submitApplication = async (req: Request, res: Response) => {
             logo_url,
             prize_image_url,
             creative_config,
-            agreed
+            agreed,
+            package_tier // New Field
         } = req.body;
 
         if (!brand_name || !contact_email || !prize_description) {
@@ -24,10 +31,42 @@ export const submitApplication = async (req: Request, res: Response) => {
             return res.status(400).json({ success: false, error: 'Incomplete campaign details.', missing: { brand_name: !brand_name, contact_email: !contact_email, prize_description: !prize_description } });
         }
 
+        // Tier Pricing Map
+        const TIER_PRICES: Record<string, number> = {
+            'tier_founding': 0, // Free
+            'tier_starter': 9900, // $99.00
+            'tier_growth': 29900, // $299.00
+            'tier_premium': 59900 // $599.00
+        };
+
+        const priceAmount = TIER_PRICES[package_tier] || 9900; // Default to Starter if unknown
+
+        // Create Stripe Session
+        let session = null;
+        if (priceAmount > 0 && process.env.STRIPE_SECRET_KEY) {
+            session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: [{
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: `Sponsor Package: ${package_tier?.replace('tier_', '').toUpperCase() || 'STANDARD'}`,
+                            description: `Campaign for ${brand_name} in ${arena_target || 'Soccer'} Arena`
+                        },
+                        unit_amount: priceAmount,
+                    },
+                    quantity: 1,
+                }],
+                mode: 'payment',
+                success_url: `${req.headers.origin}/sponsors/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${req.headers.origin}/sponsors/apply?tier=${package_tier}`,
+            });
+        }
+
         const result = await dbQuery(
             `INSERT INTO sponsor_applications 
-            (brand_name, contact_email, website_url, arena_target, frequency, prize_quantity, prize_description, logo_url, prize_image_url, creative_config, agreed_to_terms, status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending')
+            (brand_name, contact_email, website_url, arena_target, frequency, prize_quantity, prize_description, logo_url, prize_image_url, creative_config, agreed_to_terms, status, stripe_session_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
             RETURNING id`,
             [
                 brand_name,
@@ -40,11 +79,19 @@ export const submitApplication = async (req: Request, res: Response) => {
                 logo_url || null,
                 prize_image_url || null,
                 JSON.stringify(creative_config || {}),
-                agreed || false
+                agreed || false,
+                session ? 'pending_payment' : 'pending',
+                session?.id || null
             ]
         );
 
-        res.json({ success: true, message: 'Campaign proposal received.', application_id: result.rows[0].id });
+        res.json({
+            success: true,
+            message: session ? 'Redirecting to payment...' : 'Campaign proposal received.',
+            application_id: result.rows[0].id,
+            checkoutUrl: session?.url // Frontend will redirect here
+        });
+
     } catch (error: any) {
         console.error('[SPONSOR SUBMIT ERROR]:', {
             message: error.message,

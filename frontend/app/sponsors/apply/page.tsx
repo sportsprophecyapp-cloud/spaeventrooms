@@ -75,7 +75,13 @@ const ApplyFormContent = () => {
             });
 
             if (res.ok) {
-                setSubmitted(true);
+                const data = await res.json();
+                if (data.checkoutUrl) {
+                    // Redirect to Stripe
+                    window.location.href = data.checkoutUrl;
+                } else {
+                    setSubmitted(true);
+                }
             } else {
                 const data = await res.json();
                 const errorMsg = data.error || 'Submission failed. Please try again.';
