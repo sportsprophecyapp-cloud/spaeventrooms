@@ -70,7 +70,7 @@ const ApplyFormContent = () => {
                     prize_image_url: prizePreview,
                     creative_config: creative,
                     agreed: formData.agreed,
-                    package_tier: tier || 'custom' // Send the package tier
+                    package_tier: tier && !tier.startsWith('tier_') ? `tier_${tier}` : (tier || 'custom') // FIX: Ensure backend prefix match
                 })
             });
 
