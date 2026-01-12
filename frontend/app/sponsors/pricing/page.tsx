@@ -10,33 +10,33 @@ const pricingTiers = [
         id: 'founding',
         name: 'Founding Partner',
         price: '0',
-        features: ['Priority Global Placement', 'Exclusive "Founding Brand" Badge', 'Custom Campaign Sandbox', 'Monthly Prize Escrow Deal'],
+        features: ['Priority Ticker Placement', 'Exclusive "Founding Brand" Badge', 'Custom Campaign Sandbox', 'Monthly Prize Escrow Deal'],
         cta: 'APPLY NOW',
         color: '#ffd700', // Gold
         special: 'EARLY ACCESS - FIRST 5 ONLY'
     },
     {
         id: 'starter',
-        name: 'Starter Arena',
+        name: 'The Ticker',
         price: '99',
-        features: ['1 Room Placement', 'Static Logo Banner', 'Monthly Draw Integration', 'Supporter Insights'],
+        features: ['Logo in Global Marquee', 'Rotates on All Pages', 'Live Match Integration', 'Supporter Insights'],
         cta: 'SECURE SPOT',
         color: 'var(--neutral)'
     },
     {
         id: 'growth',
-        name: 'Growth Arena',
+        name: 'Prize Host',
         price: '299',
-        features: ['3 Room Placements', 'Animated Marquee', 'Bi-Weekly Draw Integration', 'Priority Admin Support'],
-        cta: 'GO GROWTH',
+        features: ['Dedicated Prize Draw Card', 'Users CLICK to Enter', 'Logo in Global Marquee', 'Priority Admin Support'],
+        cta: 'HOST A DRAW',
         color: 'var(--accent)'
     },
     {
         id: 'premium',
-        name: 'Premium Arena',
+        name: 'Arena Headliner',
         price: '599',
-        features: ['Global Placement', 'Interactive Flash Calls', 'Weekly Draw Integration', 'Custom Branding'],
-        cta: 'GO PREMIUM',
+        features: ['Official Room Sponsor', 'Header Takeover Branding', '#1 Spot in Prize Grid', 'Custom "Powered By" Badge'],
+        cta: 'GO HEADLINE',
         color: '#764ba2'
     }
 ];
