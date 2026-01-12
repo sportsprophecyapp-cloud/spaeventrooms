@@ -1,0 +1,154 @@
+.container {
+    min-height: 100vh;
+    padding: 6rem 2rem;
+    background: var(--background);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 5rem;
+}
+
+.title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: -2px;
+    margin-bottom: 1rem;
+    background: linear-gradient(to right, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--neutral);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2.5rem;
+    width: 100%;
+    max-width: 1400px; /* Expanded for 4 cards */
+}
+
+.card {
+    padding: 3.5rem 2.5rem;
+    border-radius: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+/* FOUNDING PARTNER SPECIAL STYLES */
+.founderCard {
+    border: 2px solid #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+}
+
+.specialBadge {
+    position: absolute;
+    top: 20px;
+    background: #ffd700;
+    color: black;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.card:hover {
+    transform: translateY(-15px) scale(1.02);
+    border-color: var(--accent);
+    box-shadow: 0 20px 50px rgba(0, 112, 243, 0.2);
+}
+
+.founderCard:hover {
+    border-color: #ffd700;
+    box-shadow: 0 20px 50px rgba(255, 215, 0, 0.2);
+}
+
+.tierName {
+    font-size: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 2rem;
+}
+
+.priceRow {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 3rem;
+}
+
+.currency { font-size: 1.5rem; font-weight: 600; color: var(--neutral); }
+.amount { font-size: 4.5rem; font-weight: 900; letter-spacing: -3px; }
+.period { font-size: 1rem; color: var(--neutral); }
+
+.features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 3.5rem 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.features li {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    opacity: 0.9;
+}
+
+.ctaBtn {
+    width: 100%;
+    padding: 1.2rem;
+    border: none;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.ctaBtn:hover {
+    box-shadow: 0 0 30px var(--accent-glow);
+}
+
+.footer {
+    margin-top: 6rem;
+    text-align: center;
+    color: var(--neutral);
+    font-weight: 600;
+}
+
+.contactLink {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 900;
+}
+
+@media (max-width: 768px) {
+    .title { font-size: 2.2rem; }
+    .grid { grid-template-columns: 1fr; }
+    .container { padding: 4rem 1rem; }
+}

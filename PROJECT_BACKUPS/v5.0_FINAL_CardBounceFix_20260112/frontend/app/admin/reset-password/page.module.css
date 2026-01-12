@@ -1,0 +1,72 @@
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--background);
+    padding: 2rem;
+}
+
+.card {
+    width: 100%;
+    max-width: 500px;
+    padding: 3rem;
+    border-radius: 24px;
+}
+
+.title {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--neutral);
+    margin-bottom: 2rem;
+}
+
+.inputGroup {
+    margin-bottom: 1.5rem;
+}
+
+.inputGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.inputGroup input {
+    width: 100%;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    color: white;
+}
+
+.submitBtn {
+    width: 100%;
+    background: var(--accent);
+    color: black;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+.successMessage, .errorMessage {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-weight: 700;
+}
+
+.successMessage {
+    color: #2ecc71;
+}
+
+.errorMessage {
+    color: #e74c3c;
+}

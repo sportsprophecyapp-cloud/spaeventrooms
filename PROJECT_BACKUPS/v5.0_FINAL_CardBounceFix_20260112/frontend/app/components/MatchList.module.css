@@ -1,0 +1,99 @@
+.container {
+    width: 100%;
+}
+
+.leagueBlock {
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.02);
+}
+
+.leagueHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1.2rem 1.5rem;
+    cursor: pointer;
+    background: rgba(255,255,255,0.03);
+    transition: all 0.3s ease;
+}
+
+.leagueHeader:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.leagueLogo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.leagueTitle {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.headerRight {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.liveBadge {
+    background: #ff0055;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite;
+}
+
+.matchCount {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--neutral);
+    opacity: 0.6;
+}
+
+.chevron {
+    color: var(--accent);
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.matchGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 1.5rem;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid var(--glass-border);
+}
+
+.emptyState {
+    padding: 5rem 2rem;
+    text-align: center;
+    background: var(--glass);
+    border-radius: 24px;
+    border: 1px dashed var(--glass-border);
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+    .leagueTitle { font-size: 0.8rem; }
+    .leagueHeader { padding: 1rem; }
+    .matchCount { display: none; }
+}

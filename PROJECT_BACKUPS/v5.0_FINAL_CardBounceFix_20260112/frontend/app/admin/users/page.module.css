@@ -1,0 +1,66 @@
+.container {
+    padding: 2rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.title { font-size: 1.8rem; font-weight: 900; }
+.subtitle { font-size: 0.9rem; color: var(--neutral); }
+
+.main { max-width: 1200px; margin: 0 auto; }
+
+.searchBox { padding: 1rem; margin-bottom: 2rem; }
+.input { width: 100%; background: transparent; border: none; color: white; font-size: 1rem; }
+
+.tableCard { padding: 1rem; }
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.row:last-child { border-bottom: none; }
+
+.banned { background: rgba(255, 75, 75, 0.1); }
+
+.userMeta { display: flex; flex-direction: column; gap: 4px; }
+.username { font-weight: 900; display: flex; align-items: center; gap: 8px; }
+.onlineIndicator { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; box-shadow: 0 0 5px #2ecc71; }
+.email { font-size: 0.8rem; color: var(--neutral); }
+.metadata { font-size: 0.75rem; color: var(--neutral); }
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bannedBadge, .mutedBadge, .roleBadge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.bannedBadge { background: #e74c3c; color: white; }
+.mutedBadge { background: #f39c12; color: white; }
+.roleBadge { background: var(--accent); color: white; }
+
+.manageBtn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 900;
+    cursor: pointer;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.messageBtn { background: var(--accent); }
+
+.error { text-align: center; padding: 4rem; }

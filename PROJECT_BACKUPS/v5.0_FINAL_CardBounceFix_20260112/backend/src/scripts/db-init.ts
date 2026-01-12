@@ -132,7 +132,6 @@ const initDB = async () => {
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_description TEXT;
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS application_id INTEGER REFERENCES sponsor_applications(id);
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_escrow_received BOOLEAN DEFAULT FALSE;
-            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
  
             DO $$ 
             BEGIN 
