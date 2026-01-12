@@ -10,7 +10,8 @@ import {
     updateApplication,
     updateSponsor,
     deleteApplication,
-    deleteSponsor
+    deleteSponsor,
+    verifyPayment
 } from './controller';
 import { authenticate, isAdmin } from '../auth/middleware';
 
@@ -18,6 +19,7 @@ const router = Router();
 
 // PUBLIC
 router.post('/submit', submitApplication);
+router.post('/verify-payment', verifyPayment);
 router.get('/active', getActiveSponsors);
 
 // ADMIN PROTECTED

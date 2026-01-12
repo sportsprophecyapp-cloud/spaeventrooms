@@ -1,10 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 
 const SuccessPage = () => {
+    const searchParams = useSearchParams();
+    const sessionId = searchParams.get('session_id');
+
+    useEffect(() => {
+        if (sessionId) {
+            // Verify payment
+            const verify = async () => {
+                try {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    await fetch(`${apiUrl}/api/sponsor-applications/verify-payment`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ session_id: sessionId })
+                    });
+                } catch (e) {
+                    console.error('Verification error', e);
+                }
+            };
+            verify();
+        }
+    }, [sessionId]);
+
     return (
         <div className={styles.container}>
             <div className={`${styles.card} glass`}>
