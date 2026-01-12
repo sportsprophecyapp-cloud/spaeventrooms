@@ -1,10 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 
-const SponsorApplyPage = () => {
+const ApplyFormContent = () => {
+    const searchParams = useSearchParams();
+    const tier = searchParams.get('tier');
+
+    // Map tier IDs to readable names
+    const tierNames: Record<string, string> = {
+        'founding': 'Founding Partner (Exclusive)',
+        'starter': 'Starter Arena ($99/mo)',
+        'growth': 'Growth Arena ($299/mo)',
+        'premium': 'Premium Arena ($599/mo)'
+    };
+
+    const selectedTierName = tier ? tierNames[tier] : null;
+
     const [formData, setFormData] = useState({
         brand_name: '',
         contact_email: '',
@@ -55,7 +69,8 @@ const SponsorApplyPage = () => {
                     logo_url: logoPreview,
                     prize_image_url: prizePreview,
                     creative_config: creative,
-                    agreed: formData.agreed
+                    agreed: formData.agreed,
+                    package_tier: tier || 'custom' // Send the package tier
                 })
             });
 
@@ -64,8 +79,8 @@ const SponsorApplyPage = () => {
             } else {
                 const data = await res.json();
                 const errorMsg = data.error || 'Submission failed. Please try again.';
-                const missingFields = data.missing ? Object.entries(data.missing).filter(([_, v]) => v).map(([k]) => k).join(', ') : '';
-                alert(`${errorMsg}${missingFields ? ` Missing: ${missingFields}` : ''}`);
+                // ... error handling
+                alert(errorMsg);
             }
         } catch (err) {
             console.error('Submission error:', err);
@@ -89,6 +104,18 @@ const SponsorApplyPage = () => {
             <header className={styles.header}>
                 <h1 className={styles.title}>SPONSOR CREATIVE STUDIO</h1>
                 <p className={styles.subtitle}>Design your ad and adjust placement perfectly.</p>
+
+                {selectedTierName ? (
+                    <div style={{ marginTop: '20px', padding: '10px', background: 'var(--accent)', borderRadius: '8px', display: 'inline-block', fontWeight: 'bold', color: 'black' }}>
+                        Selected Package: {selectedTierName}
+                    </div>
+                ) : (
+                    <div style={{ marginTop: '20px' }}>
+                        <Link href="/sponsors/pricing" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
+                            View Ad Packages & Pricing
+                        </Link>
+                    </div>
+                )}
             </header>
 
             <div className={styles.splitLayout}>
@@ -194,6 +221,10 @@ const SponsorApplyPage = () => {
                 </aside>
             </div>
         </div>
+    return (
+        <Suspense fallback={<div>Loading form...</div>}>
+            <ApplyFormContent />
+        </Suspense>
     );
 };
 

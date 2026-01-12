@@ -45,12 +45,8 @@ const SponsorsPricingPage = () => {
     const router = useRouter();
 
     const handleAction = (tierId: string) => {
-        if (tierId === 'founding') {
-            router.push('/sponsors/apply');
-        } else {
-            // Standard Stripe Flow
-            router.push(`/sponsors/checkout?tier=${tierId}`);
-        }
+        // Route all tiers to application form with pre-selection
+        router.push(`/sponsors/apply?tier=${tierId}`);
     };
 
     return (
@@ -73,8 +69,8 @@ const SponsorsPricingPage = () => {
                         <ul className={styles.features}>
                             {tier.features.map(f => <li key={f}>✅ {f}</li>)}
                         </ul>
-                        <button 
-                            className={styles.ctaBtn} 
+                        <button
+                            className={styles.ctaBtn}
                             style={{ background: tier.color, color: tier.id === 'founding' ? 'black' : 'white' }}
                             onClick={() => handleAction(tier.id)}
                         >
@@ -86,7 +82,7 @@ const SponsorsPricingPage = () => {
 
             <footer className={styles.footer}>
                 <p>
-                    Need a custom partnership? 
+                    Need a custom partnership?
                     <Link href="mailto:partnerships@sportsprophecyapp.com" className={styles.contactLink}> Contact our Sales Team</Link>
                 </p>
             </footer>

@@ -180,7 +180,7 @@ const DrawRoom = () => {
                 <button onClick={() => router.back()} className={styles.backBtn}>{t('back_to_leagues')}</button>
                 <h1>{t('draw_room_title')}</h1>
                 <div className={styles.headerRight}>
-                    <Link href="/sponsors/apply" className={styles.sponsorBtn}>
+                    <Link href="/sponsors/pricing" className={styles.sponsorBtn}>
                         💎 Sponsor This Arena
                     </Link>
                     <div className={styles.ticketBadge}>
