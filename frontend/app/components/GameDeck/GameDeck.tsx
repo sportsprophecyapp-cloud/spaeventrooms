@@ -120,29 +120,39 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         }
     };
 
+    // Use a ref for immediate feedback to avoid race conditions during drag end
+    const goneRef = React.useRef<Set<number>>(new Set());
+
+    // Sync ref with state on mount/updates
+    useEffect(() => {
+        gone.forEach(i => goneRef.current.add(i));
+    }, [gone]);
+
     const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
-        const isGone = gone.has(index);
+        const isGone = goneRef.current.has(index);
         if (isGone) return;
 
         // Track drag amount for visual feedback
         if (active) {
             setDragX(mx);
         } else {
-            setDragX(0); // ✅ Reset when drag ends
+            setDragX(0);
         }
 
-        const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 100);
+        // Lower threshold slightly for better responsiveness
+        const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 80);
         const dir = mx > 0 ? 1 : -1;
 
         if (trigger) {
             const match = matches[index];
             const pickSide = mx > 0 ? 'home' : 'away';
 
+            // Mark as gone immediately in ref
+            goneRef.current.add(index);
+
             // OPTIMISTIC UPDATE: Remove card immediately
             setGone(prev => new Set(prev).add(index));
-            // setMatches(matches.slice(1)); // REMOVED: Caused index mismatch with 'gone' set
             setPredictionCount(prev => prev + 1);
-            // setDragX(0) is handled by the else block above
 
             // Animate card flying off
             api.start(i => {
@@ -162,7 +172,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             submitPrediction(match, pickSide);
 
             // Check completion
-            if (gone.size + 1 === matches.length) {
+            if (goneRef.current.size === matches.length) {
                 setTimeout(() => setShowCompletion(true), 500);
             }
         } else {
@@ -173,6 +183,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             api.start(i => {
                 if (index !== i) return;
+                // Double check if it's gone in ref to prevent snap-back race
+                if (goneRef.current.has(index)) return;
+
                 return {
                     x: active ? mx : 0,
                     rot: active ? rot : 0,
@@ -183,6 +196,17 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             });
         }
     });
+
+    // Enforce "gone" state on re-renders (Safety Net)
+    useEffect(() => {
+        if (gone.size > 0) {
+            api.start(i => {
+                if (gone.has(i)) {
+                    return { x: window.innerWidth * 2, opacity: 0, display: 'none' };
+                }
+            });
+        }
+    }, [gone, api]);
 
     // Tracking for sponsor impressions on cards
     useEffect(() => {
