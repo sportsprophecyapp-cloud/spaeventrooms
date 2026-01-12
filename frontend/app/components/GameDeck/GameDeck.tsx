@@ -208,11 +208,16 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     useEffect(() => {
         const topIndex = gone.size;
         if (topIndex < matches.length && sponsors.length > 0) {
-            const currentSponsor = sponsors[topIndex % sponsors.length];
-            const currentMatch = matches[topIndex];
-            if (currentSponsor && currentMatch) {
-                trackSponsor(currentSponsor.id, 'impression', 'match_card', currentMatch.match_id);
-            }
+            // Delay tracking until after animation completes to prevent re-renders mid-swipe
+            const timer = setTimeout(() => {
+                const currentSponsor = sponsors[topIndex % sponsors.length];
+                const currentMatch = matches[topIndex];
+                if (currentSponsor && currentMatch) {
+                    trackSponsor(currentSponsor.id, 'impression', 'match_card', currentMatch.match_id);
+                }
+            }, 500);
+
+            return () => clearTimeout(timer);
         }
     }, [gone.size, matches, sponsors, trackSponsor]);
 
