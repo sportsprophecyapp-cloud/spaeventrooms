@@ -94,8 +94,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             if (response.ok) {
                 setMessage({ text: `Prediction saved: ${pickName}`, type: 'success' });
-                // Update balance immediately
-                refreshUser();
                 return true;
             } else if (response.status === 402) {
                 // Out of tokens - don't retry
@@ -176,7 +174,10 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             submitPrediction(match, pickSide);
 
             if (goneRef.current.size === matches.length) {
-                setTimeout(() => setShowCompletion(true), 500);
+                setTimeout(() => {
+                    refreshUser();
+                    setShowCompletion(true);
+                }, 500);
             }
 
             return; // CRITICAL: Exit immediately
