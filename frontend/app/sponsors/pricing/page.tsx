@@ -27,7 +27,7 @@ const pricingTiers = [
         id: 'growth',
         name: 'Prize Host',
         price: '299',
-        features: ['Dedicated Prize Draw Card', 'Users CLICK to Enter', 'Logo in Global Marquee', 'Priority Admin Support'],
+        features: ['Dedicated Prize Draw Card', 'Users CLICK to Enter', 'Match Card Rotation', 'Logo in Global Marquee'],
         cta: 'HOST A DRAW',
         color: 'var(--accent)'
     },
@@ -35,7 +35,7 @@ const pricingTiers = [
         id: 'premium',
         name: 'Arena Headliner',
         price: '599',
-        features: ['Official Room Sponsor', 'Header Takeover Branding', '#1 Spot in Prize Grid', 'Custom "Powered By" Badge'],
+        features: ['Official Room Sponsor', 'Header Takeover Branding', '#1 Spot in Prize Grid', 'Premium Match Card Rotation'],
         cta: 'GO HEADLINE',
         color: '#764ba2'
     }
