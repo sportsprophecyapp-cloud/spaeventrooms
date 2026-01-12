@@ -29,3 +29,7 @@
 3. **Regionally Intelligent:** Every UI text string must pass through the `useLanguage()` hook.
 4. **Safety Buffer:** Keep schedulers 25% under free-tier limits to allow for manual admin refreshes.
 5. **Sponsor Review:** Manual approval is required for all new applications before they go live in an arena.
+
+## 📧 Email Architecture
+- **General Inquiries & Privacy:** `contact@sportsprophecyapp.com` (Used for Corporate, Legal, and Support).
+- **Sales & Partnerships:** `partnerships@sportsprophecyapp.com` (Exclusively for Sponsor onboardings and brand deals).

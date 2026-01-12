@@ -39,7 +39,7 @@ const CorporatePage = () => {
                         </div>
                         <div className={styles.infoItem}>
                             <strong>Contact:</strong>
-                            <span>partnerships@sportsprophecyapp.com</span>
+                            <a href="mailto:contact@sportsprophecyapp.com" style={{ color: 'var(--accent)', textDecoration: 'none' }}>contact@sportsprophecyapp.com</a>
                         </div>
                         <div className={styles.infoItem}>
                             <strong>HQ:</strong>
@@ -53,6 +53,7 @@ const CorporatePage = () => {
                     <p>Events Arena is a social platform for entertainment purposes only and does not facilitate or endorse real-money gambling of any kind.</p>
                     <div className={styles.legalLinks}>
                         <Link href="/privacy">Privacy Policy</Link>
+                        <Link href="/terms">Terms of Service</Link>
                         <Link href="/delete-account">Account Deletion</Link>
                     </div>
                 </section>

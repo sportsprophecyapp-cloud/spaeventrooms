@@ -116,9 +116,9 @@ const HomePage = () => {
             <footer className={styles.footer}>
                 <div className={styles.footerInfo}>
                     <div className={styles.footerLinks}>
-                        <Link href="/corporate">Corporate</Link>
                         <Link href="/privacy">Privacy Policy</Link>
-                        <Link href="/delete-account">Delete Account</Link>
+                        <Link href="/terms">Terms of Service</Link>
+                        <Link href="/delete-account">Account Deletion</Link>
                     </div>
                     <p>&copy; 2026 Events Arena | Just Me Media</p>
                     <p className={styles.disclaimer}>Events Arena is a social platform for entertainment purposes only. No real money can be won or wagered on this site.</p>

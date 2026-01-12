@@ -12,6 +12,7 @@ import sponsorSubscriptionRoutes from './shared/sponsor-subscriptions/routes';
 import sponsorApplicationRoutes from './shared/sponsor-applications/routes';
 import chatRoutes from './shared/chat/routes';
 import matchRoutes from './shared/matches/routes';
+import migrationRoutes from './shared/migrations/routes';
 
 const app = express();
 
@@ -32,5 +33,6 @@ app.use('/api/rooms/:roomId/chat', chatRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/sponsor-subscriptions', sponsorSubscriptionRoutes);
 app.use('/api/sponsor-applications', sponsorApplicationRoutes);
+app.use('/api/migrations', migrationRoutes);
 
 export default app;

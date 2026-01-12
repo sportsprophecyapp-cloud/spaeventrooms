@@ -14,3 +14,7 @@
 - **Privacy Policy:** https://www.sportsprophecyapp.com/privacy
 - **Account Deletion:** https://www.sportsprophecyapp.com/delete-account
 - **Corporate Hub:** https://www.sportsprophecyapp.com/corporate
+
+## 📧 Technical Contacts
+- **Primary Support:** contact@sportsprophecyapp.com
+- **Partnership Bureau:** partnerships@sportsprophecyapp.com

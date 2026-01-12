@@ -27,12 +27,12 @@ const PrivacyPolicy = () => {
 
                 <section className={styles.section}>
                     <h2>4. DATA SAFETY & DELETION</h2>
-                    <p>You have the right to access, correct, or delete your personal information. To delete your account and all associated data, please visit our <a href="/delete-account" style={{color: 'var(--accent)'}}>Account Deletion Page</a>.</p>
+                    <p>You have the right to access, correct, or delete your personal information. To delete your account and all associated data, please visit our <a href="/delete-account" style={{ color: 'var(--accent)' }}>Account Deletion Page</a>.</p>
                 </section>
 
                 <section className={styles.section}>
                     <h2>5. CONTACT US</h2>
-                    <p>If you have any questions about this policy, please contact us at partnerships@sportsprophecyapp.com.</p>
+                    <p>If you have any questions about this policy, please contact us at <a href="mailto:contact@sportsprophecyapp.com" style={{ color: 'var(--accent)', textDecoration: 'none' }}>contact@sportsprophecyapp.com</a>.</p>
                 </section>
             </main>
         </div>

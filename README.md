@@ -1,7 +1,7 @@
 # Events Arena
 
-**Version**: 3.1.0  
-**Release**: January 11, 2026
+**Version**: 3.3.0  
+**Release**: January 13, 2026
 
 A multi-room prediction platform with premium UI, Google Login, Sponsor & Draw Management Hub (with instant-live partner onboarding), Player Profiles with Cosmetic Customization (Avatars/Frames), Badge Lockers, Referral Milestone Rewards, Winner Feedback System, and real-time chat.
 
@@ -33,3 +33,8 @@ Run from the root directory:
 - **[QA_CHECKLIST.md](QA_CHECKLIST.md)**: Mandatory pre-deployment verification steps.
 - **[UX_DESIGN_DOC.md](UX_DESIGN_DOC.md)**: Visual system and architecture blue-print.
 - **[LEGAL_RECORDS.md](LEGAL_RECORDS.md)**: Organization identity and compliance details.
+
+## 📧 Contact
+
+- **General Inquiries:** contact@sportsprophecyapp.com
+- **Partnerships & Sales:** partnerships@sportsprophecyapp.com

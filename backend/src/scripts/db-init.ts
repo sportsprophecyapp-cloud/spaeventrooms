@@ -210,6 +210,17 @@ const initDB = async () => {
                 is_verified BOOLEAN DEFAULT false,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- 10. Analytics (Phase 21)
+            CREATE TABLE IF NOT EXISTS sponsor_analytics (
+                id SERIAL PRIMARY KEY,
+                sponsor_id INTEGER NOT NULL, -- Logical link to room_sponsors/applications
+                event_type VARCHAR(50) NOT NULL, -- 'impression', 'click'
+                room_id VARCHAR(50),
+                match_id VARCHAR(50),
+                user_id INTEGER REFERENCES users(id), -- Optional, for authenticated tracking
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
 

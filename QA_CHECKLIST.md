@@ -48,3 +48,8 @@ This document is a mandatory pre-flight check before any `deploy.sh` command is 
 - `[ ]` **Real-time Sync:** Ticket count decreases immediately in header after entering a draw.
 - `[x]` **Header Layout:** Navbar (60px) does not overlap content on Home, Rooms, or Profile pages.
 - `[ ]` **Mobile Spacing:** Layout remains consistent and accessible on mobile viewports.
+
+### 📧 Email & Contact Systems (v1.2 Update)
+- `[ ]` **Support Link:** `contact@` link on Corporate/Privacy pages opens local mail client with correctly addressed email.
+- `[ ]` **Sales Link:** `partnerships@` link on Pricing page footer correctly addressed for business inquiries.
+- `[ ]` **Documentation:** All root `.md` files correctly reference the support hierarchy.

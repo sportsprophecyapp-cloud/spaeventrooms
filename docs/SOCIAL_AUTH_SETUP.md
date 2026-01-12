@@ -7,7 +7,7 @@ Follow these steps to obtain the necessary IDs and Keys for Apple and Google Sig
 
 1.  **Log in** to the [Apple Developer Portal](https://developer.apple.com/account/).
 2.  Go to **Certificates, Identifiers & Profiles** > **Identifiers**.
-3.  Select your App ID (`com.sportsprophecy.app`).
+3.  Select your App ID (`com.eventsarena.app`).
 4.  Scroll down to the **Capabilities** list.
 5.  Check **Sign In with Apple**.
 6.  Click **Save** (and Confirm if prompted).
@@ -20,24 +20,24 @@ Follow these steps to obtain the necessary IDs and Keys for Apple and Google Sig
 **Requirement**: Google Account (Free).
 
 1.  **Go to** [Google Cloud Console](https://console.cloud.google.com/).
-2.  **Create a Project** (e.g., "Sports Prophecy Mobile").
+2.  **Create a Project** (e.g., "Events Arena Mobile").
 3.  **Configure OAuth Consent Screen**:
     -   Go to **APIs & Services** > **OAuth consent screen**.
     -   Select **External** > Create.
-    -   Fill in App Name ("Sports Prophecy"), Support Email, and Developer Email.
+    -   Fill in App Name ("Events Arena"), Support Email (contact@sportsprophecyapp.com), and Developer Email.
     -   Click Save & Continue.
 4.  **Create Credentials** (You need 3 separate Client IDs):
     -   Go to **Credentials** > **Create Credentials** > **OAuth client ID**.
 
     ### A. iOS Client ID
     -   **Application type**: iOS
-    -   **Bundle ID**: `com.sportsprophecy.app`
+    -   **Bundle ID**: `com.eventsarena.app`
     -   **Name**: "iOS Client"
     -   **Click Create**. Copy the **Client ID**.
 
     ### B. Android Client ID
     -   **Application type**: Android
-    -   **Package name**: `com.sportsprophecy.app`
+    -   **Package name**: `com.eventsarena.app`
     -   **SHA-1 Certificate Fingerprint**:
         -   Open your terminal and run: `eas credentials`
         -   Select "Android" > "Production" > "Keystore".
@@ -49,7 +49,7 @@ Follow these steps to obtain the necessary IDs and Keys for Apple and Google Sig
     -   **Application type**: Web application
     -   **Name**: "Web Client"
     -   **Authorized JavaScript origins**: `https://auth.expo.io`
-    -   **Authorized redirect URIs**: `https://auth.expo.io/@sportsprophecy/sportsprophecyapp`, `https://www.sportsprophecyapp.com`
+    -   **Authorized redirect URIs**: `https://auth.expo.io/@eventsarena/eventsarena`, `https://www.sportsprophecyapp.com`
     -   **Click Create**. Copy the **Client ID**.
 
 ---

@@ -275,7 +275,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                 zIndex: matches.length - i,
                                 transform: interpolate([springProps.rot, springProps.scale], (r, s) =>
                                     `rotateZ(${r}deg) scale(${s})`
-                                )
+                                ),
+                                // ensure touch action is none to prevent scrolling while swiping
+                                touchAction: 'none'
                             }}
                         >
                             <div className={styles.hybridCard}>
@@ -293,21 +295,30 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                         className={`${styles.teamRegion} ${styles.homeRegion}`}
                                     >
                                         <div className={styles.logoWrapper}>
-                                            {match?.home_logo ? (
+                                            {match?.home_logo && !match.home_logo.includes('.toLowerCase()') ? (
                                                 <img
                                                     src={match.home_logo}
                                                     alt={match.home_team}
                                                     className={styles.teamLogo}
                                                     onError={(e) => {
-                                                        e.currentTarget.style.display = 'none';
-                                                        e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex;');
+                                                        const target = e.currentTarget;
+                                                        target.style.display = 'none';
+                                                        // Show fallback
+                                                        const parent = target.parentElement;
+                                                        if (parent) {
+                                                            const fallback = parent.querySelector(`.${styles.placeholderLogo}`);
+                                                            if (fallback) fallback.setAttribute('style', 'display: flex;');
+                                                        }
                                                     }}
                                                 />
-                                            ) : (
-                                                <div className={styles.placeholderLogo}>
-                                                    {match?.home_team?.charAt(0) || '?'}
-                                                </div>
-                                            )}
+                                            ) : null}
+                                            {/* Always render fallback hidden, show on error */}
+                                            <div
+                                                className={styles.placeholderLogo}
+                                                style={{ display: match?.home_logo ? 'none' : 'flex' }}
+                                            >
+                                                {match?.home_team?.charAt(0) || '?'}
+                                            </div>
                                         </div>
                                         <p className={styles.teamName}>{match?.home_team}</p>
                                         <p className={styles.pickLabel}>PICK</p>
@@ -323,28 +334,35 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                         className={`${styles.teamRegion} ${styles.awayRegion}`}
                                     >
                                         <div className={styles.logoWrapper}>
-                                            {match?.away_logo ? (
+                                            {match?.away_logo && !match.away_logo.includes('.toLowerCase()') ? (
                                                 <img
                                                     src={match.away_logo}
                                                     alt={match.away_team}
                                                     className={styles.teamLogo}
                                                     onError={(e) => {
-                                                        e.currentTarget.style.display = 'none';
-                                                        e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex;');
+                                                        const target = e.currentTarget;
+                                                        target.style.display = 'none';
+                                                        // Show fallback
+                                                        const parent = target.parentElement;
+                                                        if (parent) {
+                                                            const fallback = parent.querySelector(`.${styles.placeholderLogo}`);
+                                                            if (fallback) fallback.setAttribute('style', 'display: flex;');
+                                                        }
                                                     }}
                                                 />
-                                            ) : (
-                                                <div className={styles.placeholderLogo}>
-                                                    {match?.away_team?.charAt(0) || '?'}
-                                                </div>
-                                            )}
+                                            ) : null}
+                                            <div
+                                                className={styles.placeholderLogo}
+                                                style={{ display: match?.away_logo ? 'none' : 'flex' }}
+                                            >
+                                                {match?.away_team?.charAt(0) || '?'}
+                                            </div>
                                         </div>
                                         <p className={styles.teamName}>{match?.away_team}</p>
                                         <p className={styles.pickLabel}>PICK</p>
                                     </div>
                                 </div>
 
-                                {/* SPONSOR FOOTER */}
                                 {/* SPONSOR FOOTER */}
                                 {sponsor && (
                                     <div
