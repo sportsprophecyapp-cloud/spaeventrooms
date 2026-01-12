@@ -152,6 +152,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
 
             // Mark as gone IMMEDIATELY
             goneRef.current.add(index);
+            setGone(prev => new Set(prev).add(index)); // Moved up
 
             // Calculate exit position
             const exitX = (window.innerWidth + 200) * dir;
@@ -170,11 +171,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                 };
             });
 
-            // Force pure animation state
-            api.stop(index);
-
-            // Then update React state (after animation starts)
-            setGone(prev => new Set(prev).add(index));
             setPredictionCount(prev => prev + 1);
 
             submitPrediction(match, pickSide);
@@ -210,7 +206,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         if (gone.size > 0) {
             api.start(i => {
                 if (gone.has(i)) {
-                    return { x: window.innerWidth * 2, opacity: 0, display: 'none' };
+                    return { x: window.innerWidth * 2, opacity: 0, display: 'none', immediate: true };
                 }
             });
         }
