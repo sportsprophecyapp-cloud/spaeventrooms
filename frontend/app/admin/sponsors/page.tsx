@@ -13,6 +13,8 @@ const AdminSponsorsPage = () => {
     const [placements, setPlacements] = useState<any[]>([]);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editData, setEditData] = useState<any>({});
+    const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
+    const [reportData, setReportData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
     const canViewSponsors = user?.permissions.includes('can_view_sponsors') || user?.permissions.includes('super_admin');
@@ -137,6 +139,23 @@ const AdminSponsorsPage = () => {
         }
     };
 
+    const handleViewReport = async (id: number) => {
+        setSelectedReportId(id);
+        setReportData(null);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        try {
+            const res = await fetch(`${apiUrl}/api/admin/sponsorships/${id}/report`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setReportData(data);
+            }
+        } catch (e) {
+            console.error('Report fetch failed', e);
+        }
+    };
+
     if (!canViewSponsors) {
         return <div className={styles.error}>ACCESS DENIED: Requires 'can_view_sponsors' permission.</div>;
     }
@@ -239,6 +258,7 @@ const AdminSponsorsPage = () => {
                                         <p><strong>Website:</strong> {sp.website_url || 'N/A'}</p>
                                         <div className={styles.cardActions}>
                                             <button onClick={() => { setEditingId(sp.id); setEditData(sp); }} className={styles.pickWinnerBtn}>EDIT</button>
+                                            <button onClick={() => handleViewReport(sp.id)} className={styles.approveBtn}>REPORT</button>
                                             <button className={styles.contactBtn} onClick={() => window.location.href = sp.website_url}>VISIT SITE</button>
                                             <button onClick={() => handleDeleteSponsor(sp.id)} className={styles.deleteBtn}>DELETE</button>
                                         </div>
@@ -249,6 +269,43 @@ const AdminSponsorsPage = () => {
                     </div>
                 )}
             </main>
+
+            {selectedReportId && (
+                <div className={styles.modalOverlay} onClick={() => setSelectedReportId(null)}>
+                    <div className={`${styles.modal} glass`} onClick={e => e.stopPropagation()}>
+                        <header className={styles.modalHeader}>
+                            <h2>Audience Engagement Report</h2>
+                            <button onClick={() => setSelectedReportId(null)} className={styles.closeBtn}>×</button>
+                        </header>
+                        {reportData ? (
+                            <div className={styles.reportGrid}>
+                                <div className={styles.statBox}>
+                                    <span className={styles.statVal}>{reportData.impressions}</span>
+                                    <span className={styles.statLabel}>IMPRESSIONS</span>
+                                </div>
+                                <div className={styles.statBox}>
+                                    <span className={styles.statVal}>{reportData.clicks}</span>
+                                    <span className={styles.statLabel}>CLICKS</span>
+                                </div>
+                                <div className={styles.statBox}>
+                                    <span className={styles.statVal}>{reportData.totalPredictions}</span>
+                                    <span className={styles.statLabel}>PREDICTIONS</span>
+                                </div>
+                                <div className={styles.statBox}>
+                                    <span className={styles.statVal}>{reportData.drawEntries}</span>
+                                    <span className={styles.statLabel}>PRIZE ENTRIES</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>Loading report data...</p>
+                        )}
+                        <div className={styles.modalActions}>
+                            <button onClick={() => window.print()} className={styles.approveBtn}>PRINT / EXPORT PDF</button>
+                            <button onClick={() => setSelectedReportId(null)} className={styles.deleteBtn}>CLOSE</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

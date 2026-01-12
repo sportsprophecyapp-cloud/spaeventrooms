@@ -156,3 +156,79 @@
     border-radius: 8px;
     font-family: inherit;
 }
+
+/* MODAL & REPORTING */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.modal {
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.reportGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.statBox {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.statVal {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.statLabel {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    margin-top: 5px;
+}
+
+.modalActions {
+    display: flex;
+    gap: 10px;
+}
+
+.modalActions button {
+    flex: 1;
+}
