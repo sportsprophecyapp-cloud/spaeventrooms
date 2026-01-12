@@ -208,30 +208,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         }
     });
 
-    // Enforce "gone" state on re-renders (AGGRESSIVE Safety Net)
-    // This ensures cards that are gone explicitly STAY gone at their correct exit position
-    useEffect(() => {
-        if (gone.size > 0) {
-            gone.forEach(i => {
-                const savedPos = exitPositions.current.get(i);
-                if (savedPos) {
-                    api.start(index => {
-                        if (index === i) {
-                            return {
-                                x: savedPos.x,
-                                y: savedPos.y,
-                                rot: savedPos.rot,
-                                scale: 0.9,
-                                opacity: 0,
-                                immediate: true, // Force it instantly to prevent bounce
-                                display: 'none'
-                            };
-                        }
-                    });
-                }
-            });
-        }
-    }, [gone, api]);
+    // Safety net removed in favor of CSS visibility toggle
 
     // Tracking for sponsor impressions on cards
     useEffect(() => {
@@ -328,6 +305,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                 opacity: springProps.opacity,
                                 zIndex: matches.length - i,
                                 pointerEvents: isGone ? 'none' : 'auto',
+                                visibility: isGone ? 'hidden' : 'visible', // Instant hide
                                 transform: interpolate([springProps.rot, springProps.scale], (r, s) =>
                                     `rotateZ(${r}deg) scale(${s})`
                                 ),
