@@ -77,6 +77,9 @@ const AdminSponsorsPage = () => {
         if (res.ok) {
             alert('Application deleted.');
             fetchData();
+        } else {
+            const err = await res.json();
+            alert(`Failed to delete: ${err.error || 'Unknown error'}`);
         }
     };
 
@@ -90,6 +93,9 @@ const AdminSponsorsPage = () => {
         if (res.ok) {
             alert('Placement removed.');
             fetchData();
+        } else {
+            const err = await res.json();
+            alert(`Failed to delete: ${err.error || 'Unknown error'}`);
         }
     };
 
@@ -103,6 +109,9 @@ const AdminSponsorsPage = () => {
         if (res.ok) {
             alert('Draw removed.');
             fetchData();
+        } else {
+            const err = await res.json();
+            alert(`Failed to delete: ${err.error || 'Unknown error'}`);
         }
     };
 

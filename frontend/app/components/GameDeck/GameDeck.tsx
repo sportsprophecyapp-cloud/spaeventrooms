@@ -128,7 +128,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         gone.forEach(i => goneRef.current.add(i));
     }, [gone]);
 
-    const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
+    const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], swipe: [swipeX], direction: [xDir] }) => {
         const isGone = goneRef.current.has(index);
         if (isGone) return;
 
@@ -139,9 +139,13 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             setDragX(0);
         }
 
-        // Lower threshold slightly for better responsiveness
-        const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 80);
-        const dir = mx > 0 ? 1 : -1;
+        // Trigger if:
+        // 1. A valid swipe was detected (fast velocity)
+        // 2. OR the user dragged it very far (> 100px)
+        const trigger = swipeX !== 0 || (!active && Math.abs(mx) > 100);
+
+        // Determine direction from swipe OR drag movement
+        const dir = swipeX !== 0 ? swipeX : (mx > 0 ? 1 : -1);
 
         if (trigger) {
             const match = matches[index];
