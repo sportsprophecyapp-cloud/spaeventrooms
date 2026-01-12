@@ -202,16 +202,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         }
     });
 
-    // Enforce "gone" state on re-renders (Safety Net)
-    useEffect(() => {
-        if (gone.size > 0) {
-            api.start(i => {
-                if (gone.has(i)) {
-                    return { x: window.innerWidth * 2, opacity: 0, display: 'none', immediate: true };
-                }
-            });
-        }
-    }, [gone, api]);
+    // Safety net removed to prevent bounce-back/teleportation
 
     // Tracking for sponsor impressions on cards
     useEffect(() => {

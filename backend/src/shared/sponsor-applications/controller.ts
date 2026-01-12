@@ -217,6 +217,8 @@ export const updateSponsor = async (req: AuthRequest, res: Response) => {
 export const deleteApplication = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
+        // Clean up linked live sponsors (banners) first
+        await dbQuery('DELETE FROM room_sponsors WHERE application_id = $1', [id]);
         await dbQuery('DELETE FROM sponsor_applications WHERE id = $1', [id]);
         res.json({ success: true, message: 'Application removed.' });
     } catch (err) {
