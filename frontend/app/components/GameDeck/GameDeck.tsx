@@ -128,9 +128,11 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         gone.forEach(i => goneRef.current.add(i));
     }, [gone]);
 
-    const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], swipe: [swipeX], direction: [xDir] }) => {
-        const isGone = goneRef.current.has(index);
-        if (isGone) return;
+    const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], swipe: [swipeX], direction: [xDir], down }) => {
+        // CRITICAL: Check if gone BEFORE any logic
+        if (goneRef.current.has(index)) {
+            return; // Don't process ANY events for gone cards
+        }
 
         // Track drag amount for visual feedback
         if (active) {
@@ -139,302 +141,290 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             setDragX(0);
         }
 
-        // Trigger if:
-        // 1. A valid swipe was detected (fast velocity)
-        // 2. OR the user dragged it very far (> 100px)
         const trigger = swipeX !== 0 || (!active && Math.abs(mx) > 100);
-
-        // Determine direction from swipe OR drag movement
         const dir = swipeX !== 0 ? swipeX : (mx > 0 ? 1 : -1);
 
         if (trigger) {
+            console.log('SWIPING CARD:', index, 'Direction:', dir, 'Gone size:', goneRef.current.size + 1);
+
             const match = matches[index];
             const pickSide = mx > 0 ? 'home' : 'away';
 
-            // Mark as gone immediately in ref
+            // Mark as gone IMMEDIATELY
             goneRef.current.add(index);
 
-            // OPTIMISTIC UPDATE: Remove card immediately
-            setGone(prev => new Set(prev).add(index));
-            setPredictionCount(prev => prev + 1);
+            // Calculate exit position
+            const exitX = (window.innerWidth + 200) * dir;
 
-            // Calculate final position
-            const finalX = (window.innerWidth + 200) * dir;
+            // Fire animation IMMEDIATELY with no delay
+            return {
+                x: exitX,
+                y: 100 * dir,
+                rot: dir * 45,
+                scale: 0.9,
+                opacity: 0,
+                immediate: false, // Let it animate smoothly
+                config: { tension: 200, friction: 25 }
+            };
+        });
 
-            console.log('SWIPING CARD:', index, 'Direction:', dir, 'Gone size:', goneRef.current.size);
+    // Force pure animation state
+    api.stop(index);
 
-            // Animate card flying off
-            api.start(i => {
-                if (index !== i) return;
-                return {
-                    x: finalX,
-                    y: 100 * dir,
-                    rot: dir * 45,
-                    scale: 0.9,
-                    opacity: 0,
-                    config: { tension: 200, friction: 25 },
-                    onRest: () => {
-                        // Extra safety: ensure it stays gone after animation
-                        api.start(j => {
-                            if (j === index) {
-                                return { x: finalX * 2, opacity: 0, immediate: true };
-                            }
-                        });
-                    }
-                };
-            });
+    // Then update React state (after animation starts)
+    setGone(prev => new Set(prev).add(index));
+    setPredictionCount(prev => prev + 1);
 
-            // Call robust prediction handling
-            submitPrediction(match, pickSide);
+    submitPrediction(match, pickSide);
 
-            // Check completion
-            if (goneRef.current.size === matches.length) {
-                setTimeout(() => setShowCompletion(true), 500);
-            }
-            return;
-        } else {
-            // While dragging or idle
-            const rot = mx / 25;
-            const scale = active ? 1.02 : 1;
-            const opacity = 1 - Math.abs(mx) / 500;
+    if (goneRef.current.size === matches.length) {
+        setTimeout(() => setShowCompletion(true), 500);
+    }
 
-            api.start(i => {
-                if (index !== i) return;
-                // Double check if it's gone in ref to prevent snap-back race
-                if (goneRef.current.has(index)) return;
+    return; // CRITICAL: Exit immediately
+}
 
-                return {
-                    x: active ? mx : 0,
-                    rot: active ? rot : 0,
-                    scale,
-                    opacity: Math.max(0.5, opacity),
-                    config: { tension: active ? 800 : 500, friction: 40 }
-                };
-            });
-        }
+// Only animate if NOT gone (double safety check)
+if (!goneRef.current.has(index)) {
+    const rot = mx / 25;
+    const scale = active ? 1.02 : 1;
+    const opacity = 1 - Math.abs(mx) / 500;
+
+    api.start(i => {
+        if (index !== i) return;
+        return {
+            x: active ? mx : 0,
+            rot: active ? rot : 0,
+            scale,
+            opacity: Math.max(0.5, opacity),
+            config: { tension: active ? 800 : 500, friction: 40 }
+        };
+    });
+}
     });
 
-    // Enforce "gone" state on re-renders (Safety Net)
-    useEffect(() => {
-        if (gone.size > 0) {
-            api.start(i => {
-                if (gone.has(i)) {
-                    return { x: window.innerWidth * 2, opacity: 0, display: 'none' };
-                }
-            });
-        }
-    }, [gone, api]);
-
-    // Tracking for sponsor impressions on cards
-    useEffect(() => {
-        const topIndex = gone.size;
-        if (topIndex < matches.length && sponsors.length > 0) {
-            const currentSponsor = sponsors[topIndex % sponsors.length];
-            const currentMatch = matches[topIndex];
-            if (currentSponsor && currentMatch) {
-                trackSponsor(currentSponsor.id, 'impression', 'match_card', currentMatch.match_id);
+// Enforce "gone" state on re-renders (Safety Net)
+useEffect(() => {
+    if (gone.size > 0) {
+        api.start(i => {
+            if (gone.has(i)) {
+                return { x: window.innerWidth * 2, opacity: 0, display: 'none' };
             }
+        });
+    }
+}, [gone, api]);
+
+// Tracking for sponsor impressions on cards
+useEffect(() => {
+    const topIndex = gone.size;
+    if (topIndex < matches.length && sponsors.length > 0) {
+        const currentSponsor = sponsors[topIndex % sponsors.length];
+        const currentMatch = matches[topIndex];
+        if (currentSponsor && currentMatch) {
+            trackSponsor(currentSponsor.id, 'impression', 'match_card', currentMatch.match_id);
         }
-    }, [gone.size, matches, sponsors, trackSponsor]);
-
-    if (matches.length === 0) {
-        return (
-            <div className={styles.emptyContainer}>
-                <div className={styles.emptyContent}>
-                    <div className={styles.emptyIcon}>⚽</div>
-                    <p className={styles.emptyText}>{t('no_matches_available')}</p>
-                </div>
-            </div>
-        );
     }
+}, [gone.size, matches, sponsors, trackSponsor]);
 
-    if (showCompletion) {
-        return (
-            <div className={styles.completionScreen}>
-                <div className={styles.completionCard}>
-                    <div className={styles.completionIcon}>🎉</div>
-                    <h2 className={styles.completionTitle}>{t('completion_title') || 'All Predictions Complete!'}</h2>
-                    <p className={styles.completionStats}>{`You made ${predictionCount} predictions`}</p>
-                    <div className={styles.completionActions}>
-                        <button
-                            onClick={() => router.push('/draw')}
-                            className={styles.drawButton}
-                        >
-                            🎟️ {t('go_to_draw_room')}
-                        </button>
-                        <button
-                            onClick={() => router.push('/rooms/soccer')}
-                            className={styles.completionButton}
-                        >
-                            {t('back_to_leagues')}
-                        </button>
-                    </div>
-                    <p className={styles.completionCountdown}>{`Auto-returning in ${countdown}s`}</p>
-                </div>
-            </div>
-        );
-    }
-
-    const remainingCards = matches.length - gone.size;
-
+if (matches.length === 0) {
     return (
-        <div className={styles.deckWrapper}>
-            <div className={styles.deckHeader}>
-                <p className={styles.cardsRemaining}>
-                    {remainingCards} {t('matches_left') || 'Matches Left'}
-                </p>
-                <p className={styles.swipeHint}>
-                    {t('swipe_hint') || 'Swipe to Predict'}
-                </p>
-            </div>
-            <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>
-                {props.map((springProps, i) => {
-                    const isGone = gone.has(i);
-                    const match = matches[i];
-                    const sponsor = sponsors.length > 0 ? sponsors[i % sponsors.length] : null;
-
-                    // Safely extract date parts if available
-                    let timeDisplay = match?.start_time;
-                    try {
-                        const dateObj = new Date(match.start_time);
-                        if (!isNaN(dateObj.getTime())) {
-                            timeDisplay = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        }
-                    } catch (e) {
-                        // fallback
-                    }
-
-                    return (
-                        <animated.div
-                            {...bind(i)}
-                            className={`${styles.cardWrapper} ${isGone ? styles.cardGone : ''}`}
-                            key={match?.match_id || i}
-                            style={{
-                                x: springProps.x,
-                                y: springProps.y,
-                                opacity: springProps.opacity,
-                                zIndex: matches.length - i,
-                                transform: interpolate([springProps.rot, springProps.scale], (r, s) =>
-                                    `rotateZ(${r}deg) scale(${s})`
-                                ),
-                                // ensure touch action is none to prevent scrolling while swiping
-                                touchAction: 'none'
-                            }}
-                        >
-                            <div className={styles.hybridCard}>
-                                {/* Header */}
-                                <div className={styles.cardHeader}>
-                                    <p className={styles.predictionType}>MATCH WINNER</p>
-                                    <p className={styles.matchTime}>{timeDisplay}</p>
-                                </div>
-
-                                {/* Teams Container with Tap Regions */}
-                                <div className={styles.teamsContainer}>
-
-                                    {/* HOME TEAM REGION */}
-                                    <div
-                                        className={`${styles.teamRegion} ${styles.homeRegion}`}
-                                    >
-                                        <div className={styles.logoWrapper}>
-                                            {match?.home_logo && !match.home_logo.includes('.toLowerCase()') ? (
-                                                <img
-                                                    src={match.home_logo}
-                                                    alt={match.home_team}
-                                                    className={styles.teamLogo}
-                                                    onError={(e) => {
-                                                        const target = e.currentTarget;
-                                                        target.style.display = 'none';
-                                                        // Show fallback
-                                                        const parent = target.parentElement;
-                                                        if (parent) {
-                                                            const fallback = parent.querySelector(`.${styles.placeholderLogo}`);
-                                                            if (fallback) fallback.setAttribute('style', 'display: flex;');
-                                                        }
-                                                    }}
-                                                />
-                                            ) : null}
-                                            {/* Always render fallback hidden, show on error */}
-                                            <div
-                                                className={styles.placeholderLogo}
-                                                style={{ display: match?.home_logo ? 'none' : 'flex' }}
-                                            >
-                                                {match?.home_team?.charAt(0) || '?'}
-                                            </div>
-                                        </div>
-                                        <p className={styles.teamName}>{match?.home_team}</p>
-                                        <p className={styles.pickLabel}>PICK</p>
-                                    </div>
-
-                                    {/* VS */}
-                                    <div className={styles.vsContainer}>
-                                        <span className={styles.vs}>VS</span>
-                                    </div>
-
-                                    {/* AWAY TEAM REGION */}
-                                    <div
-                                        className={`${styles.teamRegion} ${styles.awayRegion}`}
-                                    >
-                                        <div className={styles.logoWrapper}>
-                                            {match?.away_logo && !match.away_logo.includes('.toLowerCase()') ? (
-                                                <img
-                                                    src={match.away_logo}
-                                                    alt={match.away_team}
-                                                    className={styles.teamLogo}
-                                                    onError={(e) => {
-                                                        const target = e.currentTarget;
-                                                        target.style.display = 'none';
-                                                        // Show fallback
-                                                        const parent = target.parentElement;
-                                                        if (parent) {
-                                                            const fallback = parent.querySelector(`.${styles.placeholderLogo}`);
-                                                            if (fallback) fallback.setAttribute('style', 'display: flex;');
-                                                        }
-                                                    }}
-                                                />
-                                            ) : null}
-                                            <div
-                                                className={styles.placeholderLogo}
-                                                style={{ display: match?.away_logo ? 'none' : 'flex' }}
-                                            >
-                                                {match?.away_team?.charAt(0) || '?'}
-                                            </div>
-                                        </div>
-                                        <p className={styles.teamName}>{match?.away_team}</p>
-                                        <p className={styles.pickLabel}>PICK</p>
-                                    </div>
-                                </div>
-
-                                {/* SPONSOR FOOTER */}
-                                {sponsor && (
-                                    <div
-                                        className={styles.cardFooter}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            trackSponsor(sponsor.id, 'click', 'match_card', match.match_id);
-                                            if (sponsor.website_url) {
-                                                window.open(sponsor.website_url, '_blank', 'noopener,noreferrer');
-                                            }
-                                        }}
-                                    >
-                                        <span className={styles.poweredBy}>POWERED BY</span>
-                                        <img src={sponsor.logo_url} alt={sponsor.sponsor_name} className={styles.sponsorLogo} />
-                                    </div>
-                                )}
-
-                                {/* Swipe Indicator - shows during drag */}
-                                <div style={{ opacity: Math.max(0, (dragX - 50) / 100) }} className={styles.swipeIndicatorLeft}>
-                                    ✓ PICK HOME
-                                </div>
-                                <div style={{ opacity: Math.max(0, (-dragX - 50) / 100) }} className={styles.swipeIndicatorRight}>
-                                    PICK AWAY ✓
-                                </div>
-                            </div>
-                        </animated.div>
-                    );
-                })}
+        <div className={styles.emptyContainer}>
+            <div className={styles.emptyContent}>
+                <div className={styles.emptyIcon}>⚽</div>
+                <p className={styles.emptyText}>{t('no_matches_available')}</p>
             </div>
         </div>
     );
+}
+
+if (showCompletion) {
+    return (
+        <div className={styles.completionScreen}>
+            <div className={styles.completionCard}>
+                <div className={styles.completionIcon}>🎉</div>
+                <h2 className={styles.completionTitle}>{t('completion_title') || 'All Predictions Complete!'}</h2>
+                <p className={styles.completionStats}>{`You made ${predictionCount} predictions`}</p>
+                <div className={styles.completionActions}>
+                    <button
+                        onClick={() => router.push('/draw')}
+                        className={styles.drawButton}
+                    >
+                        🎟️ {t('go_to_draw_room')}
+                    </button>
+                    <button
+                        onClick={() => router.push('/rooms/soccer')}
+                        className={styles.completionButton}
+                    >
+                        {t('back_to_leagues')}
+                    </button>
+                </div>
+                <p className={styles.completionCountdown}>{`Auto-returning in ${countdown}s`}</p>
+            </div>
+        </div>
+    );
+}
+
+const remainingCards = matches.length - gone.size;
+
+return (
+    <div className={styles.deckWrapper}>
+        <div className={styles.deckHeader}>
+            <p className={styles.cardsRemaining}>
+                {remainingCards} {t('matches_left') || 'Matches Left'}
+            </p>
+            <p className={styles.swipeHint}>
+                {t('swipe_hint') || 'Swipe to Predict'}
+            </p>
+        </div>
+        <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>
+            {props.map((springProps, i) => {
+                const isGone = gone.has(i);
+                const match = matches[i];
+                const sponsor = sponsors.length > 0 ? sponsors[i % sponsors.length] : null;
+
+                // Safely extract date parts if available
+                let timeDisplay = match?.start_time;
+                try {
+                    const dateObj = new Date(match.start_time);
+                    if (!isNaN(dateObj.getTime())) {
+                        timeDisplay = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    }
+                } catch (e) {
+                    // fallback
+                }
+
+                return (
+                    <animated.div
+                        {...bind(i)}
+                        className={`${styles.cardWrapper} ${isGone ? styles.cardGone : ''}`}
+                        key={match?.match_id || i}
+                        style={{
+                            x: springProps.x,
+                            y: springProps.y,
+                            opacity: springProps.opacity,
+                            zIndex: matches.length - i,
+                            pointerEvents: isGone ? 'none' : 'auto',
+                            transform: interpolate([springProps.rot, springProps.scale], (r, s) =>
+                                `rotateZ(${r}deg) scale(${s})`
+                            ),
+                            // ensure touch action is none to prevent scrolling while swiping
+                            touchAction: 'none'
+                        }}
+                    >
+                        <div className={styles.hybridCard}>
+                            {/* Header */}
+                            <div className={styles.cardHeader}>
+                                <p className={styles.predictionType}>MATCH WINNER</p>
+                                <p className={styles.matchTime}>{timeDisplay}</p>
+                            </div>
+
+                            {/* Teams Container with Tap Regions */}
+                            <div className={styles.teamsContainer}>
+
+                                {/* HOME TEAM REGION */}
+                                <div
+                                    className={`${styles.teamRegion} ${styles.homeRegion}`}
+                                >
+                                    <div className={styles.logoWrapper}>
+                                        {match?.home_logo && !match.home_logo.includes('.toLowerCase()') ? (
+                                            <img
+                                                src={match.home_logo}
+                                                alt={match.home_team}
+                                                className={styles.teamLogo}
+                                                onError={(e) => {
+                                                    const target = e.currentTarget;
+                                                    target.style.display = 'none';
+                                                    // Show fallback
+                                                    const parent = target.parentElement;
+                                                    if (parent) {
+                                                        const fallback = parent.querySelector(`.${styles.placeholderLogo}`);
+                                                        if (fallback) fallback.setAttribute('style', 'display: flex;');
+                                                    }
+                                                }}
+                                            />
+                                        ) : null}
+                                        {/* Always render fallback hidden, show on error */}
+                                        <div
+                                            className={styles.placeholderLogo}
+                                            style={{ display: match?.home_logo ? 'none' : 'flex' }}
+                                        >
+                                            {match?.home_team?.charAt(0) || '?'}
+                                        </div>
+                                    </div>
+                                    <p className={styles.teamName}>{match?.home_team}</p>
+                                    <p className={styles.pickLabel}>PICK</p>
+                                </div>
+
+                                {/* VS */}
+                                <div className={styles.vsContainer}>
+                                    <span className={styles.vs}>VS</span>
+                                </div>
+
+                                {/* AWAY TEAM REGION */}
+                                <div
+                                    className={`${styles.teamRegion} ${styles.awayRegion}`}
+                                >
+                                    <div className={styles.logoWrapper}>
+                                        {match?.away_logo && !match.away_logo.includes('.toLowerCase()') ? (
+                                            <img
+                                                src={match.away_logo}
+                                                alt={match.away_team}
+                                                className={styles.teamLogo}
+                                                onError={(e) => {
+                                                    const target = e.currentTarget;
+                                                    target.style.display = 'none';
+                                                    // Show fallback
+                                                    const parent = target.parentElement;
+                                                    if (parent) {
+                                                        const fallback = parent.querySelector(`.${styles.placeholderLogo}`);
+                                                        if (fallback) fallback.setAttribute('style', 'display: flex;');
+                                                    }
+                                                }}
+                                            />
+                                        ) : null}
+                                        <div
+                                            className={styles.placeholderLogo}
+                                            style={{ display: match?.away_logo ? 'none' : 'flex' }}
+                                        >
+                                            {match?.away_team?.charAt(0) || '?'}
+                                        </div>
+                                    </div>
+                                    <p className={styles.teamName}>{match?.away_team}</p>
+                                    <p className={styles.pickLabel}>PICK</p>
+                                </div>
+                            </div>
+
+                            {/* SPONSOR FOOTER */}
+                            {sponsor && (
+                                <div
+                                    className={styles.cardFooter}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        trackSponsor(sponsor.id, 'click', 'match_card', match.match_id);
+                                        if (sponsor.website_url) {
+                                            window.open(sponsor.website_url, '_blank', 'noopener,noreferrer');
+                                        }
+                                    }}
+                                >
+                                    <span className={styles.poweredBy}>POWERED BY</span>
+                                    <img src={sponsor.logo_url} alt={sponsor.sponsor_name} className={styles.sponsorLogo} />
+                                </div>
+                            )}
+
+                            {/* Swipe Indicator - shows during drag */}
+                            <div style={{ opacity: Math.max(0, (dragX - 50) / 100) }} className={styles.swipeIndicatorLeft}>
+                                ✓ PICK HOME
+                            </div>
+                            <div style={{ opacity: Math.max(0, (-dragX - 50) / 100) }} className={styles.swipeIndicatorRight}>
+                                PICK AWAY ✓
+                            </div>
+                        </div>
+                    </animated.div>
+                );
+            })}
+        </div>
+    </div>
+);
 };
 
 export default GameDeck;
