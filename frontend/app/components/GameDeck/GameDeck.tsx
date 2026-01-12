@@ -179,6 +179,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             if (goneRef.current.size === matches.length) {
                 setTimeout(() => setShowCompletion(true), 500);
             }
+            return;
         } else {
             // While dragging or idle
             const rot = mx / 25;
