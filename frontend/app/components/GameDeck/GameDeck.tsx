@@ -168,6 +168,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                     rot: dir * 45,
                     scale: 0.9,
                     opacity: 0,
+                    immediate: key => key === 'x',
                     config: { tension: 200, friction: 25 }
                 };
             });
