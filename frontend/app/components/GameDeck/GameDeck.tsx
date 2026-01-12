@@ -31,7 +31,198 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     const router = useRouter();
     const [gone, setGone] = useState<Set<number>>(() => new Set());
 
-    // ... (rest of component) ...
+    const [matches, setMatches] = useState<Match[]>([]);
+    const [showCompletion, setShowCompletion] = useState(false);
+    const [countdown, setCountdown] = useState(3);
+    const [predictionCount, setPredictionCount] = useState(0);
+    const [dragX, setDragX] = useState(0);
+    const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' | 'info' } | null>(null);
+
+    useEffect(() => {
+        if (!token) return;
+        const fetchMatches = async () => {
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                const res = await fetch(`${apiUrl}/api/rooms/soccer/matches?league=${leagueId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    setMatches(await res.json());
+                }
+            } catch (err) {
+                console.error("Error fetching matches:", err);
+            }
+        };
+        fetchMatches();
+    }, [leagueId, token]);
+
+    useEffect(() => {
+        if (showCompletion && countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        } else if (showCompletion && countdown === 0) {
+            router.push('/rooms/soccer');
+        }
+    }, [showCompletion, countdown, router]);
+
+    const [props, api] = useSprings(matches.length, i => ({
+        x: 0,
+        y: 0,
+        scale: 1,
+        rot: 0,
+        opacity: 1,
+        config: { tension: 500, friction: 40 }
+    }));
+
+    const submitPrediction = async (match: Match, pickSide: string, attemptNum = 1) => {
+        const MAX_RETRIES = 2;
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const pickName = pickSide === 'home' ? match.home_team : match.away_team;
+
+            const response = await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    matchId: match.match_id,
+                    pick: pickName
+                })
+            });
+
+            if (response.ok) {
+                setMessage({ text: `Prediction saved: ${pickName}`, type: 'success' });
+                // Update balance immediately
+                refreshUser();
+                return true;
+            } else if (response.status === 402) {
+                // Out of tokens - don't retry
+                setMessage({ text: 'Not enough tokens', type: 'error' });
+                return false;
+            } else if (attemptNum < MAX_RETRIES) {
+                // Retry on server error
+                console.warn(`Prediction failed, retrying (attempt ${attemptNum + 1})...`);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return submitPrediction(match, pickSide, attemptNum + 1);
+            } else {
+                setMessage({ text: 'Failed to save prediction', type: 'error' });
+                return false;
+            }
+        } catch (err) {
+            if (attemptNum < MAX_RETRIES) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return submitPrediction(match, pickSide, attemptNum + 1);
+            }
+            setMessage({ text: 'Network error', type: 'error' });
+            return false;
+        }
+    };
+
+    const bind = useDrag(({ args: [index], active, movement: [mx], velocity: [vx], direction: [xDir] }) => {
+        const isGone = gone.has(index);
+        if (isGone) return;
+
+        // Track drag amount for visual feedback
+        if (active) {
+            setDragX(mx);
+        } else {
+            setDragX(0); // ✅ Reset when drag ends
+        }
+
+        const trigger = !active && (Math.abs(vx) > 0.1 || Math.abs(mx) > 100);
+        const dir = mx > 0 ? 1 : -1;
+
+        if (trigger) {
+            const match = matches[index];
+            const pickSide = mx > 0 ? 'home' : 'away';
+
+            // OPTIMISTIC UPDATE: Remove card immediately
+            setGone(prev => new Set(prev).add(index));
+            setMatches(matches.slice(1));
+            setPredictionCount(prev => prev + 1);
+            // setDragX(0) is handled by the else block above
+
+            // Animate card flying off
+            api.start(i => {
+                if (index !== i) return;
+                const x = (window.innerWidth + 200) * dir;
+                return {
+                    x,
+                    y: 100 * dir,
+                    rot: dir * 45,
+                    scale: 0.9,
+                    opacity: 0,
+                    config: { tension: 200, friction: 25 }
+                };
+            });
+
+            // Call robust prediction handling
+            submitPrediction(match, pickSide);
+
+            // Check completion
+            if (gone.size + 1 === matches.length) {
+                setTimeout(() => setShowCompletion(true), 500);
+            }
+        } else {
+            // While dragging or idle
+            const rot = mx / 25;
+            const scale = active ? 1.02 : 1;
+            const opacity = 1 - Math.abs(mx) / 500;
+
+            api.start(i => {
+                if (index !== i) return;
+                return {
+                    x: active ? mx : 0,
+                    rot: active ? rot : 0,
+                    scale,
+                    opacity: Math.max(0.5, opacity),
+                    config: { tension: active ? 800 : 500, friction: 40 }
+                };
+            });
+        }
+    });
+
+    if (matches.length === 0) {
+        return (
+            <div className={styles.emptyContainer}>
+                <div className={styles.emptyContent}>
+                    <div className={styles.emptyIcon}>⚽</div>
+                    <p className={styles.emptyText}>{t('no_matches_available')}</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (showCompletion) {
+        return (
+            <div className={styles.completionScreen}>
+                <div className={styles.completionCard}>
+                    <div className={styles.completionIcon}>🎉</div>
+                    <h2 className={styles.completionTitle}>{t('completion_title') || 'All Predictions Complete!'}</h2>
+                    <p className={styles.completionStats}>{`You made ${predictionCount} predictions`}</p>
+                    <div className={styles.completionActions}>
+                        <button
+                            onClick={() => router.push('/draw')}
+                            className={styles.drawButton}
+                        >
+                            🎟️ {t('go_to_draw_room')}
+                        </button>
+                        <button
+                            onClick={() => router.push('/rooms/soccer')}
+                            className={styles.completionButton}
+                        >
+                            {t('back_to_leagues')}
+                        </button>
+                    </div>
+                    <p className={styles.completionCountdown}>{`Auto-returning in ${countdown}s`}</p>
+                </div>
+            </div>
+        );
+    }
+
+    const remainingCards = matches.length - gone.size;
 
     return (
         <div className={styles.deckWrapper}>
