@@ -68,30 +68,54 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
 
         const app = appRes.rows[0];
 
-        // 1. Create Prize Draw
-        await dbQuery(
-            `INSERT INTO prize_draws (title, prize, description, room_id, status)
-             VALUES ($1, $2, $3, $4, 'active')`,
-            [`${app.brand_name} Giveaway`, app.prize_description, `Sponsored by ${app.brand_name}`, app.arena_target]
-        );
+        // START_TRANSACTION
+        await dbQuery('BEGIN');
 
-        // 2. Create Room Sponsor placement
-        await dbQuery(`
-            INSERT INTO room_sponsors 
-            (room_id, sponsor_name, logo_url, website_url, prize_description, application_id, is_active, prize_escrow_received)
-            VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE)
-        `, [app.arena_target, app.brand_name, app.logo_url, app.website_url, app.prize_description, appId]);
+        try {
+            // 1. Create Room Sponsor placement
+            const sponsorRes = await dbQuery(`
+                INSERT INTO room_sponsors 
+                (room_id, sponsor_name, logo_url, website_url, prize_description, application_id, is_active, prize_escrow_received)
+                VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE)
+                RETURNING id
+            `, [app.arena_target, app.brand_name, app.logo_url, app.website_url, app.prize_description, appId]);
 
-        // 3. Update Application Status
-        await dbQuery(
-            "UPDATE sponsor_applications SET status = 'approved', reviewed_at = NOW(), reviewed_by = $1 WHERE id = $2",
-            [reviewerId, appId]
-        );
+            const sponsorId = sponsorRes.rows[0].id;
 
-        res.json({ success: true, message: 'Partner is now LIVE!' });
-    } catch (error) {
+            // 2. Create Prize Draw (Link to Sponsor + Image)
+            await dbQuery(
+                `INSERT INTO prize_draws (title, prize, description, room_id, status, sponsor_id, prize_image)
+                 VALUES ($1, $2, $3, $4, 'active', $5, $6)`,
+                [
+                    `${app.brand_name} Giveaway`,
+                    app.prize_description,
+                    `Sponsored by ${app.brand_name}`,
+                    app.arena_target,
+                    sponsorId,
+                    app.prize_image_url
+                ]
+            );
+
+            // 3. Update Application Status
+            await dbQuery(
+                "UPDATE sponsor_applications SET status = 'approved', reviewed_at = NOW(), reviewed_by = $1 WHERE id = $2",
+                [reviewerId, appId]
+            );
+
+            await dbQuery('COMMIT');
+            res.json({ success: true, message: 'Partner is now LIVE!' });
+
+        } catch (innerError) {
+            await dbQuery('ROLLBACK');
+            throw innerError;
+        }
+
+    } catch (error: any) {
         console.error('Approval/Deployment failed:', error);
-        res.status(500).json({ error: 'Deployment failed' });
+        res.status(500).json({
+            error: 'Deployment failed',
+            details: error.message
+        });
     }
 };
 

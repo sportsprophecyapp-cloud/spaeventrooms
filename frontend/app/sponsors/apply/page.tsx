@@ -95,51 +95,51 @@ const SponsorApplyPage = () => {
                 {/* CONTROLS COLUMN */}
                 <form onSubmit={handleSubmit} className={`${styles.form} glass`}>
                     <div className={styles.inputGroup}>
-                        <label>Brand Name</label>
-                        <input required value={formData.brand_name} onChange={e => setFormData({ ...formData, brand_name: e.target.value })} placeholder="e.g. Takomo" />
+                        <label htmlFor="brand_name">Brand Name</label>
+                        <input id="brand_name" name="brand_name" required value={formData.brand_name} onChange={e => setFormData({ ...formData, brand_name: e.target.value })} placeholder="e.g. Takomo" />
                     </div>
 
                     <div className={styles.inputRow}>
                         <div className={styles.inputGroup}>
-                            <label>Contact Email</label>
-                            <input type="email" required value={formData.contact_email} onChange={e => setFormData({ ...formData, contact_email: e.target.value })} placeholder="email@brand.com" />
+                            <label htmlFor="contact_email">Contact Email</label>
+                            <input id="contact_email" name="contact_email" type="email" required value={formData.contact_email} onChange={e => setFormData({ ...formData, contact_email: e.target.value })} placeholder="email@brand.com" />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label>Website URL (Optional)</label>
-                            <input value={formData.website_url} onChange={e => setFormData({ ...formData, website_url: e.target.value })} placeholder="https://..." />
-                        </div>
-                    </div>
-
-                    <div className={styles.inputRow}>
-                        <div className={styles.inputGroup}>
-                            <label>Brand Logo <span className={styles.guideline}>(512x512px Transparent PNG)</span></label>
-                            <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'logo')} className={styles.fileInput} />
-                        </div>
-                        <div className={styles.inputGroup}>
-                            <label>Logo Size (%)</label>
-                            <input type="range" min="50" max="150" value={creative.logo_size} onChange={e => setCreative({ ...creative, logo_size: parseInt(e.target.value) })} />
+                            <label htmlFor="website_url">Website URL (Optional)</label>
+                            <input id="website_url" name="website_url" value={formData.website_url} onChange={e => setFormData({ ...formData, website_url: e.target.value })} placeholder="https://..." />
                         </div>
                     </div>
 
                     <div className={styles.inputRow}>
                         <div className={styles.inputGroup}>
-                            <label>Move Horizontal</label>
-                            <input type="range" min="-50" max="50" value={creative.logo_x} onChange={e => setCreative({ ...creative, logo_x: parseInt(e.target.value) })} />
+                            <label htmlFor="logo_upload">Brand Logo <span className={styles.guideline}>(512x512px Transparent PNG)</span></label>
+                            <input id="logo_upload" name="logo_upload" type="file" accept="image/*" onChange={e => handleFileChange(e, 'logo')} className={styles.fileInput} />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label>Move Vertical</label>
-                            <input type="range" min="-50" max="50" value={creative.logo_y} onChange={e => setCreative({ ...creative, logo_y: parseInt(e.target.value) })} />
+                            <label htmlFor="logo_size">Logo Size (%)</label>
+                            <input id="logo_size" name="logo_size" type="range" min="50" max="150" value={creative.logo_size} onChange={e => setCreative({ ...creative, logo_size: parseInt(e.target.value) })} />
+                        </div>
+                    </div>
+
+                    <div className={styles.inputRow}>
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="logo_x">Move Horizontal</label>
+                            <input id="logo_x" name="logo_x" type="range" min="-50" max="50" value={creative.logo_x} onChange={e => setCreative({ ...creative, logo_x: parseInt(e.target.value) })} />
+                        </div>
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="logo_y">Move Vertical</label>
+                            <input id="logo_y" name="logo_y" type="range" min="-50" max="50" value={creative.logo_y} onChange={e => setCreative({ ...creative, logo_y: parseInt(e.target.value) })} />
                         </div>
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label>Prize / Promo Image <span className={styles.guideline}>(1200x400px Recommended)</span></label>
-                        <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'prize')} className={styles.fileInput} />
+                        <label htmlFor="prize_image">Prize / Promo Image <span className={styles.guideline}>(1200x400px Recommended)</span></label>
+                        <input id="prize_image" name="prize_image" type="file" accept="image/*" onChange={e => handleFileChange(e, 'prize')} className={styles.fileInput} />
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label>Prize Description</label>
-                        <textarea required value={formData.prize_description} onChange={e => setFormData({ ...formData, prize_description: e.target.value })} placeholder="Describe your prize..." />
+                        <label htmlFor="prize_description">Prize Description</label>
+                        <textarea id="prize_description" name="prize_description" required value={formData.prize_description} onChange={e => setFormData({ ...formData, prize_description: e.target.value })} placeholder="Describe your prize..." />
                     </div>
 
                     <div className={styles.legalSection}>
