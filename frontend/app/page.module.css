@@ -376,6 +376,81 @@
     border-radius: 4px;
 }
 
+
+/* Founder's Letter Section */
+.letterContainer {
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 5rem;
+    padding-bottom: 3rem;
+    display: flex;
+    justify-content: center;
+}
+
+.letterBody {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 3rem;
+    position: relative;
+    box-shadow: 10px 10px 0px rgba(0, 112, 243, 0.1);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.letterBody:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.letterHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+.companyName {
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    font-weight: 900;
+    color: var(--accent);
+}
+
+.letterDate {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.letterText {
+    font-family: var(--font-merriweather), serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2.5rem;
+}
+
+.letterFooter {
+    margin-top: 1rem;
+}
+
+.letterSignature {
+    font-family: var(--font-dancing-script), cursive;
+    font-size: 3rem;
+    color: var(--accent);
+    margin-bottom: 0.2rem;
+}
+
+.letterTitle {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
 /* Mobile Tweaks */
 @media (max-width: 768px) {
     .logo h1 {
@@ -384,5 +459,17 @@
 
     .roomGrid {
         grid-template-columns: 1fr;
+    }
+
+    .letterBody {
+        padding: 2rem;
+    }
+
+    .letterText {
+        font-size: 1rem;
+    }
+
+    .letterSignature {
+        font-size: 2.2rem;
     }
 }

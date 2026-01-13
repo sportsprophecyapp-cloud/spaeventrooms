@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Outfit } from 'next/font/google';
+import { Outfit, Dancing_Script, Merriweather } from 'next/font/google';
 import './globals.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -13,6 +13,20 @@ import ToastNotification from './components/ToastNotification/ToastNotification'
 const outfit = Outfit({
   subsets: ['latin'],
   weight: ['100', '300', '400', '600', '800', '900'],
+  variable: '--font-outfit',
+});
+
+const dancingScript = Dancing_Script({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-dancing-script',
+});
+
+const merriweather = Merriweather({
+  subsets: ['latin'],
+  weight: ['300', '400', '700'],
+  style: ['italic', 'normal'],
+  variable: '--font-merriweather',
 });
 
 export const metadata: Metadata = {
@@ -32,7 +46,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={outfit.className}>
+      <body className={`${outfit.variable} ${dancingScript.variable} ${merriweather.variable} ${outfit.className}`}>
         <GoogleOAuthProvider clientId="690358031158-n4e5sqsu936iega8rh9ge8f0kjikveht.apps.googleusercontent.com">
           <AuthProvider>
             <SponsorProvider>

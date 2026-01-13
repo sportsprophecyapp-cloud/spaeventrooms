@@ -111,11 +111,36 @@ const HomePage = () => {
                         </Link>
                     </div>
                 </section>
+
+                {/* Founder's Letter / Origin Story Section */}
+                <section className={styles.letterContainer}>
+                    <div className={styles.letterBody}>
+                        <div className={styles.letterHeader}>
+                            <span className={styles.companyName}>JUST ME MEDIA</span>
+                            <span className={styles.letterDate}>EST. 2025</span>
+                        </div>
+                        <div className={styles.letterText}>
+                            "I built <strong>Events Arena</strong> to give fans and sponsors a platform where both can equally benefit.
+                            <br /><br />
+                            I wanted to create more than just a game—I'm building a large-scale ecosystem of entertainment that rewards sports knowledge without financial risk.
+                            <br /><br />
+                            As a solo developer, your feedback during this beta is everything to me. This is a journey to build a community where everyone wins."
+                        </div>
+                        <div className={styles.letterFooter}>
+                            <p className={styles.letterSignature}>William</p>
+                            <p className={styles.letterTitle}>Founder, Just Me Media</p>
+                            <Link href="/corporate" className={styles.actionLink} style={{ marginTop: '1rem', color: 'var(--accent)', fontSize: '0.8rem' }}>
+                                Learn more about our vision →
+                            </Link>
+                        </div>
+                    </div>
+                </section>
             </main>
 
             <footer className={styles.footer}>
                 <div className={styles.footerInfo}>
                     <div className={styles.footerLinks}>
+                        <Link href="/corporate">Corporate</Link>
                         <Link href="/privacy">Privacy Policy</Link>
                         <Link href="/terms">Terms of Service</Link>
                         <Link href="/delete-account">Account Deletion</Link>
