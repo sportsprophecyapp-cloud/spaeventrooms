@@ -58,6 +58,18 @@ export const pickWinner = async (drawId: number) => {
             [winner.id, drawId]
         );
 
+        // AWARD VOUCHER (Fix for missing rewards)
+        const drawDetails = await query('SELECT title, prize, description FROM prize_draws WHERE id = $1', [drawId]);
+        if (drawDetails.rows.length > 0) {
+            const { title, prize, description } = drawDetails.rows[0];
+            await query(
+                `INSERT INTO user_vouchers (user_id, draw_id, title, description) 
+                 VALUES ($1, $2, $3, $4)`,
+                [winner.id, drawId, `WINNER: ${title}`, `Prize: ${prize}. ${description}`]
+            );
+            console.log(`🎁 Awarded voucher to User ${winner.id} for Draw ${drawId}`);
+        }
+
         // Notify winner in-app via Socket
         socketService.emitToRoom(`user:${winner.id}`, 'private_message', {
             from: 'System',

@@ -25,6 +25,9 @@ const initDB = async () => {
             ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS home_logo TEXT;
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS away_logo TEXT;
+            ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS league VARCHAR(100);
+            ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS league_logo TEXT;
+            ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS data JSONB DEFAULT '{}';
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
             -- 5. Prize Draw System
@@ -36,6 +39,8 @@ const initDB = async () => {
                 room_id VARCHAR(50) DEFAULT 'soccer',
                 status VARCHAR(20) DEFAULT 'active', -- 'active', 'completed'
                 winner_id INTEGER REFERENCES users(id),
+                sponsor_id INTEGER REFERENCES room_sponsors(id),
+                prize_image TEXT,
                 draw_date TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -54,6 +59,8 @@ const initDB = async () => {
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS draw_date TIMESTAMP;
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS winner_id INTEGER REFERENCES users(id);
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS sponsor_id INTEGER REFERENCES room_sponsors(id);
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS prize_image TEXT;
 
             -- 6. Sponsor Application & Review System (Consolidated v3.9)
             CREATE TABLE IF NOT EXISTS sponsor_applications (
@@ -222,6 +229,34 @@ const initDB = async () => {
                 match_id VARCHAR(50),
                 user_id INTEGER REFERENCES users(id), -- Optional, for authenticated tracking
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            -- 11. Gamification Tables (Phase 9 & 10 Core)
+            CREATE TABLE IF NOT EXISTS token_transactions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                amount INTEGER NOT NULL,
+                type VARCHAR(50), -- 'daily_login', 'purchase', 'referral', 'prediction'
+                description TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS badges (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                description TEXT,
+                asset_url TEXT,
+                requirement_type VARCHAR(50), -- 'submissions', 'wins', etc.
+                requirement_value INTEGER,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS user_badges (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                badge_id INTEGER REFERENCES badges(id) ON DELETE CASCADE,
+                earned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, badge_id)
             );
         `;
         await client.query(schema);

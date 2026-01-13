@@ -105,8 +105,8 @@ export const submitApplication = async (req: Request, res: Response) => {
 
 // 2. ADMIN: DEPLOY TO LIVE ARENA
 export const approveApplication = async (req: AuthRequest, res: Response) => {
+    const { appId } = req.params;
     try {
-        const { appId } = req.params;
         const reviewerId = req.user?.id;
 
         // Fetch application details
@@ -158,7 +158,11 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
         }
 
     } catch (error: any) {
-        console.error('Approval/Deployment failed:', error);
+        console.error('Approval/Deployment failed:', {
+            error: error.message,
+            stack: error.stack,
+            appId: appId
+        });
         res.status(500).json({
             error: 'Deployment failed',
             details: error.message

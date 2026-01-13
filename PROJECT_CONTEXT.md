@@ -4,12 +4,25 @@
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
 **PATH:** `/Users/williamcommu/Desktop/mobileV31crashed`
 
-## 🚀 CURRENT STATUS (Phase 24 - COMPLETE ✅)
-**Version**: 3.3.0
+## 🚀 CURRENT STATUS (Phase 25 - COMPLETE ✅)
+**Version**: 3.4.0
 **Release Date**: January 13, 2026
-**Status**: This version is built and ready for submission to the Google Play Store and Apple App Store pending developer account authorization.
+**Status**: Critical fixes for Sponsor Draws, Token/Ticket rewards, and Card persistence are now live. This version is ready for store submission.
 
 This release finalizes the universal branding, updates versioning across all documentation and configuration files, and prepares the application for store submission.
+
+### ✅ COMPLETED (Phase 25 - Card Processing & Reward Stabilization - January 13, 2026):
+1.  **Sponsor Draw Visibility**:
+    - Resolved critical schema mismatch where `sponsor_id` and `prize_image` were missing from the `prize_draws` table.
+    - Successfully linked admin approvals to live prize draws.
+2.  **Reward Engine Stabilization**:
+    - Re-implemented the `token_transactions` log table which was causing silent rollback of XP and Token rewards.
+    - Verified unified reward logic for daily logins, match predictions, and draw entries.
+3.  **Card Persistence & Filtering**:
+    - Added the missing `league` column to `soccer_matches`, enabling robust filtering of already-predicted cards.
+    - Prevented swiped cards from reappearing after arena re-entry.
+4.  **Admin Diagnostics**:
+    - Enhanced error logging for `approveApplication` to include stack traces and payload inspection.
 
 ### ✅ COMPLETED (Phase 24 - Release Preparation & Version Bump - January 13, 2026):
 1.  **Version Synchronization**:
