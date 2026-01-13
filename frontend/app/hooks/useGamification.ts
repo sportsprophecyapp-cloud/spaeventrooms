@@ -25,6 +25,7 @@ interface Cosmetic {
     cost: number;
     imageUrl: string;
     description: string;
+    requirement?: string;
     owned: boolean;
     is_achievement_reward?: boolean;
 }

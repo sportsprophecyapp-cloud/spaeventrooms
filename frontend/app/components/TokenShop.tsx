@@ -121,9 +121,17 @@ export default function TokenShop({ onClose }: TokenShopProps) {
 
                                         <div className={styles.cardContent}>
                                             <h3>{item.name}</h3>
+
+                                            {item.is_achievement_reward && !item.owned && (
+                                                <div className={styles.requirementBox}>
+                                                    <span className={styles.reqLabel}>REQUIRED:</span>
+                                                    <p className={styles.reqText}>{item.requirement || 'Achievement earned in Arena'}</p>
+                                                </div>
+                                            )}
+
                                             <div className={styles.cardFooter}>
                                                 {item.is_achievement_reward ? (
-                                                    <span className={styles.achievementLocked}>EARNED ONLY</span>
+                                                    <span className={styles.achievementLocked}>🏆 HONOR</span>
                                                 ) : (
                                                     <span className={styles.cost}>{item.cost} PTS</span>
                                                 )}
