@@ -1,0 +1,104 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.modal {
+    background: rgba(10, 10, 10, 0.95);
+    border: 2px solid var(--accent);
+    border-radius: 24px;
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 40px var(--accent-glow);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.header h3 {
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--accent);
+}
+
+.pulse {
+    width: 10px;
+    height: 10px;
+    background: #ff0055;
+    border-radius: 50%;
+    animation: pulseAnim 1.5s infinite;
+}
+
+.question {
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+
+.timer {
+    font-size: 0.75rem;
+    color: var(--neutral);
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+}
+
+.options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.optionBtn {
+    padding: 1.2rem;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    color: white;
+    font-weight: 900;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.optionBtn:hover:not(.disabled) {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-5px);
+}
+
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.success {
+    margin-top: 2rem;
+    color: var(--success);
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+@keyframes pulseAnim {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}

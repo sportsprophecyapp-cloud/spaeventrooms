@@ -1,0 +1,17 @@
+# Vercel Ignore for Frontend
+node_modules
+.git
+.vercel
+dist
+backend
+backend_backup*
+src_backup*
+backup*
+mobile*
+*.zip
+*.tar.gz
+*.log
+.DS_Store
+backups_archive
+builds
+

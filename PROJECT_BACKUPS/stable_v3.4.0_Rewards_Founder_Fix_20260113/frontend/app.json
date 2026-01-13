@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "1e6c5191-bcc9-4991-abe0-5e43456209c1"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.eventsarena.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+.rewardCenter {
+    padding: 24px;
+    margin: 20px 0;
+    border-radius: 24px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.rewardCenter h3 {
+    font-size: 1.1rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+.rewardCenter>p {
+    color: var(--neutral);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+}
+
+.voucherList {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+.voucher {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.voucher:hover {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.voucher.claimed {
+    opacity: 0.4;
+    filter: grayscale(0.5);
+}
+
+.voucherInfo h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.voucherInfo p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--neutral);
+}
+
+.claimBtn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-weight: 900;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
+}
+
+.claimBtn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--neutral);
+    box-shadow: none;
+    cursor: not-allowed;
+}

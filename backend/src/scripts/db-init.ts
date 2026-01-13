@@ -30,7 +30,59 @@ const initDB = async () => {
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS data JSONB DEFAULT '{}';
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
-            -- 5. Prize Draw System
+            -- 5. Sponsor Application & Review System (Consolidated v3.9)
+            CREATE TABLE IF NOT EXISTS sponsor_applications (
+                id SERIAL PRIMARY KEY,
+                brand_name VARCHAR(100) NOT NULL,
+                contact_email VARCHAR(100) NOT NULL,
+                website_url VARCHAR(255),
+                arena_target VARCHAR(50) NOT NULL,
+                frequency VARCHAR(50) DEFAULT 'monthly',
+                prize_quantity INTEGER DEFAULT 1,
+                prize_description TEXT NOT NULL,
+                logo_url TEXT, -- URL or Base64
+                prize_image_url TEXT, -- URL or Base64
+                creative_config JSONB, -- Stores X, Y, Scale for Founders Package
+                status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'denied'
+                agreed_to_terms BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                reviewed_at TIMESTAMP,
+                reviewed_by INTEGER REFERENCES users(id)
+            );
+
+            -- 5.1 Ensure sponsor_applications columns (Schema Evolution for v4.7)
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS brand_name VARCHAR(100);
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS arena_target VARCHAR(50) DEFAULT 'soccer';
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS frequency VARCHAR(50) DEFAULT 'monthly';
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_quantity INTEGER DEFAULT 1;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_description TEXT;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_image_url TEXT;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS creative_config JSONB;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS agreed_to_terms BOOLEAN DEFAULT FALSE;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS stripe_session_id VARCHAR(255);
+
+            -- 5.2 Room Sponsors (Live Placements)
+            CREATE TABLE IF NOT EXISTS room_sponsors (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) NOT NULL,
+                sponsor_name VARCHAR(100) NOT NULL,
+                logo_url TEXT,
+                website_url TEXT,
+                prize_description TEXT,
+                application_id INTEGER REFERENCES sponsor_applications(id),
+                is_active BOOLEAN DEFAULT TRUE,
+                auto_place BOOLEAN DEFAULT FALSE,
+                prize_escrow_received BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+ 
+            -- 5.3 Sync room_sponsors for v4.8
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_description TEXT;
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS application_id INTEGER REFERENCES sponsor_applications(id);
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_escrow_received BOOLEAN DEFAULT FALSE;
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+
+            -- 6. Prize Draw System (Depends on Room Sponsors)
             CREATE TABLE IF NOT EXISTS prize_draws (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(100) NOT NULL,
@@ -53,7 +105,7 @@ const initDB = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
-            -- 5.1 Ensure prize_draws columns (Safety for existing tables)
+            -- 6.1 Ensure prize_draws columns (Safety for existing tables)
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS title VARCHAR(100);
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS prize VARCHAR(255);
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS draw_date TIMESTAMP;
@@ -62,85 +114,14 @@ const initDB = async () => {
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS sponsor_id INTEGER REFERENCES room_sponsors(id);
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS prize_image TEXT;
 
-            -- 6. Sponsor Application & Review System (Consolidated v3.9)
-            CREATE TABLE IF NOT EXISTS sponsor_applications (
-                id SERIAL PRIMARY KEY,
-                brand_name VARCHAR(100) NOT NULL,
-                contact_email VARCHAR(100) NOT NULL,
-                website_url VARCHAR(255),
-                arena_target VARCHAR(50) NOT NULL,
-                frequency VARCHAR(50) DEFAULT 'monthly',
-                prize_quantity INTEGER DEFAULT 1,
-                prize_description TEXT NOT NULL,
-                logo_url TEXT, -- URL or Base64
-                prize_image_url TEXT, -- URL or Base64
-                creative_config JSONB, -- Stores X, Y, Scale for Founders Package
-                status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'denied'
-                agreed_to_terms BOOLEAN DEFAULT FALSE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                reviewed_at TIMESTAMP,
-                reviewed_by INTEGER REFERENCES users(id)
-            );
 
-            -- 6.1 Ensure sponsor_applications columns (Schema Evolution for v4.7)
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS brand_name VARCHAR(100);
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS arena_target VARCHAR(50) DEFAULT 'soccer';
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS frequency VARCHAR(50) DEFAULT 'monthly';
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_quantity INTEGER DEFAULT 1;
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_description TEXT;
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS prize_image_url TEXT;
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS creative_config JSONB;
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS agreed_to_terms BOOLEAN DEFAULT FALSE;
-            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS stripe_session_id VARCHAR(255);
-
-            -- 6.1.1 Fix column types and nullability for v4.7.1
+            -- 7. Schema Evolution Fixes (v4.7.1)
             ALTER TABLE sponsor_applications ALTER COLUMN logo_url TYPE TEXT;
             ALTER TABLE sponsor_applications ALTER COLUMN prize_image_url TYPE TEXT;
             ALTER TABLE sponsor_applications ALTER COLUMN website_url TYPE TEXT;
-            ALTER TABLE sponsor_applications ALTER COLUMN company_name DROP NOT NULL;
-            ALTER TABLE sponsor_applications ALTER COLUMN sponsor_type DROP NOT NULL;
-            ALTER TABLE sponsor_applications ALTER COLUMN contact_email DROP NOT NULL; -- Ensure legacy rows don't block
-            ALTER TABLE sponsor_applications ALTER COLUMN brand_name SET NOT NULL; -- Use brand_name going forward
-            ALTER TABLE sponsor_applications ALTER COLUMN contact_email SET NOT NULL; -- Re-enforce for consistency if needed, but safer to just let it pass if coming from new flow
-            
-            -- Ensure contact_email is 255 if it was smaller
             ALTER TABLE sponsor_applications ALTER COLUMN contact_email TYPE VARCHAR(255);
-
-            -- 6.2 Data Migration: Map old fields to new fields if necessary
-            UPDATE sponsor_applications SET brand_name = company_name WHERE brand_name IS NULL AND company_name IS NOT NULL;
-            UPDATE sponsor_applications SET prize_description = product_description WHERE prize_description IS NULL AND product_description IS NOT NULL;
-
-            -- 6.3 Cleanup: Ensure defaults for NOT NULL fields (after migration)
-            UPDATE sponsor_applications SET brand_name = 'Missing Brand' WHERE brand_name IS NULL;
-            UPDATE sponsor_applications SET prize_description = 'Missing Description' WHERE prize_description IS NULL;
-
-            -- 6.4 Apply NOT NULL constraints
             ALTER TABLE sponsor_applications ALTER COLUMN brand_name SET NOT NULL;
-            ALTER TABLE sponsor_applications ALTER COLUMN arena_target SET NOT NULL;
-            ALTER TABLE sponsor_applications ALTER COLUMN prize_description SET NOT NULL;
 
-            -- 7. Room Sponsors (Live Placements)
-            CREATE TABLE IF NOT EXISTS room_sponsors (
-                id SERIAL PRIMARY KEY,
-                room_id VARCHAR(50) NOT NULL,
-                sponsor_name VARCHAR(100) NOT NULL, -- Renamed from name for consistency
-                logo_url TEXT,
-                website_url TEXT,
-                link_url TEXT,
-                prize_description TEXT,
-                application_id INTEGER REFERENCES sponsor_applications(id),
-                is_active BOOLEAN DEFAULT TRUE,
-                auto_place BOOLEAN DEFAULT FALSE,
-                prize_escrow_received BOOLEAN DEFAULT FALSE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
- 
-            -- 7.1 Sync room_sponsors for v4.8
-            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_description TEXT;
-            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS application_id INTEGER REFERENCES sponsor_applications(id);
-            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_escrow_received BOOLEAN DEFAULT FALSE;
-            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
- 
             DO $$ 
             BEGIN 
                 -- Rename 'name' to 'sponsor_name' if it exists
@@ -152,6 +133,7 @@ const initDB = async () => {
                     ALTER TABLE room_sponsors RENAME COLUMN link_url TO website_url;
                 END IF;
             END $$;
+
 
             -- 8. Gamification & Cosmetics (Phase 9 & 10)
             ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code VARCHAR(20) UNIQUE;

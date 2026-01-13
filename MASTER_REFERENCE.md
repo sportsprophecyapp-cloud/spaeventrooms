@@ -7,6 +7,7 @@
 - **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Creator Events).
 - **Gamification:** Sponsor & Draw Hub (`/draw`) powered by Prize Tickets and Admin-verified partner campaigns.
 - **Social Proof:** Winner Feedback System with star ratings, testimonials, and viral sharing incentives (X, WhatsApp, native).
+- **Brand Trust:** Integrated **Founder's Letter** on the landing page to establish authenticity and vision.
 - **Referral Engine:** Unique 8-character codes, tiered rewards, and milestone tracking (50 referrals = Custom Avatar unlock).
 - **Profile System:** Dynamic routing at `/profile/[userId]` with Badge Locker, Referral Progress, and Recent Swipes.
 
