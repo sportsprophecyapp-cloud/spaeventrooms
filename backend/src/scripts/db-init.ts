@@ -156,6 +156,7 @@ const initDB = async () => {
             );
 
             ALTER TABLE cosmetics ADD COLUMN IF NOT EXISTS requirement TEXT;
+            ALTER TABLE cosmetics ADD COLUMN IF NOT EXISTS is_achievement_reward BOOLEAN DEFAULT FALSE;
             
             CREATE TABLE IF NOT EXISTS winner_feedback (
                 id SERIAL PRIMARY KEY,

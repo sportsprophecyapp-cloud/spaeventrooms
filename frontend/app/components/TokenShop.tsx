@@ -122,7 +122,12 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                                         <div className={styles.cardContent}>
                                             <h3>{item.name}</h3>
                                             <div className={styles.cardFooter}>
-                                                <span className={styles.cost}>{item.cost} PTS</span>
+                                                {item.is_achievement_reward ? (
+                                                    <span className={styles.achievementLocked}>EARNED ONLY</span>
+                                                ) : (
+                                                    <span className={styles.cost}>{item.cost} PTS</span>
+                                                )}
+
                                                 {item.owned ? (
                                                     <button
                                                         className={`${styles.buyBtn} ${styles.equipBtn}`}
@@ -132,6 +137,13 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                                                         }}
                                                     >
                                                         EQUIP
+                                                    </button>
+                                                ) : item.is_achievement_reward ? (
+                                                    <button
+                                                        className={`${styles.buyBtn} ${styles.lockedBtn}`}
+                                                        disabled={true}
+                                                    >
+                                                        LOCKED
                                                     </button>
                                                 ) : (
                                                     <button

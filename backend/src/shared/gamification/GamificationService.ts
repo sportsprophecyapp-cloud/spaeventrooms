@@ -28,11 +28,23 @@ export class GamificationService {
         description: string;
     }): Promise<{ newBalance: number; newTickets: number; newXp: number; newLevel: number }> {
         const { tokens = 0, tickets = 0, xp = 0, type, description } = options;
+        const { getClient } = require('../database');
+        const client = await getClient();
 
-        await query('BEGIN');
         try {
-            // 1. Update user record
-            const result = await query(`
+            await client.query('BEGIN');
+
+            // 1. Lock and get current user
+            const currentResult = await client.query('SELECT token_balance, total_tickets, total_points, current_level FROM users WHERE id = $1 FOR UPDATE', [userId]);
+            if (currentResult.rows.length === 0) throw new Error('User not found');
+            const user = currentResult.rows[0];
+
+            // 2. Validate spending if negative
+            if (tokens < 0 && (user.token_balance + tokens) < 0) throw new Error('Insufficient tokens');
+            if (tickets < 0 && (user.total_tickets + tickets) < 0) throw new Error('Insufficient tickets');
+
+            // 3. Update user record
+            const result = await client.query(`
                 UPDATE users 
                 SET token_balance = token_balance + $1,
                     total_tickets = total_tickets + $2,
@@ -41,20 +53,19 @@ export class GamificationService {
                 RETURNING token_balance, total_tickets, total_points, current_level
             `, [tokens, tickets, xp, userId]);
 
-            if (result.rows.length === 0) throw new Error('User not found');
-            const user = result.rows[0];
+            const updatedUser = result.rows[0];
 
-            // 2. Log transaction
+            // 4. Log transaction
             if (tokens !== 0 || tickets !== 0 || xp !== 0) {
-                await query(`
+                await client.query(`
                     INSERT INTO token_transactions (user_id, amount, type, description)
                     VALUES ($1, $2, $3, $4)
                 `, [userId, tokens, type, description]);
             }
 
-            // 3. Level up check
-            let newLevel = user.current_level;
-            const currentXp = user.total_points;
+            // 5. Level up check
+            let newLevel = updatedUser.current_level;
+            const currentXp = updatedUser.total_points;
             for (let i = this.LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
                 if (currentXp >= this.LEVEL_THRESHOLDS[i]) {
                     newLevel = i + 1;
@@ -62,24 +73,28 @@ export class GamificationService {
                 }
             }
 
-            if (newLevel !== user.current_level) {
-                await query('UPDATE users SET current_level = $1 WHERE id = $2', [newLevel, userId]);
+            if (newLevel !== updatedUser.current_level) {
+                await client.query('UPDATE users SET current_level = $1 WHERE id = $2', [newLevel, userId]);
             }
 
-            await query('COMMIT');
+            await client.query('COMMIT');
 
-            // 4. Badge check (async)
-            this.checkBadges(userId);
+            // 6. Badge check (async)
+            if (xp > 0) {
+                this.checkBadges(userId);
+            }
 
             return {
-                newBalance: user.token_balance,
-                newTickets: user.total_tickets,
-                newXp: user.total_points,
+                newBalance: updatedUser.token_balance,
+                newTickets: updatedUser.total_tickets,
+                newXp: updatedUser.total_points,
                 newLevel
             };
         } catch (err) {
-            await query('ROLLBACK');
+            await client.query('ROLLBACK');
             throw err;
+        } finally {
+            client.release();
         }
     }
 
@@ -103,72 +118,99 @@ export class GamificationService {
         reward: { tokens: number; tickets: number };
         newBalances: any;
     }> {
-        // 1. Get current streak info
-        const userResult = await query(
-            'SELECT consecutive_login_days, last_login_at FROM users WHERE id = $1',
-            [userId]
-        );
-        const user = userResult.rows[0];
-        if (!user) throw new Error('User not found');
+        const { getClient } = require('../database');
+        const client = await getClient();
 
-        const now = new Date();
-        const lastLogin = user.last_login_at ? new Date(user.last_login_at) : null;
+        try {
+            await client.query('BEGIN');
 
-        let newStreak = user.consecutive_login_days || 0;
-        let alreadyClaimed = false;
+            // 1. Lock and Get current streak info
+            const userResult = await client.query(
+                'SELECT consecutive_login_days, last_login_at FROM users WHERE id = $1 FOR UPDATE',
+                [userId]
+            );
+            const user = userResult.rows[0];
+            if (!user) throw new Error('User not found');
 
-        if (lastLogin) {
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const last = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate());
-            const diffDays = Math.floor((today.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+            const now = new Date();
+            const lastLogin = user.last_login_at ? new Date(user.last_login_at) : null;
 
-            if (diffDays === 0) {
-                alreadyClaimed = true;
-            } else if (diffDays === 1) {
-                newStreak += 1;
+            let newStreak = user.consecutive_login_days || 0;
+            let alreadyClaimed = false;
+
+            if (lastLogin) {
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const last = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate());
+                const diffDays = Math.floor((today.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 0) {
+                    alreadyClaimed = true;
+                } else if (diffDays === 1) {
+                    newStreak += 1;
+                } else {
+                    newStreak = 1; // Reset streak
+                }
             } else {
-                newStreak = 1; // Reset streak
+                newStreak = 1; // First login
             }
-        } else {
-            newStreak = 1; // First login
+
+            if (alreadyClaimed) {
+                await client.query('ROLLBACK');
+                return { alreadyClaimed: true, streak: newStreak, reward: { tokens: 0, tickets: 0 }, newBalances: null };
+            }
+
+            // 2. Calculate rewards
+            let tokens = 5;
+            let tickets = 0;
+            if (newStreak % 7 === 0) tokens += 25;
+            if (newStreak % 30 === 0) tokens += 100;
+
+            // 3. Update status
+            await client.query(
+                'UPDATE users SET consecutive_login_days = $1, last_login_at = $2 WHERE id = $3',
+                [newStreak, now, userId]
+            );
+
+            // 4. Award rewards
+            await client.query(`
+                UPDATE users 
+                SET token_balance = token_balance + $1,
+                    total_tickets = total_tickets + $2
+                WHERE id = $3
+            `, [tokens, tickets, userId]);
+
+            await client.query(`
+                INSERT INTO token_transactions (user_id, amount, type, description)
+                VALUES ($1, $2, 'daily_login', $3)
+            `, [userId, tokens, `Day ${newStreak} Login Reward`]);
+
+            await client.query('COMMIT');
+
+            // 5. Trigger async checks
+            const { BadgeService } = require('./BadgeService');
+            BadgeService.checkStreakMilestones(userId, newStreak);
+            this.checkBadges(userId);
+
+            // Refresh user data for return
+            const final = await client.query('SELECT token_balance, total_tickets, total_points, current_level FROM users WHERE id = $1', [userId]);
+
+            return {
+                alreadyClaimed: false,
+                streak: newStreak,
+                reward: { tokens, tickets },
+                newBalances: {
+                    newBalance: final.rows[0].token_balance,
+                    newTickets: final.rows[0].total_tickets,
+                    newXp: final.rows[0].total_points,
+                    newLevel: final.rows[0].current_level
+                }
+            };
+        } catch (err) {
+            await client.query('ROLLBACK');
+            throw err;
+        } finally {
+            client.release();
         }
-
-        if (alreadyClaimed) {
-            return { alreadyClaimed: true, streak: newStreak, reward: { tokens: 0, tickets: 0 }, newBalances: null };
-        }
-
-        // 2. Calculate rewards
-        let tokens = 5; // Standard 5 tokens
-        let tickets = 0;
-
-        // Streak bonuses
-        if (newStreak % 7 === 0) tokens += 25;
-        if (newStreak % 30 === 0) tokens += 100;
-
-        // 3. Apply reward
-        const balances = await this.awardReward(userId, {
-            tokens,
-            tickets,
-            type: 'daily_login',
-            description: `Day ${newStreak} Login Reward`
-        });
-
-        // 4. Update streak and timestamp (already in transaction in awardReward? No, let's do manually)
-        await query(
-            'UPDATE users SET consecutive_login_days = $1, last_login_at = $2 WHERE id = $3',
-            [newStreak, now, userId]
-        );
-
-        // 5. Trigger Badge Service milestones
-        const { BadgeService } = require('./BadgeService');
-        await BadgeService.checkStreakMilestones(userId, newStreak);
-
-        return {
-            alreadyClaimed: false,
-            streak: newStreak,
-            reward: { tokens, tickets },
-            newBalances: balances
-        };
     }
 
     /**

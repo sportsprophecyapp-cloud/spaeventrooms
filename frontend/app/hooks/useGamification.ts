@@ -26,6 +26,7 @@ interface Cosmetic {
     imageUrl: string;
     description: string;
     owned: boolean;
+    is_achievement_reward?: boolean;
 }
 
 interface ShopResponse {

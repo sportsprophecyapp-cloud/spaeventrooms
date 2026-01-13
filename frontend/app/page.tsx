@@ -11,6 +11,7 @@ import OnboardingModal from '@/app/components/OnboardingModal';
 import SponsorMarquee from '@/app/components/SponsorMarquee';
 import RecentWinners from '@/app/components/RecentWinners';
 import DailyLoginButton from '@/app/components/DailyLoginButton';
+import LootShowcase from '@/app/components/LootShowcase/LootShowcase';
 
 const HomePage = () => {
     const { t, language, setLanguage } = useLanguage();
@@ -53,8 +54,9 @@ const HomePage = () => {
             </header>
 
             {isAuthenticated && (
-                <div style={{ padding: '0 1rem', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
                     <DailyLoginButton />
+                    <LootShowcase />
                 </div>
             )}
 

@@ -6,6 +6,8 @@ import { useAuth } from '@/app/context/AuthContext';
 import styles from './page.module.css';
 import RewardCenter from '@/app/components/RewardCenter/RewardCenter';
 import TokenShop from '@/app/components/TokenShop';
+import LootShowcase from '@/app/components/LootShowcase/LootShowcase';
+import ReferralRoadmap from '@/app/components/ReferralRoadmap/ReferralRoadmap';
 
 // RESTORED: This interface is critical for the page to function.
 interface UserProfile {
@@ -220,122 +222,141 @@ const ProfilePage = () => {
                 </section>
 
                 {isOwnProfile && (
-                    <>
-                        <section className={`${styles.referralCard} glass`}>
-                            <div className={styles.refHeader}>
-                                <div className={styles.refInfo}>
-                                    <h3>RECRUIT NEW PLAYERS</h3>
-                                    <p>Earn 50 tokens for every signup. Current: <strong>{profile.referral_count || 0} / 50</strong> recruits</p>
-                                </div>
-                                <button onClick={handleCopyReferral} className={styles.copyBtn}>
-                                    {copyMessage || 'COPY LINK'}
-                                </button>
-                            </div>
-                            <div className={styles.milestoneBar}>
-                                <div className={styles.milestoneProgress} style={{ width: `${Math.min(((profile.referral_count || 0) / 50) * 100, 100)}%` }}></div>
-                                <div className={styles.milestonePoints}>
-                                    <span>1</span>
-                                    <span>5</span>
-                                    <span>25</span>
-                                    <span className={styles.finalGoal}>50 (AVATAR)</span>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section className={`${styles.historyCard} glass`}>
-                            <div className={styles.historyHeader}>
-                                <h3 className={styles.sectionTitle}>📅 RECENT SWIPES</h3>
-                                {profile.history && profile.history.length > 5 && (
-                                    <button
-                                        onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
-                                        className={styles.expandToggle}
-                                    >
-                                        {isHistoryExpanded ? 'SHOW LESS' : `VIEW ALL (${profile.history.length})`}
-                                    </button>
-                                )}
-                            </div>
-
-                            <div className={styles.historyList}>
-                                {profile.history && profile.history.length > 0 ? (
-                                    (() => {
-                                        const displayedHistory = isHistoryExpanded ? profile.history : profile.history.slice(0, 5);
-
-                                        // Group by date
-                                        const groups: { [key: string]: typeof profile.history } = {};
-                                        displayedHistory.forEach(item => {
-                                            const date = new Date(item.created_at).toLocaleDateString('en-US', {
-                                                month: 'short', day: 'numeric', year: 'numeric'
-                                            });
-                                            if (!groups[date]) groups[date] = [];
-                                            groups[date].push(item);
-                                        });
-
-                                        return Object.entries(groups).map(([date, items]) => (
-                                            <div key={date} className={styles.historyGroup}>
-                                                <div className={styles.dateDivider}>
-                                                    <span>{date}</span>
-                                                    <div className={styles.dividerLine}></div>
-                                                </div>
-                                                {items.map((item) => (
-                                                    <div key={item.id} className={styles.historyItem}>
-                                                        <div className={styles.historyTeamsWrapper}>
-                                                            <div className={styles.miniLogo}>
-                                                                <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                                            </div>
-                                                            <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
-                                                            <div className={styles.miniLogo}>
-                                                                <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                                            </div>
-                                                        </div>
-                                                        <div className={styles.historyMeta}>
-                                                            <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
-                                                            <div className={styles.historyStatus}>
-                                                                {item.status === 'correct' ? (
-                                                                    <span className={styles.statusCorrect}>✅ CORRECT</span>
-                                                                ) : item.status === 'incorrect' ? (
-                                                                    <span className={styles.statusIncorrect}>❌ INCORRECT</span>
-                                                                ) : (
-                                                                    <span className={styles.historyLive}>PENDING</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ));
-                                    })()
-                                ) : (
-                                    <p className={styles.emptyHistory}>No predictions made yet. Go to the Arena!</p>
-                                )}
-                            </div>
-                        </section>
-
-                        <RewardCenter />
-
-                        <section className={`${styles.badgeLocker} glass`}>
-                            <h3 className={styles.sectionTitle}>🏆 MY BADGES & ACHIEVEMENTS</h3>
-                            <div className={styles.badgesGrid}>
-                                {allBadges.map(badge => {
-                                    const isUnlocked = unlockedBadgeIds.has(badge.id.toString());
-                                    return (
-                                        <div key={badge.id} className={`${styles.badgeCard} ${!isUnlocked ? styles.locked : ''}`}>
-                                            <div className={styles.badgeIcon}>
-                                                {isUnlocked ? '🏅' : '🔒'}
-                                            </div>
-                                            <h4>{badge.name}</h4>
-                                            <p className={styles.badgeDesc}>{badge.description}</p>
-                                            {!isUnlocked && (
-                                                <div className={styles.requirement}>
-                                                    {badge.requirement || 'Keep playing to unlock!'}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </section>
-                    </>
+                    <ReferralRoadmap
+                        currentCount={profile.referral_count || 0}
+                        unlockedIds={unlockedBadgeIds}
+                        referralCode={profile.referral_code}
+                        onCopy={handleCopyReferral}
+                        copyMessage={copyMessage}
+                    />
                 )}
+
+                <section className={`${styles.historyCard} glass`}>
+                    <div className={styles.historyHeader}>
+                        <h3 className={styles.sectionTitle}>📅 RECENT SWIPES</h3>
+                        {profile.history && profile.history.length > 5 && (
+                            <button
+                                onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+                                className={styles.expandToggle}
+                            >
+                                {isHistoryExpanded ? 'SHOW LESS' : `VIEW ALL (${profile.history.length})`}
+                            </button>
+                        )}
+                    </div>
+
+                    <div className={styles.historyList}>
+                        {profile.history && profile.history.length > 0 ? (
+                            (() => {
+                                const displayedHistory = isHistoryExpanded ? profile.history : profile.history.slice(0, 5);
+
+                                // Group by date
+                                const groups: { [key: string]: typeof profile.history } = {};
+                                displayedHistory.forEach(item => {
+                                    const date = new Date(item.created_at).toLocaleDateString('en-US', {
+                                        month: 'short', day: 'numeric', year: 'numeric'
+                                    });
+                                    if (!groups[date]) groups[date] = [];
+                                    groups[date].push(item);
+                                });
+
+                                return Object.entries(groups).map(([date, items]) => (
+                                    <div key={date} className={styles.historyGroup}>
+                                        <div className={styles.dateDivider}>
+                                            <span>{date}</span>
+                                            <div className={styles.dividerLine}></div>
+                                        </div>
+                                        {items.map((item) => (
+                                            <div key={item.id} className={styles.historyItem}>
+                                                <div className={styles.historyTeamsWrapper}>
+                                                    <div className={styles.miniLogo}>
+                                                        <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                    </div>
+                                                    <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
+                                                    <div className={styles.miniLogo}>
+                                                        <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                    </div>
+                                                </div>
+                                                <div className={styles.historyMeta}>
+                                                    <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
+                                                    <div className={styles.historyStatus}>
+                                                        {item.status === 'correct' ? (
+                                                            <span className={styles.statusCorrect}>✅ CORRECT</span>
+                                                        ) : item.status === 'incorrect' ? (
+                                                            <span className={styles.statusIncorrect}>❌ INCORRECT</span>
+                                                        ) : (
+                                                            <span className={styles.historyLive}>PENDING</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ));
+                            })()
+                        ) : (
+                            <p className={styles.emptyHistory}>No predictions made yet. Go to the Arena!</p>
+                        )}
+                    </div>
+                </section>
+
+                <RewardCenter />
+
+                <LootShowcase />
+
+                {/* HALL OF FAME / TROPHY ROOM */}
+                <section className={styles.hallOfFame}>
+                    <h3 className={styles.hallOfFameTitle}>⚜️ HALL OF FAME ⚜️</h3>
+                    <div className={styles.trophyGrid}>
+                        {[
+                            { id: 'draw_winner_avatar', name: 'Grand Champion', asset: '/assets/cosmetics/champion_avatar.png' },
+                            { id: 'correct_50', name: 'Spectral Oracle', asset: '/assets/cosmetics/oracle_avatar.png' },
+                            { id: 'referral_50', name: 'Network Master', asset: '/assets/cosmetics/referrer_master.png' }
+                        ].map(special => {
+                            const isUnlocked = unlockedBadgeIds.has(special.id);
+                            return (
+                                <div key={special.id} className={styles.trophyItem}>
+                                    <div className={`${styles.trophyVisual} ${!isUnlocked ? styles.trophyLocked : ''}`}>
+                                        <img
+                                            src={special.asset}
+                                            alt={special.name}
+                                            className={`${styles.trophyImg} ${!isUnlocked ? styles.trophyImgLocked : ''}`}
+                                        />
+                                        {!isUnlocked && <div className={styles.lockOverlay}>🔒</div>}
+                                    </div>
+                                    <h4 className={styles.trophyName}>{special.name}</h4>
+                                    <span className={`${styles.trophyStatus} ${!isUnlocked ? styles.trophyStatusLocked : ''}`}>
+                                        {isUnlocked ? 'EARNED' : 'LOCKED'}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+
+                <section className={`${styles.badgeLocker} glass`}>
+                    <h3 className={styles.sectionTitle}>🏆 MY BADGES & ACHIEVEMENTS</h3>
+                    <div className={styles.badgesGrid}>
+                        {allBadges.map(badge => {
+                            const isUnlocked = unlockedBadgeIds.has(badge.id.toString());
+                            return (
+                                <div key={badge.id} className={`${styles.badgeCard} ${!isUnlocked ? styles.locked : ''}`}>
+                                    <div className={styles.badgeIcon}>
+                                        {isUnlocked ? (
+                                            badge.asset_url ? <img src={badge.asset_url} alt={badge.name} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : '🏅'
+                                        ) : '🔒'}
+                                    </div>
+                                    <h4>{badge.name}</h4>
+                                    <p className={styles.badgeDesc}>{badge.description}</p>
+                                    {!isUnlocked && (
+                                        <div className={styles.requirement}>
+                                            {badge.requirement || 'Keep playing to unlock!'}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
             </div>
 
             {isShopOpen && (

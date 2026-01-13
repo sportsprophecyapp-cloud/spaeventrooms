@@ -268,3 +268,17 @@
         height: 95vh;
     }
 }
+.achievementLocked {
+    font-size: 0.7rem;
+    color: #ffd700;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.lockedBtn {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #666 !important;
+    border: 1px dashed rgba(255, 255, 255, 0.2) !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}

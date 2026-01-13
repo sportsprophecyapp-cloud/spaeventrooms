@@ -1,6 +1,6 @@
 # Events Arena
 
-**Version**: 3.4.1  
+**Version**: 3.4.6  
 **Release**: January 13, 2026
 
 A multi-room prediction platform with premium UI, Google Login, Sponsor & Draw Management Hub (with instant-live partner onboarding), Player Profiles with Cosmetic Customization (Avatars/Frames), Badge Lockers, Referral Milestone Rewards, Winner Feedback System, and real-time chat.

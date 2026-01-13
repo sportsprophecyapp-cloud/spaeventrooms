@@ -16,7 +16,9 @@ export const getMe = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
         const result = await dbQuery(`
-            SELECT u.id, u.email, u.username, u.permissions, u.token_balance, u.total_points, u.total_tickets, u.current_level, u.referral_code, u.can_upload_custom,
+            SELECT u.id, u.email, u.username, u.permissions, u.token_balance, u.total_points, u.total_tickets, u.current_level, u.referral_code, u.can_upload_custom, u.consecutive_login_days,
+                   (SELECT COUNT(*) FROM users WHERE referred_by_id = u.id) as referral_count,
+                   (SELECT COUNT(*) FROM soccer_predictions WHERE user_id = u.id AND result = 'correct') as correct_picks,
                    COALESCE(u.avatar_url, (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1)) as display_avatar,
                    (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'frame' LIMIT 1) as equipped_frame
              FROM users u WHERE u.id = $1`, [userId]);
@@ -42,6 +44,9 @@ export const getMe = async (req: AuthRequest, res: Response) => {
                 level: user.current_level,
                 referralCode: user.referral_code,
                 canUploadCustom: user.can_upload_custom,
+                referral_count: parseInt(user.referral_count || '0'),
+                streak: user.consecutive_login_days || 0,
+                correct_picks: parseInt(user.correct_picks || '0'),
                 equipped: {
                     avatar: user.display_avatar,
                     frame: user.equipped_frame

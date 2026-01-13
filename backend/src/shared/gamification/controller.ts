@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { query as dbQuery } from '../database';
+import { query as dbQuery, getClient as dbGetClient } from '../database';
 import { AuthRequest } from '../auth/middleware';
 import { getLevelFromXp } from '../utils/xpMath';
 import { pickWinner } from '../services/drawService';
@@ -181,6 +181,7 @@ export const handleDailyLogin = async (req: AuthRequest, res: Response) => {
 export const getShop = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
+        // Include all active items so shop can show achievement previews
         const result = await dbQuery(`SELECT * FROM cosmetics WHERE is_active = true`);
         const userRes = await dbQuery('SELECT token_balance, total_tickets FROM users WHERE id = $1', [userId]);
         const user = userRes.rows[0] || { token_balance: 0, total_tickets: 0 };
@@ -194,161 +195,58 @@ export const getShop = async (req: AuthRequest, res: Response) => {
     } catch (e) { res.json({ success: true, cosmetics: [], balance: 0, tickets: 0 }); }
 };
 
-export const handleEnterDraw = async (req: AuthRequest, res: Response) => {
-    try {
-        const userId = req.user?.id;
-        const { id: drawId } = req.params;
-
-        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
-
-        // 1. Check user tickets
-        const userResult = await dbQuery(`SELECT total_tickets FROM users WHERE id = $1`, [userId]);
-        const tickets = userResult.rows[0]?.total_tickets || 0;
-
-        if (tickets <= 0) {
-            return res.status(400).json({ success: false, error: 'You do not have enough tickets to enter.' });
-        }
-
-        // 2. Check if draw exists and is active
-        const drawResult = await dbQuery(`SELECT id FROM prize_draws WHERE id = $1 AND status = 'active'`, [drawId]);
-        if (drawResult.rows.length === 0) {
-            return res.status(404).json({ success: false, error: 'Target draw is no longer active or does not exist.' });
-        }
-
-        // 3. Deduct ticket and record entry
-        await dbQuery('BEGIN');
-        await dbQuery(`UPDATE users SET total_tickets = total_tickets - 1 WHERE id = $1`, [userId]);
-        await dbQuery(
-            `INSERT INTO prize_draw_entries (draw_id, user_id, entry_type) VALUES ($1, $2, 'manual')`,
-            [drawId, userId]
-        );
-        await dbQuery('COMMIT');
-
-        res.json({ success: true, message: 'Successfully entered draw!' });
-    } catch (error) {
-        await dbQuery('ROLLBACK');
-        console.error('Error in handleEnterDraw:', error);
-        res.status(500).json({ success: false, error: 'Failed to enter draw.' });
-    }
-};
-
-export const handlePickWinner = async (req: AuthRequest, res: Response) => {
-    const { id } = req.params;
-    try {
-        const winner = await pickWinner(parseInt(id));
-        if (!winner) return res.status(404).json({ success: false, error: 'No entries found or draw already completed' });
-        res.json({ success: true, winner });
-    } catch (err) {
-        res.status(500).json({ error: 'Pick winner failed' });
-    }
-};
-
-export const handleGetWins = async (req: AuthRequest, res: Response) => {
-    try {
-        const userId = req.user?.id;
-        const result = await dbQuery(
-            `SELECT d.id, d.title, d.prize, d.draw_date 
-             FROM prize_draws d
-             WHERE d.winner_id = $1 AND d.status = 'completed'
-             ORDER BY d.draw_date DESC`,
-            [userId]
-        );
-        res.json({ success: true, wins: result.rows });
-    } catch (error) {
-        console.error('Error in handleGetWins:', error);
-        res.status(500).json({ success: false, error: 'Error fetching wins' });
-    }
-};
-
-export const handleUpdateDraw = async (req: AuthRequest, res: Response) => {
-    const { id } = req.params;
-    const { draw_date, status } = req.body;
-
-    try {
-        let updateQuery = 'UPDATE prize_draws SET ';
-        const params: any[] = [];
-        let paramIndex = 1;
-
-        if (draw_date !== undefined) {
-            updateQuery += `draw_date = $${paramIndex}, `;
-            params.push(draw_date);
-            paramIndex++;
-        }
-
-        if (status !== undefined) {
-            updateQuery += `status = $${paramIndex}, `;
-            params.push(status);
-            paramIndex++;
-        }
-
-        // Remove trailing comma and space
-        updateQuery = updateQuery.slice(0, -2);
-        updateQuery += ` WHERE id = $${paramIndex} RETURNING *`;
-        params.push(id);
-
-        const result = await dbQuery(updateQuery, params);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ success: false, error: 'Draw not found' });
-        }
-
-        res.json({ success: true, draw: result.rows[0] });
-    } catch (error) {
-        console.error('Error updating draw:', error);
-        res.status(500).json({ success: false, error: 'Failed to update draw' });
-    }
-};
-
-export const handleDeleteDraw = async (req: AuthRequest, res: Response) => {
-    const { id } = req.params;
-    try {
-        await dbQuery('BEGIN');
-        // Explicitly delete related records if they exist
-        await dbQuery(`DELETE FROM user_vouchers WHERE draw_id = $1`, [id]);
-        await dbQuery(`DELETE FROM prize_draw_entries WHERE draw_id = $1`, [id]);
-        await dbQuery(`DELETE FROM prize_draws WHERE id = $1`, [id]);
-        await dbQuery('COMMIT');
-        res.json({ success: true, message: 'Draw removed successfully' });
-    } catch (err) {
-        await dbQuery('ROLLBACK');
-        console.error('Delete draw failed:', err);
-        res.status(500).json({ error: 'Delete failed' });
-    }
-};
-
-export const handleGetUserTickets = handleGetTickets; // Alias for route consistency
+// ... existing code ...
 
 export const purchaseCosmetic = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { cosmeticId } = req.body;
 
     try {
-        // 1. Get cosmetic info
         const cosResult = await dbQuery('SELECT * FROM cosmetics WHERE id = $1 AND is_active = true', [cosmeticId]);
         if (cosResult.rows.length === 0) return res.status(404).json({ error: 'Item not found' });
         const item = cosResult.rows[0];
 
-        // 2. Check if already owned
-        const ownResult = await dbQuery('SELECT 1 FROM user_cosmetics WHERE user_id = $1 AND cosmetic_id = $2', [userId, cosmeticId]);
-        if (ownResult.rows.length > 0) return res.status(400).json({ error: 'Already owned' });
-
-        // 3. Check balance
-        const userResult = await dbQuery('SELECT token_balance FROM users WHERE id = $1', [userId]);
-        const balance = userResult.rows[0].token_balance;
-
-        if (balance < item.cost) {
-            return res.status(400).json({ error: 'Insufficient tokens' });
+        // NEW: PREVENT PURCHASE OF ACHIEVEMENT REWARDS
+        if (item.is_achievement_reward) {
+            return res.status(403).json({ error: 'This item must be earned through achievements and cannot be purchased.' });
         }
 
-        // 4. Transaction
-        await dbQuery('BEGIN');
-        await dbQuery('UPDATE users SET token_balance = token_balance - $1 WHERE id = $2', [item.cost, userId]);
-        await dbQuery('INSERT INTO user_cosmetics (user_id, cosmetic_id) VALUES ($1, $2)', [userId, cosmeticId]);
-        await dbQuery('COMMIT');
+        const client = await dbGetClient();
+        try {
+            await client.query('BEGIN');
 
-        res.json({ success: true, newBalance: balance - item.cost });
+            const ownResult = await client.query('SELECT 1 FROM user_cosmetics WHERE user_id = $1 AND cosmetic_id = $2 FOR UPDATE', [userId, cosmeticId]);
+            if (ownResult.rows.length > 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ error: 'Already owned' });
+            }
+
+            const userResult = await client.query('SELECT token_balance FROM users WHERE id = $1 FOR UPDATE', [userId]);
+            const balance = userResult.rows[0].token_balance;
+
+            if (balance < item.cost) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ error: 'Insufficient tokens' });
+            }
+
+            await client.query('UPDATE users SET token_balance = token_balance - $1 WHERE id = $2', [item.cost, userId]);
+            await client.query('INSERT INTO user_cosmetics (user_id, cosmetic_id) VALUES ($1, $2)', [userId, cosmeticId]);
+
+            await client.query(`
+                INSERT INTO token_transactions (user_id, amount, type, description)
+                VALUES ($1, $2, 'shop_purchase', $3)
+            `, [userId, -item.cost, `Purchased ${item.name}`]);
+
+            await client.query('COMMIT');
+            res.json({ success: true, newBalance: balance - item.cost });
+        } catch (err) {
+            await client.query('ROLLBACK');
+            throw err;
+        } finally {
+            client.release();
+        }
     } catch (err) {
-        await dbQuery('ROLLBACK');
+        console.error('Purchase error:', err);
         res.status(500).json({ error: 'Purchase failed' });
     }
 };
@@ -360,7 +258,7 @@ export const equipCosmetic = async (req: AuthRequest, res: Response) => {
     try {
         // 1. Verify ownership and type
         const itemResult = await dbQuery(`
-            SELECT c.id, c.type 
+            SELECT c.id, c.type, c.is_achievement_reward
             FROM cosmetics c 
             JOIN user_cosmetics uc ON c.id = uc.cosmetic_id 
             WHERE uc.user_id = $1 AND c.id = $2`, [userId, cosmeticId]);

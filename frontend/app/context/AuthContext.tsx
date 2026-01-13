@@ -14,6 +14,9 @@ interface User {
     points: number;
     level: number;
     canUploadCustom?: boolean;
+    referral_count?: number;
+    streak?: number;
+    correct_picks?: number;
     equipped?: {
         avatar?: string;
         frame?: string;

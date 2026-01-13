@@ -497,3 +497,111 @@
         text-align: center;
     }
 }
+.hallOfFame {
+    margin: 2.5rem 0;
+    padding: 2.5rem;
+    border-radius: 32px;
+    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.hallOfFameTitle {
+    color: #ffd700;
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    font-weight: 900;
+}
+
+.trophyGrid {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.trophyItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    width: 150px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.trophyItem:hover {
+    transform: translateY(-8px);
+}
+
+.trophyVisual {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.1);
+}
+
+.trophyIconLocked {
+    font-size: 2.8rem;
+    filter: grayscale(1) opacity(0.3);
+}
+
+.trophyImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.trophyName {
+    color: white;
+    font-weight: 900;
+    font-size: 0.9rem;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.trophyStatus {
+    font-size: 0.7rem;
+    color: #ffd700;
+    text-transform: uppercase;
+    font-weight: 800;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 3px 10px;
+    border-radius: 4px;
+}
+
+.trophyStatusLocked {
+    color: #555;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.trophyImgLocked {
+    filter: grayscale(1) brightness(0.3) contrast(1.2);
+    opacity: 0.6;
+}
+
+.lockOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    z-index: 2;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+.trophyLocked {
+    border-color: rgba(255, 255, 255, 0.05);
+}

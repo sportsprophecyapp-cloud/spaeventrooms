@@ -68,6 +68,22 @@ export const pickWinner = async (drawId: number) => {
                 [winner.id, drawId, `WINNER: ${title}`, `Prize: ${prize}. ${description}`]
             );
             console.log(`🎁 Awarded voucher to User ${winner.id} for Draw ${drawId}`);
+
+            // NEW: AWARD CHAMPION COSMETICS (v3.4.3)
+            await query(
+                `INSERT INTO cosmetics (id, name, type, description, requirement, asset_url, is_achievement_reward) 
+                 VALUES ('draw_winner_avatar', 'Grand Champion', 'avatar', 'The ultimate arena victor.', 'Unlock by winning a prize draw.', '/assets/cosmetics/champion_avatar.png', true),
+                        ('draw_winner_frame', 'Champion\\'s Crown', 'frame', 'A crown for the bold.', 'Unlock by winning a prize draw.', '/assets/cosmetics/champion_frame.png', true)
+                 ON CONFLICT (id) DO UPDATE SET asset_url = EXCLUDED.asset_url, is_achievement_reward = EXCLUDED.is_achievement_reward`
+            );
+
+            await query(
+                `INSERT INTO user_cosmetics (user_id, cosmetic_id) 
+                 VALUES ($1, 'draw_winner_avatar'), ($1, 'draw_winner_frame') 
+                 ON CONFLICT DO NOTHING`,
+                [winner.id]
+            );
+            console.log(`👑 Awarded Champion Cosmetics to User ${winner.id}`);
         }
 
         // Notify winner in-app via Socket
