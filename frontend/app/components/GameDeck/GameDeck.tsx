@@ -239,12 +239,28 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     }
 
     if (showCompletion) {
+        const featuredSponsor = sponsors[0] || null;
+
         return (
             <div className={styles.completionScreen}>
                 <div className={styles.completionCard}>
                     <div className={styles.completionIcon}>🎉</div>
-                    <h2 className={styles.completionTitle}>{t('completion_title') || 'All Predictions Complete!'}</h2>
-                    <p className={styles.completionStats}>{`You made ${predictionCount} predictions`}</p>
+                    <h2 className={styles.completionTitle}>{t('completion_title') || 'Arena Cleared!'}</h2>
+                    <p className={styles.completionStats}>{`You've mastered all ${predictionCount} matches in this league.`}</p>
+
+                    {featuredSponsor && (
+                        <div className={styles.completionPrize}>
+                            <p className={styles.prizeLabel}>FEATURED PRIZE AVAILABLE</p>
+                            <div className={styles.prizeBox}>
+                                <img src={featuredSponsor.logo_url} alt={featuredSponsor.sponsor_name} className={styles.prizeSponsorLogo} />
+                                <div className={styles.prizeDetails}>
+                                    <h4>{featuredSponsor.sponsor_name} Giveaway</h4>
+                                    <p>Enter the Draw Room now for a chance to win exclusive rewards!</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className={styles.completionActions}>
                         <button
                             onClick={() => router.push('/draw')}
@@ -270,12 +286,21 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
     return (
         <div className={styles.deckWrapper}>
             <div className={styles.deckHeader}>
-                <p className={styles.cardsRemaining}>
-                    {remainingCards} {t('matches_left') || 'Matches Left'}
-                </p>
-                <p className={styles.swipeHint}>
-                    {t('swipe_hint') || 'Swipe to Predict'}
-                </p>
+                <div className={styles.headerTop}>
+                    <p className={styles.cardsRemaining}>
+                        {remainingCards} {t('matches_left') || 'Matches Left'}
+                    </p>
+                    <p className={styles.swipeHint}>
+                        {t('swipe_hint') || 'Swipe to Predict'}
+                    </p>
+                </div>
+                {/* PROGRESS BAR */}
+                <div className={styles.progressTrack}>
+                    <div
+                        className={styles.progressBar}
+                        style={{ width: `${(gone.size / matches.length) * 100}%` }}
+                    />
+                </div>
             </div>
             <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>
                 {props.map((springProps, i) => {

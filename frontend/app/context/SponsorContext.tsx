@@ -7,6 +7,7 @@ export interface Sponsor {
     sponsor_name: string;
     logo_url: string;
     website_url?: string;
+    room_id?: string;
 }
 
 interface SponsorContextType {

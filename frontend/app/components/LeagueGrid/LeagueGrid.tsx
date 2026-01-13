@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import styles from './LeagueGrid.module.css';
+import { useSponsor } from '@/app/context/SponsorContext';
 
 interface League {
     league_id: string;
@@ -14,6 +15,7 @@ interface LeagueGridProps {
 }
 
 const LeagueGrid: React.FC<LeagueGridProps> = ({ onLeagueSelect }) => {
+    const { sponsors } = useSponsor();
     const [leagues, setLeagues] = useState<League[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showInstructions, setShowInstructions] = useState(false);
@@ -59,16 +61,25 @@ const LeagueGrid: React.FC<LeagueGridProps> = ({ onLeagueSelect }) => {
     return (
         <>
             <div className={styles.grid}>
-                {leagues.map(league => (
-                    <div key={league.league_id} className={`${styles.card} glass`} onClick={() => onLeagueSelect(league.league_id)}>
-                        <img
-                            src={league.logo_url}
-                            alt={`${league.name} logo`}
-                            className={`${styles.logo} ${league.league_id === 'soccer_france_ligue_one' ? styles.ligueOne : ''}`}
-                        />
-                        <span className={styles.name}>{league.name}</span>
-                    </div>
-                ))}
+                {leagues.map(league => {
+                    const isSponsored = sponsors.some(s => s.room_id === league.league_id);
+
+                    return (
+                        <div key={league.league_id} className={`${styles.card} glass`} onClick={() => onLeagueSelect(league.league_id)}>
+                            {isSponsored && (
+                                <div className={styles.sponsoredBadge}>
+                                    💎 SPONSORED
+                                </div>
+                            )}
+                            <img
+                                src={league.logo_url}
+                                alt={`${league.name} logo`}
+                                className={`${styles.logo} ${league.league_id === 'soccer_france_ligue_one' ? styles.ligueOne : ''}`}
+                            />
+                            <span className={styles.name}>{league.name}</span>
+                        </div>
+                    );
+                })}
             </div>
 
             {showInstructions && (
