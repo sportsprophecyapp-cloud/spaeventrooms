@@ -85,8 +85,8 @@ const initDB = async () => {
             -- 6. Prize Draw System (Depends on Room Sponsors)
             CREATE TABLE IF NOT EXISTS prize_draws (
                 id SERIAL PRIMARY KEY,
-                title VARCHAR(100) NOT NULL,
-                prize VARCHAR(255) NOT NULL,
+                title TEXT NOT NULL,
+                prize TEXT NOT NULL,
                 description TEXT,
                 room_id VARCHAR(50) DEFAULT 'soccer',
                 status VARCHAR(20) DEFAULT 'active', -- 'active', 'completed'
@@ -106,8 +106,8 @@ const initDB = async () => {
             );
 
             -- 6.1 Ensure prize_draws columns (Safety for existing tables)
-            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS title VARCHAR(100);
-            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS prize VARCHAR(255);
+            ALTER TABLE prize_draws ALTER COLUMN title TYPE TEXT;
+            ALTER TABLE prize_draws ALTER COLUMN prize TYPE TEXT;
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS draw_date TIMESTAMP;
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS winner_id INTEGER REFERENCES users(id);

@@ -1,40 +1,29 @@
-# Events Arena
+# Events Arena - v3.4.6
 
 **Version**: 3.4.6  
 **Release**: January 13, 2026
 
-A multi-room prediction platform with premium UI, Google Login, Sponsor & Draw Management Hub (with instant-live partner onboarding), Player Profiles with Cosmetic Customization (Avatars/Frames), Badge Lockers, Referral Milestone Rewards, Winner Feedback System, and real-time chat.
+Events Arena is a high-performance prediction & engagement platform designed for sports, TV, and creator-led events. It features a premium glassmorphic UI, a robust dual-currency economy, and achievement-gated rewards.
 
 ## 🚀 Key Features
 
-- **Sponsor Content Engine:** Creative Studio with 50MB payload support and real-time placement previews.
-- **Logo Integrity System:** Manifest-guided local synchronization for high-performance, origin-consistent team branding.
-- **Dynamic Gameplay:** Real-time scores and odds integration with predictive gaming mechanics.
-- **Sponsor Integration:** In-arena brand placements and gamified prize draw system.
+- **⚜️ Honors & Hall of Fame:** Automated "Grand Champion" rewarding. High-tier items are "Earned, Not Bought."
+- **🗺️ Referral Roadmap:** Animated 4-tier recruitment path with escalating rewards and integrated sharing.
+- **💰 Dual Economy:** Tokens for standard shop items and Prize Tickets for high-stakes draw entries.
+- **🏢 Sponsor Hub:** Creative Studio for partner onboarding, real-time ad placement, and performance analytics.
+- **✨ Premium UI:** Native-quality glassmorphism (`30px blur`), fluid mobile response, and high-fidelity crests.
+- **🛡️ Brand Trust:** Integrated Founder's Letter and social proof feedback systems.
 
-## Structure
+## 🛠️ Architecture
+- **Frontend:** Next.js 16 (Outfit/Merriweather Fonts, React Spring Animations).
+- **Backend:** Node.js/Express (PostgreSQL, Socket.io, Express 50MB Payload support).
+- **Data:** Dual-sync API-Football & The Odds API with robust key rotation and local logo manifest synchronization.
+- **Compliance:** Full store compliance with zero wagering terminology and secure account deletion.
 
-- `/frontend`: Next.js application (Desktop & Mobile optimized).
-- `/backend`: Node.js/Express server with PostgreSQL and Socket.io.
-- `/legacy_backup`: Archival code and documentation.
+## 📦 Getting Started
+1. `npm install` in `/frontend` and `/backend`.
+2. Sync `.env` from `.env.example`.
+3. `npm run dev` to launch the arena.
 
-## Deployment
-
-Run from the root directory:
-```bash
-./deploy.sh "Your commit message"
-```
-
-## Documentation Reference
-
-- **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)**: Current roadmap, completed phases, and version history.
-- **[MASTER_REFERENCE.md](MASTER_REFERENCE.md)**: Technical standards, build rules, and API specifications.
-- **[LOGO_MIGRATION.md](LOGO_MIGRATION.md)**: Team logo directory structure and manifest sync guide.
-- **[QA_CHECKLIST.md](QA_CHECKLIST.md)**: Mandatory pre-deployment verification steps.
-- **[UX_DESIGN_DOC.md](UX_DESIGN_DOC.md)**: Visual system and architecture blue-print.
-- **[LEGAL_RECORDS.md](LEGAL_RECORDS.md)**: Organization identity and compliance details.
-
-## 📧 Contact
-
-- **General Inquiries:** contact@sportsprophecyapp.com
-- **Partnerships & Sales:** partnerships@sportsprophecyapp.com
+---
+*Built for the next generation of social competition. Pribadi.*
