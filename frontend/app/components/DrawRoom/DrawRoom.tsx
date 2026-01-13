@@ -31,6 +31,13 @@ const DrawRoom = () => {
     const [winner, setWinner] = useState<string | null>(null);
     const [enteringId, setEnteringId] = useState<number | null>(null);
     const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+    const [now, setNow] = useState(Date.now());
+
+    // TICKING TIMER
+    useEffect(() => {
+        const timer = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     // ADMIN STATE
     const [editingDrawId, setEditingDrawId] = useState<number | null>(null);
@@ -91,6 +98,12 @@ const DrawRoom = () => {
             const data = await res.json();
             if (res.ok) {
                 setTicketCount(prev => Math.max(0, prev - 1));
+
+                // OPTIMISTIC ENTRY COUNT UPDATE
+                setDraws(prev => prev.map(d =>
+                    d.id === drawId ? { ...d, entry_count: (d.entry_count || 0) + 1 } : d
+                ));
+
                 setMessage({ text: 'GOOD LUCK! Entry Confirmed.', type: 'success' });
                 // Refresh user balances in AuthContext
                 if (user) {
@@ -171,15 +184,23 @@ const DrawRoom = () => {
 
                         // Calculate countdown
                         let countdown = '';
+                        let isUrgent = false;
                         if (draw.draw_date) {
-                            const now = new Date().getTime();
                             const target = new Date(draw.draw_date).getTime();
                             const diff = target - now;
 
                             if (diff > 0) {
                                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                countdown = days > 0 ? `${days}d ${hours}h` : `${hours}h`;
+                                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                                if (days > 0) {
+                                    countdown = `${days}d ${hours}h ${minutes}m`;
+                                } else {
+                                    isUrgent = true;
+                                    countdown = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                                }
                             } else {
                                 countdown = 'Drawing soon!';
                             }
@@ -261,8 +282,8 @@ const DrawRoom = () => {
 
                                 {/* Countdown Timer */}
                                 {countdown && (
-                                    <div className={styles.countdown}>
-                                        ⏰ Draws in: <strong>{countdown}</strong>
+                                    <div className={`${styles.countdown} ${isUrgent ? styles.urgent : ''}`}>
+                                        ⏰ {isUrgent ? 'ENDS IN:' : 'Draws in:'} <strong>{countdown}</strong>
                                     </div>
                                 )}
 

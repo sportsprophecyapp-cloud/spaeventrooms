@@ -136,18 +136,22 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
             const sponsorId = sponsorRes.rows[0].id;
             console.log(`[APPROVE] Created sponsorId: ${sponsorId}`);
 
-            console.log(`[APPROVE] Step 2: Creating prize_draws record...`);
-            // 2. Create Prize Draw (Link to Sponsor + Image)
+            console.log(`[APPROVE] Step 2: Creating prize_draws record (30-day expiry)...`);
+            // 2. Create Prize Draw (Link to Sponsor + Image + 30 Day Expiry)
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
             await dbQuery(
-                `INSERT INTO prize_draws (title, prize, description, room_id, status, sponsor_id, prize_image)
-                 VALUES ($1, $2, $3, $4, 'active', $5, $6)`,
+                `INSERT INTO prize_draws (title, prize, description, room_id, status, sponsor_id, prize_image, draw_date)
+                 VALUES ($1, $2, $3, $4, 'active', $5, $6, $7)`,
                 [
-                    `${app.brand_name} Giveaway`.substring(0, 250), // Safety truncation for title if still varchar
+                    `${app.brand_name} Giveaway`.substring(0, 250),
                     app.prize_description,
                     `Sponsored by ${app.brand_name}`,
                     app.arena_target || 'soccer',
                     sponsorId,
-                    app.prize_image_url
+                    app.prize_image_url,
+                    thirtyDaysFromNow.toISOString()
                 ]
             );
 

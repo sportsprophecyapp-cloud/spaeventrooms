@@ -202,23 +202,65 @@
     justify-content: center;
     gap: 0.5rem;
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: #00ff88;
     padding: 0.6rem 1rem;
-    background: rgba(0, 112, 243, 0.1);
+    background: rgba(0, 255, 136, 0.05);
     border-radius: 8px;
-    border: 1px solid rgba(0, 112, 243, 0.3);
+    border: 1px solid rgba(0, 255, 136, 0.2);
     width: 100%;
+    animation: pulseEntry 2s infinite;
+}
+
+@keyframes pulseEntry {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 1;
+        border-color: #00ff88;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
 }
 
 .countdown {
     font-size: 0.9rem;
     color: #FFD700;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 1rem;
+    font-family: 'monospace', Courier, monospace;
 }
 
 .countdown strong {
-    color: var(--accent);
+    color: white;
+}
+
+.urgent {
+    color: #ff4b4b;
+    animation: flashUrgent 1s infinite;
+}
+
+@keyframes flashUrgent {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 
