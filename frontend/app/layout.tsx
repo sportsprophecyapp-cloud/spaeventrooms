@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { Outfit, Dancing_Script, Merriweather } from 'next/font/google';
 import './globals.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -47,6 +48,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${outfit.variable} ${dancingScript.variable} ${merriweather.variable} ${outfit.className}`}>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-HMLRZMY3PY"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-HMLRZMY3PY');
+          `}
+        </Script>
+
         <GoogleOAuthProvider clientId="690358031158-n4e5sqsu936iega8rh9ge8f0kjikveht.apps.googleusercontent.com">
           <AuthProvider>
             <SponsorProvider>
