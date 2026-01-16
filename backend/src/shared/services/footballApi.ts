@@ -44,7 +44,16 @@ const rotateKey = () => {
     return true;
 };
 
+// Global circuit breaker for API quota
+let API_QUOTA_EXHAUSTED = false;
+
 export const fetchLiveMatches = async () => {
+    // 0. Quota Check Circuit Breaker
+    if (API_QUOTA_EXHAUSTED) {
+        console.warn('⛔ API Quota Exhausted. Sync disabled until restart or quota reset.');
+        return;
+    }
+
     // 1. Fallback immediately if no keys are configured
     if (API_KEYS.length === 0) {
         console.warn('⚠️ No THE_ODDS_API_KEYs found. Data sync will be skipped.');
@@ -64,6 +73,14 @@ export const fetchLiveMatches = async () => {
                 const response = await axios.get(`${API_HOST}/v4/sports/${sportKey}/scores/`, {
                     params: { apiKey: API_KEYS[currentKeyIndex], daysFrom: 3 }
                 });
+
+                // CHECK REMAINING QUOTA
+                const requestsRemaining = parseInt(response.headers['x-requests-remaining']);
+                if (!isNaN(requestsRemaining) && requestsRemaining < 10) {
+                    console.error('🚨 CRITICAL: API Quota < 10. Stopping all future requests to prevent overage.');
+                    API_QUOTA_EXHAUSTED = true;
+                    return;
+                }
 
                 const data = response.data;
                 if (Array.isArray(data)) {
