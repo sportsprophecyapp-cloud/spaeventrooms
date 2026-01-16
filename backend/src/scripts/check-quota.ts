@@ -24,7 +24,7 @@ const checkQuota = async () => {
 
             const remaining = response.headers['x-requests-remaining'];
             const used = response.headers['x-requests-used'];
-            console.log(`✅ Key ending in ...${key.slice(-4)}:`);
+            console.log(`✅ Key: ${key.substring(0, 10)}...${key.slice(-4)}`);
             console.log(`   - Requests Remaining: ${remaining}`);
             console.log(`   - Requests Used: ${used}`);
         } catch (error: any) {

@@ -18,7 +18,7 @@ let currentKeyIndex = 0;
 
 const API_HOST = 'https://api.the-odds-api.com';
 
-const LEAGUE_NAMES: Record<string, string> = {
+export const LEAGUE_NAMES: Record<string, string> = {
     'soccer_epl': 'Premier League',
     'soccer_spain_la_liga': 'La Liga',
     'soccer_germany_bundesliga': 'Bundesliga',
@@ -47,7 +47,7 @@ const rotateKey = () => {
 // Global circuit breaker for API quota
 let API_QUOTA_EXHAUSTED = false;
 
-export const fetchLiveMatches = async () => {
+export const fetchLiveMatches = async (targetLeagues: string[] = []) => {
     // 0. Quota Check Circuit Breaker
     if (API_QUOTA_EXHAUSTED) {
         console.warn('⛔ API Quota Exhausted. Sync disabled until restart or quota reset.');
@@ -60,11 +60,13 @@ export const fetchLiveMatches = async () => {
         return;
     }
 
+    // Determine which leagues to fetch
+    const leaguesToFetch = targetLeagues.length > 0 ? targetLeagues : SPORTS;
     let count = 0;
-    console.log(`📡 Arena Sync: Starting batch using API Key Index ${currentKeyIndex}...`);
+    console.log(`📡 Arena Sync: Fetching ${leaguesToFetch.length} leagues using Key Index ${currentKeyIndex}...`);
 
     // We process leagues one by one to handle key failures gracefully
-    for (const sportKey of SPORTS) {
+    for (const sportKey of leaguesToFetch) {
         let success = false;
         let retryCount = 0;
 
