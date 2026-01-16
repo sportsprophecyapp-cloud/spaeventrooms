@@ -20,7 +20,7 @@ const checkActiveLeagues = async (): Promise<string[]> => {
             SELECT DISTINCT league 
             FROM soccer_matches 
             WHERE status = 'live' 
-            OR (status != 'finished' AND start_time > NOW() - INTERVAL '24 hours' AND start_time < NOW() + INTERVAL '2 hours')
+            OR (status != 'finished' AND start_time > NOW() - INTERVAL '7 days' AND start_time < NOW() + INTERVAL '2 hours')
         `);
 
         if (result.rowCount === 0) return [];
@@ -34,6 +34,37 @@ const checkActiveLeagues = async (): Promise<string[]> => {
     } catch (e) {
         console.error('❌ Scheduler DB Check failed:', e);
         return [];
+    }
+};
+
+const runSchedulerCycle = async () => {
+    const now = new Date();
+    const hour = now.getHours();
+
+    // --- A. THE HEARTBEAT (Once a day at 4 AM) ---
+    // This ensures upcoming schedules are refreshed daily
+    if (hour === 4) {
+        console.log('💓 [Heartbeat] Daily Schedule Sync (All Leagues)...');
+        await fetchLiveMatches().catch(e => { }); // No args = fetch all
+        await resolveSoccerPredictions().catch(e => { });
+        return;
+    }
+
+    // --- B. TARGETED POLLING ---
+    // Query DB to see what is actually happening
+    const activeLeagues = await checkActiveLeagues();
+
+    if (activeLeagues.length > 0) {
+        console.log(`🎯 [Targeted Poll] Active Leagues: ${activeLeagues.join(', ')}`);
+        // Note: fetchLiveMatches default is daysFrom=3.
+        // For older games (caught by 7-day lookback), this might miss if API doesn't return past.
+        // But The Odds API 'scores' endpoint usually returns recent history by default.
+        await fetchLiveMatches(activeLeagues).catch(e => { });
+        await resolveSoccerPredictions().catch(e => { });
+    } else {
+        console.log('💤 [Sleep] No live/upcoming matches found in DB. Skipping API call.');
+        // Still run resolver just in case we have pendant predictions to clear
+        await resolveSoccerPredictions().catch(e => { });
     }
 };
 
@@ -51,37 +82,13 @@ export const startSoccerScheduler = () => {
             await fetchLiveMatches().catch(e => { });
         } else {
             console.log(`ℹ️ DB has ${count} matches. Skipping full startup sync to save credits.`);
+            // Run the targeted cycle immediately to catch up on pending games
+            console.log('⚡ Startup: Running immediate check for pending games...');
+            await runSchedulerCycle();
         }
     };
     initialSync();
 
     // 2. Main Loop (Runs every hour)
-    setInterval(async () => {
-        const now = new Date();
-        const hour = now.getHours();
-
-        // --- A. THE HEARTBEAT (Once a day at 4 AM) ---
-        // This ensures upcoming schedules are refreshed daily
-        if (hour === 4) {
-            console.log('💓 [Heartbeat] Daily Schedule Sync (All Leagues)...');
-            await fetchLiveMatches().catch(e => { }); // No args = fetch all
-            await resolveSoccerPredictions().catch(e => { });
-            return;
-        }
-
-        // --- B. TARGETED POLLING ---
-        // Query DB to see what is actually happening
-        const activeLeagues = await checkActiveLeagues();
-
-        if (activeLeagues.length > 0) {
-            console.log(`🎯 [Targeted Poll] Active Leagues: ${activeLeagues.join(', ')}`);
-            await fetchLiveMatches(activeLeagues).catch(e => { });
-            await resolveSoccerPredictions().catch(e => { });
-        } else {
-            console.log('💤 [Sleep] No live/upcoming matches found in DB. Skipping API call.');
-            // Still run resolver just in case we have pendant predictions to clear
-            await resolveSoccerPredictions().catch(e => { });
-        }
-
-    }, CHECK_INTERVAL);
+    setInterval(runSchedulerCycle, CHECK_INTERVAL);
 };
