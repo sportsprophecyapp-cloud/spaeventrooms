@@ -18,8 +18,8 @@
 - **Loot Showcase:** Dynamic dashboard component that previews upcoming rewards to drive retention.
 
 ## 📡 Data Architecture (API & Limits)
-- **Resilient Dual-API Sync:** API-Football (20m) + The Odds API (4h Savings Mode).
-- **Sequential Key Rotation:** Supports comma-separated lists for both `THE_ODDS_API_KEY` and `API_FOOTBALL_KEY`.
+- **Primary Data Source:** The Odds API (Optimized "Targeted Polling" Scheduler).
+- **Key Management:** Supports comma-separated lists for `THE_ODDS_API_KEY`.
 - **Logo Integrity System**: Powered by `backend/src/data/logo_manifest.json` for 100% reliable local production synchronization.
 - **Payload Limits**: Backend `express.json` is set to **50MB** to support high-resolution sponsor design uploads.
 
