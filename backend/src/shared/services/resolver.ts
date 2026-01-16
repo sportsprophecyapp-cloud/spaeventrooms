@@ -26,7 +26,12 @@ export const resolveSoccerPredictions = async () => {
             if (score_home > score_away) actualWinner = row.home_team;
             else if (score_away > score_home) actualWinner = row.away_team;
 
-            const isCorrect = pick === actualWinner;
+            // Robust comparison: normalize strings
+            const normalize = (s: string) => s.trim().toLowerCase();
+            const isCorrect = normalize(pick) === normalize(actualWinner);
+
+            console.log(`🔍 Resolving Prediction ${id}: Pick [${pick}] vs Winner [${actualWinner}] -> ${isCorrect ? '✅' : '❌'}`);
+
             const pointsEarned = isCorrect ? 100 : 0;
             const ticketsEarned = isCorrect ? 1 : 0; // NEW: +1 ticket for a correct call
             const resultStatus = isCorrect ? 'correct' : 'incorrect';

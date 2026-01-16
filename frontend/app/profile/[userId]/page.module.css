@@ -135,6 +135,79 @@
     align-items: center;
     gap: 1rem;
     margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.editNameBtn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.editNameBtn:hover {
+    background: var(--accent);
+    transform: scale(1.1);
+}
+
+.editNameContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 250px;
+}
+
+.editInput {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 900;
+    width: 100%;
+    outline: none;
+}
+
+.editActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.saveBtn {
+    background: var(--success);
+    color: black;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 900;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+
+.cancelBtn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 900;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+
+.nameInlineError {
+    color: var(--error);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
 .rankBadge {
@@ -214,7 +287,7 @@
     min-width: 100px;
     background: transparent;
     border: none;
-    color: var(--neutral);
+    color: rgba(255, 255, 255, 0.7);
     padding: 10px;
     border-radius: 12px;
     font-size: 0.75rem;
@@ -590,6 +663,9 @@
 
     .tabsNav {
         margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: visible;
     }
 
     .tabBtn {
@@ -706,4 +782,70 @@
 
 .trophyLocked {
     border-color: rgba(255, 255, 255, 0.05);
+}
+
+.historyHeader {
+    margin-top: 2rem;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: var(--neutral);
+    flex-direction: column;
+}
+
+.filterControls {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filterBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--neutral);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filterBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.activeFilter {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.loadMoreBtn {
+    width: 100%;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.loadMoreBtn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.loadMoreBtn:disabled {
+    opacity: 0.5;
+    cursor: wait;
 }

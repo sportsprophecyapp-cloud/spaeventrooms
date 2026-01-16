@@ -161,9 +161,16 @@ export class GamificationService {
 
             // 2. Calculate rewards
             let tokens = 5;
-            let tickets = 0;
-            if (newStreak % 7 === 0) tokens += 25;
-            if (newStreak % 30 === 0) tokens += 100;
+            let tickets = 1; // Base ticket reward
+
+            if (newStreak % 7 === 0) {
+                tokens += 25;
+                tickets += 1; // Bonus ticket for weekly streak
+            }
+            if (newStreak % 30 === 0) {
+                tokens += 100;
+                tickets += 2; // Bonus tickets for monthly streak
+            }
 
             // 3. Update status
             await client.query(

@@ -1,15 +1,45 @@
 {
   "expo": {
-    "extra": {
-      "eas": {
-        "projectId": "1e6c5191-bcc9-4991-abe0-5e43456209c1"
-      }
+    "name": "Events Arena",
+    "slug": "eventsarena",
+    "version": "3.3.0",
+    "scheme": "eventsarena",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a1628"
     },
     "ios": {
+      "supportsTablet": true,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.eventsarena.app",
+      "buildNumber": "32",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSFaceIDUsageDescription": "Allow Events Arena to use FaceID for quick and secure login."
       }
-    }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0a1628"
+      },
+      "package": "com.eventsarena.app",
+      "versionCode": 32,
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-web-browser",
+      "expo-secure-store"
+    ],
+    "owner": "eventsarena"
   }
 }

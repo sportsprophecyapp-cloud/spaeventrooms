@@ -170,7 +170,10 @@ export const handleDailyLogin = async (req: AuthRequest, res: Response) => {
             success: true,
             streak: { current: result.streak, nextBonus: 7 },
             tokenBalance: result.newBalances.newBalance,
-            reward: { amount: result.reward.tokens, message: result.reward.message || `Tokens received! Streak: ${result.streak} days` }
+            reward: {
+                amount: result.reward.tokens,
+                message: result.reward.message || `+${result.reward.tokens} Tokens, +${result.reward.tickets} Tickets! Streak: ${result.streak} days`
+            }
         });
     } catch (error) {
         console.error('Error in handleDailyLogin:', error);
@@ -443,5 +446,59 @@ export const handleGetAllBadges = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error fetching all badges:', error);
         res.status(500).json({ success: false, error: 'Error fetching badges' });
+    }
+};
+
+export const handleGetHistory = async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    const { page = '1', limit = '20', filter = 'all' } = req.query;
+
+    try {
+        const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+        const limitVal = parseInt(limit as string);
+
+        let queryStr = `
+            SELECT 
+                p.id, p.prediction_data->>'pick' as pick, p.created_at, p.result as status,
+                m.home_team, m.away_team, m.home_logo, m.away_logo, m.score_home, m.score_away, m.start_time
+            FROM soccer_predictions p
+            JOIN soccer_matches m ON p.match_id = m.match_id
+            WHERE p.user_id = $1
+        `;
+
+        const params: any[] = [userId];
+        let paramIdx = 2;
+
+        if (filter === 'wins') {
+            queryStr += ` AND p.result = 'correct'`;
+        } else if (filter === 'pending') {
+            queryStr += ` AND p.result = 'pending'`;
+        } else if (filter === 'incorrect') {
+            queryStr += ` AND p.result = 'incorrect'`;
+        }
+
+        queryStr += ` ORDER BY p.created_at DESC LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`;
+        params.push(limitVal, offset);
+
+        const result = await dbQuery(queryStr, params);
+
+        // Get total count for pagination
+        let countQuery = `SELECT COUNT(*) FROM soccer_predictions WHERE user_id = $1`;
+        if (filter === 'wins') countQuery += ` AND result = 'correct'`;
+        else if (filter === 'pending') countQuery += ` AND result = 'pending'`;
+        else if (filter === 'incorrect') countQuery += ` AND result = 'incorrect'`;
+
+        const countRes = await dbQuery(countQuery, [userId]);
+
+        res.json({
+            success: true,
+            history: result.rows,
+            total: parseInt(countRes.rows[0].count),
+            page: parseInt(page as string),
+            totalPages: Math.ceil(parseInt(countRes.rows[0].count) / limitVal)
+        });
+    } catch (err) {
+        console.error('Error fetching history:', err);
+        res.status(500).json({ success: false, error: 'Error fetching history' });
     }
 };

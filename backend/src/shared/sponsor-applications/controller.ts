@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { query as dbQuery } from '../database';
+import { query as dbQuery, getClient as dbGetClient } from '../database';
 import { AuthRequest } from '../auth/middleware';
 
 import Stripe from 'stripe';
@@ -120,28 +120,28 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
         const app = appRes.rows[0];
         console.log(`[APPROVE] Found application for brand: ${app.brand_name}`);
 
-        // START_TRANSACTION
-        await dbQuery('BEGIN');
-
+        // Use a dedicated client for the transaction
+        const client = await dbGetClient();
         try {
+            await client.query('BEGIN');
+
             console.log(`[APPROVE] Step 1: Creating room_sponsors record...`);
             // 1. Create Room Sponsor placement
-            const sponsorRes = await dbQuery(`
+            const sponsorRes = await client.query(`
                 INSERT INTO room_sponsors 
                 (room_id, sponsor_name, logo_url, website_url, prize_description, application_id, is_active, prize_escrow_received)
                 VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE)
                 RETURNING id
-            `, [app.arena_target || 'soccer', app.brand_name, app.logo_url, app.website_url, app.prize_description, appId]);
+            `, [app.arena_target || 'soccer', app.brand_name, app.logo_url, app.website_url, app.prize_description, Number(appId)]);
 
             const sponsorId = sponsorRes.rows[0].id;
             console.log(`[APPROVE] Created sponsorId: ${sponsorId}`);
 
             console.log(`[APPROVE] Step 2: Creating prize_draws record (30-day expiry)...`);
-            // 2. Create Prize Draw (Link to Sponsor + Image + 30 Day Expiry)
             const thirtyDaysFromNow = new Date();
             thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
 
-            await dbQuery(
+            await client.query(
                 `INSERT INTO prize_draws (title, prize, description, room_id, status, sponsor_id, prize_image, draw_date)
                  VALUES ($1, $2, $3, $4, 'active', $5, $6, $7)`,
                 [
@@ -157,19 +157,21 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
 
             console.log(`[APPROVE] Step 3: Updating application status...`);
             // 3. Update Application Status
-            await dbQuery(
+            await client.query(
                 "UPDATE sponsor_applications SET status = 'approved', reviewed_at = NOW(), reviewed_by = $1 WHERE id = $2",
-                [reviewerId || null, appId]
+                [reviewerId ? Number(reviewerId) : null, Number(appId)]
             );
 
-            await dbQuery('COMMIT');
+            await client.query('COMMIT');
             console.log(`[APPROVE] Transaction COMMITTED for appId: ${appId}`);
             res.json({ success: true, message: 'Partner is now LIVE!' });
 
         } catch (innerError: any) {
-            console.error(`[APPROVE] Inner Error during transaction:`, innerError.message);
-            await dbQuery('ROLLBACK');
+            console.error(`[APPROVE] Transaction failed:`, innerError.message);
+            await client.query('ROLLBACK');
             throw innerError;
+        } finally {
+            client.release();
         }
 
     } catch (error: any) {

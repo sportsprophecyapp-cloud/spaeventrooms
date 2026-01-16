@@ -106,6 +106,8 @@ const initDB = async () => {
             );
 
             -- 6.1 Ensure prize_draws columns (Safety for existing tables)
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS title TEXT;
+            ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS prize TEXT;
             ALTER TABLE prize_draws ALTER COLUMN title TYPE TEXT;
             ALTER TABLE prize_draws ALTER COLUMN prize TYPE TEXT;
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS draw_date TIMESTAMP;

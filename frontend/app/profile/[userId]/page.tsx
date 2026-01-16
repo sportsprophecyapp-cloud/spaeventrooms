@@ -44,6 +44,20 @@ interface UserProfile {
     }>;
 }
 
+interface HistoryEntry {
+    id: string;
+    pick: string;
+    created_at: string;
+    home_team: string;
+    away_team: string;
+    home_logo?: string;
+    away_logo?: string;
+    status: string;
+    score_home?: number;
+    score_away?: number;
+    start_time: string;
+}
+
 interface Badge {
     id: number;
     name: string;
@@ -64,6 +78,47 @@ const ProfilePage = () => {
     const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
     const [isShopOpen, setIsShopOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'showcase' | 'honors' | 'history' | 'rewards'>('showcase');
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [newName, setNewName] = useState('');
+    const [nameError, setNameError] = useState('');
+    const [isUpdatingName, setIsUpdatingName] = useState(false);
+
+    // History State
+    const [historyItems, setHistoryItems] = useState<HistoryEntry[]>([]);
+    const [historyPage, setHistoryPage] = useState(1);
+    const [historyTotal, setHistoryTotal] = useState(0);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyFilter, setHistoryFilter] = useState<'all' | 'wins' | 'pending' | 'incorrect'>('all');
+
+    const fetchHistory = async (page: number, filter: string, reset = false) => {
+        try {
+            setHistoryLoading(true);
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
+            const res = await fetch(`${apiUrl}/api/gamification/history/${userId}?page=${page}&limit=10&filter=${filter}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (reset) {
+                    setHistoryItems(data.history);
+                } else {
+                    setHistoryItems(prev => [...prev, ...data.history]);
+                }
+                setHistoryTotal(data.total);
+            }
+        } catch (err) {
+            console.error('Error fetching history:', err);
+        } finally {
+            setHistoryLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'history') {
+            fetchHistory(1, historyFilter, true);
+            setHistoryPage(1);
+        }
+    }, [activeTab, historyFilter, userId, token]); // Re-fetch on tab/filter change
 
     useEffect(() => {
         if (!isAuthenticated || !token) return;
@@ -121,6 +176,48 @@ const ProfilePage = () => {
         window.open(url, '_blank');
     };
 
+    const handleUpdateName = async () => {
+        if (!newName || newName.length < 3) {
+            setNameError('Name must be at least 3 characters');
+            return;
+        }
+        if (newName === profile?.username) {
+            setIsEditingName(false);
+            return;
+        }
+
+        setIsUpdatingName(true);
+        setNameError('');
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
+            const res = await fetch(`${apiUrl}/api/auth/username`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ newUsername: newName })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                setProfile(prev => prev ? { ...prev, username: data.user.username } : null);
+                setIsEditingName(false);
+                // Also update local auth user if it matches
+                if (user && user.id.toString() === userId) {
+                    // This depends on how AuthContext is exposed, but usually we just refetch /me or reload
+                    window.location.reload();
+                }
+            } else {
+                setNameError(data.error || 'Failed to update name');
+            }
+        } catch (err) {
+            setNameError('Connection error');
+        } finally {
+            setIsUpdatingName(false);
+        }
+    };
+
     const getTierClass = (points: number) => {
         if (points >= 5000) return styles.tierLegendary;
         if (points >= 2500) return styles.tierElite;
@@ -160,7 +257,48 @@ const ProfilePage = () => {
                 </div>
                 <div className={styles.profileInfo}>
                     <div className={styles.nameRow}>
-                        <h1>{profile.username}</h1>
+                        {isEditingName ? (
+                            <div className={styles.editNameContainer}>
+                                <input
+                                    type="text"
+                                    value={newName}
+                                    onChange={(e) => setNewName(e.target.value)}
+                                    className={styles.editInput}
+                                    placeholder="Enter new name..."
+                                    autoFocus
+                                    maxLength={20}
+                                />
+                                <div className={styles.editActions}>
+                                    <button
+                                        onClick={handleUpdateName}
+                                        className={styles.saveBtn}
+                                        disabled={isUpdatingName}
+                                    >
+                                        {isUpdatingName ? '...' : 'SAVE'}
+                                    </button>
+                                    <button
+                                        onClick={() => { setIsEditingName(false); setNameError(''); }}
+                                        className={styles.cancelBtn}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                {nameError && <div className={styles.nameInlineError}>{nameError}</div>}
+                            </div>
+                        ) : (
+                            <>
+                                <h1>{profile.username}</h1>
+                                {isOwnProfile && (
+                                    <button
+                                        className={styles.editNameBtn}
+                                        onClick={() => { setIsEditingName(true); setNewName(profile.username); }}
+                                        title="Change Username"
+                                    >
+                                        ✏️
+                                    </button>
+                                )}
+                            </>
+                        )}
                         <div className={styles.rankBadge}>GLOBAL RANK #{profile.global_rank || '??'}</div>
                     </div>
                     <div className={styles.titleRow}>
@@ -327,68 +465,87 @@ const ProfilePage = () => {
                     {activeTab === 'history' && (
                         <section className={`${styles.historyCard} glass`}>
                             <div className={styles.historyHeader}>
-                                <h3 className={styles.sectionTitle}>📅 RECENT SWIPES</h3>
-                                {profile.history && profile.history.length > 5 && (
-                                    <button
-                                        onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
-                                        className={styles.expandToggle}
-                                    >
-                                        {isHistoryExpanded ? 'SHOW LESS' : `VIEW ALL (${profile.history.length})`}
-                                    </button>
-                                )}
+                                <h3 className={styles.sectionTitle}>📅 PREDICTION HISTORY</h3>
+                                <div className={styles.filterControls}>
+                                    {(['all', 'wins', 'pending', 'incorrect'] as const).map(f => (
+                                        <button
+                                            key={f}
+                                            onClick={() => setHistoryFilter(f)}
+                                            className={`${styles.filterBtn} ${historyFilter === f ? styles.activeFilter : ''}`}
+                                        >
+                                            {f.toUpperCase()}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className={styles.historyList}>
-                                {profile.history && profile.history.length > 0 ? (
-                                    (() => {
-                                        const displayedHistory = isHistoryExpanded ? profile.history : profile.history.slice(0, 5);
-
-                                        // Group by date
-                                        const groups: { [key: string]: typeof profile.history } = {};
-                                        displayedHistory.forEach(item => {
-                                            const date = new Date(item.created_at).toLocaleDateString('en-US', {
-                                                month: 'short', day: 'numeric', year: 'numeric'
+                                {historyItems.length > 0 ? (
+                                    <>
+                                        {(() => {
+                                            // Group by date
+                                            const groups: { [key: string]: HistoryEntry[] } = {};
+                                            historyItems.forEach(item => {
+                                                const date = new Date(item.created_at).toLocaleDateString('en-US', {
+                                                    month: 'short', day: 'numeric', year: 'numeric'
+                                                });
+                                                if (!groups[date]) groups[date] = [];
+                                                groups[date].push(item);
                                             });
-                                            if (!groups[date]) groups[date] = [];
-                                            groups[date].push(item);
-                                        });
 
-                                        return Object.entries(groups).map(([date, items]) => (
-                                            <div key={date} className={styles.historyGroup}>
-                                                <div className={styles.dateDivider}>
-                                                    <span>{date}</span>
-                                                    <div className={styles.dividerLine}></div>
-                                                </div>
-                                                {items.map((item) => (
-                                                    <div key={item.id} className={styles.historyItem}>
-                                                        <div className={styles.historyTeamsWrapper}>
-                                                            <div className={styles.miniLogo}>
-                                                                <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                                            </div>
-                                                            <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
-                                                            <div className={styles.miniLogo}>
-                                                                <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                                            </div>
-                                                        </div>
-                                                        <div className={styles.historyMeta}>
-                                                            <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
-                                                            <div className={styles.historyStatus}>
-                                                                {item.status === 'correct' ? (
-                                                                    <span className={styles.statusCorrect}>✅ CORRECT</span>
-                                                                ) : item.status === 'incorrect' ? (
-                                                                    <span className={styles.statusIncorrect}>❌ INCORRECT</span>
-                                                                ) : (
-                                                                    <span className={styles.historyLive}>PENDING</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
+                                            return Object.entries(groups).map(([date, items]) => (
+                                                <div key={date} className={styles.historyGroup}>
+                                                    <div className={styles.dateDivider}>
+                                                        <span>{date}</span>
+                                                        <div className={styles.dividerLine}></div>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        ));
-                                    })()
+                                                    {items.map((item) => (
+                                                        <div key={item.id} className={styles.historyItem}>
+                                                            <div className={styles.historyTeamsWrapper}>
+                                                                <div className={styles.miniLogo}>
+                                                                    <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                                </div>
+                                                                <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
+                                                                <div className={styles.miniLogo}>
+                                                                    <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                                </div>
+                                                            </div>
+                                                            <div className={styles.historyMeta}>
+                                                                <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
+                                                                <div className={styles.historyStatus}>
+                                                                    {item.status === 'correct' ? (
+                                                                        <span className={styles.statusCorrect}>✅ CORRECT</span>
+                                                                    ) : item.status === 'incorrect' ? (
+                                                                        <span className={styles.statusIncorrect}>❌ INCORRECT</span>
+                                                                    ) : (
+                                                                        <span className={styles.historyLive}>PENDING</span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ));
+                                        })()}
+
+                                        {historyItems.length < historyTotal && (
+                                            <button
+                                                className={styles.loadMoreBtn}
+                                                onClick={() => {
+                                                    const nextPage = historyPage + 1;
+                                                    setHistoryPage(nextPage);
+                                                    fetchHistory(nextPage, historyFilter, false);
+                                                }}
+                                                disabled={historyLoading}
+                                            >
+                                                {historyLoading ? 'LOADING...' : 'LOAD MORE PREDICTIONS'}
+                                            </button>
+                                        )}
+                                    </>
                                 ) : (
-                                    <p className={styles.emptyHistory}>No predictions made yet. Go to the Arena!</p>
+                                    <p className={styles.emptyHistory}>
+                                        {historyLoading ? 'Loading history...' : 'No predictions found.'}
+                                    </p>
                                 )}
                             </div>
                         </section>

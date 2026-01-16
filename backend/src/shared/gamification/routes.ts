@@ -18,7 +18,8 @@ import {
     handleGetWins,
     handleGetAllBadges,
     handleGetRecentWinners,
-    handleUpdateDraw
+    handleUpdateDraw,
+    handleGetHistory
 } from './controller';
 import { submitFeedback, trackShare, getAllFeedback } from './feedback.controller';
 import { authenticate, isAdmin } from '../auth/middleware';
@@ -30,6 +31,7 @@ const router = Router();
 // ============================================
 
 router.get('/me', authenticate, handleGetMe);
+router.get('/history/:userId', authenticate, handleGetHistory);
 router.get('/wins', authenticate, handleGetWins);
 router.get('/badges/all', handleGetAllBadges);
 router.get('/leaderboard', handleGetLeaderboard);

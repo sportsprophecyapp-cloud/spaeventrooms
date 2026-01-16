@@ -98,6 +98,19 @@ export const login = async (req: Request, res: Response) => {
 export const register = async (req: Request, res: Response) => {
     try {
         const { email, password, username, referralCode } = req.body;
+
+        // Check if username is taken
+        const nameCheck = await dbQuery('SELECT id FROM users WHERE username = $1', [username]);
+        if (nameCheck.rows.length > 0) {
+            return res.status(400).json({ success: false, message: 'Username is already taken.' });
+        }
+
+        // Check if email is taken
+        const emailCheck = await dbQuery('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
+        if (emailCheck.rows.length > 0) {
+            return res.status(400).json({ success: false, message: 'Email is already registered.' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const myReferralCode = generateReferralCode();
 
