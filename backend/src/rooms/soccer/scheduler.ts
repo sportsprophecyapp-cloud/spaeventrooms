@@ -20,7 +20,7 @@ const checkActiveLeagues = async (): Promise<string[]> => {
             SELECT DISTINCT league 
             FROM soccer_matches 
             WHERE status = 'live' 
-            OR (status = 'scheduled' AND start_time > NOW() - INTERVAL '2 hours 30 minutes' AND start_time < NOW() + INTERVAL '2 hours')
+            OR (status != 'finished' AND start_time > NOW() - INTERVAL '24 hours' AND start_time < NOW() + INTERVAL '2 hours')
         `);
 
         if (result.rowCount === 0) return [];
