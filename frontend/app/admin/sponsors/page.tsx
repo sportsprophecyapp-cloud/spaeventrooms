@@ -67,7 +67,12 @@ const AdminSponsorsPage = () => {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) alert('Sponsor is now LIVE!');
+                if (res.ok) {
+                    alert('Sponsor is now LIVE!');
+                } else {
+                    const err = await res.json();
+                    alert(`Approval Failed: ${err.error || 'Unknown error'}`);
+                }
             } else if (type === 'delete_app') {
                 const res = await fetch(`${apiUrl}/api/sponsor-applications/${id}`, {
                     method: 'DELETE',
