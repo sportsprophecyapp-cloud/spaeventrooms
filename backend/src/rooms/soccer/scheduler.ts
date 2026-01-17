@@ -2,8 +2,8 @@ import { fetchLiveMatches, LEAGUE_NAMES } from '../../shared/services/footballAp
 import { resolveSoccerPredictions } from '../../shared/services/resolver';
 import { query } from '../../shared/database';
 
-// Standard Frequency - 1 Hour
-const CHECK_INTERVAL = 60 * 60 * 1000;
+// Conservative Frequency - 4 Hours (to conserve API quota until user base grows)
+const CHECK_INTERVAL = 4 * 60 * 60 * 1000;
 
 // Reverse Map: "Premier League" -> "soccer_epl"
 const LEAGUE_KEY_MAP = Object.entries(LEAGUE_NAMES).reduce((acc, [key, name]) => {
@@ -15,12 +15,12 @@ const checkActiveLeagues = async (): Promise<string[]> => {
     try {
         // Find leagues with matches that are:
         // 1. Currently 'live'
-        // 2. OR 'scheduled' to start within the next 2 hours or started in the last 2.5 hours (approx match time)
+        // 2. OR 'scheduled' to start within the next 2 hours or started in the last 3 hours
         const result = await query(`
             SELECT DISTINCT league 
             FROM soccer_matches 
             WHERE status = 'live' 
-            OR (status != 'finished' AND start_time > NOW() - INTERVAL '7 days' AND start_time < NOW() + INTERVAL '2 hours')
+            OR (status != 'finished' AND start_time > NOW() - INTERVAL '3 hours' AND start_time < NOW() + INTERVAL '2 hours')
         `);
 
         if (result.rowCount === 0) return [];
@@ -56,20 +56,17 @@ const runSchedulerCycle = async () => {
 
     if (activeLeagues.length > 0) {
         console.log(`🎯 [Targeted Poll] Active Leagues: ${activeLeagues.join(', ')}`);
-        // Note: fetchLiveMatches default is daysFrom=3.
-        // For older games (caught by 7-day lookback), this might miss if API doesn't return past.
-        // But The Odds API 'scores' endpoint usually returns recent history by default.
         await fetchLiveMatches(activeLeagues).catch(e => { });
         await resolveSoccerPredictions().catch(e => { });
     } else {
-        console.log('💤 [Sleep] No live/upcoming matches found in DB. Skipping API call.');
-        // Still run resolver just in case we have pendant predictions to clear
+        console.log('💤 [Sleep] No active matches. Conserving API quota.');
+        // Still run resolver in case there are any to clear
         await resolveSoccerPredictions().catch(e => { });
     }
 };
 
 export const startSoccerScheduler = () => {
-    console.log('🎯 Arena Data Scheduler: DB-Driven Mode (Targeted Polling)');
+    console.log('🎯 Arena Data Scheduler: Conservative Mode (4-hour interval)');
 
     // 1. Initial Heartbeat Force Sync (On Startup)
     // We only do this lightly to ensure we have SOME schedule data if DB is empty
@@ -89,6 +86,6 @@ export const startSoccerScheduler = () => {
     };
     initialSync();
 
-    // 2. Main Loop (Runs every hour)
+    // 2. Main Loop (Runs every 4 hours to conserve API quota)
     setInterval(runSchedulerCycle, CHECK_INTERVAL);
 };

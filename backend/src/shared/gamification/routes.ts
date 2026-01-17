@@ -17,6 +17,7 @@ import {
     handlePickWinner,
     handleGetWins,
     handleGetAllBadges,
+    handleGetAchievements,
     handleGetRecentWinners,
     handleUpdateDraw,
     handleGetHistory
@@ -34,6 +35,7 @@ router.get('/me', authenticate, handleGetMe);
 router.get('/history/:userId', authenticate, handleGetHistory);
 router.get('/wins', authenticate, handleGetWins);
 router.get('/badges/all', handleGetAllBadges);
+router.get('/achievements', authenticate, handleGetAchievements);
 router.get('/leaderboard', handleGetLeaderboard);
 router.get('/tickets', authenticate, handleGetTickets); // New Tickets Route
 router.get('/vouchers', authenticate, handleGetVouchers);

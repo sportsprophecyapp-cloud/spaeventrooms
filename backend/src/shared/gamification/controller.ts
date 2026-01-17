@@ -449,6 +449,96 @@ export const handleGetAllBadges = async (req: Request, res: Response) => {
     }
 };
 
+export const handleGetAchievements = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+        // Fetch all achievement cosmetics
+        const achievementsResult = await dbQuery(
+            `SELECT id, name, type, asset_url, description, requirement 
+             FROM cosmetics 
+             WHERE is_achievement_reward = true AND is_active = true 
+             ORDER BY created_at ASC`
+        );
+
+        // Fetch user stats
+        const userStatsResult = await dbQuery(
+            `SELECT 
+                correct_picks, 
+                referral_count, 
+                streak,
+                (SELECT COUNT(*) FROM prize_draws WHERE winner_id = $1 AND status = 'completed') as wins
+             FROM users 
+             WHERE id = $1`,
+            [userId]
+        );
+
+        const userStats = userStatsResult.rows[0] || {
+            correct_picks: 0,
+            referral_count: 0,
+            streak: 0,
+            wins: 0
+        };
+
+        // Fetch user's unlocked achievements
+        const unlockedResult = await dbQuery(
+            `SELECT cosmetic_id FROM user_cosmetics WHERE user_id = $1`,
+            [userId]
+        );
+        const unlockedIds = new Set(unlockedResult.rows.map(r => r.cosmetic_id));
+
+        // Parse achievement requirements and calculate progress
+        const achievements = achievementsResult.rows.map(achievement => {
+            // Parse the requirement to determine target type and value
+            const req = achievement.requirement.toLowerCase();
+            let targetType = 'unknown';
+            let target = 0;
+
+            if (req.includes('correct prediction')) {
+                targetType = 'correct_picks';
+                const match = req.match(/(\d+)/);
+                target = match ? parseInt(match[1]) : 0;
+            } else if (req.includes('refer') || req.includes('friend')) {
+                targetType = 'referrals';
+                const match = req.match(/(\d+)/);
+                target = match ? parseInt(match[1]) : 0;
+            } else if (req.includes('streak') || req.includes('login')) {
+                targetType = 'streak';
+                const match = req.match(/(\d+)/);
+                target = match ? parseInt(match[1]) : 0;
+            } else if (req.includes('win') && req.includes('draw')) {
+                targetType = 'wins';
+                target = 1;
+            }
+
+            // Get current progress
+            const current = userStats[targetType] || 0;
+            const progress = target > 0 ? Math.min((current / target) * 100, 100) : 0;
+            const unlocked = unlockedIds.has(achievement.id) || progress >= 100;
+
+            return {
+                id: achievement.id,
+                name: achievement.name,
+                type: achievement.type,
+                asset: achievement.asset_url,
+                description: achievement.description,
+                requirement: achievement.requirement,
+                targetType,
+                target,
+                current,
+                progress,
+                unlocked
+            };
+        });
+
+        res.json({ success: true, achievements, userStats });
+    } catch (error) {
+        console.error('Error fetching achievements:', error);
+        res.status(500).json({ success: false, error: 'Error fetching achievements' });
+    }
+};
+
 export const handleGetHistory = async (req: Request, res: Response) => {
     const { userId } = req.params;
     const { page = '1', limit = '20', filter = 'all' } = req.query;

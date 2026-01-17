@@ -73,7 +73,7 @@ export const fetchLiveMatches = async (targetLeagues: string[] = []) => {
         while (!success && retryCount < API_KEYS.length) {
             try {
                 const response = await axios.get(`${API_HOST}/v4/sports/${sportKey}/scores/`, {
-                    params: { apiKey: API_KEYS[currentKeyIndex], daysFrom: 3 }
+                    params: { apiKey: API_KEYS[currentKeyIndex], daysFrom: 7 }
                 });
 
                 // CHECK REMAINING QUOTA
