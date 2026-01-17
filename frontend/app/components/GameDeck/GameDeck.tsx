@@ -232,7 +232,13 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             <div className={styles.emptyContainer}>
                 <div className={styles.emptyContent}>
                     <div className={styles.emptyIcon}>⚽</div>
-                    <p className={styles.emptyText}>{t('no_matches_available')}</p>
+                    <p className={styles.emptyText}>{t('no_matches_available') || "No active matches right now."}</p>
+                    <button className={styles.refreshBtn} onClick={() => window.location.reload()}>
+                        🔄 Scan for Live Games
+                    </button>
+                    <p style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '1rem' }}>
+                        Next automatic update in 1 hour
+                    </p>
                 </div>
             </div>
         );
@@ -339,10 +345,16 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                             }}
                         >
                             <div className={styles.hybridCard}>
-                                {/* Header */}
+                                {/* HEADER */}
                                 <div className={styles.cardHeader}>
-                                    <p className={styles.predictionType}>MATCH WINNER</p>
-                                    <p className={styles.matchTime}>{timeDisplay}</p>
+                                    {match.status === 'live' ? (
+                                        <span className={styles.liveBadge}>● LIVE NOW</span>
+                                    ) : (
+                                        <>
+                                            <p className={styles.predictionType}>MATCH WINNER</p>
+                                            <p className={styles.matchTime}>{timeDisplay}</p>
+                                        </>
+                                    )}
                                 </div>
 
                                 {/* Teams Container with Tap Regions */}
@@ -422,7 +434,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                 </div>
 
                                 {/* SPONSOR FOOTER */}
-                                {sponsor && (
+                                {sponsor ? (
                                     <div
                                         className={styles.cardFooter}
                                         onClick={(e) => {
@@ -435,6 +447,10 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                                     >
                                         <span className={styles.poweredBy}>POWERED BY</span>
                                         <img src={sponsor.logo_url} alt={sponsor.sponsor_name} className={styles.sponsorLogo} />
+                                    </div>
+                                ) : (
+                                    <div className={styles.cardFooter}>
+                                        <span className={styles.houseSponsor}>Events Arena Premium</span>
                                     </div>
                                 )}
 
