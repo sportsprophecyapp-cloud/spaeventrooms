@@ -71,7 +71,7 @@ const AdminSponsorsPage = () => {
                     alert('Sponsor is now LIVE!');
                 } else {
                     const err = await res.json();
-                    alert(`Approval Failed: ${err.error || 'Unknown error'}`);
+                    alert(`Approval Failed: ${err.error || 'Unknown error'}\n\nDetails: ${err.details || 'No details available'}`);
                 }
             } else if (type === 'delete_app') {
                 const res = await fetch(`${apiUrl}/api/sponsor-applications/${id}`, {
