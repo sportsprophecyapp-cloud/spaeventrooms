@@ -120,7 +120,11 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
 
         const app = appRes.rows[0];
         const tier = app.package_tier || 'tier_starter';
-        console.log(`[APPROVE] Found application for brand: ${app.brand_name}, tier: ${tier}`);
+        console.log(`[APPROVE] Found application for brand: ${app.brand_name}, status: ${app.status}, tier: ${tier}`);
+
+        if (app.status === 'approved') {
+            return res.status(400).json({ error: 'Application already approved.' });
+        }
 
         // VALIDATION: Founding package MUST have a prize
         if (tier === 'tier_founding' && !app.prize_description) {
@@ -220,9 +224,16 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
 // 3. ADMIN: GET PENDING APPLICATIONS
 export const getApplications = async (req: Request, res: Response) => {
     try {
-        const result = await dbQuery("SELECT * FROM sponsor_applications WHERE status = 'pending' ORDER BY created_at DESC");
+        console.log('[GET_APPS] Fetching pending and pending_approval applications...');
+        const result = await dbQuery(
+            "SELECT * FROM sponsor_applications WHERE status IN ('pending', 'pending_approval') ORDER BY created_at DESC"
+        );
+        console.log(`[GET_APPS] Found ${result.rows.length} applications.`);
         res.json({ success: true, applications: result.rows });
-    } catch (err) { res.status(500).json({ error: 'Fetch failed' }); }
+    } catch (err: any) {
+        console.error('[GET_APPS] Fetch failed:', err.message);
+        res.status(500).json({ error: 'Fetch failed', details: err.message });
+    }
 };
 
 export const getActiveSponsors = async (req: Request, res: Response) => {

@@ -232,3 +232,17 @@
 .modalActions button {
     flex: 1;
 }
+.paidBadge {
+    display: inline-block;
+    background: #0088ff;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    margin-left: 0.8rem;
+    vertical-align: middle;
+    box-shadow: 0 0 10px rgba(0, 136, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

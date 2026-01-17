@@ -177,7 +177,12 @@ const AdminSponsorsPage = () => {
                         {applications.map(app => (
                             <div key={app.id} className={`${styles.card} glass`}>
                                 <div className={styles.cardHeader}>
-                                    <h3>{app.brand_name}</h3>
+                                    <div>
+                                        <h3>{app.brand_name}</h3>
+                                        {app.status === 'pending_approval' && (
+                                            <span className={styles.paidBadge}>PAID - AWAITING APPROVAL</span>
+                                        )}
+                                    </div>
                                     <span className={styles.targetBadge}>{app.arena_target.toUpperCase()}</span>
                                 </div>
                                 <div style={{ display: 'flex', gap: '10px', margin: '10px 0' }}>
