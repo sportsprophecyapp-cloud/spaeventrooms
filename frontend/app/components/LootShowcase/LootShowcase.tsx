@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './LootShowcase.module.css';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function LootShowcase() {
     const { user } = useAuth();
+    const router = useRouter();
 
     const nextReward = useMemo(() => {
         if (!user) return null;
@@ -105,7 +107,12 @@ export default function LootShowcase() {
             </div>
 
             <div className={styles.actionArea}>
-                <button className={styles.unlockBtn}>VIEW ALL ACHIEVEMENTS</button>
+                <button
+                    className={styles.unlockBtn}
+                    onClick={() => router.push(`/profile/${user.id}`)}
+                >
+                    VIEW ALL ACHIEVEMENTS
+                </button>
             </div>
         </section>
     );
