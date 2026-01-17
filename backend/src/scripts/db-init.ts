@@ -47,7 +47,8 @@ const initDB = async () => {
                 agreed_to_terms BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 reviewed_at TIMESTAMP,
-                reviewed_by INTEGER REFERENCES users(id)
+                reviewed_by INTEGER REFERENCES users(id),
+                renewed_at TIMESTAMP -- Tracks when subscription is renewed
             );
 
             -- 5.1 Ensure sponsor_applications columns (Schema Evolution for v4.7)
@@ -60,6 +61,7 @@ const initDB = async () => {
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS creative_config JSONB;
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS agreed_to_terms BOOLEAN DEFAULT FALSE;
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS stripe_session_id VARCHAR(255);
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS renewed_at TIMESTAMP;
 
             -- 5.2 Room Sponsors (Live Placements)
             CREATE TABLE IF NOT EXISTS room_sponsors (
