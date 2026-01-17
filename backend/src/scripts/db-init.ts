@@ -269,6 +269,15 @@ const initDB = async () => {
         // 11. Sync Team Logos
         await updateDatabaseLogos();
 
+        // 12. Enforce Achievement-Only for Avatars & Frames
+        console.log('🔒 Enforcing Achievement Gating for Avatars & Frames...');
+        await client.query(`
+            UPDATE cosmetics 
+            SET is_achievement_reward = true, 
+                cost = 0 
+            WHERE type IN ('avatar', 'frame')
+        `);
+
     } catch (err) {
         console.error('❌ DB sync failed:', err);
     } finally {

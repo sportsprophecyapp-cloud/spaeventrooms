@@ -33,7 +33,7 @@ This guide outlines the process for migrating team logos from external URLs to l
  
  - **Manifest File**: `backend/src/data/logo_manifest.json`
  - **Function**: The backend reads this JSON file to know which logos are available in the public directory without needing direct file system access.
- - **Automation**: The sync script `update_database_logos.ts` runs automatically on deployment via `db-init.ts`, converting all external URLs (API-Football) to relative local paths (`/logos/...`).
+ - **Automation**: The sync script `update_database_logos.ts` runs automatically on deployment via `db-init.ts`, converting all external URLs (e.g. from data providers) to relative local paths (`/logos/...`).
  
  ## 3. Maintenance Guide
  To add a new team or update an existing logo:
