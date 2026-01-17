@@ -6,9 +6,10 @@ import styles from './SponsorWidget.module.css';
 
 interface Sponsor {
     id: number;
-    name: string;
+    sponsor_name: string;
     logo_url: string;
-    link_url: string;
+    website_url: string;
+    package_tier?: string;
 }
 
 interface SponsorWidgetProps {
@@ -66,24 +67,28 @@ const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
 
     return (
         <div className={`${styles.container} glass`}>
-            <p className={styles.label}>OFFICIAL ROOM SPONSOR</p>
+            <p className={styles.label}>
+                {currentSponsor.package_tier === 'tier_founding'
+                    ? '🏆 FOUNDING PARTNER'
+                    : 'OFFICIAL ROOM SPONSOR'}
+            </p>
             <div className={styles.carouselFrame}>
                 <a
                     key={currentSponsor.id}
-                    href={currentSponsor.link_url}
+                    href={currentSponsor.website_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`${styles.sponsorLink} animate-fade-in`}
-                    title={currentSponsor.name}
+                    title={currentSponsor.sponsor_name}
                 >
                     {currentSponsor.logo_url ? (
-                        <img src={currentSponsor.logo_url} alt={currentSponsor.name} className={styles.logo} />
+                        <img src={currentSponsor.logo_url} alt={currentSponsor.sponsor_name} className={styles.logo} />
                     ) : (
-                        <span className={styles.nameOnly}>{currentSponsor.name}</span>
+                        <span className={styles.nameOnly}>{currentSponsor.sponsor_name}</span>
                     )}
                 </a>
             </div>
-            
+
             {/* INDICATOR DOTS */}
             {sponsors.length > 1 && (
                 <div className={styles.dots}>

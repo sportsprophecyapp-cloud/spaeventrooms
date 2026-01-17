@@ -65,8 +65,8 @@ export const submitApplication = async (req: Request, res: Response) => {
 
         const result = await dbQuery(
             `INSERT INTO sponsor_applications 
-            (brand_name, contact_email, website_url, arena_target, frequency, prize_quantity, prize_description, logo_url, prize_image_url, creative_config, agreed_to_terms, status, stripe_session_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            (brand_name, contact_email, website_url, arena_target, frequency, prize_quantity, prize_description, logo_url, prize_image_url, creative_config, agreed_to_terms, status, stripe_session_id, package_tier)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
             RETURNING id`,
             [
                 brand_name,
@@ -81,7 +81,8 @@ export const submitApplication = async (req: Request, res: Response) => {
                 JSON.stringify(creative_config || {}),
                 agreed || false,
                 session ? 'pending_payment' : 'pending',
-                session?.id || null
+                session?.id || null,
+                package_tier || 'tier_starter'
             ]
         );
 
@@ -118,42 +119,67 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
         }
 
         const app = appRes.rows[0];
-        console.log(`[APPROVE] Found application for brand: ${app.brand_name}`);
+        const tier = app.package_tier || 'tier_starter';
+        console.log(`[APPROVE] Found application for brand: ${app.brand_name}, tier: ${tier}`);
+
+        // VALIDATION: Founding package MUST have a prize
+        if (tier === 'tier_founding' && !app.prize_description) {
+            console.error(`[APPROVE] Founding Partner application ${appId} missing required prize description`);
+            return res.status(400).json({
+                error: 'Founding Partner package requires a prize draw. Prize description is mandatory.'
+            });
+        }
 
         // Use a dedicated client for the transaction
         const client = await dbGetClient();
         try {
             await client.query('BEGIN');
 
-            console.log(`[APPROVE] Step 1: Creating room_sponsors record...`);
-            // 1. Create Room Sponsor placement
+            console.log(`[APPROVE] Step 1: Creating room_sponsors record with tier: ${tier}...`);
+            // 1. Create Room Sponsor placement with tier
             const sponsorRes = await client.query(`
                 INSERT INTO room_sponsors 
-                (room_id, sponsor_name, logo_url, website_url, prize_description, application_id, is_active, prize_escrow_received)
-                VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE)
+                (room_id, sponsor_name, logo_url, website_url, prize_description, application_id, is_active, prize_escrow_received, package_tier)
+                VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7)
                 RETURNING id
-            `, [app.arena_target || 'soccer', app.brand_name, app.logo_url, app.website_url, app.prize_description, Number(appId)]);
+            `, [
+                app.arena_target || 'soccer',
+                app.brand_name,
+                app.logo_url,
+                app.website_url,
+                app.prize_description,
+                Number(appId),
+                tier
+            ]);
 
             const sponsorId = sponsorRes.rows[0].id;
             console.log(`[APPROVE] Created sponsorId: ${sponsorId}`);
 
-            console.log(`[APPROVE] Step 2: Creating prize_draws record (30-day expiry)...`);
-            const thirtyDaysFromNow = new Date();
-            thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+            // 2. Create Prize Draw (MANDATORY for founding, optional for others)
+            if (tier === 'tier_founding' || app.prize_description) {
+                console.log(`[APPROVE] Step 2: Creating prize_draws record (30-day expiry)...`);
+                const thirtyDaysFromNow = new Date();
+                thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
 
-            await client.query(
-                `INSERT INTO prize_draws (title, prize, description, room_id, status, sponsor_id, prize_image, draw_date)
-                 VALUES ($1, $2, $3, $4, 'active', $5, $6, $7)`,
-                [
-                    `${app.brand_name} Giveaway`.substring(0, 250),
-                    app.prize_description,
-                    `Sponsored by ${app.brand_name}`,
-                    app.arena_target || 'soccer',
-                    sponsorId,
-                    app.prize_image_url,
-                    thirtyDaysFromNow.toISOString()
-                ]
-            );
+                await client.query(
+                    `INSERT INTO prize_draws (title, prize, description, room_id, status, sponsor_id, prize_image, draw_date)
+                     VALUES ($1, $2, $3, $4, 'active', $5, $6, $7)`,
+                    [
+                        `${app.brand_name} Giveaway`.substring(0, 250),
+                        app.prize_description,
+                        tier === 'tier_founding'
+                            ? `🏆 Founding Partner Prize - Sponsored by ${app.brand_name}`
+                            : `Sponsored by ${app.brand_name}`,
+                        app.arena_target || 'soccer',
+                        sponsorId,
+                        app.prize_image_url,
+                        thirtyDaysFromNow.toISOString()
+                    ]
+                );
+                console.log(`[APPROVE] Prize draw created for ${tier}`);
+            } else {
+                console.log(`[APPROVE] Skipping prize draw creation (not required for ${tier})`);
+            }
 
             console.log(`[APPROVE] Step 3: Updating application status...`);
             // 3. Update Application Status
@@ -164,7 +190,11 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
 
             await client.query('COMMIT');
             console.log(`[APPROVE] Transaction COMMITTED for appId: ${appId}`);
-            res.json({ success: true, message: 'Partner is now LIVE!' });
+
+            const message = tier === 'tier_founding'
+                ? '🏆 Founding Partner is now LIVE!'
+                : 'Partner is now LIVE!';
+            res.json({ success: true, message });
 
         } catch (innerError: any) {
             console.error(`[APPROVE] Transaction failed:`, innerError.message);

@@ -45,6 +45,7 @@ const initDB = async () => {
                 creative_config JSONB, -- Stores X, Y, Scale for Founders Package
                 status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'denied'
                 agreed_to_terms BOOLEAN DEFAULT FALSE,
+                package_tier VARCHAR(50) DEFAULT 'tier_starter', -- Package tier chosen
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 reviewed_at TIMESTAMP,
                 reviewed_by INTEGER REFERENCES users(id),
@@ -62,6 +63,7 @@ const initDB = async () => {
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS agreed_to_terms BOOLEAN DEFAULT FALSE;
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS stripe_session_id VARCHAR(255);
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS renewed_at TIMESTAMP;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS package_tier VARCHAR(50) DEFAULT 'tier_starter';
 
             -- 5.2 Room Sponsors (Live Placements)
             CREATE TABLE IF NOT EXISTS room_sponsors (
@@ -83,6 +85,7 @@ const initDB = async () => {
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS application_id INTEGER REFERENCES sponsor_applications(id);
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_escrow_received BOOLEAN DEFAULT FALSE;
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+            ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS package_tier VARCHAR(50);
 
             -- 6. Prize Draw System (Depends on Room Sponsors)
             CREATE TABLE IF NOT EXISTS prize_draws (

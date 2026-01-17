@@ -11,14 +11,14 @@ const pricingTiers = [
         name: 'Founding Partner',
         price: '0',
         features: [
-            'Prize Draw Hosting (REQUIRED)',
+            '🎁 Prize Draw Hosting (MANDATORY)',
             'Exclusive "Founding Brand" Badge',
             'Strategic Partnership Status',
             'Full Audience Engagement Reports'
         ],
         cta: 'START FREE',
         color: '#ffd700', // Gold
-        special: 'EARLY ACCESS - LIMITED'
+        special: 'EARLY ACCESS - PRIZE REQUIRED'
     },
     {
         id: 'starter',
