@@ -93,6 +93,15 @@ export default function TokenShop({ onClose }: TokenShopProps) {
                             <span className={styles.previewStatus}>
                                 {previewItem ? `PREVIEWING: ${previewItem.name}` : 'Select gear to try on'}
                             </span>
+
+                            {previewItem && previewItem.is_achievement_reward && !previewItem.owned && (
+                                <div className={styles.lockedInfo}>
+                                    <span className={styles.lockIcon}>🔒</span>
+                                    <p className={styles.lockReason}>
+                                        {previewItem.requirement || "Earn this achievement to unlock."}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <div className={styles.balance}>
