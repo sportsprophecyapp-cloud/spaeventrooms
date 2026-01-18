@@ -116,6 +116,7 @@ export const fetchLiveMatches = async (targetLeagues: string[] = []) => {
                                 score_away = EXCLUDED.score_away,
                                 home_logo = EXCLUDED.home_logo,
                                 away_logo = EXCLUDED.away_logo,
+                                start_time = EXCLUDED.start_time,
                                 updated_at = NOW()
                         `, [
                             String(m.id), m.home_team, m.away_team, m.commence_time,

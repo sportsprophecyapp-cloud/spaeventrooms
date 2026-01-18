@@ -386,6 +386,69 @@
     letter-spacing: 2px;
 }
 
+/* INTERACTIVE TOOLTIPS (v3.8) */
+.tooltipWrapper {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--accent);
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    width: 200px;
+    font-size: 0.75rem;
+    color: white;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.tooltipWrapper:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* MATCH STATUS GUIDE */
+.statusGuide {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.guideItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.guideLabel {
+    color: var(--neutral);
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+}
+
 /* REFERRAL CARD */
 .referralCard {
     padding: 2.5rem;

@@ -2,8 +2,8 @@ import { fetchLiveMatches, LEAGUE_NAMES } from '../../shared/services/footballAp
 import { resolveSoccerPredictions } from '../../shared/services/resolver';
 import { query } from '../../shared/database';
 
-// Conservative Frequency - 4 Hours (to conserve API quota until user base grows)
-const CHECK_INTERVAL = 4 * 60 * 60 * 1000;
+// Increased Frequency - 1 Hour (to ensure faster resolution and catch missed windows)
+const CHECK_INTERVAL = 1 * 60 * 60 * 1000;
 
 // Reverse Map: "Premier League" -> "soccer_epl"
 const LEAGUE_KEY_MAP = Object.entries(LEAGUE_NAMES).reduce((acc, [key, name]) => {
@@ -15,12 +15,12 @@ const checkActiveLeagues = async (): Promise<string[]> => {
     try {
         // Find leagues with matches that are:
         // 1. Currently 'live'
-        // 2. OR 'scheduled' to start within the next 2 hours or started in the last 3 hours
+        // 2. OR 'scheduled' to start within the next 2 hours or started in the last 72 hours
         const result = await query(`
             SELECT DISTINCT league 
             FROM soccer_matches 
             WHERE status = 'live' 
-            OR (status != 'finished' AND start_time > NOW() - INTERVAL '3 hours' AND start_time < NOW() + INTERVAL '2 hours')
+            OR (status != 'finished' AND start_time > NOW() - INTERVAL '72 hours' AND start_time < NOW() + INTERVAL '2 hours')
         `);
 
         if (result.rowCount === 0) return [];

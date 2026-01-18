@@ -14,6 +14,19 @@ Events Arena is a high-performance prediction & engagement platform designed for
 - **✨ Premium UI:** Native-quality glassmorphism (`30px blur`), fluid mobile response, and high-fidelity crests.
 - **🛡️ Brand Trust:** Integrated Founder's Letter and social proof feedback systems.
 
+## 🎮 How to Play
+1. **Predict:** Swipe match cards to predict winners (Risk-free).
+2. **Win:** Earn **XP** and **Tokens** for every call. Earn **Tickets** for Correct Calls.
+3. **Customize:** Spend Tokens on exclusive Avatars and Frames in the Shop.
+4. **Draws:** Enter Tickets into the **Draw Room** for a chance to win real sponsor prizes.
+
+## 🗺️ Feature Map
+- `/rooms/soccer`: Live match predictions and real-time scores.
+- `/draw`: The prize economy hub.
+- `/profile`: Personal performance history, rank, and equipped items.
+- `/achievements`: Progress-based cosmetic unlocks.
+- `/corporate`: The story and vision of the Arena.
+
 ## 🛠️ Architecture
 - **Frontend:** Next.js 16 (Outfit/Merriweather Fonts, React Spring Animations).
 - **Backend:** Node.js/Express (PostgreSQL, Socket.io, Express 50MB Payload support).

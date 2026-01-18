@@ -33,6 +33,12 @@
     /* Bright Red */
 }
 
+.reward {
+    background: linear-gradient(135deg, #FFD700 0%, #FF9F00 100%);
+    color: #1A1A1A;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
 .closeBtn {
     position: absolute;
     top: 10px;

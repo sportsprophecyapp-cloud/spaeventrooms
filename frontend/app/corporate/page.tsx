@@ -16,14 +16,14 @@ const CorporatePage = () => {
             <main className={styles.main}>
                 <section className={`${styles.card} glass`}>
                     <h2>ABOUT THE ORGANIZATION</h2>
-                    <p>Just Me Media is a cutting-edge digital infrastructure and media organization dedicated to redefining fan engagement. We are the architects and developers behind <strong>Events Arena</strong>.</p>
-                    <p>Our mission is to create frictionless, high-energy platforms that bridge the gap between live events, streaming creators, and global sports communities.</p>
+                    <p>Just Me Media is more than a digital agency—it's a vision for the future of interactive entertainment. We believe sports are more than just games; they are shared moments of triumph and strategy.</p>
+                    <p>At Just Me Media, we architect <strong>Events Arena</strong> to be the definitive "second-screen" companion, where your knowledge becomes your status, and your accuracy unlocks genuine rewards.</p>
                 </section>
 
                 <section className={`${styles.card} glass`}>
                     <h2>THE ORIGIN STORY</h2>
-                    <p>Events Arena was born from a radical experiment in AI orchestration. Built in the quiet hours of November 2025, our founder pioneered a "Triple-AI" methodology—conducting the intelligence of <strong>Claude (Anthropic)</strong>, <strong>ChatGPT (OpenAI)</strong>, and <strong>Gemini (Google)</strong> as a unified development team.</p>
-                    <p>What started as an exploration into AI memory and context handoffs evolved into a world-class sports tech platform. We didn't just build an app; we built a system that amplifies human creativity through orchestrated machine intelligence.</p>
+                    <p>The "Arena" wasn't programmed by a traditional team. It was orchestrated by a single human mind conducting a symphony of Artificial Intelligence. In a landmark development experiment in late 2025, our founder leveraged the specialized strengths of <strong>Claude, ChatGPT, and Gemini</strong> to build this ecosystem from the ground up.</p>
+                    <p>This project proves that the future belongs to those who can harmonize human creativity with machine intelligence. Every line of code, every pixel, and every game logic carries the DNA of this AI-conducted journey.</p>
                 </section>
 
                 <section className={`${styles.card} glass`}>

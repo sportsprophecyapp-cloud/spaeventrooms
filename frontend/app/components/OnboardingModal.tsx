@@ -16,22 +16,27 @@ const steps = [
     },
     {
         title: "Submit Your Call",
-        description: "Swipe cards left or right to predict match winners. Calls are <span class='highlight'>Risk-Free</span> (0 tokens).",
+        description: "Swipe cards to predict match winners. Calls are <span class='highlight'>Risk-Free</span>. Accurate calls earn you XP and Tokens!",
         icon: "⚡"
     },
     {
-        title: "Earn Status",
-        description: "Login daily for <span class='highlight'>+5 tokens</span>. Build your streak to earn massive XP bonuses.",
-        icon: "💎"
+        title: "The Ticket Economy",
+        description: "Every <span class='highlight'>Correct Call</span> earns you 1 Ticket. Use tickets to enter high-stakes prize draws!",
+        icon: "🎫"
+    },
+    {
+        title: "Real-time Rewards",
+        description: "Watch your status grow! You'll get <span class='highlight'>Instant Notifications</span> the moment your predictions resolve.",
+        icon: "🎉"
     },
     {
         title: "Build Your Identity",
-        description: "Spend tokens on exclusive <span class='highlight'>Avatars and Frames</span>. Stand out in the arena chat.",
+        description: "Spend tokens on exclusive <span class='highlight'>Avatars and Frames</span>. Show off your rank in the arena.",
         icon: "👑"
     },
     {
-        title: "Climb the Standings",
-        description: "Accurate calls boost your ranking. Top Supporters earn respect and entry into exclusive <span class='highlight'>Prize Draws</span>.",
+        title: "Win Grand Prizes",
+        description: "Visit the <span class='highlight'>Draw Room</span> to use your tickets. The more accurate you are, the more chances you have to win!",
         icon: "🏆"
     }
 ];

@@ -162,6 +162,17 @@ const DrawRoom = () => {
                 <button onClick={() => router.back()} className={styles.backBtn}>{t('back_to_leagues')}</button>
                 <h1>{t('draw_room_title')}</h1>
                 <div className={styles.headerRight}>
+                    <div className={styles.ticketEarningsInfo}>
+                        <span className={styles.infoIcon}>ℹ️</span>
+                        <div className={styles.infoTooltip}>
+                            <h4>How to earn Tickets?</h4>
+                            <ul>
+                                <li>✅ 1 Ticket per Correct Call</li>
+                                <li>🔥 Bonus Tickets for Streaks</li>
+                                <li>📅 Daily Login Reward</li>
+                            </ul>
+                        </div>
+                    </div>
                     <Link href="/sponsors/pricing" className={styles.sponsorBtn}>
                         💎 Sponsor This Arena
                     </Link>
@@ -266,7 +277,7 @@ const DrawRoom = () => {
                                 )}
 
                                 {draw.prize_image ? (
-                                    <img src={draw.prize_image} className={styles.prizeImage} alt="Prize" style={{ width: '80px', height: '80px', objectFit: 'contain', margin: '0 auto 10px' }} />
+                                    <img src={draw.prize_image} className={styles.prizeImage} alt="Prize" />
                                 ) : (
                                     <div className={styles.prizeIcon}>🎁</div>
                                 )}

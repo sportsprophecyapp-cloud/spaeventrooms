@@ -7,6 +7,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "init-db": "ts-node src/scripts/db-init.ts",
+    "cleanup-old-games": "ts-node src/scripts/cleanup-old-games.ts",
+    "fix-stuck": "ts-node src/scripts/fix-stuck-predictions.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

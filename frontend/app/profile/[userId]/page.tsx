@@ -377,15 +377,33 @@ const ProfilePage = () => {
                         <>
                             <section className={styles.statsGrid}>
                                 <div className={styles.statCard}>
-                                    <span className={styles.statVal}>{profile.tokens}</span>
+                                    <div className={styles.tooltipWrapper}>
+                                        <span className={styles.statVal}>{profile.tokens}</span>
+                                        <div className={styles.tooltip}>
+                                            <strong>TOKENS</strong><br />
+                                            Used to buy exclusive Avatars and Frames in the Token Shop.
+                                        </div>
+                                    </div>
                                     <span className={styles.statLabel}>TOKENS</span>
                                 </div>
                                 <div className={styles.statCard}>
-                                    <span className={styles.statVal}>{profile.draw_entries || 0}</span>
+                                    <div className={styles.tooltipWrapper}>
+                                        <span className={styles.statVal}>{profile.draw_entries || 0}</span>
+                                        <div className={styles.tooltip}>
+                                            <strong>TICKETS</strong><br />
+                                            Earned via Correct Calls. Used to enter Grand Prize Draws.
+                                        </div>
+                                    </div>
                                     <span className={styles.statLabel}>TICKETS</span>
                                 </div>
                                 <div className={styles.statCard}>
-                                    <span className={styles.statVal}>{profile.points}</span>
+                                    <div className={styles.tooltipWrapper}>
+                                        <span className={styles.statVal}>{profile.points}</span>
+                                        <div className={styles.tooltip}>
+                                            <strong>XP</strong><br />
+                                            Total experience points. Determines your Global Rank and Tier.
+                                        </div>
+                                    </div>
                                     <span className={styles.statLabel}>XP</span>
                                 </div>
                             </section>
@@ -466,6 +484,20 @@ const ProfilePage = () => {
                         <section className={`${styles.historyCard} glass`}>
                             <div className={styles.historyHeader}>
                                 <h3 className={styles.sectionTitle}>📅 PREDICTION HISTORY</h3>
+                                <div className={styles.statusGuide}>
+                                    <div className={styles.guideItem}>
+                                        <span className={styles.statusCorrect}>✅ CORRECT</span>
+                                        <span className={styles.guideLabel}>+1 TICKET & XP</span>
+                                    </div>
+                                    <div className={styles.guideItem}>
+                                        <span className={styles.historyLive}>⏳ PENDING</span>
+                                        <span className={styles.guideLabel}>WAITING FOR SCORE</span>
+                                    </div>
+                                    <div className={styles.guideItem}>
+                                        <span className={styles.statusIncorrect}>❌ INCORRECT</span>
+                                        <span className={styles.guideLabel}>BETTER LUCK NEXT TIME</span>
+                                    </div>
+                                </div>
                                 <div className={styles.filterControls}>
                                     {(['all', 'wins', 'pending', 'incorrect'] as const).map(f => (
                                         <button
