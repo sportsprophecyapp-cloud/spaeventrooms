@@ -109,7 +109,7 @@ export default function LootShowcase() {
             <div className={styles.actionArea}>
                 <button
                     className={styles.unlockBtn}
-                    onClick={() => router.push(`/profile/${user.id}`)}
+                    onClick={() => router.push('/achievements')}
                 >
                     VIEW ALL ACHIEVEMENTS
                 </button>
