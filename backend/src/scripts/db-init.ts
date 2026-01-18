@@ -63,6 +63,8 @@ const initDB = async () => {
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS agreed_to_terms BOOLEAN DEFAULT FALSE;
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS stripe_session_id VARCHAR(255);
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS renewed_at TIMESTAMP;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMP;
+            ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS reviewed_by INTEGER REFERENCES users(id);
             ALTER TABLE sponsor_applications ADD COLUMN IF NOT EXISTS package_tier VARCHAR(50) DEFAULT 'tier_starter';
 
             -- 5.2 Room Sponsors (Live Placements)
