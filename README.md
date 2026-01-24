@@ -1,18 +1,16 @@
-# Events Arena - v3.4.6
+# Events Arena - v3.7.1
 
-**Version**: 3.4.6  
-**Release**: January 13, 2026
+**Version**: 3.7.1  
+**Release**: January 24, 2026
 
 Events Arena is a high-performance prediction & engagement platform designed for sports, TV, and creator-led events. It features a premium glassmorphic UI, a robust dual-currency economy, and achievement-gated rewards.
 
 ## 🚀 Key Features
 
+- **🩹 Auto-Heal Engine:** Integrated server startup maintenance that automatically resolves prediction backlogs and secures data integrity.
+- **🎲 Multi-Entry Draws:** Increased user engagement via re-entry capabilities for prize draws with weighted winning probabilities.
 - **⚜️ Honors & Hall of Fame:** Automated "Grand Champion" rewarding. High-tier items are "Earned, Not Bought."
-- **🗺️ Referral Roadmap:** Animated 4-tier recruitment path with escalating rewards and integrated sharing.
-- **💰 Dual Economy:** Tokens for standard shop items and Prize Tickets for high-stakes draw entries.
-- **🏢 Sponsor Hub:** Creative Studio for partner onboarding, real-time ad placement, and performance analytics.
-- **✨ Premium UI:** Native-quality glassmorphism (`30px blur`), fluid mobile response, and high-fidelity crests.
-- **🛡️ Brand Trust:** Integrated Founder's Letter and social proof feedback systems.
+- **✨ Premium UI:** Native-quality glassmorphism (`30px blur`), ultra-compact history view, and high-fidelity crests.
 
 ## 🎮 How to Play
 1. **Predict:** Swipe match cards to predict winners (Risk-free).
@@ -28,10 +26,10 @@ Events Arena is a high-performance prediction & engagement platform designed for
 - `/corporate`: The story and vision of the Arena.
 
 ## 🛠️ Architecture
-- **Frontend:** Next.js 16 (Deployed on **Render**; Free Instance).
-- **Backend:** Node.js/Express (Deployed on **Render**; **Starter Plan**).
-- **Data:** The Odds API with robust key rotation and local logo manifest synchronization.
-- **Compliance:** Full store compliance with zero wagering terminology and secure account deletion.
+- **Infrastructure:** Full Render Blueprint (Starter Plans for Backend, Frontend, and DB).
+- **Backend:** Node.js/Express with **SystemMaintenanceService** for automated backlog resolution.
+- **Frontend:** Next.js 16 with optimized scrollable history and glassmorphic UI.
+- **Data:** The Odds API with robust key rotation and 3-hour resolution safety nets.
 
 ## 📦 Getting Started
 1. `npm install` in `/frontend` and `/backend`.

@@ -1,5 +1,5 @@
 # 📌 Project Master Reference: Events Arena
-**Version 3.7.0**
+**Version 3.7.1**
 
 ## 🛠 Project Identity & Tech Stack
 - **Project Name:** Events Arena
@@ -18,9 +18,11 @@
 
 ## 📡 Data Architecture (API & Limits)
 - **Primary Data Source:** The Odds API (Optimized "Targeted Polling" Scheduler).
+- **Auto-Heal Engine**: `SystemMaintenanceService` runs on every startup to resolve backlogs and force-close matches.
+- **Resolution Safety**: 3-hour time-based fallback for all matches ensuring prompt resolution.
 - **Key Management:** Supports comma-separated lists for `THE_ODDS_API_KEY`.
-- **Logo Integrity System**: Powered by `backend/src/data/logo_manifest.json` for 100% reliable local production synchronization.
-- **Payload Limits**: Backend `express.json` is set to **50MB** to support high-resolution sponsor design uploads.
+- **Logo Integrity System**: Powered by `logo_manifest.json` for 100% reliable production synchronization.
+- **Payload Limits**: Backend `express.json` is set to **50MB**.
 
 ## 🏢 SPONSOR & PARTNER FLOW
 1. **Application:** Creative Studio form at `/sponsors/apply`.
@@ -29,7 +31,7 @@
 4. **Performance:** Automated interaction tracking (Impressions/Clicks) with print-ready reports.
 
 ## 🚀 Deployment & Build Rules
-- **Strategy:** All services on **Render**. Paid Backend eliminates 750-hour pool conflicts.
+- **Strategy:** All services (Backend, Frontend, DB) on **Render Starter Plans**.
 - **CSS Rule:** CRITICAL. Always use unique filenames for CSS modules (e.g., `wizard.module.css`) to prevent build cache conflicts.
 - **Abort Logic:** Every POST request must include an `AbortController` with a 10s timeout.
 
