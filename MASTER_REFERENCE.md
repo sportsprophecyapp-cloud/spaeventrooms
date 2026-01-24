@@ -1,5 +1,5 @@
 # 📌 Project Master Reference: Events Arena
-**Version 3.8.1**
+**Version 3.8.2**
 
 ## 🛠 Project Identity & Tech Stack
 - **Project Name:** Events Arena

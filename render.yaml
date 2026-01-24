@@ -35,7 +35,7 @@ services:
 
 databases:
   - name: sportsprophecy-db
-    plan: starter
+    plan: basic
     databaseName: sportsprophecy
     user: sportsprophecy
 
