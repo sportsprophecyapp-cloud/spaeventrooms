@@ -53,6 +53,15 @@ const forceResolveJan19 = async () => {
         `);
         console.log(`✅ Expired ${expired.rowCount || 0} ancient predictions.`);
 
+        // NEW: Force close any old matches that never marked themselves finished
+        const matchesClosed = await query(`
+            UPDATE soccer_matches 
+            SET status = 'finished' 
+            WHERE status != 'finished' 
+            AND start_time < NOW() - INTERVAL '48 hours'
+        `);
+        console.log(`✅ Force-closed ${matchesClosed.rowCount || 0} stuck matches from history.`);
+
         console.log('\n🏁 Jan 19 Resolution Complete!');
 
     } catch (err) {

@@ -11,12 +11,12 @@ export const resolveSoccerPredictions = async () => {
 
     try {
         const pending = await query(`
-            SELECT p.id, p.user_id, p.prediction_data, m.score_home, m.score_away, m.home_team, m.away_team, u.total_points, u.total_tickets
+            SELECT p.id, p.user_id, p.prediction_data, m.score_home, m.score_away, m.home_team, m.away_team, m.match_id, m.status, u.total_points, u.total_tickets
             FROM soccer_predictions p
             JOIN soccer_matches m ON p.match_id = m.match_id
             JOIN users u ON p.user_id = u.id
             WHERE p.result = 'pending' 
-            AND (m.status = 'finished' OR m.start_time < NOW() - INTERVAL '2 hours 30 minutes')
+            AND (m.status = 'finished' OR m.start_time < NOW() - INTERVAL '3 hours')
         `);
 
         for (const row of pending.rows) {
