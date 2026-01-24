@@ -27,13 +27,14 @@ const checkActiveLeagues = async (): Promise<string[]> => {
         // Find leagues with matches that are:
         // 1. Currently 'live'
         // 2. OR 'finished' within the last 4 hours (to capture final scores)
-        // 3. OR 'scheduled' to start within the next 1 hour
+        // 3. OR 'scheduled' but start_time is in the past (stuck/stale games)
+        // 4. OR 'scheduled' to start within the next 2 hours
         const result = await query(`
             SELECT DISTINCT league 
             FROM soccer_matches 
             WHERE status = 'live' 
             OR (status = 'finished' AND updated_at > NOW() - INTERVAL '4 hours')
-            OR (status = 'scheduled' AND start_time > NOW() AND start_time < NOW() + INTERVAL '1 hour')
+            OR (status = 'scheduled' AND start_time < NOW() + INTERVAL '2 hours')
         `);
 
         if (result.rowCount === 0) return [];

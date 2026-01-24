@@ -15,12 +15,18 @@ export const resolveSoccerPredictions = async () => {
             FROM soccer_predictions p
             JOIN soccer_matches m ON p.match_id = m.match_id
             JOIN users u ON p.user_id = u.id
-            WHERE p.result = 'pending' AND m.status = 'finished'
+            WHERE p.result = 'pending' 
+            AND (m.status = 'finished' OR m.start_time < NOW() - INTERVAL '2 hours 30 minutes')
         `);
 
         for (const row of pending.rows) {
-            const { id, user_id, prediction_data, score_home, score_away } = row;
+            const { id, user_id, prediction_data, score_home, score_away, match_id } = row;
             const pick = prediction_data.pick;
+
+            // SAFETY: If we are resolving this but DB says it's not finished, mark it finished now
+            if (row.status !== 'finished') {
+                await query('UPDATE soccer_matches SET status = \'finished\', updated_at = NOW() WHERE match_id = $1', [match_id]);
+            }
 
             let actualWinner: string = 'draw';
             if (score_home > score_away) actualWinner = row.home_team;
