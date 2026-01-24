@@ -57,13 +57,15 @@ export const fetchLiveMatches = async (targetLeagues: string[] = []) => {
     // 1. Fallback immediately if no keys are configured
     if (API_KEYS.length === 0) {
         console.warn('⚠️ No THE_ODDS_API_KEYs found. Data sync will be skipped.');
-        return;
+        return 0;
     }
 
     // Determine which leagues to fetch
     const leaguesToFetch = targetLeagues.length > 0 ? targetLeagues : SPORTS;
     let count = 0;
     console.log(`📡 Arena Sync: Fetching ${leaguesToFetch.length} leagues using Key Index ${currentKeyIndex}...`);
+
+    let minRemaining = 999999;
 
     // We process leagues one by one to handle key failures gracefully
     for (const sportKey of leaguesToFetch) {
@@ -78,10 +80,18 @@ export const fetchLiveMatches = async (targetLeagues: string[] = []) => {
 
                 // CHECK REMAINING QUOTA
                 const requestsRemaining = parseInt(response.headers['x-requests-remaining']);
+                const requestsUsed = parseInt(response.headers['x-requests-used']);
+
+                if (!isNaN(requestsRemaining)) {
+                    minRemaining = Math.min(minRemaining, requestsRemaining);
+                }
+
+                console.log(`📊 API Key Quota Update (Key ${currentKeyIndex}): Used: ${requestsUsed}, Remaining: ${requestsRemaining}`);
+
                 if (!isNaN(requestsRemaining) && requestsRemaining < 10) {
                     console.error('🚨 CRITICAL: API Quota < 10. Stopping all future requests to prevent overage.');
                     API_QUOTA_EXHAUSTED = true;
-                    return;
+                    return 0;
                 }
 
                 const data = response.data;

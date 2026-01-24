@@ -128,6 +128,21 @@ export const handleGetTickets = async (req: AuthRequest, res: Response) => {
     }
 };
 
+export const handleGetMyEntries = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        const result = await dbQuery(`
+            SELECT draw_id, COUNT(*) as count 
+            FROM prize_draw_entries 
+            WHERE user_id = $1 
+            GROUP BY draw_id
+        `, [userId]);
+        res.json({ success: true, entries: result.rows });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Error fetching your entries' });
+    }
+};
+
 export const handleGetActiveDraws = async (req: Request, res: Response) => {
     try {
         const result = await dbQuery(`
@@ -205,21 +220,24 @@ export const handleEnterDraw = async (req: AuthRequest, res: Response) => {
     try {
         await dbQuery('BEGIN');
 
-        // Check if user has already entered
-        const existingResult = await dbQuery(
-            'SELECT id FROM prize_draw_entries WHERE draw_id = $1 AND user_id = $2',
-            [drawId, userId]
-        );
+        // 1. Check if user has at least 1 ticket
+        const userRes = await dbQuery('SELECT total_tickets FROM users WHERE id = $1 FOR UPDATE', [userId]);
+        const tickets = userRes.rows[0]?.total_tickets || 0;
 
-        if (existingResult.rows.length > 0) {
+        if (tickets <= 0) {
             await dbQuery('ROLLBACK');
-            return res.status(400).json({ success: false, error: 'Already entered this draw' });
+            return res.status(400).json({ success: false, error: 'Insufficient tickets' });
         }
 
+        // 2. Deduct 1 ticket
+        await dbQuery('UPDATE users SET total_tickets = total_tickets - 1 WHERE id = $1', [userId]);
+
+        // 3. Insert the entry (Allowing multiple entries)
         await dbQuery(
             `INSERT INTO prize_draw_entries (draw_id, user_id, entry_type) VALUES ($1, $2, 'manual')`,
             [drawId, userId]
         );
+
         await dbQuery('COMMIT');
 
         res.json({ success: true, message: 'Successfully entered draw!' });

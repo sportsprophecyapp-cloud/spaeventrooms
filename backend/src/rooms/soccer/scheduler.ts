@@ -2,8 +2,19 @@ import { fetchLiveMatches, LEAGUE_NAMES } from '../../shared/services/footballAp
 import { resolveSoccerPredictions } from '../../shared/services/resolver';
 import { query } from '../../shared/database';
 
-// Increased Frequency - 1 Hour (to ensure faster resolution and catch missed windows)
-const CHECK_INTERVAL = 1 * 60 * 60 * 1000;
+// Reduced Frequency - 1.5 Hours (to conserve API quota while maintaining accuracy)
+let CHECK_INTERVAL = 1.5 * 60 * 60 * 1000;
+
+// QUOTA-BASED DYNAMIC POLLING
+const updateIntervalBasedOnQuota = (remaining: number) => {
+    if (remaining < 100 && CHECK_INTERVAL < 3 * 60 * 60 * 1000) {
+        console.warn(`🐢 Low API Quota (${remaining}). Slowing down polling to 3 hours.`);
+        CHECK_INTERVAL = 3 * 60 * 60 * 1000;
+    } else if (remaining > 200 && CHECK_INTERVAL > 1.5 * 60 * 60 * 1000) {
+        console.log(`🚀 Quota Healthy (${remaining}). Restoring polling to 1.5 hours.`);
+        CHECK_INTERVAL = 1.5 * 60 * 60 * 1000;
+    }
+};
 
 // Reverse Map: "Premier League" -> "soccer_epl"
 const LEAGUE_KEY_MAP = Object.entries(LEAGUE_NAMES).reduce((acc, [key, name]) => {
@@ -15,12 +26,14 @@ const checkActiveLeagues = async (): Promise<string[]> => {
     try {
         // Find leagues with matches that are:
         // 1. Currently 'live'
-        // 2. OR 'scheduled' to start within the next 2 hours or started in the last 72 hours
+        // 2. OR 'finished' within the last 4 hours (to capture final scores)
+        // 3. OR 'scheduled' to start within the next 1 hour
         const result = await query(`
             SELECT DISTINCT league 
             FROM soccer_matches 
             WHERE status = 'live' 
-            OR (status != 'finished' AND start_time > NOW() - INTERVAL '72 hours' AND start_time < NOW() + INTERVAL '2 hours')
+            OR (status = 'finished' AND updated_at > NOW() - INTERVAL '4 hours')
+            OR (status = 'scheduled' AND start_time > NOW() AND start_time < NOW() + INTERVAL '1 hour')
         `);
 
         if (result.rowCount === 0) return [];
@@ -42,50 +55,52 @@ const runSchedulerCycle = async () => {
     const hour = now.getHours();
 
     // --- A. THE HEARTBEAT (Once a day at 4 AM) ---
-    // This ensures upcoming schedules are refreshed daily
     if (hour === 4) {
         console.log('💓 [Heartbeat] Daily Schedule Sync (All Leagues)...');
-        await fetchLiveMatches().catch(e => { }); // No args = fetch all
+        const quota = await fetchLiveMatches().catch(e => 0);
+        if (typeof quota === 'number') updateIntervalBasedOnQuota(quota);
         await resolveSoccerPredictions().catch(e => { });
         return;
     }
 
     // --- B. TARGETED POLLING ---
-    // Query DB to see what is actually happening
     const activeLeagues = await checkActiveLeagues();
 
     if (activeLeagues.length > 0) {
         console.log(`🎯 [Targeted Poll] Active Leagues: ${activeLeagues.join(', ')}`);
-        await fetchLiveMatches(activeLeagues).catch(e => { });
+        const quota = await fetchLiveMatches(activeLeagues).catch(e => 0);
+        if (typeof quota === 'number') updateIntervalBasedOnQuota(quota);
         await resolveSoccerPredictions().catch(e => { });
     } else {
         console.log('💤 [Sleep] No active matches. Conserving API quota.');
-        // Still run resolver in case there are any to clear
         await resolveSoccerPredictions().catch(e => { });
     }
 };
 
 export const startSoccerScheduler = () => {
-    console.log('🎯 Arena Data Scheduler: Conservative Mode (4-hour interval)');
+    console.log('🎯 Arena Data Scheduler: Optimized Mode (1.5-hour interval)');
 
-    // 1. Initial Heartbeat Force Sync (On Startup)
-    // We only do this lightly to ensure we have SOME schedule data if DB is empty
     const initialSync = async () => {
         const countRes = await query('SELECT count(*) FROM soccer_matches');
         const count = parseInt(countRes.rows[0].count);
 
         if (count === 0) {
             console.log('🚀 DB Empty: Performing full initial schedule sync...');
-            await fetchLiveMatches().catch(e => { });
+            const quota = await fetchLiveMatches().catch(e => 0);
+            if (typeof quota === 'number') updateIntervalBasedOnQuota(quota);
         } else {
-            console.log(`ℹ️ DB has ${count} matches. Skipping full startup sync to save credits.`);
-            // Run the targeted cycle immediately to catch up on pending games
-            console.log('⚡ Startup: Running immediate check for pending games...');
+            console.log(`ℹ️ DB has ${count} matches. Skipping startup sync.`);
             await runSchedulerCycle();
         }
     };
     initialSync();
 
-    // 2. Main Loop (Runs every 4 hours to conserve API quota)
-    setInterval(runSchedulerCycle, CHECK_INTERVAL);
+    // 2. Main Loop (Supports dynamic intervals)
+    const scheduleNext = () => {
+        setTimeout(async () => {
+            await runSchedulerCycle();
+            scheduleNext();
+        }, CHECK_INTERVAL);
+    };
+    scheduleNext();
 };

@@ -12,6 +12,7 @@ import {
     handleClaimVoucher,
     handleGetActiveDraws,
     handleEnterDraw,
+    handleGetMyEntries,
     handleGetUserTickets,
     handleDeleteDraw,
     handlePickWinner,
@@ -41,6 +42,7 @@ router.get('/tickets', authenticate, handleGetTickets); // New Tickets Route
 router.get('/vouchers', authenticate, handleGetVouchers);
 router.post('/vouchers/claim', authenticate, handleClaimVoucher);
 router.get('/draws/active', authenticate, handleGetActiveDraws);
+router.get('/draws/my-entries', authenticate, handleGetMyEntries);
 router.get('/recent-winners', handleGetRecentWinners);
 router.post('/draws/:id/enter', authenticate, handleEnterDraw);
 router.post('/draws/:id/pick-winner', authenticate, isAdmin, handlePickWinner);

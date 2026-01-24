@@ -28,8 +28,8 @@ Events Arena is a high-performance prediction & engagement platform designed for
 - `/corporate`: The story and vision of the Arena.
 
 ## 🛠️ Architecture
-- **Frontend:** Next.js 16 (Outfit/Merriweather Fonts, React Spring Animations).
-- **Backend:** Node.js/Express (PostgreSQL, Socket.io, Express 50MB Payload support).
+- **Frontend:** Next.js 16 (Deployed on **Render**; Free Instance).
+- **Backend:** Node.js/Express (Deployed on **Render**; **Starter Plan**).
 - **Data:** The Odds API with robust key rotation and local logo manifest synchronization.
 - **Compliance:** Full store compliance with zero wagering terminology and secure account deletion.
 
@@ -37,6 +37,7 @@ Events Arena is a high-performance prediction & engagement platform designed for
 1. `npm install` in `/frontend` and `/backend`.
 2. Sync `.env` from `.env.example`.
 3. `npm run dev` to launch the arena.
+4. **Deploy:** Git push to `main` (Render Blueprints).
 
 ---
 *Built for the next generation of social competition. Pribadi.*

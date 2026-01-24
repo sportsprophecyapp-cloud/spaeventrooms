@@ -26,6 +26,7 @@ const DrawRoom = () => {
     const { t } = useLanguage();
     const router = useRouter();
     const [draws, setDraws] = useState<Draw[]>([]);
+    const [myEntries, setMyEntries] = useState<Record<number, number>>({});
     const [ticketCount, setTicketCount] = useState(0);
     const [isDrawing, setIsDrawing] = useState(false);
     const [winner, setWinner] = useState<string | null>(null);
@@ -58,13 +59,10 @@ const DrawRoom = () => {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                let activeDraws = [];
                 if (drawRes.ok) {
                     const data = await drawRes.json();
-                    activeDraws = data.draws || [];
+                    setDraws(data.draws || []);
                 }
-
-                setDraws(activeDraws);
 
                 // Fetch user tickets
                 const ticketRes = await fetch(`${apiUrl}/api/gamification/tickets`, {
@@ -73,6 +71,19 @@ const DrawRoom = () => {
                 if (ticketRes.ok) {
                     const data = await ticketRes.json();
                     setTicketCount(data.count || 0);
+                }
+
+                // Fetch my entries
+                const entriesRes = await fetch(`${apiUrl}/api/gamification/draws/my-entries`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (entriesRes.ok) {
+                    const data = await entriesRes.json();
+                    const entryMap: Record<number, number> = {};
+                    (data.entries || []).forEach((e: { draw_id: number, count: string }) => {
+                        entryMap[e.draw_id] = parseInt(e.count);
+                    });
+                    setMyEntries(entryMap);
                 }
             } catch (err) {
                 console.error('Error fetching draw data:', err);
@@ -103,6 +114,12 @@ const DrawRoom = () => {
                 setDraws(prev => prev.map(d =>
                     d.id === drawId ? { ...d, entry_count: (d.entry_count || 0) + 1 } : d
                 ));
+
+                // UPDATE MY ENTRIES
+                setMyEntries(prev => ({
+                    ...prev,
+                    [drawId]: (prev[drawId] || 0) + 1
+                }));
 
                 setMessage({ text: 'GOOD LUCK! Entry Confirmed.', type: 'success' });
                 // Refresh user balances in AuthContext
@@ -287,14 +304,21 @@ const DrawRoom = () => {
                                 <p className={styles.drawDesc}>{draw.description}</p>
 
                                 {/* Entry Count */}
-                                <div className={styles.entryCount}>
-                                    👥 {draw.entry_count || 0} {draw.entry_count === 1 ? 'entry' : 'entries'}
+                                <div className={styles.entryStats}>
+                                    <div className={styles.totalEntries}>
+                                        👥 {draw.entry_count || 0} {draw.entry_count === 1 ? 'entry' : 'entries'}
+                                    </div>
+                                    {myEntries[draw.id] > 0 && (
+                                        <div className={styles.myEntries}>
+                                            ⭐ Your entries: <strong>{myEntries[draw.id]}</strong>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Countdown Timer */}
                                 {countdown && (
                                     <div className={`${styles.countdown} ${isUrgent ? styles.urgent : ''}`}>
-                                        ⏰ {isUrgent ? 'ENDS IN:' : 'Draws in:'} <strong>{countdown}</strong>
+                                        ⏰ {isUrgent ? t('ends_in') : t('draws_in')} <strong>{countdown}</strong>
                                     </div>
                                 )}
 
@@ -304,7 +328,8 @@ const DrawRoom = () => {
                                         disabled={ticketCount === 0 || enteringId === draw.id}
                                         onClick={() => handleEnter(draw.id)}
                                     >
-                                        {enteringId === draw.id ? 'ENTERING...' : t('enter_draw')}
+                                        {enteringId === draw.id ? t('entering') :
+                                            myEntries[draw.id] > 0 ? t('enter_again') : t('enter_draw')}
                                     </button>
                                 </div>
                             </div>

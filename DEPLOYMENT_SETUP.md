@@ -1,9 +1,12 @@
 # Deployment Setup: Events Arena
 
-This project is deployed on **Render** using a full-stack blueprint.
+This project uses a **Single-Platform Multi-Tier Strategy** on **Render**:
+- **Backend**: **Starter Plan ($7/mo)**. Ensures 24/7 uptime for scores and schedulers.
+- **Frontend**: **Starter Plan ($7/mo)** (Currently paid for immediate recovery).
+    - *Note: Can be moved to **Free Tier** on Feb 1st without hitting limits.*
 
 ## 🚀 Live Update Workflow
-The project uses a custom deployment script to ensure consistency.
+The project uses a unified deployment script for instant updates.
 
 ### How to Deploy:
 1. Open your terminal in the root folder.
@@ -11,32 +14,24 @@ The project uses a custom deployment script to ensure consistency.
    ```bash
    ./deploy.sh "Your descriptive commit message"
    ```
+3. **Render** will automatically rebuild both the Backend and Frontend.
 
-## 🏗 Infrastructure (Render Blueprints)
-1. **Database (`sportsprophecy-db`)**: PostgreSQL.
+## 🏗 Infrastructure
+1. **Database (`sportsprophecy-db`)**: PostgreSQL on Render.
 2. **Backend (`spa-backend`)**: 
+   - Platform: Render (Starter Plan).
    - Start Command: `cd backend && node dist/scripts/db-init.js && node dist/index.js`
-   - Role: Runs the 15m/30m high-speed scheduler and prediction resolver.
-3. **Frontend (`spa-frontend`)**: Next.js.
+3. **Frontend (`spa-frontend`)**: 
+   - Platform: Render (Free Tier).
+   - Start Command: `cd frontend && npm start`
 
 ## 🔑 Required Environment Variables
-Must be configured in Render Dashboard:
 
 ### Backend
-- `THE_ODDS_API_KEY`: Comma-separated list (e.g., `key1,key2,key3`)
-- `GOOGLE_CLIENT_ID`: OAuth 2.0 Client ID from Google Cloud Console
-- `JWT_SECRET`: Secret key for JWT token generation
-- `DATABASE_URL`: PostgreSQL connection string (auto-provided by Render)
-- `REDIS_URL`: Redis connection string (auto-provided by Render)
-- `STRIPE_SECRET_KEY`: For automated sponsorship payments
-- `API_FOOTBALL_KEY`: Required for live match data synchronizations (Logos are now served locally)
-- `RENDER_EXTERNAL_URL`: Points to the backend for the Keep-Alive service
+- `THE_ODDS_API_KEY`: Comma-separated list.
+- `GOOGLE_CLIENT_ID`, `JWT_SECRET`.
+- `DATABASE_URL`, `REDIS_URL`.
+- `RENDER_EXTERNAL_URL`: Points to the backend (e.g., `https://spa-backend.onrender.com`).
 
 ### Frontend
-- `NEXT_PUBLIC_API_URL`: Points to the backend URL (e.g., `https://spa-backend.onrender.com`)
-
-### Optional (Email Service)
-- `EMAIL_USER`: SMTP username for password reset emails
-- `EMAIL_PASS`: SMTP password
-- `EMAIL_HOST`: SMTP host (e.g., `smtp.gmail.com`)
-- `EMAIL_PORT`: SMTP port (e.g., `587`)
+- `NEXT_PUBLIC_API_URL`: Points to the Backend URL.

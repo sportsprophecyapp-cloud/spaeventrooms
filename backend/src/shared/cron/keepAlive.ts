@@ -1,12 +1,12 @@
 import https from 'https';
 
 // 14 minutes (Render free tier sleeps after 15 mins of inactivity)
-const PING_INTERVAL = 14 * 60 * 1000; 
+const PING_INTERVAL = 14 * 60 * 1000;
 
 export const startKeepAlive = () => {
     // Backend URL (Self)
     const backendUrl = process.env.RENDER_EXTERNAL_URL || 'https://spa-backend-mvb1.onrender.com';
-    
+
     // Frontend URL (User Facing)
     const frontendUrl = 'https://www.sportsprophecyapp.com';
 

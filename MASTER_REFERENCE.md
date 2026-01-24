@@ -1,12 +1,11 @@
 # 📌 Project Master Reference: Events Arena
-**Version 3.4.6**
+**Version 3.5.0**
 
 ## 🛠 Project Identity & Tech Stack
 - **Project Name:** Events Arena
-- **Frontend:** Next.js (located in `/frontend`). Styling: Outfit Font, Glassmorphism.
-- **Backend:** Node.js/Express (located in `/backend`).
-- **Real-time:** Socket.io (Instantly broadcasts Chat, Scores, and Creator Events).
-- **Gamification:** Sponsor & Draw Hub (`/draw`) powered by Prize Tickets and Admin-verified partner campaigns.
+- **Frontend:** Next.js. Deployed on **Render (Starter/Free)**.
+- **Backend:** Node.js/Express. Deployed on **Render (Starter)**.
+- **Immediate Recovery**: Both services are currently on paid plans to bypass account-wide hour suspension.
 - **Social Proof:** Winner Feedback System with star ratings, testimonials, and viral sharing incentives (X, WhatsApp, native).
 - **Brand Trust:** Integrated **Founder's Letter** on the landing page to establish authenticity and vision.
 
@@ -30,14 +29,14 @@
 4. **Performance:** Automated interaction tracking (Impressions/Clicks) with print-ready reports.
 
 ## 🚀 Deployment & Build Rules
-- **Method:** Git push to `main` triggers Render deployment for both Backend and Frontend.
-- **CSS Rule:** CRITICAL. Always use unique filenames for CSS modules (e.g., `wizard.module.css`) to prevent Render build cache conflicts.
+- **Strategy:** All services on **Render**. Paid Backend eliminates 750-hour pool conflicts.
+- **CSS Rule:** CRITICAL. Always use unique filenames for CSS modules (e.g., `wizard.module.css`) to prevent build cache conflicts.
 - **Abort Logic:** Every POST request must include an `AbortController` with a 10s timeout.
 
 ## 📝 Persistent AI Instructions
 1. **Supporter Identity:** Always use "Supporter" branding for users.
 2. **Regionally Intelligent:** Every UI text string must pass through the `useLanguage()` hook.
-3. **Safety Buffer:** Keep schedulers 25% under free-tier limits.
+3. **Safety Buffer:** Schedulers should run at 75% capacity to ensure stability.
 4. **Sponsor Review:** Manual approval is required for all new applications.
 
 ## 📧 Email Architecture
