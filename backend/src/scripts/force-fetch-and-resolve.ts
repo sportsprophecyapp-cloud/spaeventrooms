@@ -7,17 +7,38 @@ import { resolveSoccerPredictions } from '../shared/services/resolver';
 
 /**
  * UNIVERSAL BACKLOG RECOVERY SCRIPT
- * 1. Syncs latest real scores from API (covers Jan 19 - Jan 24)
- * 2. Force-resolves ANY match started > 3 hours ago regardless of status
- * 3. Sweeps Ancient Pending prophecies (> 14 days) into "expired"
  */
+const jan19Results = [
+    { home: 'Girona', away: 'Getafe', score_h: 1, score_a: 1 },
+    { home: 'Alavés', away: 'Real Betis', score_h: 0, score_a: 0 },
+    { home: 'Real Sociedad', away: 'Celta Vigo', score_h: 1, score_a: 0 },
+    { home: 'Barcelona', away: 'Oviedo', score_h: 2, score_a: 0 },
+    { home: 'Atlético Madrid', away: 'Mallorca', score_h: 1, score_a: 0 },
+    { home: 'Villarreal', away: 'Real Madrid', score_h: 2, score_a: 3 },
+    { home: 'Sevilla', away: 'Athletic Bilbao', score_h: 1, score_a: 2 },
+    { home: 'Valencia', away: 'Espanyol', score_h: 1, score_a: 0 },
+    { home: 'Rayo Vallecano', away: 'CA Osasuna', score_h: 0, score_a: 1 }
+];
+
 const universalCleanup = async () => {
-    console.log('🌍 STARTING UNIVERSAL BACKLOG CLEANUP...');
+    console.log('🌍 STARTING UNIVERSAL BACKLOG CLEANUP (v3.5.5)...');
 
     try {
-        // --- STAGE 1: SYNC API (Last 7 Days) ---
-        console.log('\n📡 STAGE 1: Fetching real scores for the last 7 days...');
-        await fetchLiveMatches(); // Defaults to 7 days window
+        // --- STAGE 0: JAN 19 RECOVERY (Hardcoded) ---
+        console.log('\n🔧 STAGE 0: Recovering Jan 19 La Liga results...');
+        for (const res of jan19Results) {
+            await query(`
+                UPDATE soccer_matches 
+                SET score_home = $1, score_away = $2, status = 'finished', updated_at = NOW()
+                WHERE (home_team LIKE $3 AND away_team LIKE $4)
+                AND start_time > '2026-01-18' AND start_time < '2026-01-21'
+            `, [res.score_h, res.score_a, `%${res.home}%`, `%${res.away}%`]);
+        }
+        console.log('  ✅ Jan 19 Match scores injected.');
+
+        // --- STAGE 1: SYNC API (Recent History) ---
+        console.log('\n📡 STAGE 1: Fetching current scores from API (last 72 hours)...');
+        await fetchLiveMatches().catch(e => console.error('  ⚠️ API Sync failed, moving to Stage 2.'));
 
         // --- STAGE 2: TIME-BASED RESOLUTION ---
         console.log('\n🔮 STAGE 2: Resolving all matches started > 3 hours ago...');

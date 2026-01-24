@@ -514,51 +514,53 @@ const ProfilePage = () => {
                             <div className={styles.historyList}>
                                 {historyItems.length > 0 ? (
                                     <>
-                                        {(() => {
-                                            // Group by date
-                                            const groups: { [key: string]: HistoryEntry[] } = {};
-                                            historyItems.forEach(item => {
-                                                const date = new Date(item.created_at).toLocaleDateString('en-US', {
-                                                    month: 'short', day: 'numeric', year: 'numeric'
+                                        <div className={styles.historyListContainer}>
+                                            {(() => {
+                                                // Group by date
+                                                const groups: { [key: string]: HistoryEntry[] } = {};
+                                                historyItems.forEach(item => {
+                                                    const date = new Date(item.created_at).toLocaleDateString('en-US', {
+                                                        month: 'short', day: 'numeric', year: 'numeric'
+                                                    });
+                                                    if (!groups[date]) groups[date] = [];
+                                                    groups[date].push(item);
                                                 });
-                                                if (!groups[date]) groups[date] = [];
-                                                groups[date].push(item);
-                                            });
 
-                                            return Object.entries(groups).map(([date, items]) => (
-                                                <div key={date} className={styles.historyGroup}>
-                                                    <div className={styles.dateDivider}>
-                                                        <span>{date}</span>
-                                                        <div className={styles.dividerLine}></div>
-                                                    </div>
-                                                    {items.map((item) => (
-                                                        <div key={item.id} className={styles.historyItem}>
-                                                            <div className={styles.historyTeamsWrapper}>
-                                                                <div className={styles.miniLogo}>
-                                                                    <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                                                </div>
-                                                                <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
-                                                                <div className={styles.miniLogo}>
-                                                                    <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                                                </div>
-                                                            </div>
-                                                            <div className={styles.historyMeta}>
-                                                                <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
-                                                                <div className={styles.historyStatus}>
-                                                                    {item.status === 'correct' ? (
-                                                                        <span className={styles.statusCorrect}>✅ CORRECT</span>
-                                                                    ) : item.status === 'incorrect' ? (
-                                                                        <span className={styles.statusIncorrect}>❌ INCORRECT</span>
-                                                                    ) : (
-                                                                        <span className={styles.historyLive}>PENDING</span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
+                                                return Object.entries(groups).map(([date, items]) => (
+                                                    <div key={date} className={styles.historyGroup}>
+                                                        <div className={styles.dateDivider}>
+                                                            <span>{date}</span>
+                                                            <div className={styles.dividerLine}></div>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            ));
-                                        })()}
+                                                        {items.map((item) => (
+                                                            <div key={item.id} className={styles.historyItem}>
+                                                                <div className={styles.historyTeamsWrapper}>
+                                                                    <div className={styles.miniLogo}>
+                                                                        <img src={item.home_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                                    </div>
+                                                                    <span className={styles.historyTeams}>{item.home_team} vs {item.away_team}</span>
+                                                                    <div className={styles.miniLogo}>
+                                                                        <img src={item.away_logo} alt="" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                                                    </div>
+                                                                </div>
+                                                                <div className={styles.historyMeta}>
+                                                                    <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
+                                                                    <div className={styles.historyStatus}>
+                                                                        {item.status === 'correct' ? (
+                                                                            <span className={styles.statusCorrect}>✅ CORRECT</span>
+                                                                        ) : item.status === 'incorrect' ? (
+                                                                            <span className={styles.statusIncorrect}>❌ INCORRECT</span>
+                                                                        ) : (
+                                                                            <span className={styles.historyLive}>PENDING</span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ));
+                                            })()}
+                                        </div>
 
                                         {historyItems.length < historyTotal && (
                                             <button
