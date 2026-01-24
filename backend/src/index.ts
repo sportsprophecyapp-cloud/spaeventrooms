@@ -30,6 +30,10 @@ const io = socketService.getIO(); // Get the io instance from the service
 
     await connectRedis();
 
+    // AUTO-RESOLVE BACKLOG ON STARTUP (v3.7)
+    const { SystemMaintenanceService } = require('./shared/database/SystemMaintenanceService');
+    SystemMaintenanceService.runMaintenance().catch(console.error);
+
     startKeepAlive();
     startSoccerScheduler();
 

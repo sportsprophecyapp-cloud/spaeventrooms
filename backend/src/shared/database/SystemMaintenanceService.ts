@@ -1,0 +1,72 @@
+import { fetchLiveMatches } from '../services/footballApi';
+import { resolveSoccerPredictions } from '../services/resolver';
+import { query } from '../database';
+
+/**
+ * SYSTEM MAINTENANCE SERVICE
+ * Purpose: Handles backlog resolution and data integrity checks on startup.
+ * Specifically targets "Pending" games that should have been resolved.
+ */
+export class SystemMaintenanceService {
+    static async runMaintenance() {
+        console.log('🛠 Starting System Maintenance [Backlog Resolution]...');
+
+        try {
+            // 1. Recover Jan 19 Hardcoded (Safety for API gaps)
+            const jan19Results = [
+                { home: 'Girona', away: 'Getafe', score_h: 1, score_a: 1 },
+                { home: 'Alavés', away: 'Real Betis', score_h: 0, score_a: 0 },
+                { home: 'Real Sociedad', away: 'Celta Vigo', score_h: 1, score_a: 0 },
+                { home: 'Barcelona', away: 'Oviedo', score_h: 2, score_a: 0 },
+                { home: 'Atlético Madrid', away: 'Mallorca', score_h: 1, score_a: 0 },
+                { home: 'Villarreal', away: 'Real Madrid', score_h: 2, score_a: 3 },
+                { home: 'Sevilla', away: 'Athletic Bilbao', score_h: 1, score_a: 2 },
+                { home: 'Valencia', away: 'Espanyol', score_h: 1, score_a: 0 },
+                { home: 'Rayo Vallecano', away: 'CA Osasuna', score_h: 0, score_a: 1 }
+            ];
+
+            for (const res of jan19Results) {
+                await query(`
+                    UPDATE soccer_matches 
+                    SET score_home = $1, score_away = $2, status = 'finished', updated_at = NOW()
+                    WHERE (home_team LIKE $3 AND away_team LIKE $4)
+                    AND start_time > '2026-01-18' AND start_time < '2026-01-21'
+                    AND status != 'finished'
+                `, [res.score_h, res.score_a, `%${res.home}%`, `%${res.away}%`]);
+            }
+
+            // 2. Sync Recent History (Last 72 Hours)
+            // We only do this if we find pending games in the window
+            const hasRecentPending = await query(`
+                SELECT COUNT(*) FROM soccer_predictions p
+                JOIN soccer_matches m ON p.match_id = m.match_id
+                WHERE p.result = 'pending' AND m.start_time > NOW() - INTERVAL '4 days'
+            `);
+
+            if (parseInt(hasRecentPending.rows[0].count) > 0) {
+                console.log(`📡 Detected ${hasRecentPending.rows[0].count} recent pending games. Syncing API...`);
+                await fetchLiveMatches();
+            }
+
+            // 3. Trigger Universal Resolver (Uses 3-hour safety net from v3.5.3)
+            await resolveSoccerPredictions();
+
+            // 4. Force-resolve anything older than 24 hours that didn't get a score
+            // This markers them as "finished" to clear the 'pending' drawer
+            const abandonedMatches = await query(`
+                UPDATE soccer_matches 
+                SET status = 'finished' 
+                WHERE status != 'finished' AND start_time < NOW() - INTERVAL '24 hours'
+            `);
+            if (abandonedMatches.rowCount && abandonedMatches.rowCount > 0) {
+                console.log(`🧹 Force-closed ${abandonedMatches.rowCount} abandoned matches.`);
+                // Run resolver one last time for these
+                await resolveSoccerPredictions();
+            }
+
+            console.log('✅ System Maintenance Complete.');
+        } catch (error) {
+            console.error('❌ System Maintenance Failed:', error);
+        }
+    }
+}
