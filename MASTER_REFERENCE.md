@@ -1,5 +1,5 @@
 # 📌 Project Master Reference: Events Arena
-**Version 3.7.1**
+**Version 3.8.1**
 
 ## 🛠 Project Identity & Tech Stack
 - **Project Name:** Events Arena
@@ -40,6 +40,10 @@
 2. **Regionally Intelligent:** Every UI text string must pass through the `useLanguage()` hook.
 3. **Safety Buffer:** Schedulers should run at 75% capacity to ensure stability.
 4. **Sponsor Review:** Manual approval is required for all new applications.
+
+## 📈 Business Intelligence & Reporting
+- **Daily Arena Report:** Run `npx ts-node backend/src/scripts/arena-stats.ts` to see real-time user growth, prediction volume, economy health, and top performers.
+- **Safety Logs:** Always check Render logs for "System Maintenance Complete" to verify Auto-Heal success.
 
 ## 📧 Email Architecture
 - **General Inquiries & Privacy:** `contact@sportsprophecyapp.com`

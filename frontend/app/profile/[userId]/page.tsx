@@ -560,21 +560,21 @@ const ProfilePage = () => {
                                                     </div>
                                                 ));
                                             })()}
-                                        </div>
 
-                                        {historyItems.length < historyTotal && (
-                                            <button
-                                                className={styles.loadMoreBtn}
-                                                onClick={() => {
-                                                    const nextPage = historyPage + 1;
-                                                    setHistoryPage(nextPage);
-                                                    fetchHistory(nextPage, historyFilter, false);
-                                                }}
-                                                disabled={historyLoading}
-                                            >
-                                                {historyLoading ? 'LOADING...' : 'LOAD MORE PREDICTIONS'}
-                                            </button>
-                                        )}
+                                            {historyItems.length < historyTotal && (
+                                                <button
+                                                    className={styles.loadMoreBtn}
+                                                    onClick={() => {
+                                                        const nextPage = historyPage + 1;
+                                                        setHistoryPage(nextPage);
+                                                        fetchHistory(nextPage, historyFilter, false);
+                                                    }}
+                                                    disabled={historyLoading}
+                                                >
+                                                    {historyLoading ? 'LOADING...' : 'LOAD MORE PREDICTIONS'}
+                                                </button>
+                                            )}
+                                        </div>
                                     </>
                                 ) : (
                                     <p className={styles.emptyHistory}>

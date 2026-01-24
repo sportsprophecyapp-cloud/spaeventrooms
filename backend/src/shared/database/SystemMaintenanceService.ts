@@ -31,7 +31,6 @@ export class SystemMaintenanceService {
                     SET score_home = $1, score_away = $2, status = 'finished', updated_at = NOW()
                     WHERE (home_team LIKE $3 AND away_team LIKE $4)
                     AND start_time > '2026-01-18' AND start_time < '2026-01-21'
-                    AND status != 'finished'
                 `, [res.score_h, res.score_a, `%${res.home}%`, `%${res.away}%`]);
             }
 
@@ -62,6 +61,22 @@ export class SystemMaintenanceService {
                 console.log(`🧹 Force-closed ${abandonedMatches.rowCount} abandoned matches.`);
                 // Run resolver one last time for these
                 await resolveSoccerPredictions();
+            }
+
+            // 5. Catch-all Resolution Safety (v3.8.1)
+            // Even if matches are marked correctly, some predictions might be stuck.
+            // This marks ANY prediction for a match > 48h old as 'expired' if still pending.
+            const catchAll = await query(`
+                UPDATE soccer_predictions p
+                SET result = 'expired', points_earned = 0
+                FROM soccer_matches m
+                WHERE p.match_id = m.match_id
+                AND p.result = 'pending'
+                AND m.start_time < NOW() - INTERVAL '48 hours'
+                AND m.status = 'finished'
+            `);
+            if (catchAll.rowCount && catchAll.rowCount > 0) {
+                console.log(`🧼 Catch-all: Expired ${catchAll.rowCount} stuck predictions.`);
             }
 
             console.log('✅ System Maintenance Complete.');
