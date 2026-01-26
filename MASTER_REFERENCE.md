@@ -33,7 +33,8 @@
 4. **Performance:** Automated interaction tracking (Impressions/Clicks) with print-ready reports.
 
 ## 🚀 Deployment & Build Rules
-- **Strategy:** All services (Backend, Frontend, DB) on **Render Starter Plans**.
+- **Strategy:** All services (Backend, Frontend) on **Render Free Tier**.
+- **Database:** Migrated to **Neon (Free)** for permanent $0 operations.
 - **CSS Rule:** CRITICAL. Always use unique filenames for CSS modules (e.g., `wizard.module.css`) to prevent build cache conflicts.
 - **Abort Logic:** Every POST request must include an `AbortController` with a 10s timeout.
 

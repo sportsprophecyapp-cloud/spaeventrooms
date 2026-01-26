@@ -17,9 +17,9 @@ The project uses a unified deployment script for instant updates.
 3. **Render** will automatically rebuild the entire stack (DB -> Backend -> Frontend).
 
 ## 🏗 Infrastructure
-1. **Database (`sportsprophecy-db`)**: PostgreSQL on Render (Starter).
+1. **Database (`sportsprophecy-db`)**: PostgreSQL on **Neon (Free)**.
 2. **Backend (`spa-backend`)**: 
-   - Platform: Render (Starter Plan).
+   - Platform: Render (Free Plan).
    - Features: Auto-resolves backlog on startup.
 3. **Frontend (`spa-frontend`)**: 
    - Platform: Render (Starter Plan).
