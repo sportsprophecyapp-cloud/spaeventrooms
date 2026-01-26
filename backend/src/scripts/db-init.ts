@@ -89,6 +89,9 @@ const initDB = async () => {
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS prize_escrow_received BOOLEAN DEFAULT FALSE;
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
             ALTER TABLE room_sponsors ADD COLUMN IF NOT EXISTS package_tier VARCHAR(50);
+            ALTER TABLE room_sponsors ALTER COLUMN logo_url TYPE TEXT;
+            ALTER TABLE room_sponsors ALTER COLUMN website_url TYPE TEXT;
+            ALTER TABLE room_sponsors ALTER COLUMN sponsor_name TYPE TEXT;
 
             -- 6. Prize Draw System (Depends on Room Sponsors)
             CREATE TABLE IF NOT EXISTS prize_draws (
