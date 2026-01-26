@@ -267,6 +267,13 @@ const initDB = async () => {
         `;
         await client.query(schema);
 
+        // Ensure soccer room exists
+        await client.query(`
+            INSERT INTO rooms (room_id, display_name, is_active) 
+            VALUES ('soccer', 'Soccer Arena', TRUE) 
+            ON CONFLICT (room_id) DO NOTHING
+        `);
+
         // Set your user as the SUPER ADMIN
         await client.query("UPDATE users SET permissions = '[\"super_admin\"]'::jsonb WHERE email = 'sportsprophecyapp@gmail.com'");
 
