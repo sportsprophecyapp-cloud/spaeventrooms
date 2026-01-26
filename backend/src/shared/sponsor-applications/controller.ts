@@ -212,11 +212,16 @@ export const approveApplication = async (req: AuthRequest, res: Response) => {
         console.error('[APPROVE] Approval/Deployment failed:', {
             error: error.message,
             stack: error.stack,
-            appId: appId
+            code: error.code,
+            detail: error.detail,
+            appId: appId,
+            fullError: JSON.stringify(error, null, 2)
         });
         res.status(500).json({
             error: 'Deployment failed',
-            details: error.message
+            details: error.message,
+            code: error.code,
+            hint: error.detail
         });
     }
 };
