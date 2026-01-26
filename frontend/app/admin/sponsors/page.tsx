@@ -27,11 +27,19 @@ const AdminSponsorsPage = () => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         try {
             if (activeTab === 'apps') {
+                console.log('[ADMIN] Fetching applications from:', `${apiUrl}/api/sponsor-applications`);
                 const res = await fetch(`${apiUrl}/api/sponsor-applications`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                console.log('[ADMIN] Response status:', res.status);
                 const data = await res.json();
-                if (res.ok) setApplications(data.applications || []);
+                console.log('[ADMIN] Response data:', data);
+                if (res.ok) {
+                    console.log('[ADMIN] Setting applications:', data.applications);
+                    setApplications(data.applications || []);
+                } else {
+                    console.error('[ADMIN] Failed to fetch applications:', data);
+                }
             } else if (activeTab === 'draws') {
                 const res = await fetch(`${apiUrl}/api/gamification/draws/active`, {
                     headers: { 'Authorization': `Bearer ${token}` }

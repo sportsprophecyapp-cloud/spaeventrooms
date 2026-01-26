@@ -229,6 +229,7 @@ export const getApplications = async (req: Request, res: Response) => {
             "SELECT * FROM sponsor_applications WHERE status IN ('pending', 'pending_approval') ORDER BY created_at DESC"
         );
         console.log(`[GET_APPS] Found ${result.rows.length} applications.`);
+        console.log('[GET_APPS] Returning:', JSON.stringify({ success: true, applications: result.rows }, null, 2));
         res.json({ success: true, applications: result.rows });
     } catch (err: any) {
         console.error('[GET_APPS] Fetch failed:', err.message);
