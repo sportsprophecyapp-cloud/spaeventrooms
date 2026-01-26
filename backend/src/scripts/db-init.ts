@@ -118,6 +118,7 @@ const initDB = async () => {
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS prize TEXT;
             ALTER TABLE prize_draws ALTER COLUMN title TYPE TEXT;
             ALTER TABLE prize_draws ALTER COLUMN prize TYPE TEXT;
+            ALTER TABLE prize_draws ALTER COLUMN description TYPE TEXT;
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS draw_date TIMESTAMP;
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
             ALTER TABLE prize_draws ADD COLUMN IF NOT EXISTS winner_id INTEGER REFERENCES users(id);
