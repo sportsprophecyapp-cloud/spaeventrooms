@@ -27,6 +27,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
     const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [sponsors, setSponsors] = useState<Sponsor[]>([]);
@@ -120,18 +121,28 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 
                         <div className={styles.formGroup}>
                             <label htmlFor="login-password" className={styles.label}>Password</label>
-                            <input
-                                id="login-password"
-                                name="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className={styles.input}
-                                required
-                                disabled={loading}
-                                autoComplete="current-password"
-                            />
+                            <div className={styles.passwordWrapper}>
+                                <input
+                                    id="login-password"
+                                    name="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className={styles.input}
+                                    required
+                                    disabled={loading}
+                                    autoComplete="current-password"
+                                />
+                                <button
+                                    type="button"
+                                    className={styles.toggleBtn}
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? '🙈' : '👁️'}
+                                </button>
+                            </div>
                         </div>
 
                         <button type="submit" disabled={loading} className={styles.submitButton}>

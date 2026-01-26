@@ -123,3 +123,35 @@
     font-weight: 800;
     margin-left: 5px;
 }
+
+.passwordWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.passwordWrapper input {
+    width: 100%;
+    padding-right: 50px !important;
+}
+
+.toggleBtn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--neutral);
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    user-select: none;
+}
+
+.toggleBtn:hover {
+    opacity: 1;
+}
