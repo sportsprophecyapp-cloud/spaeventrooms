@@ -251,6 +251,15 @@ const initDB = async () => {
                 earned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(user_id, badge_id)
             );
+            
+            CREATE TABLE IF NOT EXISTS room_messages (
+                id SERIAL PRIMARY KEY,
+                room_id VARCHAR(50) NOT NULL,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                username VARCHAR(50),
+                content TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         `;
         await client.query(schema);
 

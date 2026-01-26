@@ -38,6 +38,8 @@ export const createRoomMessage = async (req: AuthRequest, res: Response) => {
         // const userQuery = await query('SELECT b.image_url FROM users u LEFT JOIN badges b ON u.equipped_badge_id = b.id WHERE u.id = $1', [userId]);
         const equipped_badge_image_url = null; // userQuery.rows[0]?.image_url || null;
 
+        console.log(`💬 Processing message for room: ${roomId} from user: ${username}`);
+
         const result = await query(
             'INSERT INTO room_messages (room_id, user_id, username, content) VALUES ($1, $2, $3, $4) RETURNING *',
             [roomId, userId, username, content]
@@ -48,10 +50,17 @@ export const createRoomMessage = async (req: AuthRequest, res: Response) => {
         newMessage.permissions = permissions;
         newMessage.equipped_badge_image_url = equipped_badge_image_url;
 
-        socketService.getIO()?.of(`/rooms/${roomId}`).emit('chat_message', newMessage);
+        const io = socketService.getIO();
+        if (io) {
+            console.log(`📡 Emitting message to namespace: /rooms/${roomId}`);
+            io.of(`/rooms/${roomId}`).emit('chat_message', newMessage);
+        } else {
+            console.error('❌ Socket.io instance NOT FOUND in chat controller');
+        }
 
         res.status(201).json(newMessage);
     } catch (err) {
-        res.status(500).json({ error: 'A server error occurred.' });
+        console.error('❌ FAIL in createRoomMessage:', err);
+        res.status(500).json({ error: 'A server error occurred while sending your message.' });
     }
 };
