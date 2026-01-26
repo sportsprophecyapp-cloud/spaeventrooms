@@ -1,12 +1,12 @@
-# ✅ Core Feature QA Checklist (v3.7.1)
+# ✅ Core Feature QA Checklist (v3.9.0)
 
-### 🛡 Infrastructure & Stability (v3.7.1 Update)
+### 🛡 Infrastructure & Stability (v3.9.0 Update)
 - `[ ]` **Auto-Heal:** Verify "System Maintenance Complete" appears in Render logs on startup.
-- `[ ]` **History Scroll:** Verify profile "History" tab is contained within a scrollable box (no infinite page height).
-- `[ ]` **API Quota:** Verify 1.5-hour polling interval is active in logs.
-- `[ ]` **DB Safety:** Confirm Database is on "Starter" plan in Render Dashboard to prevent deletion.
+- `[ ]` **History Scroll:** Verify profile "History" tab fix is active (Load More inside scroll box).
+- `[ ]` **DB Sync:** Verify `DATABASE_URL` is manually set in Render `spa-backend` settings.
+- `[ ]` **Blueprint Status:** Verify "Synced" green status on Render Blueprint dashboard.
 
-### 🏁 Prize Draw Logic (v3.7.1 Update)
+### 🏁 Prize Draw Logic (v3.9.0 Update)
 - `[ ]` **Multi-Entry:** Enter a draw multiple times and verify ticket deduction for each entry.
 - `[ ]` **Weighted Winning:** Verify "Your entries: X" displays correctly in the Draw Room.
 - `[ ]` **Badge Delivery:** Confirm "Grand Champion" avatar is awarded to winners.

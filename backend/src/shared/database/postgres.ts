@@ -7,11 +7,21 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 10000,
 });
+
+if (process.env.NODE_ENV === 'production') {
+    const dbUrl = process.env.DATABASE_URL || '';
+    const hostMatch = dbUrl.match(/@([^/]+)/);
+    const host = hostMatch ? hostMatch[1] : 'unknown';
+    console.log(`📡 DB Pool initialized (Production). Target Host: ${host.substring(0, 5)}...`);
+}
 
 pool.on('error', (err) => {
     console.error('Unexpected error on idle client', err);
+    if ((err as any).code === 'ENOTFOUND') {
+        console.error(`🚨 DNS Resolution Error: Could not find host. Check DATABASE_URL.`);
+    }
     process.exit(-1);
 });
 

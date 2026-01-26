@@ -3,9 +3,11 @@
 
 ## 🛠 Project Identity & Tech Stack
 - **Project Name:** Events Arena
-- **Frontend:** Next.js. Deployed on **Render (Starter/Free)**.
-- **Backend:** Node.js/Express. Deployed on **Render (Starter)**.
-- **Immediate Recovery**: Both services are currently on paid plans to bypass account-wide hour suspension.
+- **Frontend:** Next.js. Deployed on **Render (Free)**.
+- **Backend:** Node.js/Express. Deployed on **Render (Free)**.
+- **Database:** PostgreSQL on **Neon (Free)**.
+- **Immediate Recovery**: Services migrated to free tiers with Neon DB for sustainability.
+
 - **Social Proof:** Winner Feedback System with star ratings, testimonials, and viral sharing incentives (X, WhatsApp, native).
 - **Brand Trust:** Integrated **Founder's Letter** on the landing page to establish authenticity and vision.
 

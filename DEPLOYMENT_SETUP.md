@@ -1,9 +1,9 @@
 # Deployment Setup: Events Arena
 
-This project uses a **Full-Production Blueprint Strategy** on **Render**:
-- **Backend**: **Starter Plan ($7/mo)**. Ensures 24/7 uptime for scores and schedulers.
-- **Frontend**: **Starter Plan ($7/mo)**. Bypasses Free Tier minute limits and ensure 100% availability.
-- **Database**: **Starter Plan ($7/mo)**. Essential for production—ensures data is **NOT deleted** after 90 days.
+This project uses a **Resilient Blueprint Strategy** on **Render**:
+- **Backend**: **Free Plan ($0/mo)**. Requires manual `DATABASE_URL` (Neon) in environment settings.
+- **Frontend**: **Free Plan ($0/mo)**.
+- **Database**: **Neon (Postgres 17)**. Free tier, hosted on AWS.
 
 ## 🚀 Live Update Workflow
 The project uses a unified deployment script for instant updates.

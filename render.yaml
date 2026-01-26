@@ -2,7 +2,7 @@ services:
   - type: web
     name: spa-backend
     env: node
-    plan: starter
+    plan: free
     buildCommand: cd backend && npm install && npm run build
     startCommand: cd backend && node dist/scripts/db-init.js && node dist/index.js
     branch: main
@@ -21,7 +21,7 @@ services:
   - type: web
     name: spa-frontend
     env: node
-    plan: starter
+    plan: free
     buildCommand: cd frontend && npm install && npm run build
     startCommand: cd frontend && npm start
     branch: main

@@ -1,6 +1,6 @@
-# Events Arena - v3.7.1
+# Events Arena - v3.9.0
 
-**Version**: 3.7.1  
+**Version**: 3.9.0  
 **Release**: January 24, 2026
 
 Events Arena is a high-performance prediction & engagement platform designed for sports, TV, and creator-led events. It features a premium glassmorphic UI, a robust dual-currency economy, and achievement-gated rewards.
@@ -26,7 +26,7 @@ Events Arena is a high-performance prediction & engagement platform designed for
 - `/corporate`: The story and vision of the Arena.
 
 ## 🛠️ Architecture
-- **Infrastructure:** Full Render Blueprint (Starter Plans for Backend, Frontend, and DB).
+- **Infrastructure:** Decoupled Render Blueprint (Manual DB Connection for maximum stability).
 - **Backend:** Node.js/Express with **SystemMaintenanceService** for automated backlog resolution.
 - **Frontend:** Next.js 16 with optimized scrollable history and glassmorphic UI.
 - **Data:** The Odds API with robust key rotation and 3-hour resolution safety nets.
