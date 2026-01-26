@@ -22,7 +22,7 @@ The project uses a unified deployment script for instant updates.
    - Platform: Render (Free Plan).
    - Features: Auto-resolves backlog on startup.
 3. **Frontend (`spa-frontend`)**: 
-   - Platform: Render (Starter Plan).
+   - Platform: Render (Free Plan).
    - Start Command: `cd frontend && npm start`
 
 ## 🔑 Required Environment Variables
