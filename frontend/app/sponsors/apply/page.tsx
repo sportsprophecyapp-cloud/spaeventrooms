@@ -39,15 +39,49 @@ const ApplyFormContent = () => {
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [prizePreview, setPrizePreview] = useState<string | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'prize') => {
-        const file = e.target.files?.[0];
-        if (file) {
+    // Compress image to keep DB size under ~50KB
+    const compressImage = (file: File, maxWidth: number, quality: number): Promise<string> => {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                if (type === 'logo') setLogoPreview(reader.result as string);
-                else setPrizePreview(reader.result as string);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ratio = Math.min(maxWidth / img.width, maxWidth / img.height, 1);
+                    canvas.width = img.width * ratio;
+                    canvas.height = img.height * ratio;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return reject('Canvas not supported');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = reject;
+                img.src = e.target?.result as string;
             };
+            reader.onerror = reject;
             reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'prize') => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Enforce 5MB limit
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image too large. Please use an image under 5MB.');
+            e.target.value = '';
+            return;
+        }
+
+        try {
+            // Logo: max 300px, Prize: max 600px - compress to JPEG at 70%
+            const maxPx = type === 'logo' ? 300 : 600;
+            const compressed = await compressImage(file, maxPx, 0.7);
+            if (type === 'logo') setLogoPreview(compressed);
+            else setPrizePreview(compressed);
+        } catch {
+            alert('Error processing image. Please try another file.');
         }
     };
 

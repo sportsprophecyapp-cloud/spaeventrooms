@@ -2,12 +2,17 @@
 
 **PROJECT:** Events Arena
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
-**PATH:** `/Users/williamcommu/Desktop/mobileV31crashed`
+**PATH:** `/Users/williamcommu/Desktop/Sports Prophecy Events Arena`
 
-## 🚀 CURRENT STATUS (Phase 30 - COMPLETED ✅)
+## 🚀 CURRENT STATUS (Phase 31 - LIVE & HEALTHY ✅)
 **Version**: 3.9.0
 **Release Date**: January 26, 2026
-**Status**: Infrastructure migrated to $0 budget model. Render Free tiers active with Neon DB stabilization.
+**Status**: Live on Render Free + Neon PostgreSQL 17. Match resolver active. 3 users, 109 predictions resolved (18 correct / 91 incorrect). 1 approved sponsor with active prize draw.
+
+### ✅ COMPLETED (Phase 31 - Site Health Repair - April 11, 2026):
+1.  **Match Resolver Confirmed**: `resolveSoccerPredictions()` engine is active and processing predictions correctly.
+2.  **Image Compression**: Sponsor apply form now compresses images (logos to 300px, prize banners to 600px at 70% quality) before Base64 storage — preventing 1.4MB blobs in DB.
+3.  **Documentation Sync**: `PROJECT_CONTEXT.md` and `QA_CHECKLIST.md` updated to reflect live infrastructure and real stats.
 
 ### ✅ COMPLETED (Phase 30 - Cost Optimization & $0 Budget - January 26, 2026):
 1.  **Free Tier Migration**:
