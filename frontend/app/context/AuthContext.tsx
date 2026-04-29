@@ -27,7 +27,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     token: string | null;
-    login: (token: string, user: User) => void;
+    login: (token: string, user: User, rememberMe?: boolean) => void;
     logout: () => void;
     refreshUser: () => Promise<void>;
     updateCosmetics: (avatar?: string, frame?: string) => Promise<void>;
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const router = useRouter(); // NEW
 
     useEffect(() => {
-        const savedToken = localStorage.getItem('auth_token');
+        const savedToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
         const verifySession = async () => {
             if (savedToken) {
                 try {
@@ -64,20 +64,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         verifySession();
     }, []);
 
-    const login = (newToken: string, newUser: User) => {
+    const login = (newToken: string, newUser: User, rememberMe: boolean = true) => {
         // DERIVE ROLE FROM PERMISSIONS (Fix for Admin UI)
         if (newUser.permissions && (newUser.permissions.includes('admin') || newUser.permissions.includes('super_admin'))) {
             newUser.role = 'admin';
         }
         setToken(newToken);
         setUser(newUser);
-        localStorage.setItem('auth_token', newToken);
+        
+        if (rememberMe) {
+            localStorage.setItem('auth_token', newToken);
+            sessionStorage.removeItem('auth_token'); // Clear from other storage
+        } else {
+            sessionStorage.setItem('auth_token', newToken);
+            localStorage.removeItem('auth_token'); // Clear from other storage
+        }
     };
 
     const logout = () => {
         setToken(null);
         setUser(null);
         localStorage.removeItem('auth_token');
+        sessionStorage.removeItem('auth_token');
         router.push('/'); // NEW: Redirect to homepage
     };
 

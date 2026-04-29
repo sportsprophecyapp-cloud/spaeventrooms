@@ -170,3 +170,25 @@
 .toggleBtn:hover {
     opacity: 1;
 }
+
+.rememberMeWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    margin-bottom: -5px;
+}
+
+.rememberMeWrapper input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.rememberMeWrapper label {
+    font-size: 0.8rem;
+    color: var(--neutral);
+    cursor: pointer;
+    user-select: none;
+}

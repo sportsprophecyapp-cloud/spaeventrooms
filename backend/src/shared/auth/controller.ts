@@ -60,13 +60,16 @@ export const getMe = async (req: AuthRequest, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, rememberMe } = req.body;
         const result = await dbQuery('SELECT * FROM users WHERE email = $1', [email]);
         if (result.rows.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
         const user = result.rows[0];
         const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) return res.status(401).json({ message: 'Invalid credentials' });
-        const token = jwt.sign({ id: user.id, email: user.email, username: user.username, permissions: user.permissions }, JWT_SECRET, { expiresIn: '7d' });
+        
+        // Dynamic Token Expiration based on Remember Me
+        const expiresIn = rememberMe ? '30d' : '1d';
+        const token = jwt.sign({ id: user.id, email: user.email, username: user.username, permissions: user.permissions }, JWT_SECRET, { expiresIn });
 
         // Process unified login streak
         const { gamificationService } = require('../gamification/GamificationService');

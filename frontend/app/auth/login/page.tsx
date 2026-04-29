@@ -19,6 +19,7 @@ const LoginContent = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,13 +31,13 @@ const LoginContent = () => {
             const res = await fetch(`${apiUrl}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ ...formData, rememberMe })
             });
 
             const data = await res.json();
 
             if (res.ok) {
-                login(data.token, data.user);
+                login(data.token, data.user, rememberMe);
                 const destination = searchParams.get('redirect') || '/';
                 router.push(destination);
             } else {
@@ -125,6 +126,16 @@ const LoginContent = () => {
                                 {showPassword ? '🙈' : '👁️'}
                             </button>
                         </div>
+                    </div>
+
+                    <div className={styles.rememberMeWrapper}>
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                        />
+                        <label htmlFor="rememberMe">Remember me for 30 days</label>
                     </div>
 
                     {error && <div className={styles.error}>{error}</div>}
