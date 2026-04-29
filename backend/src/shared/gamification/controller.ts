@@ -483,12 +483,12 @@ export const handleGetAchievements = async (req: AuthRequest, res: Response) => 
         // Fetch user stats
         const userStatsResult = await dbQuery(
             `SELECT 
-                correct_picks, 
-                referral_count, 
-                streak,
-                (SELECT COUNT(*) FROM prize_draws WHERE winner_id = $1 AND status = 'completed') as wins
-             FROM users 
-             WHERE id = $1`,
+                (SELECT COUNT(*)::int FROM soccer_predictions WHERE user_id = u.id AND result = 'correct') as correct_picks, 
+                (SELECT COUNT(*)::int FROM users WHERE referred_by_id = u.id) as referral_count, 
+                u.consecutive_login_days as streak,
+                (SELECT COUNT(*)::int FROM prize_draws WHERE winner_id = u.id AND status = 'completed') as wins
+             FROM users u
+             WHERE u.id = $1`,
             [userId]
         );
 
