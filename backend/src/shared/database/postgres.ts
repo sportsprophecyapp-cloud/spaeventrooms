@@ -10,6 +10,10 @@ const pool = new Pool({
     connectionTimeoutMillis: 10000,
 });
 
+pool.on('connect', client => {
+    client.query('SET search_path TO public');
+});
+
 if (process.env.NODE_ENV === 'production') {
     const dbUrl = process.env.DATABASE_URL || '';
     const hostMatch = dbUrl.match(/@([^/]+)/);
