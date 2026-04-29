@@ -22,7 +22,7 @@ const seedAchievements = async () => {
                 name: 'Social Guardian',
                 type: 'frame',
                 cost: 0,
-                asset_url: null,
+                asset_url: '/assets/cosmetics/social_guardian_frame.png',
                 description: 'A frame for those who protect the community.',
                 requirement: 'Refer 10 friends to the Arena',
                 is_achievement_reward: true
@@ -32,7 +32,7 @@ const seedAchievements = async () => {
                 name: 'Arena Influencer',
                 type: 'avatar',
                 cost: 0,
-                asset_url: '/assets/cosmetics/oracle_avatar.png',
+                asset_url: '/assets/cosmetics/arena_influencer_avatar.png',
                 description: 'Your voice echoes through the Arena.',
                 requirement: 'Refer 25 friends to the Arena',
                 is_achievement_reward: true
@@ -96,7 +96,7 @@ const seedAchievements = async () => {
                 name: 'Regular',
                 type: 'avatar',
                 cost: 0,
-                asset_url: '/assets/cosmetics/streak_fire.png',
+                asset_url: '/assets/cosmetics/bronze_flame_avatar.png',
                 description: '3-day login streak.',
                 requirement: '3-day login streak',
                 is_achievement_reward: true
@@ -106,7 +106,7 @@ const seedAchievements = async () => {
                 name: 'Dedicated',
                 type: 'avatar',
                 cost: 0,
-                asset_url: '/assets/cosmetics/streak_fire.png',
+                asset_url: '/assets/cosmetics/silver_star_avatar.png',
                 description: '7-day login streak.',
                 requirement: '7-day login streak',
                 is_achievement_reward: true
@@ -136,7 +136,7 @@ const seedAchievements = async () => {
                 name: 'Legend',
                 type: 'frame',
                 cost: 0,
-                asset_url: null,
+                asset_url: '/assets/cosmetics/legend_frame.png',
                 description: 'One year of loyalty.',
                 requirement: '365-day login streak',
                 is_achievement_reward: true
