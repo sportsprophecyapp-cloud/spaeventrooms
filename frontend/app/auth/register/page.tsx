@@ -77,7 +77,13 @@ const RegisterContent = () => {
 
                 {refName && (
                     <div className={styles.refBadge}>
-                        Invited by <span>{refName}</span>
+                        <div className={styles.refIcon}>🎁</div>
+                        <div>
+                            <strong>Invited by {refName}</strong>
+                            <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', opacity: 0.9 }}>
+                                Register now to claim your first free Prize Draw Ticket!
+                            </p>
+                        </div>
                     </div>
                 )}
 

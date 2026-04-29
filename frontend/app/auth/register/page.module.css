@@ -32,11 +32,19 @@
 .refBadge {
     background: rgba(0, 112, 243, 0.1);
     border: 1px solid var(--accent);
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 0.85rem;
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 0.95rem;
     margin-bottom: 2rem;
     color: var(--foreground);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+}
+
+.refIcon {
+    font-size: 2rem;
 }
 
 .refBadge span {

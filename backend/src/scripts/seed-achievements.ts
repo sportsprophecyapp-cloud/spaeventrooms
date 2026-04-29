@@ -10,9 +10,9 @@ const seedAchievements = async () => {
             {
                 id: 'referral_1',
                 name: 'Arena Recruiter',
-                type: 'badge',
+                type: 'avatar',
                 cost: 0,
-                asset_url: null,
+                asset_url: '/assets/cosmetics/recruit_handshake.png',
                 description: 'Your first step into the Social Arena.',
                 requirement: 'Refer 1 friend to the Arena',
                 is_achievement_reward: true
@@ -52,9 +52,9 @@ const seedAchievements = async () => {
             {
                 id: 'correct_1',
                 name: 'First Blood',
-                type: 'badge',
+                type: 'avatar',
                 cost: 0,
-                asset_url: null,
+                asset_url: '/assets/cosmetics/first_blood_target.png',
                 description: 'First correct prediction.',
                 requirement: '1 correct prediction',
                 is_achievement_reward: true
@@ -62,9 +62,9 @@ const seedAchievements = async () => {
             {
                 id: 'correct_5',
                 name: 'On a Roll',
-                type: 'badge',
+                type: 'avatar',
                 cost: 0,
-                asset_url: null,
+                asset_url: '/assets/cosmetics/streak_fire.png',
                 description: '5 correct predictions.',
                 requirement: '5 correct predictions',
                 is_achievement_reward: true
@@ -72,9 +72,9 @@ const seedAchievements = async () => {
             {
                 id: 'correct_25',
                 name: 'Prophet',
-                type: 'badge',
+                type: 'avatar',
                 cost: 0,
-                asset_url: null,
+                asset_url: '/assets/cosmetics/prophet_eye.png',
                 description: '25 correct predictions.',
                 requirement: '25 correct predictions',
                 is_achievement_reward: true
@@ -94,9 +94,9 @@ const seedAchievements = async () => {
             {
                 id: 'streak_3',
                 name: 'Regular',
-                type: 'badge',
+                type: 'avatar',
                 cost: 0,
-                asset_url: null,
+                asset_url: '/assets/cosmetics/streak_fire.png',
                 description: '3-day login streak.',
                 requirement: '3-day login streak',
                 is_achievement_reward: true
@@ -104,9 +104,9 @@ const seedAchievements = async () => {
             {
                 id: 'streak_7',
                 name: 'Dedicated',
-                type: 'badge',
+                type: 'avatar',
                 cost: 0,
-                asset_url: null,
+                asset_url: '/assets/cosmetics/streak_fire.png',
                 description: '7-day login streak.',
                 requirement: '7-day login streak',
                 is_achievement_reward: true

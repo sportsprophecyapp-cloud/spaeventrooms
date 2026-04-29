@@ -106,6 +106,42 @@
     box-shadow: 0 5px 20px var(--accent-glow);
 }
 
+.heroCtaWrapper {
+    margin-top: 2rem;
+    animation: slideUpFade 0.8s ease-out 0.4s both;
+}
+
+.heroCtaBtn {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent) 0%, #00d2ff 100%);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 900;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+    transition: all 0.3s ease;
+    animation: pulseGlow 2s infinite;
+}
+
+.heroCtaBtn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 0 30px rgba(0, 210, 255, 0.6);
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+    50% { box-shadow: 0 0 25px rgba(0, 210, 255, 0.7); }
+    100% { box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+}
+
+@keyframes slideUpFade {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
 /* Main Content */
 .main {
     flex: 1;

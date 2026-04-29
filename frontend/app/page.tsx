@@ -51,6 +51,14 @@ const HomePage = () => {
                 <Link href="/draw" className={styles.taglineLink}>
                     <p className={styles.tagline}>{t('tagline')}</p>
                 </Link>
+
+                {!isAuthenticated && (
+                    <div className={styles.heroCtaWrapper}>
+                        <Link href="/auth/register" className={styles.heroCtaBtn}>
+                            JOIN FOR FREE & START WINNING
+                        </Link>
+                    </div>
+                )}
             </header>
 
             {isAuthenticated && (
