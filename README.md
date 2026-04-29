@@ -1,6 +1,6 @@
-# Events Arena - v4.0.0
+# Events Arena - v4.1.0
 
-**Version**: 4.0.0  
+**Version**: 4.1.0  
 **Release**: April 29, 2026
 
 Events Arena is a high-performance prediction & engagement platform designed for sports, TV, and creator-led events. It features a premium glassmorphic UI, a robust dual-currency economy, and achievement-gated rewards.
@@ -12,6 +12,8 @@ Events Arena is a high-performance prediction & engagement platform designed for
 - **⚜️ Honors & Hall of Fame:** Automated "Grand Champion" rewarding. High-tier items are "Earned, Not Bought."
 - **✨ Premium UI:** Native-quality glassmorphism (`30px blur`), ultra-compact history view, and high-fidelity crests.
 - **🏒 Multi-Sport Support:** Independent tracking for Soccer and NHL predictions, optimizing API usage and maintaining a $0 cloud budget.
+- **📈 Viral Growth Optimized:** Complete OpenGraph "Unfurl" metadata, XML sitemaps, 3D Gamification graphics, and highly-converting FOMO CTAs.
+- **🛡️ Automated Cloud Backups:** Headless Node.js cron jobs taking automated snapshots to persistent volumes.
 
 ## 🎮 How to Play
 1. **Predict:** Swipe match cards to predict winners (Risk-free).

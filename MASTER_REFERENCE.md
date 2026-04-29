@@ -1,5 +1,5 @@
 # 📌 Project Master Reference: Events Arena
-**Version 4.0.0**
+**Version 4.1.0**
 
 ## 🛠 Project Identity & Tech Stack
 - **Project Name:** Events Arena
@@ -9,8 +9,9 @@
 - **Immediate Recovery**: Services migrated to free tiers with Neon DB for sustainability.
 - **Multi-Sport Support**: Native support for Soccer and NHL via independent table structures (`soccer_matches` vs `nhl_matches`) to ensure robust $0 scaling.
 
-- **Social Proof:** Winner Feedback System with star ratings, testimonials, and viral sharing incentives (X, WhatsApp, native).
+- **Social Proof:** Winner Feedback System, dynamic Referral Badges with FOMO copy, and OpenGraph/Twitter Card viral unfurls (iMessage/WhatsApp expansion).
 - **Brand Trust:** Integrated **Founder's Letter** on the landing page to establish authenticity and vision.
+- **Automated Infrastructure:** Zero-cost cron-job backups executing nightly to a persistent 1GB Render Disk.
 
 ## 💰 THE EVENTS ECONOMY
 - **Dual-Currency Model:** 
