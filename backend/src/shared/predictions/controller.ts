@@ -8,6 +8,7 @@ const PREDICTION_COST = 10;
 
 export const submitMatchPrediction = async (req: AuthRequest, res: Response) => {
     const { matchId, pick } = req.body;
+    const { roomId } = req.params;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -25,24 +26,28 @@ export const submitMatchPrediction = async (req: AuthRequest, res: Response) => 
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // REMOVED TOKEN COST FOR BETA TESTING
-        /*
-        const user = userResult.rows[0];
-        if (user.token_balance < PREDICTION_COST) {
-            return res.status(402).json({ message: 'Not enough tokens' });
-        }
-        */
-
-        // 2. Insert prediction in a transaction (Token deduction removed)
+        // 2. Insert prediction in a transaction
         await query('BEGIN');
-        // await query('UPDATE users SET token_balance = token_balance - $1 WHERE id = $2', [PREDICTION_COST, userId]);
-        await query(
-            `INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
-             VALUES ($1, $2, $3)
-             ON CONFLICT (user_id, match_id) 
-             DO UPDATE SET prediction_data = EXCLUDED.prediction_data`,
-            [userId, matchId, { pick }]
-        );
+        
+        if (roomId === 'nhl') {
+            await query(
+                `INSERT INTO nhl_predictions (user_id, match_id, prediction_data)
+                 VALUES ($1, $2, $3)
+                 ON CONFLICT (user_id, match_id) 
+                 DO UPDATE SET prediction_data = EXCLUDED.prediction_data`,
+                [userId, matchId, { pick }]
+            );
+        } else {
+            // Default to soccer
+            await query(
+                `INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
+                 VALUES ($1, $2, $3)
+                 ON CONFLICT (user_id, match_id) 
+                 DO UPDATE SET prediction_data = EXCLUDED.prediction_data`,
+                [userId, matchId, { pick }]
+            );
+        }
+        
         await query('COMMIT');
 
         // 3. Award points for participation

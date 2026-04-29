@@ -57,10 +57,16 @@ const runSchedulerCycle = async () => {
 
     // --- A. THE HEARTBEAT (Once a day at 4 AM) ---
     if (hour === 4) {
-        console.log('💓 [Heartbeat] Daily Schedule Sync (All Leagues)...');
+        console.log('💓 [Heartbeat] Daily Schedule Sync (All Leagues + NHL)...');
         const quota = await fetchLiveMatches().catch(e => 0);
         if (typeof quota === 'number') updateIntervalBasedOnQuota(quota);
+        
+        const { fetchLiveNhlMatches } = require('../../shared/services/nhlApi');
+        await fetchLiveNhlMatches().catch((e: any) => 0);
+        
         await resolveSoccerPredictions().catch(e => { });
+        const { resolveNhlPredictions } = require('../../shared/services/nhlResolver');
+        await resolveNhlPredictions().catch((e: any) => { });
         return;
     }
 
@@ -71,11 +77,30 @@ const runSchedulerCycle = async () => {
         console.log(`🎯 [Targeted Poll] Active Leagues: ${activeLeagues.join(', ')}`);
         const quota = await fetchLiveMatches(activeLeagues).catch(e => 0);
         if (typeof quota === 'number') updateIntervalBasedOnQuota(quota);
-        await resolveSoccerPredictions().catch(e => { });
     } else {
-        console.log('💤 [Sleep] No active matches. Conserving API quota.');
-        await resolveSoccerPredictions().catch(e => { });
+        console.log('💤 [Sleep] No active soccer matches. Conserving API quota.');
     }
+    
+    // NHL Active Check & Poll
+    try {
+        const nhlActiveResult = await query(`
+            SELECT COUNT(*) FROM nhl_matches 
+            WHERE status = 'live' 
+            OR (status = 'finished' AND updated_at > NOW() - INTERVAL '4 hours')
+            OR (status = 'scheduled' AND start_time < NOW() + INTERVAL '2 hours')
+        `);
+        if (parseInt(nhlActiveResult.rows[0].count) > 0) {
+             console.log(`🎯 [Targeted Poll] NHL matches are active.`);
+             const { fetchLiveNhlMatches } = require('../../shared/services/nhlApi');
+             await fetchLiveNhlMatches().catch((e: any) => 0);
+        }
+    } catch(e) {
+        console.error('❌ Scheduler NHL Check failed:', e);
+    }
+
+    await resolveSoccerPredictions().catch(e => { });
+    const { resolveNhlPredictions } = require('../../shared/services/nhlResolver');
+    await resolveNhlPredictions().catch((e: any) => { });
 };
 
 export const startSoccerScheduler = () => {

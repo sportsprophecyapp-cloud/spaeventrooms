@@ -65,7 +65,7 @@ function RoomContent() {
                                 {selectedLeague ? (
                                     <>
                                         <button onClick={handleReturnToGrid} className={styles.backToGridBtn}>{t('back_to_leagues')}</button>
-                                        <GameDeck leagueId={selectedLeague} />
+                                        <GameDeck leagueId={selectedLeague} roomId={roomId} />
                                     </>
                                 ) : (
                                     <>
@@ -73,6 +73,11 @@ function RoomContent() {
                                         <LeagueGrid onLeagueSelect={handleLeagueSelect} />
                                     </>
                                 )}
+                            </>
+                        ) : roomId === 'nhl' ? (
+                            <>
+                                <button onClick={() => window.location.href = '/'} className={styles.backToGridBtn}>Back to Lobby</button>
+                                <GameDeck leagueId="nhl" roomId={roomId} />
                             </>
                         ) : (
                             <div className={styles.creatorWelcome}>

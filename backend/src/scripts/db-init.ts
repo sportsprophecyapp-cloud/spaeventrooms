@@ -31,6 +31,34 @@ const initDB = async () => {
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS data JSONB DEFAULT '{}';
             ALTER TABLE soccer_matches ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
+            -- 4.5 NHL Tables
+            CREATE TABLE IF NOT EXISTS nhl_matches (
+                match_id VARCHAR(50) PRIMARY KEY,
+                home_team VARCHAR(100) NOT NULL,
+                away_team VARCHAR(100) NOT NULL,
+                start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+                status VARCHAR(20) DEFAULT 'scheduled',
+                score_home INTEGER DEFAULT 0,
+                score_away INTEGER DEFAULT 0,
+                home_logo TEXT,
+                away_logo TEXT,
+                league VARCHAR(100) DEFAULT 'NHL',
+                league_logo TEXT,
+                data JSONB DEFAULT '{}',
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS nhl_predictions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                match_id VARCHAR(50) REFERENCES nhl_matches(match_id),
+                prediction_data JSONB NOT NULL,
+                result VARCHAR(20) DEFAULT 'pending',
+                points_earned INTEGER DEFAULT 0,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, match_id)
+            );
+
             -- 5. Sponsor Application & Review System (Consolidated v3.9)
             CREATE TABLE IF NOT EXISTS sponsor_applications (
                 id SERIAL PRIMARY KEY,
@@ -271,6 +299,13 @@ const initDB = async () => {
         await client.query(`
             INSERT INTO rooms (room_id, display_name, is_active) 
             VALUES ('soccer', 'Soccer Arena', TRUE) 
+            ON CONFLICT (room_id) DO NOTHING
+        `);
+
+        // Ensure NHL room exists
+        await client.query(`
+            INSERT INTO rooms (room_id, display_name, is_active) 
+            VALUES ('nhl', 'NHL Arena', TRUE) 
             ON CONFLICT (room_id) DO NOTHING
         `);
 

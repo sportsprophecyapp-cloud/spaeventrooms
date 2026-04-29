@@ -66,7 +66,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/badges', badgeRoutes);
 app.use('/api/moderation', moderationRoutes);
-app.use('/api/rooms/soccer/matches', matchRoutes);
+app.use('/api/rooms/:roomId/matches', matchRoutes);
 app.use('/api/rooms/:roomId/announcements', announcementRoutes);
 app.use('/api/rooms/:roomId/predictions', predictionRoutes);
 app.use('/api/rooms/:roomId/sponsors', sponsorRoutes);

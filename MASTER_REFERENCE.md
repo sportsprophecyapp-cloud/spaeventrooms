@@ -1,5 +1,5 @@
 # 📌 Project Master Reference: Events Arena
-**Version 3.9.0**
+**Version 4.0.0**
 
 ## 🛠 Project Identity & Tech Stack
 - **Project Name:** Events Arena
@@ -7,6 +7,7 @@
 - **Backend:** Node.js/Express. Deployed on **Render (Free)**.
 - **Database:** PostgreSQL on **Neon (Free)**.
 - **Immediate Recovery**: Services migrated to free tiers with Neon DB for sustainability.
+- **Multi-Sport Support**: Native support for Soccer and NHL via independent table structures (`soccer_matches` vs `nhl_matches`) to ensure robust $0 scaling.
 
 - **Social Proof:** Winner Feedback System with star ratings, testimonials, and viral sharing incentives (X, WhatsApp, native).
 - **Brand Trust:** Integrated **Founder's Letter** on the landing page to establish authenticity and vision.

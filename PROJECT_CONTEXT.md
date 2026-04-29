@@ -4,10 +4,15 @@
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
 **PATH:** `/Users/williamcommu/Desktop/Sports Prophecy Events Arena`
 
-## 🚀 CURRENT STATUS (Phase 31 - LIVE & HEALTHY ✅)
-**Version**: 3.9.0
-**Release Date**: January 26, 2026
-**Status**: Live on Render Free + Neon PostgreSQL 17. Match resolver active. 3 users, 109 predictions resolved (18 correct / 91 incorrect). 1 approved sponsor with active prize draw.
+## 🚀 CURRENT STATUS (Phase 32 - NHL Arena Live ✅)
+**Version**: 4.0.0
+**Release Date**: April 29, 2026
+**Status**: Live on Render Free + Neon PostgreSQL 17. Multi-sport architecture verified. NHL Arena added natively without disrupting Soccer tracking. API scheduler is intelligently managing requests to preserve the $0 budget.
+
+### ✅ COMPLETED (Phase 32 - NHL Arena Integration - April 29, 2026):
+1.  **Additive Architecture**: Deployed `nhl_matches` and `nhl_predictions` tables alongside existing soccer logic to guarantee 0% risk to active user predictions.
+2.  **Smart Polling Engine**: Updated `SystemMaintenanceService` and `scheduler.ts` to dynamically poll NHL The Odds API endpoints only when matches are imminent or live.
+3.  **UI Extension**: Added NHL Arena directly to the frontend lobby and bridged it into the universal `GameDeck` using dynamic `roomId` routing.
 
 ### ✅ COMPLETED (Phase 31 - Site Health Repair - April 11, 2026):
 1.  **Match Resolver Confirmed**: `resolveSoccerPredictions()` engine is active and processing predictions correctly.

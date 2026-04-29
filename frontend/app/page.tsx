@@ -21,8 +21,8 @@ const HomePage = () => {
 
     const rooms = [
         { id: 'soccer', name: 'Soccer Arena', description: 'Forecast match winners and events from the world\'s top leagues.', icon: '/assets/arenas/soccer-arena.jpg', color: 'var(--accent)', active: true },
-        { id: 'nfl', name: 'NFL Hub', description: 'Pro predictions and game scripts. Coming for the playoffs!', icon: '/assets/arenas/nfl-hub.jpg', color: '#ff4b4b', active: false },
-        { id: 'f1', name: 'F1 Paddock', description: 'Podium picks and fastest lap prophecies. Season starts soon.', icon: '/assets/arenas/f1-paddock.png', color: '#ffd700', active: false }
+        { id: 'nhl', name: 'NHL Arena', description: 'Ice-cold predictions. Puck drops now!', icon: '/assets/arenas/f1-paddock.png', color: '#00d2ff', active: true },
+        { id: 'nfl', name: 'NFL Hub', description: 'Pro predictions and game scripts. Coming for the playoffs!', icon: '/assets/arenas/nfl-hub.jpg', color: '#ff4b4b', active: false }
     ];
 
     React.useEffect(() => {

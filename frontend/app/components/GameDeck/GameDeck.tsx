@@ -22,9 +22,10 @@ interface Match {
 
 interface GameDeckProps {
     leagueId: string;
+    roomId?: string;
 }
 
-const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
+const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
     const { t } = useLanguage();
     const { token, refreshUser } = useAuth();
     const { sponsors, trackSponsor } = useSponsor();
@@ -43,7 +44,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
         const fetchMatches = async () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${apiUrl}/api/rooms/soccer/matches?league=${leagueId}`, {
+                const res = await fetch(`${apiUrl}/api/rooms/${roomId}/matches?league=${leagueId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -61,7 +62,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
             return () => clearTimeout(timer);
         } else if (showCompletion && countdown === 0) {
-            router.push('/rooms/soccer');
+            router.push(`/rooms/${roomId}`);
         }
     }, [showCompletion, countdown, router]);
 
@@ -80,7 +81,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
             const pickName = pickSide === 'home' ? match.home_team : match.away_team;
 
-            const response = await fetch(`${apiUrl}/api/rooms/soccer/predictions/match`, {
+            const response = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions/match`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -275,7 +276,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId }) => {
                             🎟️ {t('go_to_draw_room')}
                         </button>
                         <button
-                            onClick={() => router.push('/rooms/soccer')}
+                            onClick={() => router.push(`/rooms/${roomId}`)}
                             className={styles.completionButton}
                         >
                             {t('back_to_leagues')}
