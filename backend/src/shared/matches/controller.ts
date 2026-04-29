@@ -27,8 +27,12 @@ export const getMatchesByLeague = async (req: Request, res: Response) => {
                 ORDER BY m.start_time ASC
                 LIMIT 20
             `, [userId]);
+            const countResult = await query(`
+                SELECT COUNT(*) as count FROM nhl_matches WHERE status = 'scheduled'
+            `);
+            const totalScheduled = parseInt(countResult.rows[0].count);
 
-            return res.json(result.rows);
+            return res.json({ matches: result.rows, total_scheduled: totalScheduled });
         } catch (err) {
             console.error(`[FATAL] Could not fetch matches for NHL:`, err);
             return res.status(500).json({ error: 'A server error occurred while fetching NHL matches.' });
@@ -74,8 +78,12 @@ export const getMatchesByLeague = async (req: Request, res: Response) => {
             ORDER BY m.start_time ASC
             LIMIT 20
         `, [dbLeagueName, userId]);
+        const countResult = await query(`
+            SELECT COUNT(*) as count FROM soccer_matches WHERE league = $1 AND status = 'scheduled'
+        `, [dbLeagueName]);
+        const totalScheduled = parseInt(countResult.rows[0].count);
 
-        res.json(result.rows);
+        res.json({ matches: result.rows, total_scheduled: totalScheduled });
     } catch (err) {
         console.error(`[FATAL] Could not fetch matches for league ${league}:`, err);
         res.status(500).json({ error: 'A server error occurred while fetching matches.' });

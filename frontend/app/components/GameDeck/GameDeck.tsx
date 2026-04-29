@@ -33,6 +33,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
     const [gone, setGone] = useState<Set<number>>(() => new Set());
 
     const [matches, setMatches] = useState<Match[]>([]);
+    const [totalScheduled, setTotalScheduled] = useState<number>(0);
     const [showCompletion, setShowCompletion] = useState(false);
     const [countdown, setCountdown] = useState(3);
     const [predictionCount, setPredictionCount] = useState(0);
@@ -48,7 +49,23 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
-                    setMatches(await res.json());
+                    const data = await res.json();
+                    let fetchedMatches: Match[] = [];
+                    let fetchedTotal = 0;
+                    if (Array.isArray(data)) {
+                        fetchedMatches = data;
+                        fetchedTotal = data.length;
+                    } else {
+                        fetchedMatches = data.matches || [];
+                        fetchedTotal = data.total_scheduled || 0;
+                    }
+                    setMatches(fetchedMatches);
+                    setTotalScheduled(fetchedTotal);
+                    
+                    if (fetchedMatches.length === 0 && fetchedTotal > 0) {
+                        setShowCompletion(true);
+                        setPredictionCount(fetchedTotal);
+                    }
                 }
             } catch (err) {
                 console.error("Error fetching matches:", err);
@@ -228,7 +245,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         }
     }, [gone.size, matches, sponsors, trackSponsor]);
 
-    if (matches.length === 0) {
+    if (matches.length === 0 && totalScheduled === 0) {
         return (
             <div className={styles.emptyContainer}>
                 <div className={styles.emptyContent}>
