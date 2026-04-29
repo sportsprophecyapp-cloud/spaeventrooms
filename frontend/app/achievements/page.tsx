@@ -21,7 +21,7 @@ interface Achievement {
 
 const AchievementsPage = () => {
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const [achievements, setAchievements] = useState<Achievement[]>([]);
     const [filteredAchievements, setFilteredAchievements] = useState<Achievement[]>([]);
     const [activeTab, setActiveTab] = useState<'all' | 'avatar' | 'frame'>('all');
@@ -38,7 +38,8 @@ const AchievementsPage = () => {
                 const response = await fetch(`${apiUrl}/api/gamification/achievements`, {
                     credentials: 'include',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
