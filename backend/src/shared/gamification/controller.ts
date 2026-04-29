@@ -509,7 +509,7 @@ export const handleGetAchievements = async (req: AuthRequest, res: Response) => 
         // Parse achievement requirements and calculate progress
         const achievements = achievementsResult.rows.map(achievement => {
             // Parse the requirement to determine target type and value
-            const req = achievement.requirement.toLowerCase();
+            const req = (achievement.requirement || '').toLowerCase();
             let targetType = 'unknown';
             let target = 0;
 
@@ -518,7 +518,7 @@ export const handleGetAchievements = async (req: AuthRequest, res: Response) => 
                 const match = req.match(/(\d+)/);
                 target = match ? parseInt(match[1]) : 0;
             } else if (req.includes('refer') || req.includes('friend')) {
-                targetType = 'referrals';
+                targetType = 'referral_count';
                 const match = req.match(/(\d+)/);
                 target = match ? parseInt(match[1]) : 0;
             } else if (req.includes('streak') || req.includes('login')) {
