@@ -1,4 +1,4 @@
-// Professional Sports Prophecy Design System
+// Professional Events Arena Design System
 // Based on modern sports analytics platforms
 
 export const COLORS = {

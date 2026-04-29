@@ -27,7 +27,7 @@ const PrivacyPolicyScreen = () => {
                     <Text style={styles.lastUpdated}>Effective Date: 12/15/2025</Text>
 
                     <Text style={styles.paragraph}>
-                        Sports Prophecy (“we”, “our”, “us”) respects your privacy. This Privacy Policy explains what information we collect, how we use it, and how it is protected.
+                        Events Arena (“we”, “our”, “us”) respects your privacy. This Privacy Policy explains what information we collect, how we use it, and how it is protected.
                     </Text>
 
                     <View style={styles.section}>
@@ -57,7 +57,7 @@ const PrivacyPolicyScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>2. How We Use Your Information</Text>
                         <Text style={styles.paragraph}>
-                            To provide the core functionality of Sports Prophecy: game predictions, leaderboard tracking, and digital rewards (Tokens/Crowns).
+                            To provide the core functionality of Events Arena: game predictions, leaderboard tracking, and digital rewards (Tokens/Crowns).
                         </Text>
                         <Text style={styles.paragraph}>
                             To display sponsor banners and provide relevant advertising.
@@ -73,7 +73,7 @@ const PrivacyPolicyScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>3. Advertising & Sponsor Banners</Text>
                         <Text style={styles.paragraph}>
-                            Sports Prophecy displays sponsored banners within the app.
+                            Events Arena displays sponsored banners within the app.
                         </Text>
                         <Text style={styles.paragraph}>
                             Third-party ad networks may collect non-personally identifiable information, such as device identifiers and usage data, to deliver relevant ads.
@@ -106,7 +106,7 @@ const PrivacyPolicyScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>6. Children’s Privacy & Age Restrictions</Text>
                         <Text style={styles.paragraph}>
-                            Sports Prophecy is intended for users 13 years and older. Users under 13 are not permitted to use the app.
+                            Events Arena is intended for users 13 years and older. Users under 13 are not permitted to use the app.
                         </Text>
                         <Text style={styles.paragraph}>
                             Account creation requires Google Sign-In or Apple Sign-In, and users are prompted to confirm their birth year. Users under 13 are blocked from accessing the app.

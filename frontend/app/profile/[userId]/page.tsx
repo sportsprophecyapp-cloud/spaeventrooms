@@ -554,12 +554,12 @@ const ProfilePage = () => {
                                                                                     <button 
                                                                                         className={styles.shareBtn} 
                                                                                         onClick={async () => {
-                                                                                            const text = `🎯 I just nailed my prediction for ${item.home_team} vs ${item.away_team}!\n\nI'm Rank #${profile.global_rank || '??'} on Sports Prophecy Arena.`;
+                                                                                            const text = `🎯 I just nailed my prediction for ${item.home_team} vs ${item.away_team}!\n\nI'm Rank #${profile.global_rank || '??'} on Events Arena.`;
                                                                                             const url = `${window.location.origin}/auth/register?ref=${profile.referral_code}`;
                                                                                             if (navigator.share) {
                                                                                                 try {
                                                                                                     await navigator.share({
-                                                                                                        title: 'Sports Prophecy Arena',
+                                                                                                        title: 'Events Arena',
                                                                                                         text: text,
                                                                                                         url: url
                                                                                                     });

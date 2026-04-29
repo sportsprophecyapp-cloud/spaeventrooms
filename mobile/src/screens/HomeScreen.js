@@ -236,7 +236,7 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.legalNotice}>
         <Ionicons name="information-circle-outline" size={16} color="#6B7280" />
         <Text style={styles.legalNoticeText}>
-          100% Free to Play • No Deposits • No Gambling • Skill-Based Only
+          100% Free to Play • No Deposits • No Purchases • Skill-Based Only
         </Text>
       </View>
 

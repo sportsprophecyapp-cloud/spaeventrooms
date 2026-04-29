@@ -13,7 +13,7 @@ const ReportScreen = ({ navigation }) => {
             return;
         }
 
-        const subject = type === 'error' ? '⚠️ Error Report - Sports Prophecy' : '💡 Suggestion - Sports Prophecy';
+        const subject = type === 'error' ? '⚠️ Error Report - Events Arena' : '💡 Suggestion - Events Arena';
         const body = `Type: ${type.toUpperCase()}\n\nMessage:\n${message}\n\n---\nUser Info (Optional):\nUsername: [Enter Username]\nDevice: [Enter Device]`;
 
         const url = `mailto:Contact@sportsprophecyapp.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -45,7 +45,7 @@ const ReportScreen = ({ navigation }) => {
                     </View>
                     <Text style={styles.title}>We Value Your Feedback!</Text>
                     <Text style={styles.subtitle}>
-                        Help us improve Sports Prophecy. Suggestions used will earn <Text style={styles.highlight}>5 ENTRIES</Text> into our Beta Testers Draw!
+                        Help us improve Events Arena. Suggestions used will earn <Text style={styles.highlight}>5 ENTRIES</Text> into our Beta Testers Draw!
                     </Text>
 
                     {/* Type Selector */}

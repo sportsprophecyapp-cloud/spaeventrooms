@@ -23,7 +23,7 @@ const AgeVerificationScreen = () => {
         if (age < 13) {
             Alert.alert(
                 'Access Denied',
-                'You must be at least 13 years old to use Sports Prophecy.',
+                'You must be at least 13 years old to use Events Arena.',
                 [{ text: 'OK' }]
             );
             return;

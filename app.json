@@ -2,7 +2,7 @@
   "expo": {
     "name": "Events Arena",
     "slug": "eventsarena",
-    "version": "3.4.6",
+    "version": "4.1.0",
     "scheme": "eventsarena",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,7 @@
       "supportsTablet": true,
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.eventsarena.app",
-      "buildNumber": "35",
+      "buildNumber": "41",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSFaceIDUsageDescription": "Allow Events Arena to use FaceID for quick and secure login."
@@ -29,7 +29,7 @@
         "backgroundColor": "#0a1628"
       },
       "package": "com.eventsarena.app",
-      "versionCode": 35,
+      "versionCode": 41,
       "edgeToEdgeEnabled": true
     },
     "web": {

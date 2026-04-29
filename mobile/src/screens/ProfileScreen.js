@@ -295,7 +295,7 @@ const ProfileScreen = () => {
     const handleShare = async () => {
         try {
             const result = await Share.share({
-                message: `Join me on Sports Prophecy and get 5 free crowns! Use my code ${user?.referralCode} at signup. Play here: https://www.sportsprophecyapp.com`,
+                message: `Join me on Events Arena and get 5 free crowns! Use my code ${user?.referralCode} at signup. Play here: https://www.sportsprophecyapp.com`,
             });
         } catch (error) {
             showAlert('Error', error.message);

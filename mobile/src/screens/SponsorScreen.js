@@ -295,7 +295,7 @@ const SponsorScreen = ({ navigation }) => {
         <View>
             <View style={styles.marketingContainer}>
                 <Ionicons name="gift-outline" size={48} color={COLORS.accent.gold} style={{ alignSelf: 'center', marginBottom: SPACING.md }} />
-                <Text style={styles.marketingTitle}>Partner with Sports Prophecy</Text>
+                <Text style={styles.marketingTitle}>Partner with Events Arena</Text>
                 <Text style={styles.marketingText}>
                     Connect your brand with thousands of engaged sports fans through our Weekly Prize Draws.
                 </Text>

@@ -729,7 +729,7 @@ const ChatScreen = () => {
           text: 'Report Message',
           style: 'destructive',
           onPress: async () => {
-            const subject = 'Chat Report – Sports Prophecy';
+            const subject = 'Chat Report – Events Arena';
             const roomName = activeRoom ? activeRoom.name : 'Public Lobby';
             const timestamp = new Date().toISOString();
             const reportingUserId = user?.uuid || user?.uid || 'Unknown';

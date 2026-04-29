@@ -29,21 +29,21 @@ const TermsOfServiceScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>1. Acceptance of Terms</Text>
                         <Text style={styles.paragraph}>
-                            By accessing and using Sports Prophecy ("the App"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the App.
+                            By accessing and using Events Arena ("the App"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the App.
                         </Text>
                     </View>
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>2. Description of Service</Text>
                         <Text style={styles.paragraph}>
-                            Sports Prophecy is a skill-based sports prediction platform for entertainment purposes. No gambling, wagering, or cash payouts are offered. Users can make predictions on sporting events, earn virtual tokens and crowns, and compete for rewards sponsored by third parties.
+                            Events Arena is a skill-based sports prediction platform for entertainment purposes. No purchases, wagering, or cash payouts are offered. Users can make predictions on sporting events, earn virtual tokens and crowns, and compete for rewards sponsored by third parties.
                         </Text>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>3. No Gambling or Real Money Gaming</Text>
+                        <Text style={styles.sectionTitle}>3. No Purchases or Real Money Gaming</Text>
                         <Text style={styles.paragraph}>
-                            Sports Prophecy is NOT a gambling site, sports betting platform, or real money gaming application.
+                            Events Arena is NOT a casino site, sports betting platform, or real money gaming application.
                         </Text>
                         <Text style={styles.bulletPoint}>• No real money is wagered or exchanged</Text>
                         <Text style={styles.bulletPoint}>• No cash payouts or monetary prizes</Text>
@@ -51,7 +51,7 @@ const TermsOfServiceScreen = () => {
                         <Text style={styles.bulletPoint}>• Participation is FREE with no purchase required</Text>
                         <Text style={styles.bulletPoint}>• This is a skill-based entertainment platform only</Text>
                         <Text style={styles.paragraph}>
-                            Users acknowledge that Sports Prophecy operates as a free promotional contest platform, not a gambling service.
+                            Users acknowledge that Events Arena operates as a free promotional contest platform, not a casino service.
                         </Text>
                     </View>
 
@@ -108,7 +108,7 @@ const TermsOfServiceScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>9. User Conduct</Text>
                         <Text style={styles.paragraph}>
-                            To keep Sports Prophecy fun and safe for everyone, we enforce a zero-tolerance policy for:
+                            To keep Events Arena fun and safe for everyone, we enforce a zero-tolerance policy for:
                         </Text>
                         <Text style={styles.bulletPoint}>• Hate speech, harassment, or bullying of any kind</Text>
                         <Text style={styles.bulletPoint}>• Spamming, scamming, or unauthorized self-promotion</Text>
@@ -129,7 +129,7 @@ const TermsOfServiceScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>10. Intellectual Property</Text>
                         <Text style={styles.paragraph}>
-                            All content, features, and functionality of the App are owned by Sports Prophecy and are protected by copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or create derivative works without our express written permission.
+                            All content, features, and functionality of the App are owned by Events Arena and are protected by copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or create derivative works without our express written permission.
                         </Text>
                     </View>
 
@@ -164,7 +164,7 @@ const TermsOfServiceScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>15. Governing Law</Text>
                         <Text style={styles.paragraph}>
-                            These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Sports Prophecy operates, without regard to its conflict of law provisions.
+                            These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Events Arena operates, without regard to its conflict of law provisions.
                         </Text>
                     </View>
 
@@ -179,7 +179,7 @@ const TermsOfServiceScreen = () => {
                     <View style={styles.acknowledgment}>
                         <Ionicons name="shield-checkmark" size={24} color={COLORS.accent.cyan} />
                         <Text style={styles.acknowledgmentText}>
-                            By using Sports Prophecy, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                            By using Events Arena, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
                         </Text>
                     </View>
                 </LinearGradient>

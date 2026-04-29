@@ -1,5 +1,5 @@
 # Events Arena Frontend
-This is the [Next.js](https://nextjs.org) application for the Events Arena (Sports Prophecy) platform.
+This is the [Next.js](https://nextjs.org) application for the Events Arena platform.
 
 ## Getting Started
 

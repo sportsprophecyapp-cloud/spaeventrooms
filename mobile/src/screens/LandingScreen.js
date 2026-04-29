@@ -102,7 +102,7 @@ const LandingScreen = ({ navigation }) => {
                             <Text style={styles.topTagline}>FREE & ENTERTAINING</Text>
                         </View>
                         <Text style={styles.heroTitleMain}>
-                            Sports Prophecy
+                            Events Arena
                         </Text>
 
                         <View style={styles.forecastContainer}>
@@ -193,7 +193,7 @@ const LandingScreen = ({ navigation }) => {
 
                     {/* Features Section */}
                     <View style={styles.featuresSection}>
-                        <Text style={styles.sectionTitle}>Why Sports Prophecy?</Text>
+                        <Text style={styles.sectionTitle}>Why Events Arena?</Text>
 
                         <View style={styles.featureRow}>
                             <View style={styles.featureCard}>
@@ -209,7 +209,7 @@ const LandingScreen = ({ navigation }) => {
                                     <Ionicons name="flash" size={32} color={COLORS.accent.purple} />
                                 </View>
                                 <Text style={styles.featureTitle}>100% Free</Text>
-                                <Text style={styles.featureDesc}>No deposits, no gambling, no risk</Text>
+                                <Text style={styles.featureDesc}>No deposits, no purchases, no risk</Text>
                             </View>
                         </View>
 
@@ -311,7 +311,7 @@ const LandingScreen = ({ navigation }) => {
                                 <Text style={styles.footerLink}>Terms of Service</Text>
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.copyright}>© 2025 Sports Prophecy. All rights reserved.</Text>
+                        <Text style={styles.copyright}>© 2025 Events Arena. All rights reserved.</Text>
                         <Text style={styles.versionDisplay}>v{APP_VERSION}</Text>
                     </View>
 
@@ -324,7 +324,7 @@ const LandingScreen = ({ navigation }) => {
                             </View>
 
                             <Text style={styles.letterText}>
-                                "I built <Text style={{ fontWeight: 'bold', color: COLORS.accent.gold }}>Sports Prophecy</Text> to give fans and sponsors a platform where both can equally benefit.
+                                "I built <Text style={{ fontWeight: 'bold', color: COLORS.accent.gold }}>Events Arena</Text> to give fans and sponsors a platform where both can equally benefit.
                                 {"\n\n"}
                                 I wanted to create more than just a game—I'm building a large-scale ecosystem of entertainment that rewards sports knowledge without financial risk.
                                 {"\n\n"}
@@ -342,7 +342,7 @@ const LandingScreen = ({ navigation }) => {
                     <View style={styles.legalSummary}>
                         <Ionicons name="shield-checkmark" size={16} color={COLORS.text.muted} />
                         <Text style={styles.legalSummaryText}>
-                            100% Free to Play • No Deposits • No Gambling • Skill-Based Only
+                            100% Free to Play • No Deposits • No Purchases • Skill-Based Only
                         </Text>
                     </View>
 

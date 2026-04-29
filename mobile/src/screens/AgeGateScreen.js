@@ -38,7 +38,7 @@ const AgeGateScreen = ({ navigation, onVerify }) => {
                 <Text style={styles.title}>Age Verification Required</Text>
 
                 <Text style={styles.description}>
-                    You must be 18 years or older to use Sports Prophecy.
+                    You must be 18 years or older to use Events Arena.
                 </Text>
 
                 <View style={styles.checkboxContainer}>

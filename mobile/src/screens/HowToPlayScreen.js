@@ -54,9 +54,9 @@ const HowToPlayScreen = () => {
                         ✓ Legal & Compliant
                     </Text>
                     <Text style={styles.complianceBannerText}>
-                        Sports Prophecy is a skill-based prediction platform. No purchase
-                        necessary. No gambling. No risk. Prizes awarded through sweepstakes
-                        drawings administered by Sports Prophecy LLC. Odds vary based on
+                        Events Arena is a skill-based prediction platform. No purchase
+                        necessary. No purchases. No risk. Prizes awarded through sweepstakes
+                        drawings administered by Events Arena LLC. Odds vary based on
                         number of eligible entries.
                     </Text>
                 </View>
@@ -203,7 +203,7 @@ const HowToPlayScreen = () => {
                     >
                         <Text style={styles.bonusTitle}>100% Free to Play!</Text>
                         <Text style={styles.bonusDescription}>
-                            No deposits, no gambling, no risk. Earn rewards from our sponsors by making accurate predictions. Login daily for bonus tokens and build your streak for crown rewards!
+                            No deposits, no purchases, no risk. Earn rewards from our sponsors by making accurate predictions. Login daily for bonus tokens and build your streak for crown rewards!
                         </Text>
                         <View style={styles.streakInfo}>
                             <Ionicons name="flame" size={20} color={COLORS.text.inverse} />

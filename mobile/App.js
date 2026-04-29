@@ -128,7 +128,7 @@ export default function App() {
         <AuthProvider>
           <NavigationContainer
             documentTitle={{
-              formatter: (options, route) => options?.title ? `${options.title} | Sports Prophecy` : 'Sports Prophecy'
+              formatter: (options, route) => options?.title ? `${options.title} | Events Arena` : 'Events Arena'
             }}
           >
             <AppNavigator />

@@ -37,7 +37,7 @@ const FirstTimeUserView = ({ navigation, games, onComplete }) => {
                 colors={['#3B82F6', '#8B5CF6', '#EC4899']}
                 style={styles.hero}
             >
-                <Text style={styles.welcomeTitle}>Welcome to Sports Prophecy! 🎯</Text>
+                <Text style={styles.welcomeTitle}>Welcome to Events Arena! 🎯</Text>
                 <Text style={styles.welcomeSubtext}>
                     Make predictions. Earn rewards. Win prizes.
                 </Text>

@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Sports Prophecy Arena - Disaster Recovery Backup Script
+# Events Arena - Disaster Recovery Backup Script
 # Run this script periodically to back up your database and codebase.
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_DIR="$(pwd)/backups/$TIMESTAMP"
 
-echo "🛡️  Starting Sports Prophecy Arena Backup... ($TIMESTAMP)"
+echo "🛡️  Starting Events Arena Backup... ($TIMESTAMP)"
 
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
