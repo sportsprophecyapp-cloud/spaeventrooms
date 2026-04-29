@@ -16,12 +16,12 @@
 
 ---
 
-## 🎯 Phase 1: The "Hustle" (Attracting the First Sponsors)
+## 🎯 Phase 1: Initial Outreach (Establishing Partnerships)
 
-**The "Zero-Risk Free Trial" Pitch:**
-Sponsors hate paying upfront for ads when they don't know if it will work. 
-- **The Strategy:** Reach out to local sports bars, independent merch brands, or e-commerce sites. Tell them: *"I will put your logo on my app's homepage and run a raffle for your brand to my highly engaged sports audience for 1 week, completely free. All you have to do is provide a $25 or $50 gift card as the prize."*
-- **Why it works:** We get a legitimate prize to give to users (driving traffic). The sponsor gets free marketing. Once they see the traffic, we charge them for the *next* week.
+**The Introductory Partnership Model:**
+Brands appreciate demonstrable value before committing to long-term advertising budgets.
+- **The Strategy:** Reach out to local sports bars, independent merch brands, or e-commerce sites. The approach: *"We would love to feature your brand in our 'Prize Draw Room' for one week at no upfront cost. If you can provide a $25 or $50 gift card as the prize, we will place your logo front and center for our highly engaged sports audience."*
+- **Why it works:** It provides immediate, tangible value to our users while allowing the sponsor to see the platform's engagement rates firsthand. Once the value is proven, we can transition to a standard sponsorship model.
 
 **Hyper-Niche Alignment:**
 Because we have separated rooms (Soccer and NHL), we can pitch highly targeted sponsors. Advertisers pay a premium for targeted audiences.
