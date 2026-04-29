@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { getMatchesByLeague } from './controller';
 import { authenticate } from '../auth/middleware';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // All match routes require a logged-in user
 router.use(authenticate);

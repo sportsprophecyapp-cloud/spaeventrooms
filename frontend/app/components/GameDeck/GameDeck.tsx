@@ -345,14 +345,14 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                 touchAction: 'none'
                             }}
                         >
-                            <div className={styles.hybridCard}>
+                            <div className={`${styles.hybridCard} ${roomId === 'nhl' ? styles.nhlBackground : ''}`}>
                                 {/* HEADER */}
                                 <div className={styles.cardHeader}>
                                     {match.status === 'live' ? (
                                         <span className={styles.liveBadge}>● LIVE NOW</span>
                                     ) : (
                                         <>
-                                            <p className={styles.predictionType}>MATCH WINNER</p>
+                                            <p className={styles.predictionType}>{roomId === 'nhl' ? '🏒 ICE RINK' : '🏟️ MATCH WINNER'}</p>
                                             <p className={styles.matchTime}>{timeDisplay}</p>
                                         </>
                                     )}
@@ -392,7 +392,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                             </div>
                                         </div>
                                         <p className={styles.teamName}>{match?.home_team}</p>
-                                        <p className={styles.pickLabel}>PICK</p>
+                                        <p className={styles.pickLabel}>{roomId === 'nhl' ? 'HOME ICE' : 'HOME WIN'}</p>
                                     </div>
 
                                     {/* VS */}
@@ -430,7 +430,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                             </div>
                                         </div>
                                         <p className={styles.teamName}>{match?.away_team}</p>
-                                        <p className={styles.pickLabel}>PICK</p>
+                                        <p className={styles.pickLabel}>{roomId === 'nhl' ? 'ROAD WIN' : 'AWAY WIN'}</p>
                                     </div>
                                 </div>
 

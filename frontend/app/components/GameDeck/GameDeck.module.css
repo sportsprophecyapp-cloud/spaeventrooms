@@ -161,6 +161,19 @@
     z-index: 1;
 }
 
+/* NHL Hybrid Card Background */
+.nhlBackground {
+    background: url('/assets/arenas/nhl_arena_bg.png') center/cover no-repeat;
+    box-shadow:
+        inset 0 0 100px rgba(0, 0, 0, 0.8),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 210, 255, 0.3);
+}
+
+.nhlBackground::before {
+    background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.6), transparent);
+}
+
 /* Top rim light */
 .hybridCard::before {
     content: '';
@@ -241,6 +254,14 @@
 .awayRegion {
     background: linear-gradient(90deg, rgba(255, 71, 87, 0.05) 0%, transparent 100%);
     border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nhlBackground .homeRegion {
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 210, 255, 0.08) 100%);
+}
+
+.nhlBackground .awayRegion {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
 }
 
 
