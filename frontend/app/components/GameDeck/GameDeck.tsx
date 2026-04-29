@@ -253,7 +253,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                         <>
                             <img src="/assets/arenas/nhl-offseason.png" alt="Off-season Trophy" style={{ width: '200px', height: '200px', objectFit: 'contain', animation: 'float 3s ease-in-out infinite', filter: 'drop-shadow(0 10px 20px rgba(0,210,255,0.5))' }} />
                             <h3 className={styles.emptyText} style={{ color: '#00d2ff', marginTop: '1rem' }}>
-                                Season Complete. See you back for the 2026/2027 season soon!
+                                {t('nhl_season_complete') || 'Season Complete. See you back for the 2026/2027 season soon!'}
                             </h3>
                         </>
                     ) : (
@@ -263,10 +263,10 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                         </>
                     )}
                     <button className={styles.refreshBtn} onClick={() => window.location.reload()}>
-                        🔄 Scan for Live Games
+                        🔄 {t('scan_live_games') || 'Scan for Live Games'}
                     </button>
                     <p style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '1rem' }}>
-                        Next automatic update in 1 hour
+                        {t('next_update_1hr') || 'Next automatic update in 1 hour'}
                     </p>
                 </div>
             </div>
@@ -289,8 +289,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                             <div className={styles.prizeBox}>
                                 <img src={featuredSponsor.logo_url} alt={featuredSponsor.sponsor_name} className={styles.prizeSponsorLogo} />
                                 <div className={styles.prizeDetails}>
-                                    <h4>{featuredSponsor.sponsor_name} Giveaway</h4>
-                                    <p>Enter the Draw Room now for a chance to win exclusive rewards!</p>
+                                    <h4>{featuredSponsor.sponsor_name} {t('giveaway') || 'Giveaway'}</h4>
+                                    <p>{t('enter_draw_hint') || 'Enter the Draw Room now for a chance to win exclusive rewards!'}</p>
                                 </div>
                             </div>
                         </div>
@@ -310,7 +310,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                             {t('back_to_leagues')}
                         </button>
                     </div>
-                    <p className={styles.completionCountdown}>{`Auto-returning in ${countdown}s`}</p>
+                    <p className={styles.completionCountdown}>{t('auto_returning') || 'Auto-returning in'} {countdown}s</p>
                 </div>
             </div>
         );

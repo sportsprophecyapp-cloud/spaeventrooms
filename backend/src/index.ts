@@ -6,6 +6,7 @@ import { roomRegistry } from './rooms/registry';
 import { connectRedis } from './shared/database/redis';
 import { startKeepAlive } from './shared/cron/keepAlive';
 import { startSoccerScheduler } from './rooms/soccer/scheduler';
+import { initBackupScheduler } from './shared/services/backupScheduler';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ const io = socketService.getIO(); // Get the io instance from the service
 
     startKeepAlive();
     startSoccerScheduler();
+    initBackupScheduler();
 
     roomRegistry.initializeRooms(app, io);
 

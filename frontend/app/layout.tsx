@@ -34,6 +34,29 @@ export const metadata: Metadata = {
   title: 'Events Arena | The Ultimate Fan Engagement & Prediction Platform',
   description: 'Join the ultimate second-screen experience. Forecast live match outcomes, earn status, and compete for prizes in the Events Arena. 100% free, pure skill.',
   manifest: '/manifest.json',
+  metadataBase: new URL('https://eventsarena.sportsprophecy.app'), // Replace with actual domain if different
+  openGraph: {
+    title: 'Events Arena | Predict & Win',
+    description: 'Join the ultimate second-screen experience. Forecast live match outcomes, earn status, and compete for prizes. 100% free, pure skill.',
+    url: 'https://eventsarena.sportsprophecy.app',
+    siteName: 'Events Arena',
+    images: [
+      {
+        url: '/assets/seo/hero-banner.png',
+        width: 1200,
+        height: 630,
+        alt: 'Events Arena Hero Banner',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Events Arena | Predict & Win',
+    description: 'Join the ultimate second-screen experience. Forecast live match outcomes, earn status, and compete for prizes.',
+    images: ['/assets/seo/hero-banner.png'],
+  },
 };
 
 export const viewport: Viewport = {

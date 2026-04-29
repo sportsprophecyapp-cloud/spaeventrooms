@@ -36,6 +36,13 @@ export const translations: any = {
         enter_draw: "Enter Draw",
         go_to_draw_room: "Go to Draw Room",
         tickets_earned: "Tickets Earned",
+        nhl_season_complete: "Season Complete. See you back for the 2026/2027 season soon!",
+        scan_live_games: "Scan for Live Games",
+        next_update_1hr: "Next automatic update in 1 hour",
+        giveaway: "Giveaway",
+        enter_draw_hint: "Enter the Draw Room now for a chance to win exclusive rewards!",
+        auto_returning: "Auto-returning in",
+        completion_title: "Arena Cleared!"
     },
     id: { // Bahasa Indonesia
         welcome_bridge: "Selamat datang di",
@@ -72,6 +79,13 @@ export const translations: any = {
         mock_draw_btn: "Coba Simulasi Undian (Demo)",
         go_to_draw_room: "Buka Ruang Undian",
         tickets_earned: "Tiket Diperoleh",
+        nhl_season_complete: "Musim Selesai. Sampai jumpa di musim 2026/2027!",
+        scan_live_games: "Pindai Pertandingan Langsung",
+        next_update_1hr: "Pembaruan otomatis berikutnya dalam 1 jam",
+        giveaway: "Hadiah Langsung",
+        enter_draw_hint: "Masuk ke Ruang Undian sekarang untuk kesempatan memenangkan hadiah eksklusif!",
+        auto_returning: "Otomatis kembali dalam",
+        completion_title: "Arena Selesai!"
     },
     th: { // Thai
         welcome_bridge: "ยินดีต้อนรับสู่",
@@ -108,5 +122,12 @@ export const translations: any = {
         mock_draw_btn: "ลองจำลองการจับรางวัล (สาธิต)",
         go_to_draw_room: "ไปยังห้องชิงโชค",
         tickets_earned: "ตั๋วที่ได้รับ",
+        nhl_season_complete: "จบฤดูกาลแล้ว พบกันใหม่ในฤดูกาล 2026/2027!",
+        scan_live_games: "สแกนหาการแข่งขันสด",
+        next_update_1hr: "อัปเดตอัตโนมัติครั้งถัดไปใน 1 ชั่วโมง",
+        giveaway: "ของรางวัล",
+        enter_draw_hint: "เข้าสู่ห้องชิงโชคเพื่อลุ้นรับรางวัลพิเศษ!",
+        auto_returning: "กำลังกลับไปใน",
+        completion_title: "เคลียร์อารีน่าแล้ว!"
     }
 };

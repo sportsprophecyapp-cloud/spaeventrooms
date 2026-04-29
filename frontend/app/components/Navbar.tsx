@@ -37,7 +37,14 @@ const Navbar = () => {
                         >TH</button>
                     </div>
 
-                    {/* 2. Authentication or User Tray */}
+                    {/* 2. Quick Access Draw Room */}
+                    {isAuthenticated && (
+                        <Link href="/draw" className={styles.drawNavBtn} title="Draw Room">
+                            🎟️
+                        </Link>
+                    )}
+
+                    {/* 3. Authentication or User Tray */}
                     <div className={styles.links}>
                         {!isAuthenticated ? (
                             <>
