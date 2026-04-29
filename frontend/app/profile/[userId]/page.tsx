@@ -243,12 +243,12 @@ const ProfilePage = () => {
                 >
                     {profile.equipped?.frame && (
                         <div className={styles.frameOverlay}>
-                            <img src={profile.equipped.frame} alt="Frame" />
+                            <img src={profile.equipped.frame} alt="Frame" onError={(e) => e.currentTarget.style.display = 'none'} />
                         </div>
                     )}
                     <div className={styles.avatarLarge}>
                         {profile.equipped?.avatar ? (
-                            <img src={profile.equipped.avatar} alt={profile.username} className={styles.avatarImg} />
+                            <img src={profile.equipped.avatar} alt={profile.username} className={styles.avatarImg} onError={(e) => e.currentTarget.style.display = 'none'} />
                         ) : (
                             profile.username[0].toUpperCase()
                         )}
@@ -440,6 +440,7 @@ const ProfilePage = () => {
                                                         src={special.asset}
                                                         alt={special.name}
                                                         className={`${styles.trophyImg} ${!isUnlocked ? styles.trophyImgLocked : ''}`}
+                                                        onError={(e) => e.currentTarget.style.display = 'none'}
                                                     />
                                                     {!isUnlocked && <div className={styles.lockOverlay}>🔒</div>}
                                                 </div>

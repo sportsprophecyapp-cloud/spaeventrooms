@@ -77,12 +77,12 @@ const UserTray = () => {
                 >
                     {user.equipped?.frame && (
                         <div className={styles.frameOverlay}>
-                            <img src={user.equipped.frame} alt="Frame" />
+                            <img src={user.equipped.frame} alt="Frame" onError={(e) => e.currentTarget.style.display = 'none'} />
                         </div>
                     )}
                     <div className={styles.avatar}>
                         {user.equipped?.avatar ? (
-                            <img src={user.equipped.avatar} alt={user.username} className={styles.avatarImg} />
+                            <img src={user.equipped.avatar} alt={user.username} className={styles.avatarImg} onError={(e) => e.currentTarget.style.display = 'none'} />
                         ) : (
                             user.username?.substring(0, 2).toUpperCase()
                         )}

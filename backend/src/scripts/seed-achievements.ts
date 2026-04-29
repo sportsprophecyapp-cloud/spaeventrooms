@@ -12,7 +12,7 @@ const seedAchievements = async () => {
                 name: 'Arena Recruiter',
                 type: 'badge',
                 cost: 0,
-                asset_url: '/assets/cosmetics/recruiter_badge.png',
+                asset_url: null,
                 description: 'Your first step into the Social Arena.',
                 requirement: 'Refer 1 friend to the Arena',
                 is_achievement_reward: true
@@ -22,7 +22,7 @@ const seedAchievements = async () => {
                 name: 'Social Guardian',
                 type: 'frame',
                 cost: 0,
-                asset_url: '/assets/cosmetics/champion_frame.png',
+                asset_url: null,
                 description: 'A frame for those who protect the community.',
                 requirement: 'Refer 10 friends to the Arena',
                 is_achievement_reward: true
@@ -136,7 +136,7 @@ const seedAchievements = async () => {
                 name: 'Legend',
                 type: 'frame',
                 cost: 0,
-                asset_url: '/assets/cosmetics/legend_frame.png',
+                asset_url: null,
                 description: 'One year of loyalty.',
                 requirement: '365-day login streak',
                 is_achievement_reward: true
@@ -158,7 +158,7 @@ const seedAchievements = async () => {
                 name: "Champion's Crown",
                 type: 'frame',
                 cost: 0,
-                asset_url: '/assets/cosmetics/champion_frame.png',
+                asset_url: null,
                 description: 'A crown for the bold.',
                 requirement: 'Win a Prize Draw',
                 is_achievement_reward: true
