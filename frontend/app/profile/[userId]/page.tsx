@@ -552,14 +552,29 @@ const ProfilePage = () => {
                                                                                 <span className={styles.statusCorrect}>✅ CORRECT</span>
                                                                                 {isOwnProfile && (
                                                                                     <button 
-                                                                                        className={styles.shareXBtn} 
-                                                                                        onClick={() => {
-                                                                                            const text = `🎯 I just nailed my prediction for ${item.home_team} vs ${item.away_team}!\n\nI'm Rank #${profile.global_rank || '??'} on Sports Prophecy Arena.\n\nJoin me and play for free: ${window.location.origin}/auth/register?ref=${profile.referral_code}`;
-                                                                                            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+                                                                                        className={styles.shareBtn} 
+                                                                                        onClick={async () => {
+                                                                                            const text = `🎯 I just nailed my prediction for ${item.home_team} vs ${item.away_team}!\n\nI'm Rank #${profile.global_rank || '??'} on Sports Prophecy Arena.`;
+                                                                                            const url = `${window.location.origin}/auth/register?ref=${profile.referral_code}`;
+                                                                                            if (navigator.share) {
+                                                                                                try {
+                                                                                                    await navigator.share({
+                                                                                                        title: 'Sports Prophecy Arena',
+                                                                                                        text: text,
+                                                                                                        url: url
+                                                                                                    });
+                                                                                                } catch (err) {
+                                                                                                    console.error('Error sharing:', err);
+                                                                                                }
+                                                                                            } else {
+                                                                                                navigator.clipboard.writeText(`${text}\n${url}`);
+                                                                                                alert('Link copied to clipboard!');
+                                                                                            }
                                                                                         }}
-                                                                                        title="Share to X"
+                                                                                        title="Share"
                                                                                     >
-                                                                                        𝕏
+                                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '4px'}}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                                                                                        Share
                                                                                     </button>
                                                                                 )}
                                                                             </div>
