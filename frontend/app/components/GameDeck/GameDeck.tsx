@@ -232,8 +232,19 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         return (
             <div className={styles.emptyContainer}>
                 <div className={styles.emptyContent}>
-                    <div className={styles.emptyIcon}>⚽</div>
-                    <p className={styles.emptyText}>{t('no_matches_available') || "No active matches right now."}</p>
+                    {roomId === 'nhl' ? (
+                        <>
+                            <img src="/assets/arenas/nhl-offseason.png" alt="Off-season Trophy" style={{ width: '200px', height: '200px', objectFit: 'contain', animation: 'float 3s ease-in-out infinite', filter: 'drop-shadow(0 10px 20px rgba(0,210,255,0.5))' }} />
+                            <h3 className={styles.emptyText} style={{ color: '#00d2ff', marginTop: '1rem' }}>
+                                Season Complete. See you back for the 2026/2027 season soon!
+                            </h3>
+                        </>
+                    ) : (
+                        <>
+                            <div className={styles.emptyIcon}>⚽</div>
+                            <p className={styles.emptyText}>{t('no_matches_available') || "No active matches right now."}</p>
+                        </>
+                    )}
                     <button className={styles.refreshBtn} onClick={() => window.location.reload()}>
                         🔄 Scan for Live Games
                     </button>
