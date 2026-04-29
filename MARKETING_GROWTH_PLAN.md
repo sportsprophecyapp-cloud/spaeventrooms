@@ -1,7 +1,7 @@
 # 📈 Events Arena: Growth & Marketing Playbook
 
 **Owner:** Digital Marketing Partner  
-**Objective:** Scale the Events Arena user base from 0 to sustainable mass adoption by leveraging zero-cost marketing strategies, tribal sports communities, and the built-in gamification loops.
+**Objective:** Scale the Events Arena user base from 0 to sustainable mass adoption by leveraging organic marketing strategies, tribal sports communities, and the built-in gamification loops.
 
 ---
 

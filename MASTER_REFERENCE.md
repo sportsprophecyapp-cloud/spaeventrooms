@@ -11,7 +11,7 @@
 
 - **Social Proof:** Winner Feedback System, dynamic Referral Badges with FOMO copy, and OpenGraph/Twitter Card viral unfurls (iMessage/WhatsApp expansion).
 - **Brand Trust:** Integrated **Founder's Letter** on the landing page to establish authenticity and vision.
-- **Automated Infrastructure:** Zero-cost cron-job backups executing nightly to a persistent 1GB Render Disk.
+- **Automated Infrastructure:** Automated cron-job backups executing nightly to a persistent 1GB Render Disk.
 
 ## 💰 THE EVENTS ECONOMY
 - **Dual-Currency Model:** 
