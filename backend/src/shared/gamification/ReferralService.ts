@@ -42,8 +42,8 @@ export class ReferralService {
                 [referrerId, refereeId]
             );
 
-            // 5. Award reward to referrer (50 Tokens)
-            await client.query('UPDATE users SET token_balance = token_balance + 50 WHERE id = $1', [referrerId]);
+            // 5. Award reward to referrer (50 Tokens and 5 Draw Tickets)
+            await client.query('UPDATE users SET token_balance = token_balance + 50, total_tickets = total_tickets + 5 WHERE id = $1', [referrerId]);
             await client.query(
                 'INSERT INTO token_transactions (user_id, amount, type, description) VALUES ($1, 50, \'referral\', $2)',
                 [referrerId, `Referral bonus for User ID ${refereeId}`]

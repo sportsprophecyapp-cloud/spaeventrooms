@@ -77,14 +77,18 @@ export default function LootShowcase() {
                 <div className={styles.previewCircle}>
                     <div className={styles.avatarWrapper}>
                         {nextReward.type === 'Avatar' ? (
-                            <img src={nextReward.asset} alt="Preview" className={styles.avatarImg} />
+                            <img src={nextReward.asset} alt="Preview" className={styles.avatarImg} onError={(e) => e.currentTarget.style.display = 'none'} />
+                        ) : user.equipped?.avatar ? (
+                            <img src={user.equipped.avatar} alt="My Avatar" className={styles.avatarImg} onError={(e) => e.currentTarget.style.display = 'none'} />
                         ) : (
-                            <img src={user.equipped?.avatar || '/assets/arenas/soccer-arena.jpg'} alt="My Avatar" className={styles.avatarImg} />
+                            <div className={styles.avatarImg} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: '2rem', fontWeight: 'bold' }}>
+                                {user.username?.substring(0, 2).toUpperCase()}
+                            </div>
                         )}
                     </div>
                     {nextReward.type === 'Frame' && (
                         <div className={styles.frameOverlay}>
-                            <img src={nextReward.asset} alt="Frame Preview" />
+                            <img src={nextReward.asset} alt="Frame Preview" onError={(e) => e.currentTarget.style.display = 'none'} />
                         </div>
                     )}
                 </div>

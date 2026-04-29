@@ -548,7 +548,21 @@ const ProfilePage = () => {
                                                                     <span className={styles.historyPick}>PICK: <strong>{item.pick.toUpperCase()}</strong></span>
                                                                     <div className={styles.historyStatus}>
                                                                         {item.status === 'correct' ? (
-                                                                            <span className={styles.statusCorrect}>✅ CORRECT</span>
+                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                                <span className={styles.statusCorrect}>✅ CORRECT</span>
+                                                                                {isOwnProfile && (
+                                                                                    <button 
+                                                                                        className={styles.shareXBtn} 
+                                                                                        onClick={() => {
+                                                                                            const text = `🎯 I just nailed my prediction for ${item.home_team} vs ${item.away_team}!\n\nI'm Rank #${profile.global_rank || '??'} on Sports Prophecy Arena.\n\nJoin me and play for free: ${window.location.origin}/auth/register?ref=${profile.referral_code}`;
+                                                                                            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+                                                                                        }}
+                                                                                        title="Share to X"
+                                                                                    >
+                                                                                        𝕏
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
                                                                         ) : item.status === 'incorrect' ? (
                                                                             <span className={styles.statusIncorrect}>❌ INCORRECT</span>
                                                                         ) : (
