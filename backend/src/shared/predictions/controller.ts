@@ -74,19 +74,24 @@ export const getUserMatchPrediction = async (req: AuthRequest, res: Response) =>
         const table = roomId === 'nhl' ? 'nhl_predictions' : 'soccer_predictions';
         console.log(`🔍 Checking prediction for user: ${userId}, match: ${matchId}, room: ${roomId}, table: ${table}`);
         
+        if (!matchId) {
+            console.warn('⚠️ Missing matchId in getUserMatchPrediction');
+            return res.json(null);
+        }
+
         const result = await query(
             `SELECT prediction_data FROM ${table} WHERE user_id = $1 AND match_id = $2`,
             [userId, matchId]
         );
 
-        if (result.rows.length > 0) {
-            res.json(result.rows[0].prediction_data);
+        if (result && result.rows && result.rows.length > 0) {
+            return res.json(result.rows[0].prediction_data);
         } else {
-            res.json(null);
+            return res.json(null);
         }
     } catch (err: any) {
         console.error('❌ FATAL in getUserMatchPrediction:', err.message, { userId, matchId, roomId });
-        res.status(500).json({ error: 'Internal Server Error', details: err.message });
+        return res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 };
 

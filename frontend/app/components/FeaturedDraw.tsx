@@ -27,7 +27,7 @@ const FeaturedDraw = () => {
         const fetchDraw = async () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${apiUrl}/api/gamification/draws`);
+                const res = await fetch(`${apiUrl}/api/gamification/draws/active`);
                 if (res.ok) {
                     const data = await res.json();
                     const activeDraws = data.draws || [];
