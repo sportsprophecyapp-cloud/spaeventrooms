@@ -54,6 +54,9 @@ const HomePage = () => {
                     <p className={styles.tagline}>{t('tagline')}</p>
                 </Link>
 
+                {/* THE GLOBAL HERO: Pulse CTA for Everyone */}
+                <PulseCTA />
+
                 {!isAuthenticated && (
                     <div className={styles.heroCtaWrapper}>
                         <Link href="/auth/register" className={styles.heroCtaBtn}>
@@ -63,16 +66,13 @@ const HomePage = () => {
                 )}
             </header>
 
-            {isAuthenticated && (
-                <div style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
-                    <DailyLoginButton />
-                    <LootShowcase />
-                </div>
-            )}
-
             <main className={styles.main}>
-                <PulseCTA />
-                
+                {isAuthenticated && (
+                    <div style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '1000px', margin: '0 auto', width: '100%', gap: '1rem' }}>
+                        <DailyLoginButton />
+                        <LootShowcase />
+                    </div>
+                )}
                 <div className={styles.roomGrid}>
                     {rooms.map(room => (
                         <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`} style={{ borderColor: room.active ? room.color : undefined }}>
