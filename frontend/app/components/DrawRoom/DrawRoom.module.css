@@ -297,6 +297,13 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.myEntriesRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
 .myEntries {
     display: flex;
     align-items: center;
@@ -308,8 +315,27 @@
     background: rgba(0, 255, 136, 0.05);
     border-radius: 8px;
     border: 1px solid rgba(0, 255, 136, 0.2);
-    width: 100%;
     animation: pulseEntry 2s infinite;
+}
+
+.shareEntryBtn {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: #d4af37;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.shareEntryBtn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
 }
 
 @keyframes pulseEntry {

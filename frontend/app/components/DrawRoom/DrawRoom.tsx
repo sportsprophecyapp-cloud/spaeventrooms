@@ -6,6 +6,7 @@ import { useAuth } from '@/app/context/AuthContext';
 import { useLanguage } from '@/app/context/LanguageContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import TicketShareCard from '../TicketShareCard/TicketShareCard';
 
 interface Draw {
     id: number;
@@ -44,6 +45,7 @@ const DrawRoom = () => {
     const [editingDrawId, setEditingDrawId] = useState<number | null>(null);
     const [editDate, setEditDate] = useState('');
     const [editStatus, setEditStatus] = useState<'active' | 'completed'>('active');
+    const [selectedShareDraw, setSelectedShareDraw] = useState<Draw | null>(null);
 
     useEffect(() => {
         if (!token) {
@@ -309,8 +311,17 @@ const DrawRoom = () => {
                                         👥 {draw.entry_count || 0} {draw.entry_count === 1 ? 'entry' : 'entries'}
                                     </div>
                                     {myEntries[draw.id] > 0 && (
-                                        <div className={styles.myEntries}>
-                                            ⭐ Your entries: <strong>{myEntries[draw.id]}</strong>
+                                        <div className={styles.myEntriesRow}>
+                                            <div className={styles.myEntries}>
+                                                ⭐ Your entries: <strong>{myEntries[draw.id]}</strong>
+                                            </div>
+                                            <button 
+                                                className={styles.shareEntryBtn}
+                                                onClick={() => setSelectedShareDraw(draw)}
+                                                title="Share Golden Ticket"
+                                            >
+                                                📤 Share
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -373,6 +384,17 @@ const DrawRoom = () => {
                     <div className={`${styles.messageToast} ${styles[message.type]}`}>
                         {message.text}
                     </div>
+                )}
+
+                {selectedShareDraw && user && (
+                    <TicketShareCard 
+                        prizeTitle={selectedShareDraw.title}
+                        prizeValue={selectedShareDraw.prize}
+                        sponsorName={selectedShareDraw.sponsor_name || 'Events Arena'}
+                        username={user.username || 'Fan'}
+                        referralCode={user.id.toString()}
+                        onClose={() => setSelectedShareDraw(null)}
+                    />
                 )}
 
             </main>
