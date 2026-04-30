@@ -8,6 +8,7 @@ import RewardCenter from '@/app/components/RewardCenter/RewardCenter';
 import TokenShop from '@/app/components/TokenShop';
 import LootShowcase from '@/app/components/LootShowcase/LootShowcase';
 import ReferralRoadmap from '@/app/components/ReferralRoadmap/ReferralRoadmap';
+import PredictionShareCard from '@/app/components/PredictionShareCard/PredictionShareCard';
 
 // RESTORED: This interface is critical for the page to function.
 interface UserProfile {
@@ -89,6 +90,7 @@ const ProfilePage = () => {
     const [historyTotal, setHistoryTotal] = useState(0);
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyFilter, setHistoryFilter] = useState<'all' | 'wins' | 'pending' | 'incorrect'>('all');
+    const [selectedShareItem, setSelectedShareItem] = useState<HistoryEntry | null>(null);
 
     const fetchHistory = async (page: number, filter: string, reset = false) => {
         try {
@@ -553,35 +555,30 @@ const ProfilePage = () => {
                                                                                 {isOwnProfile && (
                                                                                     <button 
                                                                                         className={styles.shareBtn} 
-                                                                                        onClick={async () => {
-                                                                                            const text = `🎯 I just nailed my prediction for ${item.home_team} vs ${item.away_team}!\n\nI'm Rank #${profile.global_rank || '??'} on Events Arena.`;
-                                                                                            const url = `${window.location.origin}/auth/register?ref=${profile.referral_code}`;
-                                                                                            if (navigator.share) {
-                                                                                                try {
-                                                                                                    await navigator.share({
-                                                                                                        title: 'Events Arena',
-                                                                                                        text: text,
-                                                                                                        url: url
-                                                                                                    });
-                                                                                                } catch (err) {
-                                                                                                    console.error('Error sharing:', err);
-                                                                                                }
-                                                                                            } else {
-                                                                                                navigator.clipboard.writeText(`${text}\n${url}`);
-                                                                                                alert('Link copied to clipboard!');
-                                                                                            }
-                                                                                        }}
-                                                                                        title="Share"
+                                                                                        onClick={() => setSelectedShareItem(item)}
+                                                                                        title="Share Result"
                                                                                     >
                                                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '4px'}}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                                                                                         Share
                                                                                     </button>
                                                                                 )}
                                                                             </div>
-                                                                        ) : item.status === 'incorrect' ? (
-                                                                            <span className={styles.statusIncorrect}>❌ INCORRECT</span>
                                                                         ) : (
-                                                                            <span className={styles.historyLive}>PENDING</span>
+                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                                <span className={item.status === 'incorrect' ? styles.statusIncorrect : styles.historyLive}>
+                                                                                    {item.status.toUpperCase()}
+                                                                                </span>
+                                                                                {isOwnProfile && (
+                                                                                    <button 
+                                                                                        className={styles.shareBtn} 
+                                                                                        onClick={() => setSelectedShareItem(item)}
+                                                                                        title="Share Pick"
+                                                                                    >
+                                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '4px'}}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                                                                                        Share
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
                                                                         )}
                                                                     </div>
                                                                 </div>
@@ -623,6 +620,20 @@ const ProfilePage = () => {
 
             {isShopOpen && (
                 <TokenShop onClose={() => setIsShopOpen(false)} />
+            )}
+
+            {selectedShareItem && (
+                <PredictionShareCard 
+                    homeTeam={selectedShareItem.home_team}
+                    awayTeam={selectedShareItem.away_team}
+                    homeLogo={selectedShareItem.home_logo || ''}
+                    awayLogo={selectedShareItem.away_logo || ''}
+                    pick={selectedShareItem.pick}
+                    username={profile.username}
+                    referralCode={profile.referral_code || profile.id}
+                    matchId={selectedShareItem.id}
+                    onClose={() => setSelectedShareItem(null)}
+                />
             )}
         </div>
     );
