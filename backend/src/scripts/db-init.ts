@@ -341,22 +341,9 @@ const initDB = async () => {
             WHERE type IN ('avatar', 'frame')
         `);
 
-        // 13. Final Branding Cleanup (Replace legacy SaaS Price DB placeholders)
+        // 13. Final Branding Cleanup (Ensure at least one active sponsor exists)
         console.log('🧹 Final Branding Cleanup (Sponsors & Prizes)...');
-        await client.query(`
-            UPDATE room_sponsors 
-            SET sponsor_name = 'Events Arena',
-                logo_url = '/assets/icon.png'
-            WHERE sponsor_name = 'SaaS Price DB'
-        `);
         
-        await client.query(`
-            UPDATE prize_draws 
-            SET title = REPLACE(title, 'SaaS Price DB', 'Events Arena'),
-                description = REPLACE(description, 'SaaS Price DB', 'Events Arena')
-            WHERE title LIKE '%SaaS Price DB%' OR description LIKE '%SaaS Price DB%'
-        `);
-
         // Ensure there is at least one active sponsor for the Draw Room if empty
         const sponsorCount = await client.query('SELECT count(*) FROM room_sponsors WHERE is_active = true');
         if (parseInt(sponsorCount.rows[0].count) === 0) {
