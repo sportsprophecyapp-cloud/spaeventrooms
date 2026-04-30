@@ -516,7 +516,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                     awayLogo={lastMatch.away_logo || ''}
                     pick={lastPick || ''}
                     username={user.username || 'Fan'}
-                    referralCode={user.id}
+                    referralCode={user.id.toString()}
                     matchId={lastMatch.match_id}
                     onClose={() => setShowShareCard(false)}
                 />
