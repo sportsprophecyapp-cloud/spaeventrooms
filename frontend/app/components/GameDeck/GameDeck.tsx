@@ -28,7 +28,7 @@ interface GameDeckProps {
 
 const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
     const { t } = useLanguage();
-    const { token, refreshUser } = useAuth();
+    const { token, refreshUser, user } = useAuth();
     const { sponsors, trackSponsor } = useSponsor();
     const router = useRouter();
     const [gone, setGone] = useState<Set<number>>(() => new Set());
