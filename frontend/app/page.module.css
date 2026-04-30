@@ -124,6 +124,8 @@
     box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
     transition: all 0.3s ease;
     animation: pulseGlow 2s infinite;
+    max-width: 100%;
+    text-align: center;
 }
 
 .heroCtaBtn:hover {
@@ -288,6 +290,16 @@
 .inactive {
     opacity: 0.6;
     filter: grayscale(0.5);
+}
+
+.inactive .roomIcon {
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+.inactive .notifyBtn {
+    opacity: 1;
+    filter: none;
 }
 
 .notifyBtn {
@@ -520,6 +532,7 @@
 
     .letterBody {
         padding: 2rem;
+        box-shadow: 5px 5px 0px rgba(0, 112, 243, 0.1);
     }
 
     .letterText {
@@ -528,5 +541,25 @@
 
     .letterSignature {
         font-size: 2.2rem;
+    }
+
+    .footerLinks {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .economyPreview {
+        flex-direction: column;
+    }
+
+    .ecoCard {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .heroCtaBtn {
+        font-size: 1rem;
+        padding: 0.9rem 1.8rem;
     }
 }

@@ -84,7 +84,9 @@ const SponsorWidget = ({ roomId }: SponsorWidgetProps) => {
                     {currentSponsor.logo_url ? (
                         <img src={currentSponsor.logo_url} alt={currentSponsor.sponsor_name} className={styles.logo} />
                     ) : (
-                        <span className={styles.nameOnly}>{currentSponsor.sponsor_name}</span>
+                        <div className={styles.premiumWordmark}>
+                            <span className={styles.wordmarkText}>{currentSponsor.sponsor_name}</span>
+                        </div>
                     )}
                 </a>
             </div>

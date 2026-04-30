@@ -123,3 +123,29 @@
 - ❌ **Direct Prize Draw Entries:** We cannot sell tickets to the Weekly Draws. This violates the "No Purchase Necessary" sweepstakes laws.
 - ❌ **"Do-Over" Predictions:** We cannot sell the ability to change a locked-in prediction after a game starts.
 - ❌ **Point Boosters:** We cannot sell items that artificially inflate a user's leaderboard score.
+
+---
+
+## 🏛️ Strategic Growth Milestones (The "Repeatable Engine" Framework)
+*High-level strategy to transition from a "good idea" to a "repeatable revenue engine" based on user population tiers.*
+
+### Phase 0: The Proof Engine (0 - 5,000 Users)
+**Goal:** Build unshakeable trust and eliminate skepticism.
+- **The Proof Layer:** Publicly display "Verified Winner" payouts on the homepage. Use real usernames and prize screenshots (e.g., "User @HattrickHarry won a $50 Amazon Gift Card").
+- **Speed to First Prediction:** Aim for < 60 seconds from landing to first pick. Feature a "Match of the Day" directly on the mobile landing screen.
+- **Sponsor Validation:** Use SaaSPriceDB as a case study. Document every click and impression they receive to build a "Sales Deck" for future brands.
+
+### Phase 1: The Viral Loop (5,000 - 20,000 Users)
+**Goal:** Manufacture growth through competition.
+- **Competition Sharing:** Shift from "Share this app" to "Share this bet." Allow users to export a "Prediction Receipt" to Instagram/X to challenge friends.
+- **Tribal Communities:** Aggressively enter Reddit/Discord game threads during live matches with "consensus data" (e.g., "70% of fans on Events Arena predict a Chelsea upset tonight. What's your call?").
+
+### Phase 2: The Sponsor Weapon (20,000+ Users)
+**Goal:** Scale revenue through standardized distribution.
+- **Standardized Pricing:** Move to fixed sponsor tiers ($250, $1,000, $3,000) based on guaranteed impression counts.
+- **Micro-Influencer Nodes:** Target sports creators with 5k-50k followers. Give them "Private Arenas" and revenue shares on Arena Pass signups.
+- **Sentiment Data Sales:** Package the aggregate fan prediction data as a B2B API for sports media outlets.
+
+---
+*Last Updated: April 30, 2026*
+

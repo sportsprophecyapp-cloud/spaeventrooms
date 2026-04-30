@@ -48,7 +48,9 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
                                     }}
                                 />
                             ) : null}
-                            <div className={styles.placeholderLogo}>{match.home_team?.[0]}</div>
+                            <div className={styles.placeholderLogo}>
+                                <span className={styles.monogram}>{match.home_team?.[0]}</span>
+                            </div>
                         </div>
                         <span className={styles.team}>{match.home_team}</span>
                     </div>
@@ -66,7 +68,9 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
                                     }}
                                 />
                             ) : null}
-                            <div className={styles.placeholderLogo}>{match.away_team?.[0]}</div>
+                            <div className={styles.placeholderLogo}>
+                                <span className={styles.monogram}>{match.away_team?.[0]}</span>
+                            </div>
                         </div>
                         <span className={styles.team}>{match.away_team}</span>
                     </div>
