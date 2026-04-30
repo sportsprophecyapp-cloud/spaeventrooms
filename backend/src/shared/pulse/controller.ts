@@ -17,8 +17,8 @@ export const getPulsePicks = async (req: Request, res: Response) => {
                     m.away_logo,
                     m.start_time,
                     COUNT(p.user_id) as total_votes,
-                    COUNT(CASE WHEN p.prediction_data->>'pick' = 'home' THEN 1 END) as home_votes,
-                    COUNT(CASE WHEN p.prediction_data->>'pick' = 'away' THEN 1 END) as away_votes
+                    COUNT(CASE WHEN p.prediction_data->>'pick' = m.home_team THEN 1 END) as home_votes,
+                    COUNT(CASE WHEN p.prediction_data->>'pick' = m.away_team THEN 1 END) as away_votes
                 FROM nhl_matches m
                 LEFT JOIN nhl_predictions p ON m.match_id = p.match_id
                 WHERE m.start_time > CURRENT_TIMESTAMP
@@ -35,8 +35,8 @@ export const getPulsePicks = async (req: Request, res: Response) => {
                     m.away_logo,
                     m.start_time,
                     COUNT(p.user_id) as total_votes,
-                    COUNT(CASE WHEN p.prediction_data->>'pick' = 'home' THEN 1 END) as home_votes,
-                    COUNT(CASE WHEN p.prediction_data->>'pick' = 'away' THEN 1 END) as away_votes
+                    COUNT(CASE WHEN p.prediction_data->>'pick' = m.home_team THEN 1 END) as home_votes,
+                    COUNT(CASE WHEN p.prediction_data->>'pick' = m.away_team THEN 1 END) as away_votes
                 FROM soccer_matches m
                 LEFT JOIN soccer_predictions p ON m.match_id = p.match_id
                 WHERE m.start_time > CURRENT_TIMESTAMP

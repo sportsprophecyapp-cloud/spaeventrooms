@@ -70,11 +70,14 @@ export const getMatchSentiment = async (req: AuthRequest, res: Response) => {
         
         const result = await query(
             `SELECT 
-                prediction_data->>'pick' as pick,
-                COUNT(*) as count
-             FROM ${table}
-             WHERE match_id = $1
-             GROUP BY prediction_data->>'pick'`,
+                p.prediction_data->>'pick' as pick,
+                COUNT(*) as count,
+                m.home_team,
+                m.away_team
+             FROM ${table} p
+             JOIN ${table.replace('_predictions', '_matches')} m ON p.match_id = m.match_id
+             WHERE p.match_id = $1
+             GROUP BY p.prediction_data->>'pick', m.home_team, m.away_team`,
             [matchId]
         );
 
@@ -82,8 +85,14 @@ export const getMatchSentiment = async (req: AuthRequest, res: Response) => {
         let total = 0;
 
         result.rows.forEach(row => {
-            if (row.pick) {
-                counts[row.pick] = parseInt(row.count);
+            if (row.pick === row.home_team) {
+                counts.home = parseInt(row.count);
+                total += parseInt(row.count);
+            } else if (row.pick === row.away_team) {
+                counts.away = parseInt(row.count);
+                total += parseInt(row.count);
+            } else if (row.pick === 'draw') {
+                counts.draw = parseInt(row.count);
                 total += parseInt(row.count);
             }
         });
