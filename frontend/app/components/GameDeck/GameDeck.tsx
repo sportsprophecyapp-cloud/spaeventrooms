@@ -411,6 +411,14 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                     {/* HOME TEAM REGION */}
                                     <div
                                         className={`${styles.teamRegion} ${styles.homeRegion}`}
+                                        style={{
+                                            background: dragX > 20 
+                                                ? `linear-gradient(90deg, transparent 0%, rgba(46, 213, 115, ${Math.min(0.3, dragX / 500)}) 100%)`
+                                                : undefined,
+                                            boxShadow: dragX > 50
+                                                ? `inset -20px 0 40px rgba(46, 213, 115, ${Math.min(0.2, (dragX - 50) / 1000)})`
+                                                : undefined
+                                        }}
                                     >
                                         <div className={styles.logoWrapper}>
                                             {match?.home_logo && !match.home_logo.includes('.toLowerCase()') ? (
@@ -421,7 +429,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                                     onError={(e) => {
                                                         const target = e.currentTarget;
                                                         target.style.display = 'none';
-                                                        // Show fallback
                                                         const parent = target.parentElement;
                                                         if (parent) {
                                                             const fallback = parent.querySelector(`.${styles.placeholderLogo}`);
@@ -430,7 +437,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                                     }}
                                                 />
                                             ) : null}
-                                            {/* Always render fallback hidden, show on error */}
                                             <div
                                                 className={styles.placeholderLogo}
                                                 style={{ display: match?.home_logo ? 'none' : 'flex' }}
@@ -439,7 +445,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                             </div>
                                         </div>
                                         <p className={styles.teamName}>{match?.home_team}</p>
-                                        <p className={styles.pickLabel}>{roomId === 'nhl' ? 'HOME ICE' : 'HOME WIN'}</p>
+                                        <p className={styles.pickLabel} style={{ opacity: dragX > 50 ? 1 : 0, transform: `translateY(${dragX > 50 ? 0 : 10}px)` }}>
+                                            {roomId === 'nhl' ? 'HOME ICE' : 'HOME WIN'}
+                                        </p>
                                     </div>
 
                                     {/* VS */}
@@ -450,6 +458,14 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                     {/* AWAY TEAM REGION */}
                                     <div
                                         className={`${styles.teamRegion} ${styles.awayRegion}`}
+                                        style={{
+                                            background: dragX < -20 
+                                                ? `linear-gradient(90deg, rgba(255, 71, 87, ${Math.min(0.3, -dragX / 500)}) 0%, transparent 100%)`
+                                                : undefined,
+                                            boxShadow: dragX < -50
+                                                ? `inset 20px 0 40px rgba(255, 71, 87, ${Math.min(0.2, (-dragX - 50) / 1000)})`
+                                                : undefined
+                                        }}
                                     >
                                         <div className={styles.logoWrapper}>
                                             {match?.away_logo && !match.away_logo.includes('.toLowerCase()') ? (
@@ -460,7 +476,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                                     onError={(e) => {
                                                         const target = e.currentTarget;
                                                         target.style.display = 'none';
-                                                        // Show fallback
                                                         const parent = target.parentElement;
                                                         if (parent) {
                                                             const fallback = parent.querySelector(`.${styles.placeholderLogo}`);
@@ -477,7 +492,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                             </div>
                                         </div>
                                         <p className={styles.teamName}>{match?.away_team}</p>
-                                        <p className={styles.pickLabel}>{roomId === 'nhl' ? 'ROAD WIN' : 'AWAY WIN'}</p>
+                                        <p className={styles.pickLabel} style={{ opacity: dragX < -50 ? 1 : 0, transform: `translateY(${dragX < -50 ? 0 : 10}px)` }}>
+                                            {roomId === 'nhl' ? 'ROAD WIN' : 'AWAY WIN'}
+                                        </p>
                                     </div>
                                 </div>
 
