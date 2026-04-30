@@ -12,6 +12,7 @@ import SponsorMarquee from '@/app/components/SponsorMarquee';
 import RecentWinners from '@/app/components/RecentWinners';
 import DailyLoginButton from '@/app/components/DailyLoginButton';
 import LootShowcase from '@/app/components/LootShowcase/LootShowcase';
+import FeaturedDraw from '@/app/components/FeaturedDraw';
 
 const HomePage = () => {
     const { t, language, setLanguage } = useLanguage();
@@ -85,6 +86,9 @@ const HomePage = () => {
                         </div>
                     ))}
                 </div>
+
+                {/* Featured Prize Draw */}
+                <FeaturedDraw />
 
                 {/* Recent Winners Showcase */}
                 <RecentWinners />

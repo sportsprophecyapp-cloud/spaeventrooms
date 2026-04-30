@@ -1,6 +1,7 @@
 # 📈 Events Arena: Growth & Marketing Playbook
 
-**Owner:** Digital Marketing Partner  
+**Owner:** William Commu (JustMe Media)  
+**Marketing Division:** Amelia (Amediving@gmail.com)  
 **Objective:** Scale the Events Arena user base from 0 to sustainable mass adoption by leveraging organic marketing strategies, tribal sports communities, and the built-in gamification loops.
 
 ---
