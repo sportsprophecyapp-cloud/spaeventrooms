@@ -1,5 +1,6 @@
 import pool from '../shared/database';
 import { updateDatabaseLogos } from './update_database_logos';
+import { updateNHLLogos } from './update_nhl_logos';
 
 const initDB = async () => {
     const client = await pool.connect();
@@ -331,6 +332,7 @@ const initDB = async () => {
 
         // 11. Sync Team Logos
         await updateDatabaseLogos();
+        await updateNHLLogos();
 
         // 12. Enforce Achievement-Only for Avatars & Frames
         console.log('🔒 Enforcing Achievement Gating for Avatars & Frames...');
