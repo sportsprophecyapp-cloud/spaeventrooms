@@ -64,3 +64,61 @@
 
 - **Idea:** Reach out to a medium-sized sports podcaster and offer them 500 "Tokens" to give away to their listeners if they mention the app.
 - **Observation:** e.g., "We notice a massive spike in users on Friday nights right before the Premier League weekend starts. We should focus ads then."
+
+---
+
+## 🚀 Advanced Product Roadmap & Monetization (Next Steps)
+*A formalized breakdown of future feature expansions to grow the platform autonomously and generate direct revenue, as brainstormed with the development team.*
+
+### 1. Creator "Private Arenas" (Acquisition & Retention)
+*The ultimate organic growth engine powered by influencers.*
+- **Custom Room Codes:** Influencers/Creators generate a unique 6-character invite code (e.g., `FAZE66`).
+- **Private Leaderboards:** Users join the code and are placed in a private `creator_arenas` table. Their predictions count towards a room-specific leaderboard.
+- **"Beat the Creator" Mechanic:** The UI highlights the Creator's own predictions. The goal for the room is to beat the creator's score, driving intense engagement.
+- **Revenue Share Integration:** Creators receive a percentage kickback for any users they bring in who eventually convert to the "Arena Pass".
+
+### 2. The "Prediction Receipt" (Viral Loop)
+*Letting users market the app for us.*
+- **Feature:** Auto-generate a beautifully branded, downloadable "Prediction Card" image right after a user locks in a bold pick.
+- **Action:** Users can one-tap share this to Instagram Stories, X, or WhatsApp.
+- **Interactive Deep Linking:** The cards won't just be static images. We will use Open Graph meta tags and Universal Deep Links so that when a user shares it in iMessage, Discord, or X, the card is **clickable**. 
+- **The Flow:** A friend clicks the card, the app instantly opens (or prompts them to download), and drops them *directly* into that exact same matchup so they can vote against their friend. The sharer's referral code is automatically attached under the hood!
+
+### 3. The "Arena Pass" ($4.99/mo B2C Subscription)
+*Direct consumer revenue without violating "Free to Play" sweepstakes laws.*
+- **Deep Analytics:** Premium users can see how the top 10% of "Grand Champions" are voting before they lock in their picks.
+- **Elite Cosmetics:** Exclusive access to premium animated profile frames and glowing avatars.
+- **Ad-Free Swiping:** Removes standard banner ads (Match-specific sponsor cards remain).
+- **Rule:** It must *never* offer a competitive advantage in predicting.
+
+### 4. Hyper-Targeted "Match" Sponsorships (B2B)
+*Scaling the current sponsor system into a bidding model.*
+- **Concept:** Instead of global sponsors, allow local bars, energy drinks, or betting aggregators to "own" a single, high-profile match card.
+- **Action:** When users swipe on the Super Bowl or a Champions League Final card, it boldly displays: *"Predictions Presented by [Brand]"* with a direct link.
+
+### 5. Monetizing Sentiment Data (B2B Data API)
+*Data is the new oil. Crowdsourced fan sentiment is extremely valuable.*
+- **Concept:** As the platform reaches 10,000+ active predictors, package the aggregate data into an API.
+- **Action:** Sell this "fan consensus feed" to sports blogs, media outlets, and odds-makers (e.g., "According to Events Arena consensus, 80% of fans predict an upset tonight").
+
+### 6. Flash Predictions (Live Game Engagement)
+*Turning passive TV watchers into active app users.*
+- **Feature:** Trigger push notifications during halftime of major live games.
+- **Action:** *"Halftime! Who scores next? Predict in the next 5 minutes for 3x Tokens."* 
+- **Value:** Spikes engagement exactly when users are already watching sports.
+
+---
+
+## 🛡️ Safe B2C Direct Sales (Target: Phase 2 @ 5,000 - 10,000 Users)
+*To maintain our strict legal status as a 100% free sweepstakes platform (and avoid being classified as a gambling site), we must NEVER sell competitive advantages or direct entries to prize draws. Instead, we can safely sell the following "Quality of Life" and "Cosmetic" items once the user base hits critical mass (5k-10k active users).*
+
+### What We CAN Legally Sell:
+- **The "Arena Pass" ($4.99/mo):** Ad-free experience, deep analytics on how top players are voting, and a shiny "Premium" badge next to their username on leaderboards.
+- **Cosmetic Gold Tokens:** Sell packages of Gold Tokens that can ONLY be used in the cosmetic shop to buy avatars and frames. (Crucial: Gold Tokens must not be convertible into Prize Draw entries).
+- **Exclusive Shop Items:** Animated profile frames, special glowing name-tags in the global chat, and rare 3D team avatars.
+- **Custom Reaction Packs:** Unique emojis and trash-talk reaction packs for the live event chat rooms.
+
+### What We CANNOT Sell (The Red Flags):
+- ❌ **Direct Prize Draw Entries:** We cannot sell tickets to the Weekly Draws. This violates the "No Purchase Necessary" sweepstakes laws.
+- ❌ **"Do-Over" Predictions:** We cannot sell the ability to change a locked-in prediction after a game starts.
+- ❌ **Point Boosters:** We cannot sell items that artificially inflate a user's leaderboard score.
