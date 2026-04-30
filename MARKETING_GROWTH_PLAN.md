@@ -35,6 +35,16 @@
 - [ ] Post weekly screenshots of the Top 5 Leaderboard on X, tagging the users if possible.
 - [ ] *Notes/Results:* (Which fanbases are most responsive? Soccer or NHL?)
 
+## Phase 2: Social Proof & Trust Building (Immediate Post-Launch)
+*   **The "Winner’s Circle" Portal:** 
+    *   Launch a dedicated section showcasing past prize draws, winner usernames, and prize distribution status.
+    *   Implement "Winner Spotlights" featuring brief testimonials or proof-of-prize (e.g., blurred screenshots of received gift cards).
+*   **Transparency & Fair Play:**
+    *   Publish a "How it Works: The RNG Draw" page explaining the technical fairness of our prize selection process.
+    *   Position as "100% Skill & Zero Risk" to contrast with traditional gambling apps.
+*   **Live Community Events:**
+    *   Host "Live Draw" events in the Global Lobby chat to build excitement and verify legitimacy in real-time.
+
 ## 🎯 Pillar 3: Supercharge the Referral Loop
 *The platform has a built-in FOMO referral engine and 3D badges. Let the users do the marketing.*
 

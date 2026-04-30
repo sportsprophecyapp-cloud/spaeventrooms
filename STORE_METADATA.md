@@ -13,14 +13,18 @@ This document contains the official text and settings for the Google Play Consol
 *The ultimate fan engagement arena. Predict sports, climb ranks, and win prizes!*
 
 ### **Full Description**
-**Welcome to the Events Arena—where every match is a chance to prove you’re the ultimate fan!**
+**Title:** Prophecy Sports Statistics & Arena
+**Tagline:** The Ultimate Second-Screen Sports Companion.
 
-Events Arena is a 100% free-to-play, premium "second-screen" companion for sports fans. Whether you're a die-hard soccer fan or a hockey fanatic, the Arena lets you turn your sports knowledge into status and rewards.
+**Long Description:**
+Transform the way you watch live sports with Events Arena—the premium second-screen experience designed for the modern fan. Forecast match outcomes, earn elite status, and compete for sponsor prizes in a 100% free-to-play environment focused on pure skill and real-time analysis.
 
-**Predict & Win:**
-- Forecast winners and specific game events for the world's top leagues (Soccer, NHL, and more).
-- Lock in your picks before the whistle blows.
-- Earn tokens for every accurate prediction.
+**Key Features:**
+*   **Arena Pulse:** Lock in your picks instantly with our high-impact live sentiment tracker.
+*   **Global Community:** Chat with thousands of fans in the unified Global Lobby while you watch the game.
+*   **Skill-Based Rewards:** Climb the leaderboards and unlock exclusive digital assets through accurate forecasting.
+*   **Sponsor Draws:** Use your earned tickets to enter prize draws for real-world rewards.
+*   **No Risk, All Reward:** Zero-gambling, pure-skill forecasting for the true sports enthusiast.
 
 **The Draw Room:**
 - Use your earned tokens to enter exclusive prize draws.
