@@ -310,7 +310,14 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                             🎟️ {t('go_to_draw_room')}
                         </button>
                         <button
-                            onClick={() => setShowShareCard(true)}
+                            onClick={() => {
+                                console.log('📤 Share clicked. User:', !!user, 'LastMatch:', !!lastMatch);
+                                if (!user || !lastMatch) {
+                                    setMessage({ text: "Please make a prediction before sharing!", type: 'info' });
+                                    return;
+                                }
+                                setShowShareCard(true);
+                            }}
                             className={styles.shareButton}
                         >
                             📤 SHARE YOUR PICKS
