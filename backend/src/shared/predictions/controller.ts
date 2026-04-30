@@ -72,6 +72,8 @@ export const getUserMatchPrediction = async (req: AuthRequest, res: Response) =>
 
     try {
         const table = roomId === 'nhl' ? 'nhl_predictions' : 'soccer_predictions';
+        console.log(`🔍 Checking prediction for user: ${userId}, match: ${matchId}, room: ${roomId}, table: ${table}`);
+        
         const result = await query(
             `SELECT prediction_data FROM ${table} WHERE user_id = $1 AND match_id = $2`,
             [userId, matchId]
@@ -82,9 +84,9 @@ export const getUserMatchPrediction = async (req: AuthRequest, res: Response) =>
         } else {
             res.json(null);
         }
-    } catch (err) {
-        console.error('Error fetching user match prediction:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+    } catch (err: any) {
+        console.error('❌ FATAL in getUserMatchPrediction:', err.message, { userId, matchId, roomId });
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 };
 
