@@ -25,16 +25,24 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { isAuthenticated, token } = useAuth();
     const { socket } = useSocket();
     const scrollRef = useRef<HTMLDivElement>(null);
 
+    // Auto-collapse on mobile initial load
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            setIsCollapsed(true);
+        }
+    }, []);
+
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [messages, isCollapsed]);
 
     useEffect(() => {
         const fetchHistory = async () => {
@@ -95,10 +103,7 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
             });
 
             if (res.ok) {
-                // We rely on the socket event to update the UI for everyone, including the sender.
-                // This prevents duplication (local add + socket add).
-                // const sentMessage = await res.json();
-                // setMessages(prev => [...prev, sentMessage]);
+                // We rely on the socket event to update the UI
             } else {
                 const errorData = await res.json();
                 setError(errorData.message || 'Failed to send message.');
@@ -111,46 +116,58 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
     };
 
     return (
-        <div className={`${styles.container} glass`}>
-            <div className={styles.header}>
-                <span className={styles.statusDot}></span>
-                <h3>LIVE FAN ARENA</h3>
+        <div className={`${styles.container} ${isCollapsed ? styles.collapsed : ''} glass`}>
+            <div className={styles.header} onClick={() => setIsCollapsed(!isCollapsed)}>
+                <div className={styles.headerLeft}>
+                    <span className={styles.statusDot}></span>
+                    <h3>LIVE FAN ARENA</h3>
+                </div>
+                <button 
+                    className={`${styles.toggleBtn} ${isCollapsed ? styles.isCollapsed : ''}`}
+                    aria-label={isCollapsed ? 'Open Chat' : 'Close Chat'}
+                >
+                    {isCollapsed ? '▲' : '▼'}
+                </button>
             </div>
 
-            <div className={styles.feed} ref={scrollRef}>
-                {loading ? <div className={styles.loading}>Accessing Arena Channel...</div> :
-                    messages.map((msg) => (
-                        <div key={msg.id} className={styles.message}>
-                            <div className={styles.meta}>
-                                {msg.equipped_badge_image_url && (
-                                    <img src={msg.equipped_badge_image_url} alt="Badge" className={styles.equippedBadge} />
-                                )}
-                                <span className={styles.level}>Lvl {msg.current_level}</span>
-                                <span className={styles.username}>@{msg.username}</span>
-                            </div>
-                            <p className={styles.content}>{msg.content}</p>
-                        </div>
-                    ))}
-            </div>
+            {!isCollapsed && (
+                <>
+                    <div className={styles.feed} ref={scrollRef}>
+                        {loading ? <div className={styles.loading}>Accessing Arena Channel...</div> :
+                            messages.map((msg) => (
+                                <div key={msg.id} className={styles.message}>
+                                    <div className={styles.meta}>
+                                        {msg.equipped_badge_image_url && (
+                                            <img src={msg.equipped_badge_image_url} alt="Badge" className={styles.equippedBadge} />
+                                        )}
+                                        <span className={styles.level}>Lvl {msg.current_level}</span>
+                                        <span className={styles.username}>@{msg.username}</span>
+                                    </div>
+                                    <p className={styles.content}>{msg.content}</p>
+                                </div>
+                            ))}
+                    </div>
 
-            {isAuthenticated ? (
-                <form onSubmit={handleSendMessage} className={styles.inputArea}>
-                    {error && <div className={styles.errorMessage}>{error}</div>}
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Say something to the arena..."
-                        className={styles.input}
-                        maxLength={200}
-                        disabled={isSending}
-                    />
-                    <button type="submit" className={styles.sendBtn} disabled={isSending}>
-                        {isSending ? '...' : 'SEND'}
-                    </button>
-                </form>
-            ) : (
-                <div className={styles.loginPrompt}>Sign in to join the conversation.</div>
+                    {isAuthenticated ? (
+                        <form onSubmit={handleSendMessage} className={styles.inputArea}>
+                            {error && <div className={styles.errorMessage}>{error}</div>}
+                            <input
+                                type="text"
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                placeholder="Say something to the arena..."
+                                className={styles.input}
+                                maxLength={200}
+                                disabled={isSending}
+                            />
+                            <button type="submit" className={styles.sendBtn} disabled={isSending}>
+                                {isSending ? '...' : 'SEND'}
+                            </button>
+                        </form>
+                    ) : (
+                        <div className={styles.loginPrompt}>Sign in to join the conversation.</div>
+                    )}
+                </>
             )}
         </div>
     );
