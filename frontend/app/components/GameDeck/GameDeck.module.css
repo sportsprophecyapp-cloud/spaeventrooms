@@ -700,22 +700,39 @@
 }
 
 .drawButton {
-    background: linear-gradient(135deg, #0070f3 0%, #00c6ff 100%);
+    background: linear-gradient(135deg, #ff8c00 0%, #ff4d00 100%);
     color: white;
     border: none;
     padding: 1rem 2rem;
     border-radius: 16px;
-    font-weight: 800;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 10px 25px rgba(0, 112, 243, 0.3);
+    box-shadow: 0 10px 25px rgba(255, 77, 0, 0.3);
+    text-transform: uppercase;
 }
 
-.drawButton:hover {
+.shareButton {
+    background: linear-gradient(135deg, #B4975A 0%, #d4af37 100%);
+    color: black;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(180, 151, 90, 0.3);
+    text-transform: uppercase;
+}
+
+.drawButton:hover,
+.shareButton:hover {
     transform: translateY(-2px);
-    box-shadow: 0 15px 35px rgba(0, 112, 243, 0.4);
+    filter: brightness(1.1);
 }
 
 .completionButton {

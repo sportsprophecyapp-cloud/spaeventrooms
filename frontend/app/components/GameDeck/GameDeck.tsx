@@ -9,6 +9,7 @@ import { useAuth } from '@/app/context/AuthContext';
 import { useSponsor } from '@/app/context/SponsorContext';
 import { useRouter } from 'next/navigation';
 import ToastNotification from '../ToastNotification/ToastNotification';
+import PredictionShareCard from '../PredictionShareCard/PredictionShareCard';
 
 interface Match {
     match_id: string;
@@ -39,6 +40,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
     const [predictionCount, setPredictionCount] = useState(0);
     const [dragX, setDragX] = useState(0);
     const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' | 'info' } | null>(null);
+    const [lastMatch, setLastMatch] = useState<Match | null>(null);
+    const [lastPick, setLastPick] = useState<string | null>(null);
+    const [showShareCard, setShowShareCard] = useState(false);
 
     useEffect(() => {
         if (!token) return;
@@ -170,6 +174,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
             // Mark as gone IMMEDIATELY
             goneRef.current.add(index);
             setGone(prev => new Set(prev).add(index)); // Moved up
+            setLastMatch(match);
+            setLastPick(pickSide === 'home' ? match.home_team : match.away_team);
 
             // Calculate exit position
             const exitX = (window.innerWidth + 200) * dir;
@@ -302,6 +308,12 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                             className={styles.drawButton}
                         >
                             🎟️ {t('go_to_draw_room')}
+                        </button>
+                        <button
+                            onClick={() => setShowShareCard(true)}
+                            className={styles.shareButton}
+                        >
+                            📤 SHARE YOUR PICKS
                         </button>
                         <button
                             onClick={() => router.push(`/rooms/${roomId}`)}
@@ -495,6 +507,20 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                     );
                 })}
             </div>
+
+            {showShareCard && lastMatch && user && (
+                <PredictionShareCard 
+                    homeTeam={lastMatch.home_team}
+                    awayTeam={lastMatch.away_team}
+                    homeLogo={lastMatch.home_logo || ''}
+                    awayLogo={lastMatch.away_logo || ''}
+                    pick={lastPick || ''}
+                    username={user.username || 'Fan'}
+                    referralCode={user.id}
+                    matchId={lastMatch.match_id}
+                    onClose={() => setShowShareCard(false)}
+                />
+            )}
         </div>
     );
 };

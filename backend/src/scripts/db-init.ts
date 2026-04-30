@@ -349,10 +349,10 @@ const initDB = async () => {
         // Ensure there is at least one active sponsor for the Draw Room if empty
         const sponsorCount = await client.query('SELECT count(*) FROM room_sponsors WHERE is_active = true');
         if (parseInt(sponsorCount.rows[0].count) === 0) {
-            console.log('🎁 Seeding default Events Arena sponsor...');
+            console.log('🎁 Seeding default SaaSPriceDB founding sponsor...');
             await client.query(`
-                INSERT INTO room_sponsors (room_id, sponsor_name, logo_url, website_url, prize_description, is_active)
-                VALUES ('soccer', 'Events Arena', '/assets/icon.png', 'https://sportsprophecyapp.com', 'Official Events Arena Founding Prize', true)
+                INSERT INTO room_sponsors (room_id, sponsor_name, logo_url, website_url, prize_description, is_active, package_tier)
+                VALUES ('soccer', 'SaaSPriceDB', '/assets/saaspricedb_logo.png', 'https://saaspricedb.com/', 'SaaSPriceDB Founding Partner Prize', true, 'tier_founding')
             `);
         }
 

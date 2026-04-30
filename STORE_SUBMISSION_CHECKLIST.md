@@ -57,6 +57,8 @@ We use Expo Application Services (EAS) to securely compile the apps in the cloud
 - [x] **Login Loading Fix:** Branded "Entering Arena..." splash screen active.
 - [x] **Draw Room Empty State:** Countdown to June 1st draw active on web.
 - [x] **Contact Info Audit:** `contact@sportsprophecyapp.com` synced across all platforms.
+- [x] **Asset Localization:** NHL team logos localized to prevent CDN 404 errors.
+- [x] **Viral Engine Ready:** Shareable prediction cards and challenge QR codes functional.
 - [ ] **Final High-Res Asset Capture:** Capture 1024x500 Feature Graphic from Photo Studio.
 
 ---
