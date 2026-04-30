@@ -78,10 +78,10 @@
 - **"Beat the Creator" Mechanic:** The UI highlights the Creator's own predictions. The goal for the room is to beat the creator's score, driving intense engagement.
 - **Revenue Share Integration:** Creators receive a percentage kickback for any users they bring in who eventually convert to the "Arena Pass".
 
-### 2. The "Prediction Receipt" (Viral Loop)
+### 2. The "Prediction Receipt" (Viral Loop) [COMPLETED]
 *Letting users market the app for us.*
-- **Feature:** Auto-generate a beautifully branded, downloadable "Prediction Card" image right after a user locks in a bold pick.
-- **Action:** Users can one-tap share this to Instagram Stories, X, or WhatsApp.
+- [x] **Feature:** Auto-generate a beautifully branded, downloadable "Prediction Card" image with integrated QR codes.
+- [x] **Action:** Users can one-tap share this to Instagram Stories, X, or WhatsApp.
 - **Interactive Deep Linking:** The cards won't just be static images. We will use Open Graph meta tags and Universal Deep Links so that when a user shares it in iMessage, Discord, or X, the card is **clickable**. 
 - **The Flow:** A friend clicks the card, the app instantly opens (or prompts them to download), and drops them *directly* into that exact same matchup so they can vote against their friend. The sharer's referral code is automatically attached under the hood!
 
@@ -97,10 +97,10 @@
 - **Concept:** Instead of global sponsors, allow local bars, energy drinks, or betting aggregators to "own" a single, high-profile match card.
 - **Action:** When users swipe on the Super Bowl or a Champions League Final card, it boldly displays: *"Predictions Presented by [Brand]"* with a direct link.
 
-### 5. Monetizing Sentiment Data (B2B Data API)
+### 5. Monetizing Sentiment Data (B2B Data API) [READY]
 *Data is the new oil. Crowdsourced fan sentiment is extremely valuable.*
-- **Concept:** As the platform reaches 10,000+ active predictors, package the aggregate data into an API.
-- **Action:** Sell this "fan consensus feed" to sports blogs, media outlets, and odds-makers (e.g., "According to Events Arena consensus, 80% of fans predict an upset tonight").
+- [x] **Concept:** Aggregate data packaged into an internal Marketing Studio.
+- [x] **Action:** Marketing Studio live at `/admin/studio` to generate "Arena Pulse" graphics for social media.
 
 ### 6. Flash Predictions (Live Game Engagement)
 *Turning passive TV watchers into active app users.*

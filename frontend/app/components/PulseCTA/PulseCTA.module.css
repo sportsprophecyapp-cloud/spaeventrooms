@@ -1,0 +1,185 @@
+.pulseContainer {
+    background: linear-gradient(145deg, #0a0a14 0%, #1a1a2e 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 2rem auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 112, 243, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.pulseContainer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #0070f3;
+}
+
+.pulseHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.liveIndicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #0070f3;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background: #0070f3;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #0070f3;
+    animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.totalVotes {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+}
+
+.matchDisplay {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.team img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}
+
+.teamName {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.pct {
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+}
+
+.vs {
+    font-size: 1rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.1);
+    margin: 0 1rem;
+}
+
+.sentimentBar {
+    height: 12px;
+    background: #000;
+    border-radius: 6px;
+    display: flex;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.homeFill {
+    background: #0070f3;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.awayFill {
+    background: #00d4ff;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+}
+
+.pickBtn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.pickBtn:hover:not(:disabled) {
+    background: white;
+    color: black;
+    transform: translateY(-2px);
+}
+
+.successMsg {
+    width: 100%;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid #00ff88;
+    color: #00ff88;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+.successMsg a {
+    color: white;
+    text-decoration: underline;
+    margin-left: 8px;
+}
+
+.loginHint {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: center;
+    margin-top: 1rem;
+    font-style: italic;
+}
+
+@media (max-width: 600px) {
+    .pulseContainer {
+        padding: 1.5rem;
+    }
+    .pct {
+        font-size: 1.5rem;
+    }
+    .team img {
+        width: 48px;
+        height: 48px;
+    }
+}

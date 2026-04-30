@@ -13,6 +13,7 @@ import RecentWinners from '@/app/components/RecentWinners';
 import DailyLoginButton from '@/app/components/DailyLoginButton';
 import LootShowcase from '@/app/components/LootShowcase/LootShowcase';
 import FeaturedDraw from '@/app/components/FeaturedDraw';
+import PulseCTA from '@/app/components/PulseCTA/PulseCTA';
 
 const HomePage = () => {
     const { t, language, setLanguage } = useLanguage();
@@ -70,6 +71,8 @@ const HomePage = () => {
             )}
 
             <main className={styles.main}>
+                <PulseCTA />
+                
                 <div className={styles.roomGrid}>
                     {rooms.map(room => (
                         <div key={room.id} className={`${styles.roomCard} glass ${!room.active ? styles.inactive : ''}`} style={{ borderColor: room.active ? room.color : undefined }}>

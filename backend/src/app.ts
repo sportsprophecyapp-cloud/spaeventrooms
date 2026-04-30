@@ -15,6 +15,7 @@ import sponsorApplicationRoutes from './shared/sponsor-applications/routes';
 import chatRoutes from './shared/chat/routes';
 import matchRoutes from './shared/matches/routes';
 import migrationRoutes from './shared/migrations/routes';
+import pulseRoutes from './shared/pulse/routes';
 
 const app = express();
 
@@ -75,5 +76,6 @@ app.use('/api/gamification', gamificationRoutes);
 app.use('/api/sponsor-subscriptions', sponsorSubscriptionRoutes);
 app.use('/api/sponsor-applications', sponsorApplicationRoutes);
 app.use('/api/migrations', migrationRoutes);
+app.use('/api/pulse', pulseRoutes);
 
 export default app;

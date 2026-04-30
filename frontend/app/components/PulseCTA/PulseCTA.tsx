@@ -1,0 +1,138 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import styles from './PulseCTA.module.css';
+import { useAuth } from '@/app/context/AuthContext';
+import Link from 'next/link';
+
+interface PulseMatch {
+    match_id: string;
+    home_team: string;
+    away_team: string;
+    home_logo: string;
+    away_logo: string;
+    room_id: string;
+    total_votes: string;
+    percentages: { home: number, away: number };
+}
+
+const PulseCTA = () => {
+    const { token, user, refreshUser } = useAuth();
+    const [match, setMatch] = useState<PulseMatch | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+
+    useEffect(() => {
+        const fetchPulse = async () => {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
+            try {
+                const res = await fetch(`${apiUrl}/api/pulse/picks`);
+                if (res.ok) {
+                    const data = await res.json();
+                    // Pick the "Public Lock" or "Coin Toss"
+                    setMatch(data.publicLock || data.coinToss || null);
+                }
+            } catch (err) {
+                console.error('Error fetching pulse pick:', err);
+            }
+        };
+        fetchPulse();
+    }, []);
+
+    const handleQuickPick = async (pick: 'home' | 'away') => {
+        if (!token) {
+            window.location.href = '/auth/login';
+            return;
+        }
+        if (!match) return;
+
+        setIsSubmitting(true);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
+        try {
+            const res = await fetch(`${apiUrl}/api/rooms/${match.room_id}/predictions/match`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    matchId: match.match_id,
+                    pick
+                })
+            });
+
+            if (res.ok) {
+                setSubmitted(true);
+                await refreshUser();
+            }
+        } catch (err) {
+            console.error('Error submitting quick pick:', err);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (!match) return null;
+
+    return (
+        <div className={styles.pulseContainer}>
+            <div className={styles.pulseHeader}>
+                <div className={styles.liveIndicator}>
+                    <span className={styles.dot}></span>
+                    ARENA PULSE
+                </div>
+                <span className={styles.totalVotes}>{parseInt(match.total_votes).toLocaleString()} FANS ALREADY VOTED</span>
+            </div>
+
+            <div className={styles.matchDisplay}>
+                <div className={styles.team}>
+                    <img src={match.home_logo} alt={match.home_team} />
+                    <span className={styles.teamName}>{match.home_team}</span>
+                    <span className={styles.pct}>{match.percentages.home}%</span>
+                </div>
+                <div className={styles.vs}>VS</div>
+                <div className={styles.team}>
+                    <img src={match.away_logo} alt={match.away_team} />
+                    <span className={styles.teamName}>{match.away_team}</span>
+                    <span className={styles.pct}>{match.percentages.away}%</span>
+                </div>
+            </div>
+
+            <div className={styles.sentimentBar}>
+                <div className={styles.homeFill} style={{ width: `${match.percentages.home}%` }}></div>
+                <div className={styles.awayFill} style={{ width: `${match.percentages.away}%` }}></div>
+            </div>
+
+            <div className={styles.actions}>
+                {submitted ? (
+                    <div className={styles.successMsg}>
+                        🎯 PICK LOCKED IN! <Link href={`/arena/${match.room_id}`}>ENTER ARENA →</Link>
+                    </div>
+                ) : (
+                    <>
+                        <button 
+                            className={styles.pickBtn} 
+                            onClick={() => handleQuickPick('home')}
+                            disabled={isSubmitting}
+                        >
+                            {match.home_team} WIN
+                        </button>
+                        <button 
+                            className={styles.pickBtn} 
+                            onClick={() => handleQuickPick('away')}
+                            disabled={isSubmitting}
+                        >
+                            {match.away_team} WIN
+                        </button>
+                    </>
+                )}
+            </div>
+            
+            {!user && (
+                <p className={styles.loginHint}>* Login to earn tokens for your pick</p>
+            )}
+        </div>
+    );
+};
+
+export default PulseCTA;
