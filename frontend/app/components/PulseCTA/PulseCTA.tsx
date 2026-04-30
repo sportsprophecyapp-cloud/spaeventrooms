@@ -130,14 +130,14 @@ const PulseCTA = () => {
                             onClick={() => handleQuickPick('home')}
                             disabled={isSubmitting}
                         >
-                            {match.home_team} WIN
+                            {isSubmitting ? 'Submitting...' : `${match.home_team} WIN`}
                         </button>
                         <button 
                             className={styles.pickBtn} 
                             onClick={() => handleQuickPick('away')}
                             disabled={isSubmitting}
                         >
-                            {match.away_team} WIN
+                            {isSubmitting ? 'Submitting...' : `${match.away_team} WIN`}
                         </button>
                     </>
                 )}
