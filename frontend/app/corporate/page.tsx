@@ -27,6 +27,14 @@ const CorporatePage = () => {
                 </section>
 
                 <section className={`${styles.card} glass`}>
+                    <h2>A MESSAGE FROM THE FOUNDER</h2>
+                    <p>"I built <strong>Events Arena</strong> to give fans and sponsors a platform where both can equally benefit.</p>
+                    <p>I wanted to create more than just a game—I'm building a large-scale ecosystem of entertainment that rewards sports knowledge without financial risk.</p>
+                    <p>As a solo developer, your feedback during this beta is everything to me. This is a journey to build a community where everyone wins."</p>
+                    <p style={{ marginTop: '1rem', fontStyle: 'italic' }}>— William, Founder of Just Me Media</p>
+                </section>
+
+                <section className={`${styles.card} glass`}>
                     <h2>CORPORATE INFO</h2>
                     <div className={styles.infoGrid}>
                         <div className={styles.infoItem}>

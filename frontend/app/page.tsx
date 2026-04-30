@@ -96,33 +96,34 @@ const HomePage = () => {
                 {/* Recent Winners Showcase */}
                 <RecentWinners />
 
-                {/* How It Works Section */}
-                <section style={{ marginTop: '4rem', textAlign: 'center', width: '100%', maxWidth: '1000px' }}>
-                    <div className={styles.sectionTitle}>{t('how_it_works_title')}</div>
-                    <div className={styles.economyPreview} style={{ marginTop: '2.5rem' }}>
-                        <div className={`${styles.ecoCard} glass`}>
-                            <div className={styles.ecoIconBg} style={{ background: 'rgba(0, 112, 243, 0.1)' }}>
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0070f3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {!isAuthenticated && (
+                    <section style={{ marginTop: '4rem', textAlign: 'center', width: '100%', maxWidth: '1000px' }}>
+                        <div className={styles.sectionTitle}>{t('how_it_works_title')}</div>
+                        <div className={styles.economyPreview} style={{ marginTop: '2.5rem' }}>
+                            <div className={`${styles.ecoCard} glass`}>
+                                <div className={styles.ecoIconBg} style={{ background: 'rgba(0, 112, 243, 0.1)' }}>
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0070f3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                </div>
+                                <h4>{t('how_step_1')}</h4>
+                                <p>{t('how_step_1_desc')}</p>
                             </div>
-                            <h4>{t('how_step_1')}</h4>
-                            <p>{t('how_step_1_desc')}</p>
-                        </div>
-                        <div className={`${styles.ecoCard} glass`}>
-                            <div className={styles.ecoIconBg} style={{ background: 'rgba(255, 75, 75, 0.1)' }}>
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4b4b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <div className={`${styles.ecoCard} glass`}>
+                                <div className={styles.ecoIconBg} style={{ background: 'rgba(255, 75, 75, 0.1)' }}>
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4b4b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                </div>
+                                <h4>{t('how_step_2')}</h4>
+                                <p>{t('how_step_2_desc')}</p>
                             </div>
-                            <h4>{t('how_step_2')}</h4>
-                            <p>{t('how_step_2_desc')}</p>
-                        </div>
-                        <div className={`${styles.ecoCard} glass`}>
-                            <div className={styles.ecoIconBg} style={{ background: 'rgba(255, 215, 0, 0.1)' }}>
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                            <div className={`${styles.ecoCard} glass`}>
+                                <div className={styles.ecoIconBg} style={{ background: 'rgba(255, 215, 0, 0.1)' }}>
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                                </div>
+                                <h4>{t('how_step_3')}</h4>
+                                <p>{t('how_step_3_desc')}</p>
                             </div>
-                            <h4>{t('how_step_3')}</h4>
-                            <p>{t('how_step_3_desc')}</p>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                )}
 
                 <section className={styles.economyPreview}>
                     <div className={`${styles.ecoCard} glass`}>
@@ -135,29 +136,7 @@ const HomePage = () => {
                     </div>
                 </section>
 
-                {/* Founder's Letter / Origin Story Section */}
-                <section className={styles.letterContainer}>
-                    <div className={styles.letterBody}>
-                        <div className={styles.letterHeader}>
-                            <span className={styles.companyName}>JUST ME MEDIA</span>
-                            <span className={styles.letterDate}>EST. 2025</span>
-                        </div>
-                        <div className={styles.letterText}>
-                            "I built <strong>Events Arena</strong> to give fans and sponsors a platform where both can equally benefit.
-                            <br /><br />
-                            I wanted to create more than just a game—I'm building a large-scale ecosystem of entertainment that rewards sports knowledge without financial risk.
-                            <br /><br />
-                            As a solo developer, your feedback during this beta is everything to me. This is a journey to build a community where everyone wins."
-                        </div>
-                        <div className={styles.letterFooter}>
-                            <p className={styles.letterSignature}>William</p>
-                            <p className={styles.letterTitle}>Founder, Just Me Media</p>
-                            <Link href="/corporate" className={styles.actionLink} style={{ marginTop: '1rem', color: 'var(--accent)', fontSize: '0.8rem' }}>
-                                Learn more about our vision →
-                            </Link>
-                        </div>
-                    </div>
-                </section>
+                {/* Removed Founder's Letter to Corporate Page */}
             </main>
 
             <footer className={styles.footer}>
