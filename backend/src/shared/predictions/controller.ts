@@ -61,6 +61,33 @@ export const submitMatchPrediction = async (req: AuthRequest, res: Response) => 
     }
 };
 
+export const getUserMatchPrediction = async (req: AuthRequest, res: Response) => {
+    const { matchId } = req.query;
+    const { roomId } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId || !matchId) {
+        return res.json(null);
+    }
+
+    try {
+        const table = roomId === 'nhl' ? 'nhl_predictions' : 'soccer_predictions';
+        const result = await query(
+            `SELECT prediction_data FROM ${table} WHERE user_id = $1 AND match_id = $2`,
+            [userId, matchId]
+        );
+
+        if (result.rows.length > 0) {
+            res.json(result.rows[0].prediction_data);
+        } else {
+            res.json(null);
+        }
+    } catch (err) {
+        console.error('Error fetching user match prediction:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 export const getMatchSentiment = async (req: AuthRequest, res: Response) => {
     const { matchId } = req.params;
     const { roomId } = req.params;

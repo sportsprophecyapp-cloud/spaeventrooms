@@ -1,16 +1,22 @@
 import { Router } from 'express';
-import { getPredictions, createPrediction, submitPrediction, revealAnswer, submitMatchPrediction, getMatchSentiment } from './controller';
+import * as controllers from './controller';
 import { authenticate } from '../auth/middleware';
 import commentRoutes from '../comments/routes';
 
-const router = Router({ mergeParams: true });
+const router = Router();
 
-router.get('/', getPredictions);
-router.get('/match/:matchId/sentiment', getMatchSentiment);
-router.post('/', authenticate, createPrediction);
-router.post('/match', authenticate, submitMatchPrediction);
-router.post('/:id/submit', authenticate, submitPrediction);
-router.patch('/:id/answer', authenticate, revealAnswer);
-router.use('/:predictionId/comments', commentRoutes);
+// Match-specific sentiment and user-check (Public or Auth)
+router.get('/match', authenticate, controllers.getUserMatchPrediction);
+router.get('/match/:matchId/sentiment', controllers.getMatchSentiment);
+router.post('/match', authenticate, controllers.submitMatchPrediction);
+
+// Custom prediction routes
+router.get('/', controllers.getPredictions);
+router.post('/', authenticate, controllers.createPrediction);
+router.post('/:id/submit', authenticate, controllers.submitPrediction);
+router.post('/:id/reveal', authenticate, controllers.revealAnswer);
+
+// Nested routes
+router.use('/:id/comments', commentRoutes);
 
 export default router;

@@ -29,17 +29,28 @@ const PulseCTA = () => {
                 const res = await fetch(`${apiUrl}/api/pulse/picks`);
                 if (res.ok) {
                     const data = await res.json();
-                    // Pick the "Public Lock" or "Coin Toss"
-                    setMatch(data.publicLock || data.coinToss || null);
+                    const activeMatch = data.publicLock || data.coinToss || null;
+                    setMatch(activeMatch);
+
+                    // If logged in, check if user has already voted for THIS specific match
+                    if (activeMatch && token) {
+                        const checkRes = await fetch(`${apiUrl}/api/rooms/${activeMatch.room_id}/predictions/match?matchId=${activeMatch.match_id}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (checkRes.ok) {
+                            const pred = await checkRes.json();
+                            if (pred) setSubmitted(true);
+                        }
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching pulse pick:', err);
             }
         };
         fetchPulse();
-    }, []);
+    }, [token]);
 
-    const handleQuickPick = async (pick: 'home' | 'away') => {
+    const handleQuickPick = async (side: 'home' | 'away') => {
         if (!token) {
             window.location.href = '/auth/login';
             return;
@@ -48,6 +59,10 @@ const PulseCTA = () => {
 
         setIsSubmitting(true);
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
+        
+        // IMPORTANT: Send the actual TEAM NAME as the pick
+        const pickName = side === 'home' ? match.home_team : match.away_team;
+
         try {
             const res = await fetch(`${apiUrl}/api/rooms/${match.room_id}/predictions/match`, {
                 method: 'POST',
@@ -57,7 +72,7 @@ const PulseCTA = () => {
                 },
                 body: JSON.stringify({
                     matchId: match.match_id,
-                    pick
+                    pick: pickName
                 })
             });
 
