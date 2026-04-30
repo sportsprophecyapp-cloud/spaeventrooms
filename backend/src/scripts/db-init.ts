@@ -368,7 +368,7 @@ const initDB = async () => {
             console.log('🎟️ Seeding first official Prize Draw...');
             await client.query(`
                 INSERT INTO prize_draws (title, prize, description, room_id, status, draw_date)
-                VALUES ('The Founding Arena Draw', '$50 Amazon Gift Card', 'The first official prize draw for the Events Arena community.', 'soccer', 'active', '2026-06-01 00:00:00')
+                VALUES ('The Founding Arena Draw', 'Events Arena Founders Prize', 'The first official reward for the Events Arena community. Winner will be announced on June 1st.', 'soccer', 'active', '2026-06-01 00:00:00')
             `);
         }
 
