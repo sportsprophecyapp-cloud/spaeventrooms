@@ -1,5 +1,6 @@
 import { BaseRoom } from './roomFactory';
 import { SoccerRoom } from './soccer/room';
+import { GlobalLobbyRoom } from './global/room';
 import { Express } from 'express';
 import { Server } from 'socket.io';
 
@@ -9,6 +10,7 @@ class RoomRegistry {
     constructor() {
         // Register default rooms
         this.registerRoom(new SoccerRoom());
+        this.registerRoom(new GlobalLobbyRoom());
     }
 
     registerRoom(room: BaseRoom) {

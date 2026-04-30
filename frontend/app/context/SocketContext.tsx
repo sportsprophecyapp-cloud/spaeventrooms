@@ -21,8 +21,13 @@ export const SocketProvider = ({ children, roomId }: { children: React.ReactNode
 
     useEffect(() => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        
+        // CENTRALIZED CHAT: Map public rooms to a single lobby until 1000 users
+        const publicRooms = ['soccer', 'nhl', 'test_room'];
+        const effectiveRoomId = publicRooms.includes(roomId) ? 'global_lobby' : roomId;
+
         // Connect to the room-specific namespace
-        const socketInstance = io(`${apiUrl}/rooms/${roomId}`, {
+        const socketInstance = io(`${apiUrl}/rooms/${effectiveRoomId}`, {
             transports: ['websocket'],
             autoConnect: true,
         });

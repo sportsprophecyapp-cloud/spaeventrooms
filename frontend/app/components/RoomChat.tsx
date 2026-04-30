@@ -40,7 +40,12 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
         const fetchHistory = async () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${apiUrl}/api/rooms/${roomId}/chat`);
+                
+                // CENTRALIZED CHAT
+                const publicRooms = ['soccer', 'nhl', 'test_room'];
+                const effectiveRoomId = publicRooms.includes(roomId) ? 'global_lobby' : roomId;
+
+                const res = await fetch(`${apiUrl}/api/rooms/${effectiveRoomId}/chat`);
                 if (res.ok) {
                     setMessages(await res.json());
                 } else {
@@ -78,7 +83,12 @@ const RoomChat: React.FC<RoomChatProps> = ({ roomId }) => {
 
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const res = await fetch(`${apiUrl}/api/rooms/${roomId}/chat`, {
+            
+            // CENTRALIZED CHAT
+            const publicRooms = ['soccer', 'nhl', 'test_room'];
+            const effectiveRoomId = publicRooms.includes(roomId) ? 'global_lobby' : roomId;
+
+            const res = await fetch(`${apiUrl}/api/rooms/${effectiveRoomId}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ content })
