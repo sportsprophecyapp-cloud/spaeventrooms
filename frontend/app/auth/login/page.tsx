@@ -157,7 +157,21 @@ const LoginContent = () => {
 };
 
 const LoginPage = () => (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+        <div style={{ 
+            height: '100vh', 
+            background: '#000', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            color: '#B4975A',
+            fontSize: '18px',
+            fontWeight: '900',
+            letterSpacing: '3px'
+        }}>
+            ENTERING ARENA...
+        </div>
+    }>
         <LoginContent />
     </Suspense>
 );

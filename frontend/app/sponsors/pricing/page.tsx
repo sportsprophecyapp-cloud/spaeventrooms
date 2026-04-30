@@ -11,14 +11,14 @@ const pricingTiers = [
         name: 'Founding Partner',
         price: '0',
         features: [
-            '🎁 Prize Draw Hosting (MANDATORY)',
-            'Exclusive "Founding Brand" Badge',
+            'Free to join — you provide the prize',
+            'Exclusive "Founding Brand" Badge (permanent)',
             'Strategic Partnership Status',
             'Full Audience Engagement Reports'
         ],
-        cta: 'START FREE',
-        color: '#ffd700', // Gold
-        special: 'EARLY ACCESS - PRIZE REQUIRED'
+        cta: 'CLAIM YOUR SPOT',
+        color: '#ffd700',
+        special: 'ONLY 10 FOUNDING SPOTS AVAILABLE'
     },
     {
         id: 'starter',
@@ -74,6 +74,9 @@ const SponsorsPricingPage = () => {
             <header className={styles.header}>
                 <h1 className={styles.title}>PARTNER WITH THE ARENA</h1>
                 <p className={styles.subtitle}>Connect your brand with the most engaged sports fans in the world.</p>
+                <p style={{ color: '#ffd700', fontSize: '0.85rem', fontWeight: 700, marginTop: '0.5rem', letterSpacing: '1px' }}>
+                    ⚡ 7 of 10 Founding Partner spots remaining — secure yours before launch.
+                </p>
             </header>
 
             <div className={styles.grid}>
@@ -103,7 +106,7 @@ const SponsorsPricingPage = () => {
             <footer className={styles.footer}>
                 <p>
                     Need a custom partnership?
-                    <Link href="mailto:partnerships@sportsprophecyapp.com" className={styles.contactLink}> Contact our Sales Team</Link>
+                    <Link href="mailto:contact@sportsprophecyapp.com" className={styles.contactLink}> Contact our Sales Team</Link>
                 </p>
             </footer>
         </div>

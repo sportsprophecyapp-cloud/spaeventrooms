@@ -96,7 +96,7 @@ const PrivacyPolicyScreen = () => {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>5. Data Deletion & Retention</Text>
                         <Text style={styles.paragraph}>
-                            You may request deletion of your account and personal data at any time by contacting support@sportsprophecyapp.com or using the in-app account deletion feature.
+                            You may request deletion of your account and personal data at any time by contacting contact@sportsprophecyapp.com or using the in-app account deletion feature.
                         </Text>
                         <Text style={styles.paragraph}>
                             We retain data only as necessary to provide services, comply with legal obligations, or resolve disputes.
@@ -121,7 +121,7 @@ const PrivacyPolicyScreen = () => {
                         <Text style={styles.paragraph}>
                             For questions, concerns, or privacy inquiries, contact:
                         </Text>
-                        <Text style={styles.contactText}>Email: support@sportsprophecyapp.com</Text>
+                        <Text style={styles.contactText}>Email: contact@sportsprophecyapp.com</Text>
                     </View>
 
                     <View style={styles.acknowledgment}>

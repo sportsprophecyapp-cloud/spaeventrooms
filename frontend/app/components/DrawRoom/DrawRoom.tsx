@@ -337,9 +337,34 @@ const DrawRoom = () => {
                     })}
                     {draws.length === 0 && (
                         <div className={styles.emptyState}>
-                            <div className={styles.emptyIcon}>🎁</div>
-                            <h3>No Active Draws</h3>
-                            <p>Check back soon for new prizes and events!</p>
+                            <div className={styles.emptyIcon}>🏆</div>
+                            <h3>Inaugural Draw Launching June 1st</h3>
+                            <p>Our first Grand Champion prize draw is almost here. Make predictions now to stock up on tickets before the draw goes live.</p>
+                            <div className={styles.launchCountdown}>
+                                {(() => {
+                                    const target = new Date('2026-06-01T00:00:00').getTime();
+                                    const diff = target - now;
+                                    if (diff <= 0) return <span>🎉 Draw is LIVE!</span>;
+                                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                                    return (
+                                        <div className={styles.countdownSegments}>
+                                            <div className={styles.countdownSeg}><span>{days}</span><label>DAYS</label></div>
+                                            <div className={styles.countdownSep}>:</div>
+                                            <div className={styles.countdownSeg}><span>{String(hours).padStart(2,'0')}</span><label>HRS</label></div>
+                                            <div className={styles.countdownSep}>:</div>
+                                            <div className={styles.countdownSeg}><span>{String(minutes).padStart(2,'0')}</span><label>MIN</label></div>
+                                            <div className={styles.countdownSep}>:</div>
+                                            <div className={styles.countdownSeg}><span>{String(seconds).padStart(2,'0')}</span><label>SEC</label></div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                            <Link href="/" className={styles.earnTicketsBtn}>
+                                🎫 Make Predictions to Earn Tickets →
+                            </Link>
                         </div>
                     )}
                 </div>

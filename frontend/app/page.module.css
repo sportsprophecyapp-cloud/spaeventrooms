@@ -286,9 +286,30 @@
 }
 
 .inactive {
-    opacity: 0.5;
-    pointer-events: none;
-    filter: grayscale(1);
+    opacity: 0.6;
+    filter: grayscale(0.5);
+}
+
+.notifyBtn {
+    display: inline-block;
+    padding: 0.9rem 1.8rem;
+    background: transparent;
+    color: #ff4b4b;
+    border: 1px solid #ff4b4b;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+}
+
+.notifyBtn:hover {
+    background: rgba(255,75,75,0.1);
+    box-shadow: 0 0 20px rgba(255,75,75,0.3);
+    transform: translateY(-2px);
 }
 
 .comingSoon {

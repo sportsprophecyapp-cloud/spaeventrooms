@@ -2,7 +2,7 @@
   "expo": {
     "name": "Events Arena",
     "slug": "sportsprophecyapp",
-    "version": "3.3.0",
+    "version": "4.1.1",
     "scheme": "eventsarena",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,7 @@
       "supportsTablet": true,
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.sportsprophecy.app",
-      "buildNumber": "32",
+      "buildNumber": "42",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSFaceIDUsageDescription": "Allow Events Arena to use FaceID for quick and secure login."
@@ -29,7 +29,7 @@
         "backgroundColor": "#0a1628"
       },
       "package": "com.sportsprophecy.app",
-      "versionCode": 32,
+      "versionCode": 42,
       "edgeToEdgeEnabled": true
     },
     "web": {
