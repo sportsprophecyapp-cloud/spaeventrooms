@@ -1,3 +1,4 @@
+import { Router } from 'express';
 import { getPredictions, createPrediction, submitPrediction, revealAnswer, submitMatchPrediction, getMatchSentiment } from './controller';
 import { authenticate } from '../auth/middleware';
 import commentRoutes from '../comments/routes';
