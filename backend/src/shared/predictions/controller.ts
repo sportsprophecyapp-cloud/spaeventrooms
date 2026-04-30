@@ -61,6 +61,47 @@ export const submitMatchPrediction = async (req: AuthRequest, res: Response) => 
     }
 };
 
+export const getMatchSentiment = async (req: AuthRequest, res: Response) => {
+    const { matchId } = req.params;
+    const { roomId } = req.params;
+
+    try {
+        const table = roomId === 'nhl' ? 'nhl_predictions' : 'soccer_predictions';
+        
+        const result = await query(
+            `SELECT 
+                prediction_data->>'pick' as pick,
+                COUNT(*) as count
+             FROM ${table}
+             WHERE match_id = $1
+             GROUP BY prediction_data->>'pick'`,
+            [matchId]
+        );
+
+        const counts: Record<string, number> = { home: 0, away: 0, draw: 0 };
+        let total = 0;
+
+        result.rows.forEach(row => {
+            if (row.pick) {
+                counts[row.pick] = parseInt(row.count);
+                total += parseInt(row.count);
+            }
+        });
+
+        const percentages = {
+            home: total > 0 ? Math.round((counts.home / total) * 100) : 0,
+            away: total > 0 ? Math.round((counts.away / total) * 100) : 0,
+            draw: total > 0 ? Math.round((counts.draw / total) * 100) : 0,
+            total
+        };
+
+        res.json({ counts, percentages });
+    } catch (err) {
+        console.error('Error fetching match sentiment:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 export const getPredictions = async (req: AuthRequest, res: Response) => {
     const { roomId } = req.params;
 
