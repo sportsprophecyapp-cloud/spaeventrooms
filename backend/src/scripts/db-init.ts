@@ -354,6 +354,24 @@ const initDB = async () => {
             `);
         }
 
+        // 14. Set the First Official Draw Date (June 1st, 2026)
+        console.log('📅 Setting 1st Official Draw Date (June 1st, 2026)...');
+        await client.query(`
+            UPDATE prize_draws 
+            SET draw_date = '2026-06-01 00:00:00' 
+            WHERE draw_date IS NULL OR status = 'active'
+        `);
+
+        // Ensure at least one prize draw exists with the correct date
+        const drawCount = await client.query('SELECT count(*) FROM prize_draws WHERE status = \'active\'');
+        if (parseInt(drawCount.rows[0].count) === 0) {
+            console.log('🎟️ Seeding first official Prize Draw...');
+            await client.query(`
+                INSERT INTO prize_draws (title, prize, description, room_id, status, draw_date)
+                VALUES ('The Founding Arena Draw', '$50 Amazon Gift Card', 'The first official prize draw for the Events Arena community.', 'soccer', 'active', '2026-06-01 00:00:00')
+            `);
+        }
+
     } catch (err) {
         console.error('❌ DB sync failed:', err);
     } finally {

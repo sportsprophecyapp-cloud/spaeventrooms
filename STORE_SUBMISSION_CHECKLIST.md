@@ -6,12 +6,16 @@ This checklist tracks the manual steps required to launch the mobile application
 
 ## Phase 1: Accounts & Prerequisites
 Before building the app, ensure you have the following accounts active and upgraded to **Business/Organization** status (Individual accounts will be rejected for apps featuring sweepstakes/contests):
-- [x] **Apple Developer Organization Account** ($99/year)
-  - *Requirement:* You must have an established LLC/Corporation and a D-U-N-S Number (free from Dun & Bradstreet) to upgrade from Individual to Organization.
-- [x] **Google Play Console Organization Account** ($25 one-time fee)
-  - *Requirement:* Must be registered under your legal business name with associated legal documentation.
-- [x] **Expo Account** (Free - used for cloud building the binaries)
-- [x] **Privacy Policy & Terms of Service** (Must be hosted on a live URL like `sportsprophecyapp.com/privacy`)
+- [ ] **Apple Developer Program (Organization)**
+  - Status: **Pending Migration** (New Case ID: `102883092966`)
+  - Entity: `JustMe Media`
+  - D-U-N-S: `243354843` (Verified)
+- [x] **Google Play Console (Business)**
+  - Status: **COMPLETED** (Account type updated to Organization)
+  - Entity: `JustMe Media`
+- [x] **D-U-N-S Number Verified** (`243354843`)
+- [x] **Official Website Active** (https://sportsprophecyapp.com)
+- [x] **Privacy Policy & Terms of Service** (Cleaned & Branded)
 
 ## Phase 2: Generating the Binaries (Cloud Build)
 We use Expo Application Services (EAS) to securely compile the apps in the cloud. Open your terminal, navigate to the `mobile` folder (`cd mobile`), and run:
