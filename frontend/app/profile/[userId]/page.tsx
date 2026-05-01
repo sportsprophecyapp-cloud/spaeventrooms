@@ -165,8 +165,8 @@ const ProfilePage = () => {
     }, [userId, isAuthenticated, token]);
 
     const handleCopyReferral = () => {
-        if (!profile || !profile.referral_code) return;
-        const refUrl = `${window.location.origin}/auth/register?ref=${profile.referral_code}`;
+        if (!profile || !profile.referralCode) return;
+        const refUrl = `${window.location.origin}/auth/register?ref=${profile.referralCode}`;
         navigator.clipboard.writeText(refUrl);
         setCopyMessage('LINK COPIED! (+50 TOKENS)');
         setTimeout(() => setCopyMessage(''), 3000);
@@ -174,7 +174,7 @@ const ProfilePage = () => {
 
     const handleShareStats = () => {
         if (!profile) return;
-        const text = `🏆 I'm Rank #${profile.global_rank || '??'} in the Events Arena! \n\n🎯 Level ${profile.level} ${profile.points >= 5000 ? 'LEGENDARY' : 'PRO'} Supporter. \n\nThink you can beat me? Join here: \n${window.location.origin}/auth/register?ref=${profile.referral_code}`;
+        const text = `🏆 I'm Rank #${profile.global_rank || '??'} in the Events Arena! \n\n🎯 Level ${profile.level} ${profile.points >= 5000 ? 'LEGENDARY' : 'PRO'} Supporter. \n\nThink you can beat me? Join here: \n${window.location.origin}/auth/register?ref=${profile.referralCode}`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
         window.open(url, '_blank');
     };
