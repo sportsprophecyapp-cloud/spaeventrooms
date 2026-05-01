@@ -165,7 +165,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         }
     }, [showCompletion, countdown, router]);
 
-    const [props, api] = useSprings(matches.length, i => ({
+    const [props, api] = useSprings(cards.length, i => ({
         x: 0,
         y: 0,
         scale: 1,
@@ -326,21 +326,18 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
     // Tracking for sponsor impressions on cards
     useEffect(() => {
         const topIndex = gone.size;
-        if (topIndex < matches.length && sponsors.length > 0) {
-            // Delay tracking until after animation completes to prevent re-renders mid-swipe
+        if (topIndex < cards.length && sponsors.length > 0) {
             const timer = setTimeout(() => {
-                const currentSponsor = sponsors[topIndex % sponsors.length];
-                const currentMatch = matches[topIndex];
-                if (currentSponsor && currentMatch) {
-                    trackSponsor(currentSponsor.id, 'impression', 'match_card', currentMatch.match_id);
-                }
-            }, 500);
-
+                const currentMatch = cards[topIndex].match;
+                const sponsor = sponsors[topIndex % sponsors.length];
+                console.log('TRACKING IMPRESSION:', sponsor.id, 'match:', currentMatch.match_id);
+                trackSponsor(sponsor.id, 'impression', 'match_card', currentMatch.match_id);
+            }, 1500);
             return () => clearTimeout(timer);
         }
-    }, [gone.size, matches, sponsors, trackSponsor]);
+    }, [gone.size, cards, sponsors, trackSponsor]);
 
-    if (matches.length === 0 && totalScheduled === 0) {
+    if (cards.length === 0 && totalScheduled === 0) {
         return (
             <div className={styles.emptyContainer}>
                 <div className={styles.emptyContent}>
@@ -439,14 +436,14 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         );
     }
 
-    const remainingCards = matches.length - gone.size;
+    const remainingCardsCount = cards.length - gone.size;
 
     return (
         <div className={styles.deckWrapper}>
             <div className={styles.deckHeader}>
                 <div className={styles.headerTop}>
                     <p className={styles.cardsRemaining}>
-                        {remainingCards} {t('matches_left') || 'Matches Left'}
+                        {remainingCardsCount} {t('matches_left') || 'Matches Left'}
                     </p>
                     <p className={styles.swipeHint}>
                         {t('swipe_hint') || 'Swipe to Predict'}
@@ -456,7 +453,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                 <div className={styles.progressTrack}>
                     <div
                         className={styles.progressBar}
-                        style={{ width: `${(gone.size / matches.length) * 100}%` }}
+                        style={{ width: `${(gone.size / cards.length) * 100}%` }}
                     />
                 </div>
             </div>
