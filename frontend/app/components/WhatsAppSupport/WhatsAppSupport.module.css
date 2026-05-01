@@ -12,26 +12,32 @@
 .button {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0;
     background: rgba(37, 211, 102, 0.15);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(37, 211, 102, 0.3);
-    padding: 10px 20px;
+    padding: 12px;
     border-radius: 50px;
     color: white;
     text-decoration: none;
     font-weight: 700;
     font-size: 0.9rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    width: 48px;
+    white-space: nowrap;
 }
 
 .button:hover {
     background: rgba(37, 211, 102, 0.25);
-    transform: translateY(-4px) scale(1.05);
+    transform: translateY(-4px);
     border-color: rgba(37, 211, 102, 0.6);
     box-shadow: 0 12px 40px rgba(37, 211, 102, 0.3);
+    width: 240px;
+    padding-right: 20px;
+    gap: 12px;
 }
 
 .iconWrapper {
@@ -124,18 +130,74 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+.label {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.button:hover .label {
+    opacity: 1;
+}
+
+.buttonContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.dismissBtn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.buttonContainer:hover .dismissBtn {
+    opacity: 1;
+}
+
+.dismissBtn:hover {
+    background: #ff4b4b;
+    color: white;
+    border-color: #ff4b4b;
+}
+
 @media (max-width: 768px) {
     .wrapper {
         bottom: 1.5rem;
         right: 1.5rem;
     }
     
-    .label {
-        display: none;
-    }
-    
     .button {
+        width: 48px;
         padding: 12px;
-        border-radius: 50%;
+    }
+
+    .button:hover {
+        width: 48px;
+        padding: 12px;
+        transform: none;
+    }
+
+    .label {
+        display: none !important;
+    }
+
+    .dismissBtn {
+        display: none;
     }
 }
