@@ -54,8 +54,8 @@ const UserTray = () => {
         };
     }, [isExpanded]);
 
-    // SAFE PERMISSION CHECK: Check permissions only after confirming user exists.
-    const isAdmin = user.permissions?.includes('super_admin') || user.permissions?.includes('can_manage_users');
+    // SAFE PERMISSION CHECK: Use derived role from AuthContext
+    const isAdmin = user.role === 'admin';
 
     return (
         <div className={styles.wrapper} ref={menuRef}>

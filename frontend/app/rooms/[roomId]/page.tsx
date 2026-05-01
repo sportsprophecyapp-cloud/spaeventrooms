@@ -94,7 +94,7 @@ function RoomContent() {
                             </>
                         ) : roomId === 'nhl' ? (
                             <>
-                                <button onClick={() => window.location.href = '/'} className={styles.backToGridBtn}>Back to Lobby</button>
+                                <button onClick={() => router.push('/')} className={styles.backToGridBtn}>Back to Lobby</button>
                                 <GameDeck leagueId="nhl" roomId={roomId} />
                             </>
                         ) : (

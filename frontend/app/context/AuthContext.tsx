@@ -54,11 +54,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     if (res.ok) {
                         const data = await res.json();
                         login(savedToken, data.user);
-                    } else {
+                    } else if (res.status === 401) {
                         logout();
                     }
                 } catch (e) {
-                    logout();
+                    console.error('Session verification failed', e);
                 }
             }
         };

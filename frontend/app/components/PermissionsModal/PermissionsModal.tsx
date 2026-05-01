@@ -65,11 +65,27 @@ const PermissionsModal = ({ isOpen, onClose, user }: Props) => {
                     <div className={styles.permissionsGrid}>
                         <label className={styles.checkboxLabel}>
                             <input type="checkbox" checked={permissions.includes('super_admin')} onChange={() => handlePermissionChange('super_admin')} />
-                            super_admin
+                            🛡️ super_admin (Full Access)
+                        </label>
+                        <label className={styles.checkboxLabel}>
+                            <input type="checkbox" checked={permissions.includes('can_moderate_chat')} onChange={() => handlePermissionChange('can_moderate_chat')} />
+                            💬 can_moderate_chat
+                        </label>
+                        <label className={styles.checkboxLabel}>
+                            <input type="checkbox" checked={permissions.includes('can_manage_users')} onChange={() => handlePermissionChange('can_manage_users')} />
+                            👥 can_manage_users
+                        </label>
+                        <label className={styles.checkboxLabel}>
+                            <input type="checkbox" checked={permissions.includes('can_create_rooms')} onChange={() => handlePermissionChange('can_create_rooms')} />
+                            🪄 can_create_rooms
+                        </label>
+                        <label className={styles.checkboxLabel}>
+                            <input type="checkbox" checked={permissions.includes('can_view_sponsors')} onChange={() => handlePermissionChange('can_view_sponsors')} />
+                            💎 can_view_sponsors
                         </label>
                         <label className={styles.checkboxLabel}>
                             <input type="checkbox" checked={permissions.includes('day_one')} onChange={() => handlePermissionChange('day_one')} />
-                            day_one (Founder Badge)
+                            ⭐ day_one (Founder Badge)
                         </label>
                     </div>
                 </div>
