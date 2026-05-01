@@ -38,14 +38,16 @@ const LiveTicker = () => {
 
     if (loading || matches.length === 0) return null;
 
+    const hasLive = matches.some(m => m.status === 'live');
+
     // Double matches for seamless loop
     const displayMatches = [...matches, ...matches];
 
     return (
         <div className={styles.tickerWrapper}>
-            <div className={styles.liveLabel}>
-                <span className={styles.dot}></span>
-                LIVE SCORES
+            <div className={styles.liveLabel} style={!hasLive ? { background: '#2c2c2c' } : {}}>
+                <span className={styles.dot} style={!hasLive ? { background: '#ffa502' } : {}}></span>
+                {hasLive ? 'LIVE SCORES' : 'UPCOMING'}
             </div>
             <div className={styles.marqueeContainer}>
                 <div className={styles.marqueeTrack}>

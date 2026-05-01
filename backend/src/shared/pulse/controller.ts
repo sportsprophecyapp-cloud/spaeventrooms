@@ -86,34 +86,21 @@ export const getPulsePicks = async (req: Request, res: Response) => {
 
 export const getLiveTicker = async (req: Request, res: Response) => {
     try {
-        const sql = `
-            SELECT 
-                m.home_team, 
-                m.away_team, 
-                m.score_home, 
-                m.score_away, 
-                m.status,
-                m.start_time,
-                'soccer' as sport
-            FROM soccer_matches m
-            WHERE m.status = 'live' 
-               OR (m.status = 'finished' AND m.updated_at > CURRENT_TIMESTAMP - INTERVAL '6 hours')
-               OR (m.status = 'upcoming' AND m.start_time < CURRENT_TIMESTAMP + INTERVAL '12 hours')
+        // Step 1: Get live games + recently finished (6h) + upcoming within 24h
+        const primarySql = `
+            SELECT home_team, away_team, score_home, score_away, status, start_time, 'soccer' as sport
+            FROM soccer_matches
+            WHERE status = 'live'
+               OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '6 hours')
+               OR (status = 'upcoming' AND start_time < CURRENT_TIMESTAMP + INTERVAL '24 hours')
             
             UNION ALL
             
-            SELECT 
-                m.home_team, 
-                m.away_team, 
-                m.score_home, 
-                m.score_away, 
-                m.status,
-                m.start_time,
-                'nhl' as sport
-            FROM nhl_matches m
-            WHERE m.status = 'live'
-               OR (m.status = 'finished' AND m.updated_at > CURRENT_TIMESTAMP - INTERVAL '6 hours')
-               OR (m.status = 'upcoming' AND m.start_time < CURRENT_TIMESTAMP + INTERVAL '12 hours')
+            SELECT home_team, away_team, score_home, score_away, status, start_time, 'nhl' as sport
+            FROM nhl_matches
+            WHERE status = 'live'
+               OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '6 hours')
+               OR (status = 'upcoming' AND start_time < CURRENT_TIMESTAMP + INTERVAL '24 hours')
             
             ORDER BY 
                 CASE WHEN status = 'live' THEN 0 WHEN status = 'upcoming' THEN 1 ELSE 2 END ASC,
@@ -121,7 +108,22 @@ export const getLiveTicker = async (req: Request, res: Response) => {
             LIMIT 15;
         `;
 
-        const result = await query(sql);
+        let result = await query(primarySql);
+
+        // Step 2: Fallback — if nothing returned, grab the very next scheduled games (any date)
+        if (result.rows.length === 0) {
+            const fallbackSql = `
+                (SELECT home_team, away_team, score_home, score_away, status, start_time, 'soccer' as sport
+                 FROM soccer_matches WHERE status = 'upcoming' ORDER BY start_time ASC LIMIT 8)
+                UNION ALL
+                (SELECT home_team, away_team, score_home, score_away, status, start_time, 'nhl' as sport
+                 FROM nhl_matches WHERE status = 'upcoming' ORDER BY start_time ASC LIMIT 7)
+                ORDER BY start_time ASC
+                LIMIT 15;
+            `;
+            result = await query(fallbackSql);
+        }
+
         res.json(result.rows);
     } catch (err) {
         console.error('Error fetching live ticker:', err);
