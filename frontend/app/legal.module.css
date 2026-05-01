@@ -1,0 +1,112 @@
+.container {
+    min-height: 100vh;
+    padding-top: 80px;
+    color: white;
+    font-family: var(--font-outfit, sans-serif);
+    background: #050505;
+}
+
+.header {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.backBtn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.backBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #d4af37;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 12px 0;
+    background: linear-gradient(to right, #fff, #aaa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.date {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.section {
+    padding: 32px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #d4af37;
+    margin-bottom: 16px;
+}
+
+.section p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.8;
+    margin-bottom: 12px;
+}
+
+.section ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.section ul li {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    padding-left: 20px;
+    position: relative;
+}
+
+.section ul li::before {
+    content: '•';
+    color: #d4af37;
+    position: absolute;
+    left: 0;
+}
+
+.emailLink {
+    color: #25D366;
+    text-decoration: underline;
+}
+
+.acknowledgment {
+    margin-top: 40px;
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    padding: 24px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    text-align: center;
+}

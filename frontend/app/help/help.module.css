@@ -163,3 +163,27 @@
     color: rgba(255, 255, 255, 0.3);
     font-size: 0.8rem;
 }
+
+.footerLinks {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.footerLinks a {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+}
+
+.footerLinks a:hover {
+    color: #d4af37;
+}
+
+.footerLinks span {
+    color: rgba(255, 255, 255, 0.2);
+}

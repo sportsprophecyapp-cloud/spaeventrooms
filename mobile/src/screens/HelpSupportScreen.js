@@ -63,6 +63,11 @@ const HelpSupportScreen = () => {
             answer: "No, predictions are final once submitted. Make sure you're confident in your choice before clicking submit!"
         },
         {
+            id: 13,
+            question: "Is there a mobile app?",
+            answer: "Yes! Events Arena is currently available on Android via the Google Play Store. Our iOS app is in development and coming soon to the Apple App Store."
+        },
+        {
             id: 11,
             question: "What sports are available?",
             answer: "We cover NFL, NBA, NHL, MLB, EPL (English Premier League), and MLS. More sports may be added in the future!"

@@ -50,7 +50,7 @@ const HelpPage = () => {
         {
             id: 8,
             question: "Is there a mobile app?",
-            answer: "Yes! Events Arena is available on both Android and iOS. You can download it to get live notifications for your wins."
+            answer: "Events Arena is currently available on Android via the Google Play Store. Our iOS app is in development and coming soon to the Apple App Store — stay tuned!"
         }
     ];
 
@@ -103,7 +103,14 @@ const HelpPage = () => {
             </main>
 
             <footer className={styles.footer}>
-                <p>&copy; 2026 Events Arena. All rights reserved.</p>
+                <p>&copy; 2026 Events Arena — Just Me Media. All rights reserved.</p>
+                <div className={styles.footerLinks}>
+                    <a href="/terms">Terms of Service</a>
+                    <span>·</span>
+                    <a href="/privacy">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="mailto:contact@sportsprophecyapp.com">contact@sportsprophecyapp.com</a>
+                </div>
             </footer>
         </div>
     );

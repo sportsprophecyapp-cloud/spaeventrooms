@@ -24,7 +24,7 @@ const PrivacyPolicyScreen = () => {
                     colors={COLORS.gradients.dark}
                     style={styles.card}
                 >
-                    <Text style={styles.lastUpdated}>Effective Date: 12/15/2025</Text>
+                    <Text style={styles.lastUpdated}>Effective Date: May 2026</Text>
 
                     <Text style={styles.paragraph}>
                         Events Arena (“we”, “our”, “us”) respects your privacy. This Privacy Policy explains what information we collect, how we use it, and how it is protected.
@@ -71,15 +71,18 @@ const PrivacyPolicyScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>3. Advertising & Sponsor Banners</Text>
+                        <Text style={styles.sectionTitle}>3. Data Sharing & Support</Text>
                         <Text style={styles.paragraph}>
-                            Events Arena displays sponsored banners within the app.
+                            B2B Insights: We provide anonymized and aggregated behavioral trends to sponsors (e.g., "60% of fans predicted an NHL Home win"). This data contains no personally identifiable information.
                         </Text>
                         <Text style={styles.paragraph}>
-                            Third-party ad networks may collect non-personally identifiable information, such as device identifiers and usage data, to deliver relevant ads.
+                            WhatsApp Support: When using our live WhatsApp support ("Events Arena Live Support"), your phone number and message history are processed by WhatsApp to help us resolve your inquiries.
                         </Text>
                         <Text style={styles.paragraph}>
-                            We do not share personally identifiable information with advertisers.
+                            Social Sharing: Generating a "Golden Ticket" share card creates a graphic that you may choose to share on third-party social platforms. We do not control how these platforms use shared content.
+                        </Text>
+                        <Text style={styles.paragraph}>
+                            We do not sell your personal data to any third party.
                         </Text>
                     </View>
 

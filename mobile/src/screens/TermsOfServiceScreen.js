@@ -24,7 +24,7 @@ const TermsOfServiceScreen = () => {
                     colors={COLORS.gradients.dark}
                     style={styles.card}
                 >
-                    <Text style={styles.lastUpdated}>Last Updated: December 21, 2025</Text>
+                    <Text style={styles.lastUpdated}>Effective Date: May 2026</Text>
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>1. Acceptance of Terms</Text>
@@ -173,7 +173,31 @@ const TermsOfServiceScreen = () => {
                         <Text style={styles.paragraph}>
                             If you have any questions about these Terms of Service, please contact us at:
                         </Text>
-                        <Text style={styles.contactText}>Email: sportsprophecyapp@gmail.com</Text>
+                        <Text style={styles.contactText}>Email: contact@sportsprophecyapp.com</Text>
+                    </View>
+
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>4. Referral Program & Rewards</Text>
+                        <Text style={styles.paragraph}>
+                            Weighted Drawings: Entries for prize draws are granted for valid, unique new user sign-ups via the referral system.
+                        </Text>
+                        <Text style={styles.paragraph}>
+                            Fraud Prevention: Creating multiple accounts to self-refer or using bots to generate referrals is strictly prohibited. Just Me Media reserves the right to void entries and terminate accounts suspected of fraud.
+                        </Text>
+                    </View>
+
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>5. Intellectual Property</Text>
+                        <Text style={styles.paragraph}>
+                            All content, branding, the prediction interface, and software are the exclusive property of Just Me Media. You may not copy, modify, or distribute any part of the Platform without written permission.
+                        </Text>
+                    </View>
+
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>6. Live Support</Text>
+                        <Text style={styles.paragraph}>
+                            Events Arena provides live support via WhatsApp under the name "Events Arena Live Support". By initiating a chat, you agree to WhatsApp's terms. Just Me Media will never ask for your password or financial information via chat.
+                        </Text>
                     </View>
 
                     <View style={styles.acknowledgment}>
