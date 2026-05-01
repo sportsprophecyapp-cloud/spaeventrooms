@@ -651,7 +651,7 @@ const ProfilePage = () => {
                     username={profile.username}
                     referralCode={profile.referralCode || profile.id}
                     matchId="referral"
-                    onClose={() => setShowReferralCard(null)}
+                    onClose={() => setShowReferralCard(false)}
                 />
             )}
 
