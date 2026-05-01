@@ -78,8 +78,17 @@ const HelpSupportScreen = () => {
         setExpandedFaq(expandedFaq === id ? null : id);
     };
 
-    const handleEmailPress = () => {
-        Linking.openURL('mailto:Contact@sportsprophecyapp.com');
+    const handleWhatsAppPress = () => {
+        const whatsappUrl = "whatsapp://send?phone=16475540219&text=Hello! I'm reaching out from the Events Arena Mobile App. I have a question about...";
+        const webWhatsappUrl = "https://wa.me/16475540219";
+        
+        Linking.canOpenURL(whatsappUrl).then(supported => {
+            if (supported) {
+                Linking.openURL(whatsappUrl);
+            } else {
+                Linking.openURL(webWhatsappUrl);
+            }
+        });
     };
 
     return (
@@ -99,16 +108,16 @@ const HelpSupportScreen = () => {
                     colors={COLORS.gradients.primary}
                     style={styles.contactCard}
                 >
-                    <Ionicons name="mail" size={48} color={COLORS.text.inverse} />
+                    <Ionicons name="chatbubbles" size={48} color={COLORS.text.inverse} />
                     <Text style={styles.contactTitle}>Need Help?</Text>
-                    <Text style={styles.contactSubtitle}>We're here to assist you</Text>
+                    <Text style={styles.contactSubtitle}>Chat with our live concierge</Text>
                     <TouchableOpacity
                         style={styles.emailButton}
-                        onPress={handleEmailPress}
-                        accessibilityLabel="Contact Support Email"
+                        onPress={handleWhatsAppPress}
+                        accessibilityLabel="Contact Live Support on WhatsApp"
                     >
-                        <Ionicons name="mail-outline" size={20} color={COLORS.accent.cyan} />
-                        <Text style={styles.emailText}>Contact@sportsprophecyapp.com</Text>
+                        <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+                        <Text style={[styles.emailText, { color: '#25D366' }]}>Events Arena Live Support</Text>
                     </TouchableOpacity>
                 </LinearGradient>
 

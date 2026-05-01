@@ -105,16 +105,7 @@ const MoreScreen = ({ navigation }) => {
                                     } else if (item.label === 'Settings') {
                                         navigation.navigate('Profile');
                                     } else if (item.label === 'Help & Support') {
-                                        const whatsappUrl = "whatsapp://send?phone=16475540219&text=Hello! I'm reaching out from the Events Arena Mobile App. I have a question about...";
-                                        const webWhatsappUrl = "https://wa.me/16475540219";
-                                        
-                                        Linking.canOpenURL(whatsappUrl).then(supported => {
-                                            if (supported) {
-                                                Linking.openURL(whatsappUrl);
-                                            } else {
-                                                Linking.openURL(webWhatsappUrl);
-                                            }
-                                        });
+                                        navigation.navigate('HelpSupport');
                                     } else if (item.label === 'Advertise with Us') {
                                         navigation.navigate('Sponsor');
                                     } else if (item.label === 'Terms of Service') {
