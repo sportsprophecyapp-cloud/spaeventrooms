@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator, Switch, Image, Share } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, Modal, TextInput, Alert, ActivityIndicator, Switch, Image, Share, Clipboard } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -292,13 +292,35 @@ const ProfileScreen = () => {
         }
     };
 
-    const handleShare = async () => {
+    const handleCopyCode = async () => {
+        const code = user?.referralCode || '';
         try {
-            const result = await Share.share({
-                message: `Join me on Events Arena and get 5 free crowns! Use my code ${user?.referralCode} at signup. Play here: https://www.sportsprophecyapp.com`,
-            });
+            if (Platform.OS === 'web') {
+                await navigator.clipboard.writeText(code);
+            } else {
+                Clipboard.setString(code);
+            }
+            showAlert('Copied!', `Referral code "${code}" copied to clipboard.`);
         } catch (error) {
-            showAlert('Error', error.message);
+            showAlert('Error', 'Failed to copy code. Please copy it manually: ' + code);
+        }
+    };
+
+    const handleShare = async () => {
+        const shareMessage = `Join me on Events Arena and get 5 free crowns! Use my code ${user?.referralCode} at signup. Play here: https://www.sportsprophecyapp.com`;
+        try {
+            if (Platform.OS === 'web') {
+                if (navigator.share) {
+                    await navigator.share({ title: 'Events Arena', text: shareMessage, url: 'https://www.sportsprophecyapp.com' });
+                } else {
+                    await navigator.clipboard.writeText(shareMessage);
+                    showAlert('Link Copied!', 'Referral link copied to clipboard — paste it anywhere to share!');
+                }
+            } else {
+                await Share.share({ message: shareMessage });
+            }
+        } catch (error) {
+            // User cancelled share — not an error
         }
     };
 
@@ -550,15 +572,15 @@ const ProfileScreen = () => {
                             </ScrollView>
                         </View>
 
-                        {/* Referral Rewards */}
+                        {/* Social Hub */}
                         <View style={styles.referralRewardsContainer}>
-                            <Text style={styles.sectionHeading}>🎁 REFERRAL REWARDS</Text>
+                            <Text style={styles.sectionHeading}>🌐 SOCIAL HUB</Text>
                             <View style={styles.referralInnerCard}>
                                 <Text style={styles.referralQuote}>
                                     "Share code <Text style={styles.codeHighlight}>{user?.referralCode || 'LOADING'}</Text> - 5👑 per referral"
                                 </Text>
                                 <View style={styles.referralActions}>
-                                    <TouchableOpacity style={styles.actionButton} onPress={() => { /* Copy Code */ }}>
+                                    <TouchableOpacity style={styles.actionButton} onPress={handleCopyCode}>
                                         <Ionicons name="copy-outline" size={18} color={COLORS.text.inverse} />
                                         <Text style={styles.actionButtonText}>Copy Code</Text>
                                     </TouchableOpacity>

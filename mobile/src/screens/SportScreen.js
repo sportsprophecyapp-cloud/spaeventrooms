@@ -3,9 +3,9 @@ import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Act
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import GameCard from '../components/GameCard';
-import GameCardSkeleton from '../components/GameCardSkeleton';
-import PredictionModal from '../components/PredictionModal';
+import ArenaDeck from '../components/ArenaDeck';
+import ArenaCardSkeleton from '../components/ArenaCardSkeleton'; // I'll create this or use a generic one
+import PredictionShareCard from '../components/PredictionShareCard';
 import SponsorBanner from '../components/SponsorBanner';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -18,16 +18,20 @@ const SportScreen = () => {
     const { sportId, sportName } = route.params || { sportId: 'all', sportName: 'All Games' };
 
     const [events, setEvents] = useState([]);
+    const [sponsors, setSponsors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    const [modalVisible, setModalVisible] = useState(false);
+    const [arenaCleared, setArenaCleared] = useState(false);
+    const [showShareCard, setShowShareCard] = useState(false);
+    const [lastGame, setLastGame] = useState(null);
+    const [lastPick, setLastPick] = useState('');
 
     const fetchEvents = async () => {
         try {
-            const [eventsData, predictionsData] = await Promise.all([
+            const [eventsData, predictionsData, sponsorsData] = await Promise.all([
                 apiService.getEvents(),
-                user ? apiService.getUserPredictions(user.uuid) : Promise.resolve([])
+                user ? apiService.getUserPredictions(user.uuid) : Promise.resolve([]),
+                apiService.getActiveSponsors()
             ]);
 
             // Mark events that user has already predicted on
@@ -41,6 +45,18 @@ const SportScreen = () => {
             }));
 
             setEvents(eventsWithStatus);
+            setSponsors(Array.isArray(sponsorsData) ? sponsorsData : []);
+            
+            // Check if all games for this sport are already predicted
+            const unpredictedCount = eventsWithStatus
+                .filter(event => matchesSport(event, sportId))
+                .filter(event => !event.hasPredicted).length;
+                
+            if (unpredictedCount === 0 && eventsWithStatus.length > 0) {
+                setArenaCleared(true);
+            } else {
+                setArenaCleared(false);
+            }
         } catch (error) {
             console.error('Failed to fetch events', error);
         } finally {
@@ -58,15 +74,20 @@ const SportScreen = () => {
         fetchEvents();
     };
 
-    const [initialTeam, setInitialTeam] = useState(null);
-
-    const handleGamePress = (event, selectedTeam = null) => {
-        setSelectedEvent(event);
-        setInitialTeam(selectedTeam);
-        setModalVisible(true);
+    const handlePredictionSuccess = (game, pick) => {
+        setLastGame(game);
+        setLastPick(pick);
+        fetchEvents();
     };
 
-
+    const handleArenaComplete = () => {
+        setArenaCleared(true);
+        // Find the last game played to show on the share card
+        const unpredicted = upcomingEvents.filter(e => !e.hasPredicted);
+        if (unpredicted.length > 0) {
+            setLastGame(unpredicted[unpredicted.length - 1]);
+        }
+    };
 
     // Helper to check if event matches selected sport
     const matchesSport = (event, selectedSportId) => {
@@ -101,42 +122,14 @@ const SportScreen = () => {
     // Filter events by selected sport
     const filteredEvents = events.filter(event => matchesSport(event, sportId));
 
-    // Get upcoming events in next 24 hours
-    const now = new Date();
-    const futureWindow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
+    // Get upcoming events
     const upcomingEvents = filteredEvents
-        .filter(event => {
-            const eventDate = new Date(event.commence_time || event.startTime);
-            return eventDate >= now && eventDate <= futureWindow;
-        })
+        .filter(event => !event.hasPredicted)
         .sort((a, b) => {
-            // Priority 1: Predicted games go to the bottom
-            if (a.hasPredicted && !b.hasPredicted) return 1;
-            if (!a.hasPredicted && b.hasPredicted) return -1;
-
-            // Priority 2: Sort by time (ascending)
             const dateA = new Date(a.commence_time || a.startTime);
             const dateB = new Date(b.commence_time || b.startTime);
             return dateA - dateB;
         });
-
-    const getNextUnpredictedGame = async (ignoreId = null) => {
-        // Find the next game that hasn't been predicted on
-        // Also exclude the game we just predicted on (ignoreId) to allow for immediate UI updates
-        const unpredictedGames = upcomingEvents.filter(event =>
-            !event.hasPredicted && event.id !== ignoreId
-        );
-
-        if (unpredictedGames.length > 0) {
-            const nextGame = unpredictedGames[0];
-            setSelectedEvent(nextGame);
-            return nextGame;
-        }
-
-        return null; // No more unpredicted games
-    };
-
 
     return (
         <SafeAreaView style={styles.container}>
@@ -151,77 +144,101 @@ const SportScreen = () => {
             {/* Fixed Sponsor Banner */}
             <SponsorBanner style={styles.sponsorBannerContainer} />
 
-            <ScrollView
-                contentContainerStyle={styles.content}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent.cyan} />
-                }
-            >
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Upcoming Games (Next 24 Hours)</Text>
-                    <Text style={styles.gameCount}>{upcomingEvents.length} games</Text>
-                </View>
-
+            <View style={styles.deckContainer}>
                 {loading ? (
-                    <View style={styles.skeletonContainer}>
-                        {[1, 2, 3].map(i => <GameCardSkeleton key={i} />)}
+                    <ArenaCardSkeleton />
+                ) : arenaCleared ? (
+                    <View style={styles.completionCard}>
+                        <LinearGradient
+                            colors={['#1e293b', '#0f172a']}
+                            style={styles.completionGradient}
+                        >
+                            <View style={styles.confettiContainer}>
+                                <Text style={styles.confettiIcon}>🎉</Text>
+                                <Text style={styles.completionTitle}>Arena Cleared!</Text>
+                                <Text style={styles.completionSubtext}>
+                                    You've mastered all matches in the {sportName} Arena.
+                                </Text>
+                            </View>
+
+                            <View style={styles.prizeSection}>
+                                <Text style={styles.prizeLabel}>FEATURED PRIZE AVAILABLE</Text>
+                                <View style={styles.prizeCard}>
+                                    <Ionicons name="gift-outline" size={32} color={COLORS.accent.gold} />
+                                    <View>
+                                        <Text style={styles.prizeTitle}>Weekly Draw Entry</Text>
+                                        <Text style={styles.prizeDesc}>Join for a chance to win exclusive rewards!</Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View style={styles.completionActions}>
+                                <TouchableOpacity 
+                                    style={styles.drawButton}
+                                    onPress={() => navigation.navigate('WeeklyDraw')}
+                                >
+                                    <LinearGradient
+                                        colors={COLORS.gradients.primary}
+                                        style={styles.actionGradient}
+                                    >
+                                        <Ionicons name="ticket-outline" size={20} color={COLORS.text.dark} />
+                                        <Text style={styles.actionButtonText}>GO TO DRAW ROOM</Text>
+                                    </LinearGradient>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity 
+                                    style={styles.sharePicksButton}
+                                    onPress={() => setShowShareCard(true)}
+                                >
+                                    <LinearGradient
+                                        colors={COLORS.gradients.gold}
+                                        style={styles.actionGradient}
+                                    >
+                                        <Ionicons name="share-social-outline" size={20} color={COLORS.text.dark} />
+                                        <Text style={styles.actionButtonText}>SHARE YOUR PICKS</Text>
+                                    </LinearGradient>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity 
+                                    style={styles.backLeaguesButton}
+                                    onPress={() => navigation.goBack()}
+                                >
+                                    <Text style={styles.backLeaguesText}>← Back to Leagues</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </LinearGradient>
                     </View>
                 ) : upcomingEvents.length > 0 ? (
-                    (Array.isArray(upcomingEvents) ? upcomingEvents : []).map(event => (
-                        <GameCard
-                            key={event.id}
-                            game={event}
-                            onPress={handleGamePress}
-                        />
-                    ))
+                    <ArenaDeck 
+                        games={upcomingEvents}
+                        sponsors={sponsors}
+                        onComplete={handleArenaComplete}
+                        onPredictionSuccess={handlePredictionSuccess}
+                    />
                 ) : (
                     <View style={styles.emptyState}>
-                        {['mlb', 'soccer', 'mma'].includes(sportId.toLowerCase()) ? (
-                            <View style={styles.comingSoonCard}>
-                                <LinearGradient
-                                    colors={['rgba(14, 165, 233, 0.1)', 'transparent']}
-                                    style={styles.comingSoonGradient}
-                                >
-                                    <Ionicons name="time-outline" size={64} color={COLORS.accent.cyan} />
-                                    <View style={styles.comingSoonBadge}>
-                                        <Text style={styles.comingSoonBadgeText}>V2.5 PREVIEW</Text>
-                                    </View>
-                                    <Text style={styles.comingSoonText}>{sportName} Coming Soon</Text>
-                                    <Text style={styles.emptySubtext}>
-                                        Next-gen forecasting for {sportName} is in final testing.
-                                    </Text>
-                                    <TouchableOpacity
-                                        style={styles.notifyButton}
-                                        onPress={() => Linking.openURL('https://sportsprophecyapp.com')}
-                                    >
-                                        <Text style={styles.notifyButtonText}>GET NOTIFIED</Text>
-                                    </TouchableOpacity>
-                                </LinearGradient>
-                            </View>
-                        ) : (
-                            <>
-                                <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
-                                <Text style={styles.emptyText}>No games available</Text>
-                                <Text style={styles.emptySubtext}>
-                                    New games are added daily.
-                                </Text>
-                            </>
-                        )}
+                        <Ionicons name="calendar-outline" size={48} color={COLORS.text.tertiary} />
+                        <Text style={styles.emptyText}>Arena is quiet today...</Text>
+                        <Text style={styles.emptySubtext}>New games are added daily. Check back soon!</Text>
                     </View>
                 )}
-            </ScrollView>
+            </View>
 
-            <PredictionModal
-                visible={modalVisible}
-                onClose={() => setModalVisible(false)}
-                event={selectedEvent}
-                initialTeam={initialTeam}
-                onPredictionSuccess={fetchEvents}
-                onLoadNextGame={getNextUnpredictedGame}
-            />
+            {showShareCard && (
+                <PredictionShareCard 
+                    visible={showShareCard}
+                    onClose={() => setShowShareCard(false)}
+                    homeTeam={lastGame?.homeTeam || 'Home Team'}
+                    awayTeam={lastGame?.awayTeam || 'Away Team'}
+                    pick={lastPick || 'Winner'}
+                    username={user?.username || 'Fan'}
+                    referralCode={user?.referralCode || 'ARENA'}
+                />
+            )}
         </SafeAreaView>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
@@ -249,111 +266,138 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: COLORS.border.tertiary,
         width: '100%',
-        borderRadius: 0, // Reset radius for full width bar look
+        borderRadius: 0,
         borderWidth: 0,
         marginVertical: 0,
         backgroundColor: COLORS.background.secondary,
     },
-    contactText: {
-        color: COLORS.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.xs,
-    },
-    content: {
-        padding: SPACING.base,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.base,
-        marginTop: SPACING.sm,
-    },
-    sectionTitle: {
-        fontSize: TYPOGRAPHY.sizes.lg,
-        fontWeight: TYPOGRAPHY.weights.bold,
-        color: COLORS.text.primary,
-    },
-    gameCount: {
-        fontSize: TYPOGRAPHY.sizes.sm,
-        color: COLORS.text.secondary,
-        fontWeight: TYPOGRAPHY.weights.semibold,
-    },
-    skeletonContainer: {
-        paddingVertical: SPACING.sm,
+    deckContainer: {
+        flex: 1,
     },
     loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: SPACING.xxxl,
     },
     loadingText: {
         color: COLORS.text.secondary,
         marginTop: SPACING.md,
         fontSize: TYPOGRAPHY.sizes.sm,
     },
-    emptyState: {
+    completionCard: {
+        flex: 1,
+        padding: SPACING.lg,
+    },
+    completionGradient: {
+        flex: 1,
+        borderRadius: BORDER_RADIUS.xl,
+        padding: SPACING.xl,
+        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: SPACING.xxxl,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
-    emptyText: {
-        color: COLORS.text.secondary,
-        fontSize: TYPOGRAPHY.sizes.md,
-        fontWeight: TYPOGRAPHY.weights.semibold,
-        marginTop: SPACING.base,
+    confettiContainer: {
+        alignItems: 'center',
     },
-    comingSoonText: {
-        color: COLORS.accent.cyan,
-        fontSize: TYPOGRAPHY.sizes.lg,
-        fontWeight: TYPOGRAPHY.weights.bold,
-        marginTop: SPACING.base,
+    confettiIcon: {
+        fontSize: 48,
+        marginBottom: SPACING.md,
     },
-    emptySubtext: {
-        color: COLORS.text.tertiary,
-        fontSize: TYPOGRAPHY.sizes.sm,
-        marginTop: SPACING.xs,
+    completionTitle: {
+        color: COLORS.text.primary,
+        fontSize: 28,
+        fontWeight: TYPOGRAPHY.weights.black,
         textAlign: 'center',
     },
-    comingSoonCard: {
+    completionSubtext: {
+        color: COLORS.text.secondary,
+        fontSize: 14,
+        textAlign: 'center',
+        marginTop: SPACING.sm,
+    },
+    prizeSection: {
         width: '100%',
-        backgroundColor: COLORS.background.secondary,
-        borderRadius: BORDER_RADIUS.xl,
-        overflow: 'hidden',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.md,
         borderWidth: 1,
-        borderColor: 'rgba(14, 165, 233, 0.2)',
-        marginTop: SPACING.lg,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
-    comingSoonGradient: {
-        alignItems: 'center',
-        paddingVertical: 40,
-        paddingHorizontal: SPACING.xl,
-    },
-    comingSoonBadge: {
-        backgroundColor: COLORS.accent.cyan,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 4,
-        marginTop: SPACING.md,
-        marginBottom: SPACING.sm,
-    },
-    comingSoonBadgeText: {
-        color: COLORS.text.inverse,
+    prizeLabel: {
+        color: COLORS.accent.gold,
         fontSize: 10,
         fontWeight: TYPOGRAPHY.weights.black,
         letterSpacing: 1,
+        marginBottom: SPACING.sm,
     },
-    notifyButton: {
-        marginTop: SPACING.xl,
-        paddingHorizontal: SPACING.xl,
-        paddingVertical: SPACING.md,
-        borderRadius: BORDER_RADIUS.md,
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: COLORS.accent.cyan,
+    prizeCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.md,
     },
-    notifyButtonText: {
-        color: COLORS.accent.cyan,
-        fontSize: TYPOGRAPHY.sizes.sm,
+    prizeTitle: {
+        color: COLORS.text.primary,
+        fontSize: 16,
         fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    prizeDesc: {
+        color: COLORS.text.tertiary,
+        fontSize: 12,
+    },
+    completionActions: {
+        width: '100%',
+        gap: SPACING.md,
+    },
+    drawButton: {
+        height: 56,
+        borderRadius: BORDER_RADIUS.lg,
+        overflow: 'hidden',
+    },
+    sharePicksButton: {
+        height: 56,
+        borderRadius: BORDER_RADIUS.lg,
+        overflow: 'hidden',
+    },
+    actionGradient: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.md,
+    },
+    actionButtonText: {
+        color: COLORS.text.dark,
+        fontSize: 14,
+        fontWeight: TYPOGRAPHY.weights.black,
         letterSpacing: 1,
+    },
+    backLeaguesButton: {
+        alignItems: 'center',
+        paddingVertical: SPACING.sm,
+    },
+    backLeaguesText: {
+        color: COLORS.text.tertiary,
+        fontSize: 14,
+        fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    emptyState: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: SPACING.xxxl,
+    },
+    emptyText: {
+        color: COLORS.text.primary,
+        fontSize: 18,
+        fontWeight: TYPOGRAPHY.weights.bold,
+        marginTop: SPACING.md,
+    },
+    emptySubtext: {
+        color: COLORS.text.secondary,
+        fontSize: 14,
+        textAlign: 'center',
+        marginTop: SPACING.sm,
     },
 });
 

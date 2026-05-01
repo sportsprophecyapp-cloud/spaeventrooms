@@ -45,7 +45,39 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
     const [showShareCard, setShowShareCard] = useState(false);
 
     useEffect(() => {
-        if (!token) return;
+        const fetchLastPrediction = async () => {
+            if (showCompletion && !lastMatch && user?.id) {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://spa-backend-mvb1.onrender.com';
+                try {
+                    const res = await fetch(`${apiUrl}/api/auth/profile/${user.id}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.user?.history && data.user.history.length > 0) {
+                            const latest = data.user.history[0];
+                            setLastMatch({
+                                match_id: latest.id,
+                                home_team: latest.home_team,
+                                away_team: latest.away_team,
+                                home_logo: latest.home_logo,
+                                away_logo: latest.away_logo,
+                                start_time: latest.start_time,
+                                status: latest.status
+                            });
+                            setLastPick(latest.pick);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error fetching last prediction:', err);
+                }
+            }
+        };
+
+        fetchLastPrediction();
+    }, [showCompletion, lastMatch, user?.id, token]);
+
+    useEffect(() => {
         const fetchMatches = async () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -283,55 +315,70 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         const featuredSponsor = sponsors[0] || null;
 
         return (
-            <div className={styles.completionScreen}>
-                <div className={styles.completionCard}>
-                    <div className={styles.completionIcon}>🎉</div>
-                    <h2 className={styles.completionTitle}>{t('completion_title') || 'Arena Cleared!'}</h2>
-                    <p className={styles.completionStats}>{`You've mastered all ${predictionCount} matches in this league.`}</p>
+            <>
+                <div className={styles.completionScreen}>
+                    <div className={styles.completionCard}>
+                        <div className={styles.completionIcon}>🎉</div>
+                        <h2 className={styles.completionTitle}>{t('completion_title') || 'Arena Cleared!'}</h2>
+                        <p className={styles.completionStats}>{`You've mastered all ${predictionCount} matches in this league.`}</p>
 
-                    {featuredSponsor && (
-                        <div className={styles.completionPrize}>
-                            <p className={styles.prizeLabel}>FEATURED PRIZE AVAILABLE</p>
-                            <div className={styles.prizeBox}>
-                                <img src={featuredSponsor.logo_url} alt={featuredSponsor.sponsor_name} className={styles.prizeSponsorLogo} />
-                                <div className={styles.prizeDetails}>
-                                    <h4>{featuredSponsor.sponsor_name} {t('giveaway') || 'Giveaway'}</h4>
-                                    <p>{t('enter_draw_hint') || 'Enter the Draw Room now for a chance to win exclusive rewards!'}</p>
+                        {featuredSponsor && (
+                            <div className={styles.completionPrize}>
+                                <p className={styles.prizeLabel}>FEATURED PRIZE AVAILABLE</p>
+                                <div className={styles.prizeBox}>
+                                    <img src={featuredSponsor.logo_url} alt={featuredSponsor.sponsor_name} className={styles.prizeSponsorLogo} />
+                                    <div className={styles.prizeDetails}>
+                                        <h4>{featuredSponsor.sponsor_name} {t('giveaway') || 'Giveaway'}</h4>
+                                        <p>{t('enter_draw_hint') || 'Enter the Draw Room now for a chance to win exclusive rewards!'}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    <div className={styles.completionActions}>
-                        <button
-                            onClick={() => router.push('/draw')}
-                            className={styles.drawButton}
-                        >
-                            🎟️ {t('go_to_draw_room')}
-                        </button>
-                        <button
-                            onClick={() => {
-                                console.log('📤 Share clicked. User:', !!user, 'LastMatch:', !!lastMatch);
-                                if (!user || !lastMatch) {
-                                    setMessage({ text: "Please make a prediction before sharing!", type: 'info' });
-                                    return;
-                                }
-                                setShowShareCard(true);
-                            }}
-                            className={styles.shareButton}
-                        >
-                            📤 SHARE YOUR PICKS
-                        </button>
-                        <button
-                            onClick={() => router.push(`/rooms/${roomId}`)}
-                            className={styles.completionButton}
-                        >
-                            {t('back_to_leagues')}
-                        </button>
+                        <div className={styles.completionActions}>
+                            <button
+                                onClick={() => router.push('/draw')}
+                                className={styles.drawButton}
+                            >
+                                🎟️ {t('go_to_draw_room')}
+                            </button>
+                            <button
+                                className={styles.completionShareBtn}
+                                onClick={() => {
+                                    if (lastMatch) {
+                                        setShowShareCard(true);
+                                    } else {
+                                        setMessage({ text: 'Accessing records...', type: 'info' });
+                                    }
+                                }}
+                            >
+                                📤 SHARE YOUR PICKS
+                            </button>
+                            <button
+                                onClick={() => router.push(`/rooms/${roomId}`)}
+                                className={styles.completionButton}
+                            >
+                                {t('back_to_leagues')}
+                            </button>
+                        </div>
+                        <p className={styles.completionCountdown}>{t('auto_returning') || 'Auto-returning in'} {countdown}s</p>
                     </div>
-                    <p className={styles.completionCountdown}>{t('auto_returning') || 'Auto-returning in'} {countdown}s</p>
                 </div>
-            </div>
+
+                {showShareCard && lastMatch && user && (
+                    <PredictionShareCard
+                        homeTeam={lastMatch.home_team}
+                        awayTeam={lastMatch.away_team}
+                        homeLogo={lastMatch.home_logo || ''}
+                        awayLogo={lastMatch.away_logo || ''}
+                        pick={lastPick || ''}
+                        username={user.username || 'Fan'}
+                        referralCode={(user as any).referralCode || user.id?.toString() || ''}
+                        matchId={lastMatch.match_id}
+                        onClose={() => setShowShareCard(false)}
+                    />
+                )}
+            </>
         );
     }
 
@@ -532,19 +579,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                 })}
             </div>
 
-            {showShareCard && lastMatch && user && (
-                <PredictionShareCard 
-                    homeTeam={lastMatch.home_team}
-                    awayTeam={lastMatch.away_team}
-                    homeLogo={lastMatch.home_logo || ''}
-                    awayLogo={lastMatch.away_logo || ''}
-                    pick={lastPick || ''}
-                    username={user.username || 'Fan'}
-                    referralCode={user.id.toString()}
-                    matchId={lastMatch.match_id}
-                    onClose={() => setShowShareCard(false)}
-                />
-            )}
         </div>
     );
 };

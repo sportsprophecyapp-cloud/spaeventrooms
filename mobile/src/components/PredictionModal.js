@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, ScrollView, Image, Animated } from 'react-native';
+import { StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, ScrollView, Image, Animated, Share, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiService } from '../services/api';
@@ -103,8 +103,6 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
             setSuccess(false);
         }
     }, [visible, initialTeam]);
-
-    if (!event) return null;
 
     if (!event) return null;
 
@@ -263,6 +261,27 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
             setError(errorMsg);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSharePick = async () => {
+        const eventName = event?.homeTeam && event?.awayTeam
+            ? `${event.homeTeam} vs ${event.awayTeam}`
+            : 'a game';
+        const shareMessage = `I just made my pick on Events Arena! 🏆 I'm calling it for ${selectedWinner} in ${eventName}. Think you can beat my prediction? Join for free: https://www.sportsprophecyapp.com`;
+        try {
+            if (Platform.OS === 'web') {
+                if (navigator.share) {
+                    await navigator.share({ title: 'My Events Arena Pick', text: shareMessage, url: 'https://www.sportsprophecyapp.com' });
+                } else {
+                    await navigator.clipboard.writeText(shareMessage);
+                    Alert.alert('Copied!', 'Your pick has been copied — paste it anywhere to share!');
+                }
+            } else {
+                await Share.share({ message: shareMessage });
+            }
+        } catch (err) {
+            // User cancelled — not an error
         }
     };
 
@@ -521,36 +540,49 @@ const PredictionModal = ({ visible, onClose, event, initialTeam, onPredictionSuc
                             </View>
                         )}
 
-                        <TouchableOpacity
-                            style={[styles.submitButton, success && styles.submitButtonSuccess]}
-                            onPress={handleSubmit}
-                            disabled={loading || !selectedWinner || !hasEnoughTokens || success}
-                            accessibilityLabel="Submit Prediction"
-                            testID="prediction-submit-button"
-                        >
-                            <LinearGradient
-                                colors={success ? [COLORS.status.success, COLORS.status.success] : (!selectedWinner || !hasEnoughTokens) ? ['#9ca3af', '#cbd5e1'] : ['#2979FF', '#00B0FF']}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                style={styles.submitGradient}
+                        {success ? (
+                            <View style={styles.successFooter}>
+                                <View style={styles.successBanner}>
+                                    <Ionicons name="checkmark-circle" size={24} color={COLORS.status.success} />
+                                    <Text style={styles.successBannerText}>PREDICTION LOCKED IN!</Text>
+                                </View>
+                                <TouchableOpacity
+                                    style={styles.sharePickButton}
+                                    onPress={handleSharePick}
+                                    accessibilityLabel="Share Your Pick"
+                                    testID="prediction-share-button"
+                                >
+                                    <Ionicons name="share-social-outline" size={18} color={COLORS.text.inverse} />
+                                    <Text style={styles.sharePickText}>📣 SHARE YOUR PICK</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <TouchableOpacity
+                                style={styles.submitButton}
+                                onPress={handleSubmit}
+                                disabled={loading || !selectedWinner || !hasEnoughTokens}
+                                accessibilityLabel="Submit Prediction"
+                                testID="prediction-submit-button"
                             >
-                                {loading ? (
-                                    <ActivityIndicator color={COLORS.text.inverse} />
-                                ) : success ? (
-                                    <>
-                                        <Text style={styles.submitText}>PREDICTION SAVED</Text>
-                                        <Ionicons name="checkmark-circle" size={24} color={COLORS.text.inverse} />
-                                    </>
-                                ) : (
-                                    <>
-                                        <Text style={styles.submitText}>
-                                            {!hasEnoughTokens ? 'INSUFFICIENT TOKENS' : 'SUBMIT PREDICTION'}
-                                        </Text>
-                                        {hasEnoughTokens && <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />}
-                                    </>
-                                )}
-                            </LinearGradient>
-                        </TouchableOpacity>
+                                <LinearGradient
+                                    colors={(!selectedWinner || !hasEnoughTokens) ? ['#9ca3af', '#cbd5e1'] : ['#2979FF', '#00B0FF']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    style={styles.submitGradient}
+                                >
+                                    {loading ? (
+                                        <ActivityIndicator color={COLORS.text.inverse} />
+                                    ) : (
+                                        <>
+                                            <Text style={styles.submitText}>
+                                                {!hasEnoughTokens ? 'INSUFFICIENT TOKENS' : 'SUBMIT PREDICTION'}
+                                            </Text>
+                                            {hasEnoughTokens && <Ionicons name="arrow-forward" size={20} color={COLORS.text.inverse} />}
+                                        </>
+                                    )}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        )}
 
                         <Text style={{ textAlign: 'center', color: COLORS.text.tertiary, fontSize: 10, marginTop: 4 }}>
                             Predictions are skill-based and free.
@@ -1021,6 +1053,44 @@ const styles = StyleSheet.create({
         color: COLORS.text.primary,
         fontSize: TYPOGRAPHY.sizes.lg,
         fontWeight: TYPOGRAPHY.weights.bold,
+    },
+    successFooter: {
+        gap: SPACING.sm,
+        marginTop: SPACING.base,
+        marginBottom: SPACING.lg,
+    },
+    successBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.sm,
+        backgroundColor: COLORS.status.success + '20',
+        borderRadius: BORDER_RADIUS.md,
+        paddingVertical: SPACING.md,
+        borderWidth: 1,
+        borderColor: COLORS.status.success + '60',
+    },
+    successBannerText: {
+        color: COLORS.status.success,
+        fontSize: TYPOGRAPHY.sizes.base,
+        fontWeight: TYPOGRAPHY.weights.black,
+        letterSpacing: 1,
+    },
+    sharePickButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: SPACING.sm,
+        backgroundColor: COLORS.accent.purple || '#7C3AED',
+        borderRadius: BORDER_RADIUS.md,
+        paddingVertical: SPACING.lg,
+        ...SHADOWS.sm,
+    },
+    sharePickText: {
+        color: COLORS.text.inverse,
+        fontSize: TYPOGRAPHY.sizes.md,
+        fontWeight: TYPOGRAPHY.weights.black,
+        letterSpacing: 1,
     },
 });
 

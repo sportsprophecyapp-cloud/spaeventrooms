@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, RefreshControl, ActivityIndicator, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -57,6 +57,21 @@ const PredictionHistoryScreen = () => {
 
         return result;
     }, [predictions, activeFilter, sortOrder]);
+
+    const handleSharePrediction = async (pred) => {
+        const isWon = pred.resolved && (pred.result?.won || pred.won);
+        const statusText = pred.resolved ? (isWon ? 'WINNER! 🏆' : 'CLOSE CALL!') : 'PICKED!';
+        const shareMessage = `🎯 I'm picking the ${pred.predictedWinner} on Events Arena! ${statusText}\n\nJoin my squad and earn crowns: https://www.sportsprophecyapp.com?ref=${user?.referralCode}`;
+        
+        try {
+            await Share.share({
+                message: shareMessage,
+                title: 'Events Arena Prediction'
+            });
+        } catch (error) {
+            console.error('Error sharing prediction:', error);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -124,24 +139,33 @@ const PredictionHistoryScreen = () => {
                                 </View>
 
                                 <View style={styles.statusSection}>
-                                    {pred.resolved ? (
-                                        (pred.result?.won || pred.won) ? (
-                                            <View style={[styles.statusBadge, styles.wonBadge]}>
-                                                <Ionicons name="checkmark-circle" size={14} color="#fff" />
-                                                <Text style={styles.statusText}>WON</Text>
-                                            </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                        {pred.resolved ? (
+                                            (pred.result?.won || pred.won) ? (
+                                                <View style={[styles.statusBadge, styles.wonBadge]}>
+                                                    <Ionicons name="checkmark-circle" size={14} color="#fff" />
+                                                    <Text style={styles.statusText}>WON</Text>
+                                                </View>
+                                            ) : (
+                                                <View style={[styles.statusBadge, styles.lostBadge]}>
+                                                    <Ionicons name="close-circle" size={14} color="#fff" />
+                                                    <Text style={styles.statusText}>LOST</Text>
+                                                </View>
+                                            )
                                         ) : (
-                                            <View style={[styles.statusBadge, styles.lostBadge]}>
-                                                <Ionicons name="close-circle" size={14} color="#fff" />
-                                                <Text style={styles.statusText}>LOST</Text>
+                                            <View style={[styles.statusBadge, styles.pendingBadge]}>
+                                                <Ionicons name="time" size={14} color="#fff" />
+                                                <Text style={styles.statusText}>PENDING</Text>
                                             </View>
-                                        )
-                                    ) : (
-                                        <View style={[styles.statusBadge, styles.pendingBadge]}>
-                                            <Ionicons name="time" size={14} color="#fff" />
-                                            <Text style={styles.statusText}>PENDING</Text>
-                                        </View>
-                                    )}
+                                        )}
+                                        
+                                        <TouchableOpacity 
+                                            style={styles.smallShareBtn} 
+                                            onPress={() => handleSharePrediction(pred)}
+                                        >
+                                            <Ionicons name="share-social-outline" size={16} color={COLORS.accent.cyan} />
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
                         </View>
@@ -294,6 +318,13 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: COLORS.text.secondary,
         marginTop: 8,
+    },
+    smallShareBtn: {
+        padding: 6,
+        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(56, 189, 248, 0.2)',
     },
 });
 

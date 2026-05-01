@@ -3,7 +3,7 @@ import * as controllers from './controller';
 import { authenticate } from '../auth/middleware';
 import commentRoutes from '../comments/routes';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // Match-specific sentiment and user-check (Public or Auth)
 router.get('/match', authenticate, controllers.getUserMatchPrediction);

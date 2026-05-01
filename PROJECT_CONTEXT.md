@@ -1,5 +1,8 @@
 # Project Context: Events Arena
 
+> [!TIP]
+> **AI ASSISTANTS**: Read [AI_HANDOFF.md](file:///Users/williamcommu/Desktop/Sports Prophecy Events Arena/AI_HANDOFF.md) for critical session-start context and architecture notes.
+
 **PROJECT:** Events Arena
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
 **PATH:** `/Users/williamcommu/Desktop/Sports Prophecy Events Arena`
@@ -359,17 +362,25 @@ This roadmap details how we will expand the new swipeable UI to include multiple
 
 ## 🔧 WORKFLOW SUMMARY & KEY LESSONS:
 - **Build Failures are Part of the Process:** Critical build failures (missing exports, syntax errors) are a normal part of rapid development. Our process of deploying, inspecting, and immediately fixing is working.
-- **Site Inspect is CRITICAL:** The browser\'s **console output** is the only reliable way to distinguish between silent failures, `404` errors, and `500` server crashes.
+- **Site Inspect is CRITICAL:** The browser's **console output** is the only reliable way to distinguish between silent failures, `404` errors, and `500` server crashes.
 
 ---
 
 
-### 🐛 KNOWN ISSUES (Active Development)
+### 📱 Platform Strategy: Separation of Concerns
+While the platform aims for **UI/UX Parity** (e.g., the Tinder-swipe "Arena" experience), the Web and Mobile codebases are intentionally maintained as separate entities for specific feature implementations:
 
-### In Progress
-- **Multi-Prediction System**: Planning for "Match Winner + 2 Extras" (Team to Score First, BTTS). [NEXT PHASE]
+1.  **Interaction Layer**: 
+    - **Web**: Uses `react-spring` and `@use-gesture/react` for mouse/touch swipe physics.
+    - **Mobile**: Uses `react-native-reanimated` and `react-native-gesture-handler` for high-performance native gestures and haptic feedback.
+2.  **Viral Growth Loop**:
+    - **Web**: Relies on **OpenGraph (OG)** meta tags, Twitter Cards, and browser-based `navigator.share` for social "unfurls".
+    - **Mobile**: Utilizes **Native Share APIs** (`expo-sharing`) and `react-native-view-shot` to generate premium, high-resolution shareable graphics for social media story sharing.
+3.  **Revenue & Compliance**:
+    - **Web**: Handles direct Stripe/PayPal integrations for sponsor applications.
+    - **Mobile**: Adheres to strict **App Store / Play Store guidelines** regarding virtual currency and prize draws, utilizing native store-compliant flows where necessary.
+4.  **Notifications**:
+    - **Web**: Browser-based Push API (when active).
+    - **Mobile**: Native Push Notifications (APNs/FCM) for real-time match alerts and win celebrations.
 
-### Under Investigation
-- None at this time
-
-*Last Updated: January 24, 2026*
+*Last Updated: April 30, 2026*

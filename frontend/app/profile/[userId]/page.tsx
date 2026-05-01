@@ -15,7 +15,7 @@ interface UserProfile {
     id: string;
     username: string;
     email: string;
-    referral_code?: string;
+    referralCode?: string;
     tokens: number;
     points: number;
     level: number;
@@ -78,7 +78,8 @@ const ProfilePage = () => {
     const [copyMessage, setCopyMessage] = useState('');
     const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
     const [isShopOpen, setIsShopOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'showcase' | 'honors' | 'history' | 'rewards'>('showcase');
+    const [showReferralCard, setShowReferralCard] = useState(false);
+    const [activeTab, setActiveTab] = useState<'showcase' | 'honors' | 'history' | 'social'>('showcase');
     const [isEditingName, setIsEditingName] = useState(false);
     const [newName, setNewName] = useState('');
     const [nameError, setNameError] = useState('');
@@ -367,10 +368,10 @@ const ProfilePage = () => {
                         📅 HISTORY
                     </button>
                     <button
-                        className={`${styles.tabBtn} ${activeTab === 'rewards' ? styles.activeTab : ''}`}
-                        onClick={() => setActiveTab('rewards')}
+                        className={`${styles.tabBtn} ${activeTab === 'social' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('social')}
                     >
-                        🎁 REWARDS
+                        🌐 SOCIAL
                     </button>
                 </nav>
 
@@ -410,17 +411,43 @@ const ProfilePage = () => {
                                 </div>
                             </section>
 
-                            {isOwnProfile && (
-                                <ReferralRoadmap
-                                    currentCount={profile.referral_count || 0}
-                                    unlockedIds={unlockedBadgeIds}
-                                    referralCode={profile.referral_code}
-                                    onCopy={handleCopyReferral}
-                                    copyMessage={copyMessage}
-                                />
-                            )}
                             <LootShowcase />
                         </>
+                    )}
+
+                    {activeTab === 'social' && isOwnProfile && (
+                        <div className={styles.socialTabContent}>
+                            <div className={styles.shareHub}>
+                                <div className={styles.shareHubHeader}>
+                                    <h3>🚀 RECRUIT YOUR SQUAD</h3>
+                                    <p>Grow the arena and earn exclusive rewards for every recruit.</p>
+                                </div>
+                                <div className={styles.shareHubActions}>
+                                    <button 
+                                        className={styles.primaryShareBtn}
+                                        onClick={() => setShowReferralCard(true)}
+                                    >
+                                        📤 GENERATE INVITE CARD
+                                    </button>
+                                    <button 
+                                        className={styles.secondaryShareBtn}
+                                        onClick={handleShareStats}
+                                    >
+                                        🐦 SHARE ON X
+                                    </button>
+                                </div>
+                            </div>
+
+                            <ReferralRoadmap
+                                currentCount={profile.referral_count || 0}
+                                unlockedIds={unlockedBadgeIds}
+                                referralCode={profile.referralCode}
+                                onCopy={handleCopyReferral}
+                                copyMessage={copyMessage}
+                            />
+                            
+                            <RewardCenter />
+                        </div>
                     )}
 
                     {activeTab === 'honors' && (
@@ -611,12 +638,22 @@ const ProfilePage = () => {
                             </div>
                         </section>
                     )}
-
-                    {activeTab === 'rewards' && (
-                        <RewardCenter />
-                    )}
                 </div>
             </div>
+
+            {showReferralCard && (
+                <PredictionShareCard 
+                    homeTeam="EVENTS"
+                    awayTeam="ARENA"
+                    homeLogo="/assets/icons/app-icon.png"
+                    awayLogo="/assets/icons/app-icon.png"
+                    pick="CHAMPION"
+                    username={profile.username}
+                    referralCode={profile.referralCode || profile.id}
+                    matchId="referral"
+                    onClose={() => setShowReferralCard(null)}
+                />
+            )}
 
             {isShopOpen && (
                 <TokenShop onClose={() => setIsShopOpen(false)} />
@@ -630,7 +667,7 @@ const ProfilePage = () => {
                     awayLogo={selectedShareItem.away_logo || ''}
                     pick={selectedShareItem.pick}
                     username={profile.username}
-                    referralCode={profile.referral_code || profile.id}
+                    referralCode={profile.referralCode || profile.id}
                     matchId={selectedShareItem.id}
                     onClose={() => setSelectedShareItem(null)}
                 />

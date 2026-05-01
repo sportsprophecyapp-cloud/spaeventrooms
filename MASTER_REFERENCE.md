@@ -1,6 +1,9 @@
 # 📌 Project Master Reference: Events Arena
 **Version 4.1.0**
 
+> [!TIP]
+> For AI agents starting a new session, please refer to [AI_HANDOFF.md](file:///Users/williamcommu/Desktop/Sports Prophecy Events Arena/AI_HANDOFF.md) for the latest project "state of mind" and handoff instructions.
+
 ## 🛠 Project Identity & Tech Stack
 - **Project Name:** Events Arena
 - **Frontend:** Next.js. Deployed on **Render (Free)**.
@@ -49,6 +52,19 @@
 ## 📈 Business Intelligence & Reporting
 - **Daily Arena Report:** Run `npx ts-node backend/src/scripts/arena-stats.ts` to see real-time user growth, prediction volume, economy health, and top performers.
 - **Safety Logs:** Always check Render logs for "System Maintenance Complete" to verify Auto-Heal success.
+
+## 📱 Platform-Specific Architecture (Web vs Mobile)
+To maintain optimal performance and store compliance, the following features MUST remain separate in their implementation:
+
+- **Sharing Logic**: 
+    - **Web**: Uses `navigator.share` and OG tags for link-based viral growth.
+    - **Mobile**: Uses `react-native-view-shot` for image-based viral growth (Instagram/Snapchat stories).
+- **Gesture Physics**:
+    - **Web**: Optimized for low-latency mouse and trackpad interactions.
+    - **Mobile**: Optimized for thumb-based gestures with **Expo Haptics** for tactile selection feedback.
+- **Store Compliance**:
+    - **Mobile**: Strict avoidance of gambling terminology to ensure App Store/Google Play approval.
+    - **Web**: Full SEO optimization with OpenGraph, Sitemap, and Robots.txt.
 
 ## 📧 Email Architecture
 - **General Inquiries & Privacy:** `contact@sportsprophecyapp.com`

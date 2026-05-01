@@ -4,6 +4,7 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import LandingScreen from './src/screens/LandingScreen';
 import MainTabNavigator from './src/navigation/MainTabNavigator';
@@ -123,20 +124,22 @@ export default function App() {
 
 
   return (
-    <SafeAreaProvider>
-      <ErrorBoundary>
-        <AuthProvider>
-          <NavigationContainer
-            documentTitle={{
-              formatter: (options, route) => options?.title ? `${options.title} | Events Arena` : 'Events Arena'
-            }}
-          >
-            <AppNavigator />
-          </NavigationContainer>
-        </AuthProvider>
-      </ErrorBoundary>
-      <StatusBar style="light" />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <NavigationContainer
+              documentTitle={{
+                formatter: (options, route) => options?.title ? `${options.title} | Events Arena` : 'Events Arena'
+              }}
+            >
+              <AppNavigator />
+            </NavigationContainer>
+          </AuthProvider>
+        </ErrorBoundary>
+        <StatusBar style="light" />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

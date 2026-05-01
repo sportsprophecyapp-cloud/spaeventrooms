@@ -29,8 +29,11 @@ const PredictionShareCard: React.FC<PredictionShareCardProps> = ({
     onClose
 }) => {
     const cardRef = useRef<HTMLDivElement>(null);
+    const isReferralMode = matchId === 'referral';
 
-    const shareUrl = `${window.location.origin}/rooms/nhl?match=${matchId}&ref=${referralCode}`;
+    const shareUrl = isReferralMode 
+        ? `${window.location.origin}/auth/register?ref=${referralCode}`
+        : `${window.location.origin}/rooms/nhl?match=${matchId}&ref=${referralCode}`;
 
     const handleDownload = async () => {
         if (cardRef.current === null) return;
@@ -38,7 +41,7 @@ const PredictionShareCard: React.FC<PredictionShareCardProps> = ({
         try {
             const dataUrl = await toPng(cardRef.current, { cacheBust: true });
             const link = document.createElement('a');
-            link.download = `EventsArena-Prediction-${matchId}.png`;
+            link.download = isReferralMode ? `EventsArena-Invite-${username}.png` : `EventsArena-Prediction-${matchId}.png`;
             link.href = dataUrl;
             link.click();
         } catch (err) {
@@ -57,8 +60,10 @@ const PredictionShareCard: React.FC<PredictionShareCardProps> = ({
             if (navigator.share && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     files: [file],
-                    title: 'My Events Arena Prediction',
-                    text: `I'm picking the ${pick} to win! Scan the QR code to bet against me.`,
+                    title: isReferralMode ? 'Join my Arena Squad!' : 'My Events Arena Prediction',
+                    text: isReferralMode 
+                        ? `Join me on Events Arena and get a crown bonus! @${username}`
+                        : `I'm picking the ${pick} to win! Scan the QR code to bet against me.`,
                 });
             } else {
                 handleDownload();
@@ -79,7 +84,7 @@ const PredictionShareCard: React.FC<PredictionShareCardProps> = ({
                             <span className={styles.arenaTag}>EVENTS ARENA</span>
                         </div>
 
-                        <div className={styles.mainTitle}>PREDICTION LOCKED</div>
+                        <div className={styles.mainTitle}>{isReferralMode ? 'SQUAD INVITE' : 'PREDICTION LOCKED'}</div>
 
                         <div className={styles.matchup}>
                             <div className={styles.team}>
@@ -100,14 +105,14 @@ const PredictionShareCard: React.FC<PredictionShareCardProps> = ({
                         </div>
 
                         <div className={styles.predictionBox}>
-                            <span className={styles.pickLabel}>MY PICK</span>
-                            <span className={styles.pickValue}>{pick.toUpperCase()}</span>
+                            <span className={styles.pickLabel}>{isReferralMode ? 'RECRUITER' : 'MY PICK'}</span>
+                            <span className={styles.pickValue}>{isReferralMode ? `@${username}`.toUpperCase() : pick.toUpperCase()}</span>
                         </div>
 
                         <div className={styles.footer}>
                             <div className={styles.userInfo}>
-                                <span className={styles.username}>@{username}</span>
-                                <span className={styles.inviteText}>SCAN TO CHALLENGE ME</span>
+                                <span className={styles.username}>{isReferralMode ? 'UNLIMITED REWARDS' : `@${username}`}</span>
+                                <span className={styles.inviteText}>{isReferralMode ? 'SCAN TO JOIN SQUAD' : 'SCAN TO CHALLENGE ME'}</span>
                             </div>
                             <div className={styles.qrWrapper}>
                                 <QRCodeSVG 

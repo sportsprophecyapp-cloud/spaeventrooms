@@ -28,4 +28,11 @@
 - `[x]` **Unique Usernames:** Username uniqueness enforced during registration.
 - `[ ]` **Referral Roadmap:** Profile page roadmap shows correct milestone nodes.
 
+### 📱 Platform-Specific QA
+- `[ ]` **Mobile Gestures**: Verify Tinder-swipe velocity and snap-back logic in the mobile Arena.
+- `[ ]` **Mobile Haptics**: Confirm vibration feedback on swipe-left/right triggers.
+- `[ ]` **Mobile Share Card**: Verify `view-shot` generates high-res image with correct referral code.
+- `[ ]` **Web OG Tags**: Verify match-specific unfurls work correctly on WhatsApp/iMessage.
+- `[ ]` **Web Performance**: Verify mouse drag physics feel natural on Desktop browsers.
+
 Pribadi.

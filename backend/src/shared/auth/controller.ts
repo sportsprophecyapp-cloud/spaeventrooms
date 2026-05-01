@@ -18,7 +18,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
         const result = await dbQuery(`
             SELECT u.id, u.email, u.username, u.permissions, u.token_balance, u.total_points, u.total_tickets, u.current_level, u.referral_code, u.can_upload_custom, u.consecutive_login_days,
                    (SELECT COUNT(*) FROM users WHERE referred_by_id = u.id) as referral_count,
-                   (SELECT COUNT(*) FROM soccer_predictions WHERE user_id = u.id AND result = 'correct') as correct_picks,
+                   (SELECT (SELECT COUNT(*) FROM soccer_predictions WHERE user_id = u.id AND result = 'correct') + (SELECT COUNT(*) FROM nhl_predictions WHERE user_id = u.id AND result = 'correct')) as correct_picks,
                    COALESCE(u.avatar_url, (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'avatar' LIMIT 1)) as display_avatar,
                    (SELECT asset_url FROM cosmetics c JOIN user_cosmetics uc ON c.id = uc.cosmetic_id WHERE uc.user_id = u.id AND uc.is_equipped = true AND c.type = 'frame' LIMIT 1) as equipped_frame
              FROM users u WHERE u.id = $1`, [userId]);
@@ -186,15 +186,24 @@ export const getProfile = async (req: Request, res: Response) => {
         const referralResult = await dbQuery(`SELECT COUNT(*) as count FROM users WHERE referred_by_id = $1`, [userId]);
         const referralCount = parseInt(referralResult.rows[0].count) || 0;
 
-        // 4. Fetch Recent Prediction History (Joining Soccer data for logos)
+        // 4. Fetch Recent Prediction History (Joining Soccer & NHL data)
         const historyResult = await dbQuery(`
-            SELECT 
+            (SELECT 
                 p.id, p.prediction_data->>'pick' as pick, p.created_at, p.result as status,
-                m.home_team, m.away_team, m.home_logo, m.away_logo, m.score_home, m.score_away, m.start_time
+                m.home_team, m.away_team, m.home_logo, m.away_logo, m.score_home, m.score_away, m.start_time,
+                'soccer' as sport
             FROM soccer_predictions p
             JOIN soccer_matches m ON p.match_id = m.match_id
-            WHERE p.user_id = $1
-            ORDER BY p.created_at DESC
+            WHERE p.user_id = $1)
+            UNION ALL
+            (SELECT 
+                p.id, p.prediction_data->>'pick' as pick, p.created_at, p.result as status,
+                m.home_team, m.away_team, m.home_logo, m.away_logo, m.score_home, m.score_away, m.start_time,
+                'nhl' as sport
+            FROM nhl_predictions p
+            JOIN nhl_matches m ON p.match_id = m.match_id
+            WHERE p.user_id = $1)
+            ORDER BY created_at DESC
             LIMIT 10
         `, [userId]);
 
@@ -208,7 +217,7 @@ export const getProfile = async (req: Request, res: Response) => {
                 tickets: user.total_tickets,
                 points: user.total_points,
                 level: user.current_level,
-                referral_code: user.referral_code,
+                referralCode: user.referral_code,
                 global_rank: globalRank,
                 referral_count: referralCount,
                 canUploadCustom: user.can_upload_custom,

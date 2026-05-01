@@ -714,8 +714,8 @@
     text-transform: uppercase;
 }
 
-.shareButton {
-    background: linear-gradient(135deg, #B4975A 0%, #d4af37 100%);
+.completionShareBtn {
+    background: linear-gradient(135deg, #FFD700 0%, #B4975A 100%);
     color: black;
     border: none;
     padding: 1rem 2rem;
@@ -725,8 +725,14 @@
     letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 10px 25px rgba(180, 151, 90, 0.3);
+    box-shadow: 0 10px 25px rgba(180, 151, 90, 0.4);
     text-transform: uppercase;
+}
+
+.completionShareBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(255, 215, 0, 0.5);
+    filter: brightness(1.1);
 }
 
 .drawButton:hover,
