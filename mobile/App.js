@@ -27,6 +27,7 @@ import PrivacyPolicyScreen from './src/screens/PrivacyPolicyScreen';
 import AnnouncementsScreen from './src/screens/AnnouncementsScreen';
 import AdminSponsorsScreen from './src/screens/AdminSponsorsScreen';
 import PredictionHistoryScreen from './src/screens/PredictionHistoryScreen';
+import TournamentHubScreen from './src/screens/TournamentHubScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -93,6 +94,7 @@ const AppNavigator = () => {
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
           <Stack.Screen name="WeeklyDraw" component={WeeklyDrawScreen} />
           <Stack.Screen name="Sport" component={SportScreen} />
+          <Stack.Screen name="TournamentHub" component={TournamentHubScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
           <Stack.Screen name="Sponsor" component={SponsorScreen} />

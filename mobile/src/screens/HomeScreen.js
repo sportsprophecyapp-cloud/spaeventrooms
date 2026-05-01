@@ -21,6 +21,7 @@ import FirstTimeUserView from '../components/FirstTimeUserView';
 import SocialProofCard from '../components/SocialProofCard';
 import { NoPredictionsYet, BrokenStreak } from '../components/EmptyStates';
 import { useAuth } from '../context/AuthContext';
+import LayeredProfileCard from '../components/LayeredProfileCard';
 import { COLORS } from '../constants/theme';
 import { APP_VERSION } from '../constants/version';
 import { apiService } from '../services/api';
@@ -134,16 +135,32 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.usernameText}>{user?.username || user?.idName || 'User'}</Text>
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications" size={24} color="#FFF" />
-            {user?.unreadNotifications > 0 && (
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationBadgeText}>
-                  {user.unreadNotifications}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity style={styles.notificationButton}>
+              <Ionicons name="notifications" size={24} color="#FFF" />
+              {user?.unreadNotifications > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {user.unreadNotifications}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ marginLeft: 15 }}>
+              {user?.layeredIdentity ? (
+                <View style={{ transform: [{ scale: 0.45 }], width: 50, height: 50, justifyContent: 'center', alignItems: 'center' }}>
+                    <LayeredProfileCard identity={user.layeredIdentity} size={100} />
+                </View>
+              ) : (
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ color: '#FFF', fontWeight: 'bold' }}>
+                        {(user?.idName || user?.username || 'U').substring(0, 2).toUpperCase()}
+                    </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Token/Crown Balance */}
@@ -205,6 +222,30 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Performance</Text>
         <PerformanceStats stats={user} />
+      </View>
+
+      {/* Tournament Hubs */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Tournament Hubs</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 15 }}>
+          <TouchableOpacity 
+            style={[styles.hubCard, { backgroundColor: '#1a472a', width: width * 0.6 }]}
+            onPress={() => navigation.navigate('TournamentHub', { hubId: 'world-cup', title: 'World Cup', icon: '⚽' })}
+          >
+            <Text style={{ fontSize: 24, marginBottom: 5 }}>🌍</Text>
+            <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>World Cup</Text>
+            <Text style={{ color: '#a0aec0', fontSize: 12 }}>Group Stage</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.hubCard, { backgroundColor: '#2a4365', width: width * 0.6 }]}
+            onPress={() => navigation.navigate('TournamentHub', { hubId: 'nhl-playoffs', title: 'Stanley Cup', icon: '🏒' })}
+          >
+            <Text style={{ fontSize: 24, marginBottom: 5 }}>🏆</Text>
+            <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>Stanley Cup</Text>
+            <Text style={{ color: '#a0aec0', fontSize: 12 }}>Playoffs</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       {/* Games Today */}
@@ -381,7 +422,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#111827',
+    color: COLORS.text.primary,
+    marginBottom: 15,
+  },
+  hubCard: {
+    padding: 15,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    minHeight: 100,
   },
   viewAllText: {
     fontSize: 14,

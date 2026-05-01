@@ -11,6 +11,7 @@ import { AVATAR_CATEGORIES, PRESET_AVATARS, getAvatarSource, BADGE_AVATARS } fro
 import { BiometricService } from '../services/biometrics';
 import TooltipIconButton from '../components/TooltipIconButton';
 import UserAvatar from '../components/UserAvatar';
+import LayeredProfileCard from '../components/LayeredProfileCard';
 import { Platform } from 'react-native';
 
 const showAlert = (title, message, buttons) => {
@@ -469,14 +470,18 @@ const ProfileScreen = () => {
                         <View style={styles.profileHeader}>
                             <View style={styles.avatarWrapper}>
                                 <TouchableOpacity onPress={() => setShowAvatarModal(true)}>
-                                    <UserAvatar
-                                        size={100}
-                                        profilePicture={user?.profilePicture}
-                                        selectedBadge={user?.selectedBadge}
-                                        fallbackName={user?.idName || user?.username}
-                                        style={styles.largeAvatar}
-                                        customBadgeSize={36}
-                                    />
+                                    {user?.layeredIdentity ? (
+                                        <LayeredProfileCard identity={user.layeredIdentity} size={110} />
+                                    ) : (
+                                        <UserAvatar
+                                            size={100}
+                                            profilePicture={user?.profilePicture}
+                                            selectedBadge={user?.selectedBadge}
+                                            fallbackName={user?.idName || user?.username}
+                                            style={styles.largeAvatar}
+                                            customBadgeSize={36}
+                                        />
+                                    )}
                                     <View style={styles.editIconBadge}>
                                         <Ionicons name="camera" size={16} color={COLORS.text.inverse} />
                                     </View>
