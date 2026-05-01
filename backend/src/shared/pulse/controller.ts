@@ -140,18 +140,34 @@ export const getLiveTicker = async (req: Request, res: Response) => {
 // ─── NHL PLAYOFFS HUB ──────────────────────────────────────────────────────
 export const getNhlPlayoffs = async (req: Request, res: Response) => {
     try {
-        const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?limit=50');
-        if (!response.ok) throw new Error('ESPN API error');
-        const data = await response.json() as any;
+        // Generate date strings for the last 20 days to cover the full first round
+        const today = new Date();
+        const dates: string[] = [];
+        for (let i = 0; i <= 20; i++) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            dates.push(d.toISOString().slice(0, 10).replace(/-/g, ''));
+        }
 
-        const events = (data.events || []).filter((e: any) => {
+        // Fetch all dates in parallel (ESPN scoreboard per day)
+        const fetchDate = async (dateStr: string) => {
+            try {
+                const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?dates=${dateStr}&limit=20`);
+                if (!res.ok) return [];
+                const data = await res.json() as any;
+                return data.events || [];
+            } catch { return []; }
+        };
+
+        const allEventArrays = await Promise.all(dates.map(fetchDate));
+        const allEvents = allEventArrays.flat().filter((e: any) => {
             return e.competitions?.[0]?.series?.type === 'playoff';
         });
 
         const series: any[] = [];
         const seen = new Set<string>();
 
-        for (const event of events) {
+        for (const event of allEvents) {
             const comp = event.competitions?.[0];
             if (!comp?.series) continue;
             const seriesData = comp.series;
@@ -171,7 +187,7 @@ export const getNhlPlayoffs = async (req: Request, res: Response) => {
 
             series.push({
                 id: key,
-                round: event.competitions?.[0]?.notes?.[0]?.headline || 'Playoff Series',
+                round: (event.competitions?.[0]?.notes?.[0]?.headline || 'Playoff Series').replace(/\s*-\s*Game\s*\d+/i, '').trim(),
                 summary: seriesData.summary || '',
                 completed: seriesData.completed || false,
                 home: {
