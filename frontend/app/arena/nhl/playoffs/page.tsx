@@ -155,10 +155,11 @@ function SeriesCard({ series }: { series: SeriesData }) {
     const winner = home.wins === 4 ? home : away.wins === 4 ? away : null;
 
     return (
-        <div className={`${styles.seriesCard} ${completed ? styles.completed : ''}`}>
-            {completed && winner && (
-                <div className={styles.seriesWinner}>✅ {winner.abbr} ADVANCES</div>
-            )}
+        <Link href={`/arena/nhl`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className={`${styles.seriesCard} ${completed ? styles.completed : ''} ${styles.clickableCard || ''}`}>
+                {completed && winner && (
+                    <div className={styles.seriesWinner}>✅ {winner.abbr} ADVANCES</div>
+                )}
 
             {/* Home Team */}
             <div className={`${styles.teamRow} ${home.eliminated ? styles.eliminated : ''}`}>
@@ -199,6 +200,7 @@ function SeriesCard({ series }: { series: SeriesData }) {
                     Last: {home.abbr} {lastGame.home_score} – {lastGame.away_score} {away.abbr} · {lastGame.detail}
                 </div>
             )}
-        </div>
+            </div>
+        </Link>
     );
 }

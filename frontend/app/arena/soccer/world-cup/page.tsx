@@ -154,12 +154,13 @@ export default function WorldCupPage() {
 }
 
 function MatchCard({ match }: { match: Match }) {
-    const { home, away, status, statusDetail, completed, date, venue } = match;
+    const { home, away, status, statusDetail, completed, date, venue, id } = match;
     const isLive = status === 'In Progress';
     const matchDate = new Date(date);
 
     return (
-        <div className={`${styles.matchCard} ${isLive ? styles.liveCard : ''} ${completed ? styles.completedCard : ''}`}>
+        <Link href={`/arena/soccer`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className={`${styles.matchCard} ${isLive ? styles.liveCard : ''} ${completed ? styles.completedCard : ''} ${styles.clickableCard || ''}`}>
             {isLive && <div className={styles.liveTag}><span className={styles.liveDot}></span>LIVE</div>}
 
             <div className={styles.matchTeams}>
@@ -193,6 +194,7 @@ function MatchCard({ match }: { match: Match }) {
             </div>
 
             {venue && <p className={styles.matchVenue}>📍 {venue}</p>}
-        </div>
+            </div>
+        </Link>
     );
 }
