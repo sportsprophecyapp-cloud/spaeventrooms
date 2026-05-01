@@ -1,37 +1,40 @@
 # AI Handoff - Session End (May 1, 2026)
 
 ## 🎯 Current Status: LIVE
-The platform has undergone a significant engagement upgrade, expanding from simple winner predictions to a multi-prediction "deck" strategy with real-time sports data integration.
+The platform has undergone a massive gamification upgrade. We have successfully implemented a full "Layered Identity System" on the backend and Web Frontend, and established Tournament Hubs for live events. The Web app is currently stable and live. The Mobile app (React Native) is currently In Review on the Google Play Store and is awaiting a Feature Parity update.
 
 ### ✅ Completed Today
-- **Multi-Prediction System**:
-  - **Backend**: Refactored to support multiple prediction types per match (Winner, BTTS, Total) using JSONB merging.
-  - **Frontend (Web)**: `GameDeck.tsx` now generates 3 cards for Soccer and 2 for NHL.
-  - **Mobile**: `ArenaDeck.js` and `ArenaCard.js` refactored to support the multi-card swipe array.
-- **Real-Time Features**:
-  - **Live Ticker**: Implemented a global sports marquee marquee on the Home and Room pages.
-  - **Pulse CTA**: Fixed the "Enter Arena" link and updated it to the new `/arena/` path.
-- **Routing & UX**:
-  - **Clean URLs**: Implemented a Next.js rewrite in `next.config.ts` so `/arena/[id]` correctly maps to the match rooms.
-  - **Navigation**: Updated all links site-wide to use the `/arena/` prefix.
-- **Stability**:
-  - Resolved multiple TypeScript build errors related to `referralCode` mapping, `match` vs `card` recursive calls, and boolean state type mismatches.
+- **Layered Identity Engine (Backend)**:
+  - Database Migrated: `users` table now holds `arena_stats` (JSONB) containing specific sports mastery counts, `max_streak`, and `draws_won`.
+  - Backfilled existing users' history into the `arena_stats` schema from old prediction tables.
+  - `GamificationService` now computes 6 dynamic layers: Shape (level), Gems (picks/5), Colour (streak), Portrait (total picks), Title Badge (arena mastery), and Champion Aura (draws won).
+- **Web Frontend Parity**:
+  - Rebuilt the `ProfileScreen` into 4 tabs (Identity, Awards, Progress, Arenas).
+  - Built `LayeredProfileCard.tsx` (CSS/SVG based, NO static assets) which dynamically renders the users' 6 layers perfectly.
+  - Replaced the simple avatar in `UserTray.tsx` (the top right corner Navbar) with the new `LayeredProfileCard`, and linked it directly to the Profile Page using Next.js `useRouter` to prevent hard-reloads.
+- **Tournament Hubs**:
+  - Implemented `WorldCupPage` and `NHLPlayoffsPage`.
+  - Added click-to-predict routing inside the Hub `MatchCards`, allowing users to jump directly to `/arena/soccer` or `/arena/nhl`.
 
-### ⏳ Pending / Next Steps
-- **Mobile Deployment**: Trigger a new **EAS Build** to sync the mobile app with the new multi-card logic.
-- **Mobile Ticker**: Port the `LiveTicker` component to React Native for cross-platform feature parity.
-- **Gamification**: Integrate specific "Badges" for the new prediction types (e.g., "Over/Under Oracle").
-- **Performance**: Monitor Render CPU usage for the ticker polling (currently 1-minute intervals).
+### ⏳ Pending / Next Steps (Mobile Parity V1.1)
+*Do NOT build a new `.aab` or submit to Google Play. We will push these updates via Expo OTA (`eas update`) once the current version passes review.*
 
-## 📂 Key Files Touched
-- `backend/src/shared/predictions/controller.ts`
-- `backend/src/shared/pulse/controller.ts`
-- `frontend/app/page.tsx`
-- `frontend/app/components/GameDeck/GameDeck.tsx`
-- `frontend/app/components/PulseCTA/PulseCTA.tsx`
-- `frontend/app/components/LiveTicker/LiveTicker.tsx`
-- `frontend/next.config.ts`
-- `mobile/src/components/ArenaDeck.js`
-- `mobile/src/components/ArenaCard.js`
+1. **Mobile Layered Identity**:
+   - Recreate the `LayeredProfileCard` for React Native using `react-native-svg`.
+   - Update `mobile/src/screens/ProfileScreen.js` to parse the new `layeredIdentity` payload from the API.
+   - Update the mobile `HomeScreen.js` header to use the new identity badge.
+2. **Mobile Tournament Hubs**:
+   - Build a `TournamentHubScreen.js` in the mobile app to match the Web App's NHL/World Cup hubs.
+   - Route to the correct sport arena when a Match Card is clicked.
 
-**See you in the morning! The Arena is stable and Live.**
+## 📂 Key Files Touched Today
+- `backend/src/shared/gamification/GamificationService.ts`
+- `backend/src/shared/auth/controller.ts`
+- `frontend/app/components/LayeredProfileCard/LayeredProfileCard.tsx`
+- `frontend/app/components/LayeredProfileCard/LayeredProfileCard.module.css`
+- `frontend/app/components/UserTray.tsx`
+- `frontend/app/profile/[userId]/page.tsx`
+- `frontend/app/arena/soccer/world-cup/page.tsx`
+- `frontend/app/arena/nhl/playoffs/page.tsx`
+
+**See you in the next session! The Arena is stable and the Web is fully Gamified.**
