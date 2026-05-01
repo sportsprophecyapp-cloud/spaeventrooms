@@ -72,9 +72,14 @@ const TicketShareCard: React.FC<TicketShareCardProps> = ({
                 url = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
                 break;
             case 'messenger':
-                // Messenger is tricky on web, usually better to use FB Sharer or Native on mobile
                 url = `fb-messenger://share/?link=${encodedUrl}`;
                 break;
+            case 'snapchat':
+                url = `https://www.snapchat.com/share?url=${encodedUrl}&text=${encodedText}`;
+                break;
+            case 'instagram':
+                alert('For Instagram: Download the Golden Ticket image below and share it to your Story or Feed!');
+                return;
             case 'copy':
                 navigator.clipboard.writeText(shareUrl);
                 alert('Link copied to clipboard!');
@@ -137,6 +142,14 @@ const TicketShareCard: React.FC<TicketShareCardProps> = ({
                     <button onClick={() => handleSocialShare('facebook')} className={styles.socialBtn} title="Facebook">
                         <span className={styles.socialIcon}>👤</span>
                         <label>Facebook</label>
+                    </button>
+                    <button onClick={() => handleSocialShare('snapchat')} className={styles.socialBtn} title="Snapchat">
+                        <span className={styles.socialIcon}>👻</span>
+                        <label>Snapchat</label>
+                    </button>
+                    <button onClick={() => handleSocialShare('instagram')} className={styles.socialBtn} title="Instagram">
+                        <span className={styles.socialIcon}>📸</span>
+                        <label>Instagram</label>
                     </button>
                     <button onClick={() => handleSocialShare('copy')} className={styles.socialBtn} title="Copy Link">
                         <span className={styles.socialIcon}>🔗</span>
