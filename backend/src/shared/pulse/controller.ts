@@ -92,7 +92,7 @@ export const getLiveTicker = async (req: Request, res: Response) => {
             FROM soccer_matches
             WHERE status = 'live'
                OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '48 hours')
-               OR (status = 'upcoming' AND start_time < CURRENT_TIMESTAMP + INTERVAL '7 days')
+               OR (status = 'scheduled' AND start_time < CURRENT_TIMESTAMP + INTERVAL '7 days')
             
             UNION ALL
             
@@ -100,10 +100,10 @@ export const getLiveTicker = async (req: Request, res: Response) => {
             FROM nhl_matches
             WHERE status = 'live'
                OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '48 hours')
-               OR (status = 'upcoming' AND start_time < CURRENT_TIMESTAMP + INTERVAL '7 days')
+               OR (status = 'scheduled' AND start_time < CURRENT_TIMESTAMP + INTERVAL '7 days')
             
             ORDER BY 
-                CASE WHEN status = 'live' THEN 0 WHEN status = 'upcoming' THEN 1 ELSE 2 END ASC,
+                CASE WHEN status = 'live' THEN 0 WHEN status = 'scheduled' THEN 1 ELSE 2 END ASC,
                 start_time ASC
             LIMIT 15;
         `;
@@ -115,13 +115,13 @@ export const getLiveTicker = async (req: Request, res: Response) => {
             const fallbackSql = `
                 (SELECT home_team, away_team, score_home, score_away, status, start_time, 'soccer' as sport
                  FROM soccer_matches 
-                 WHERE status IN ('upcoming', 'live')
+                 WHERE status IN ('scheduled', 'live')
                     OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '72 hours')
                  ORDER BY start_time DESC LIMIT 8)
                 UNION ALL
                 (SELECT home_team, away_team, score_home, score_away, status, start_time, 'nhl' as sport
                  FROM nhl_matches 
-                 WHERE status IN ('upcoming', 'live')
+                 WHERE status IN ('scheduled', 'live')
                     OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '72 hours')
                  ORDER BY start_time DESC LIMIT 7)
                 ORDER BY start_time ASC

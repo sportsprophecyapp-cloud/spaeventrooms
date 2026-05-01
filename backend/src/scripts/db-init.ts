@@ -294,7 +294,9 @@ const initDB = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `;
+
         await client.query(schema);
+        console.log('✅ Schema synchronization complete.');
 
         // Ensure soccer room exists
         await client.query(`

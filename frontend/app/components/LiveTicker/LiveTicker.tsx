@@ -56,14 +56,14 @@ const LiveTicker = () => {
                             <span className={styles.sportTag}>{m.sport.toUpperCase()}</span>
                             <span className={styles.teams}>
                                 {m.home_team} 
-                                {m.status !== 'upcoming' && (
+                                {m.status !== 'scheduled' && (
                                     <> <span className={styles.score}>{m.score_home ?? 0}</span> - <span className={styles.score}>{m.score_away ?? 0}</span> </>
                                 )}
-                                {m.status === 'upcoming' && <span className={styles.score}> vs </span>}
+                                {m.status === 'scheduled' && <span className={styles.score}> vs </span>}
                                 {m.away_team}
                             </span>
-                            <span className={m.status === 'live' ? styles.liveStatus : m.status === 'upcoming' ? styles.upcomingStatus : styles.finishedStatus}>
-                                {m.status === 'live' ? 'LIVE' : m.status === 'upcoming' && m.start_time ? new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'FT'}
+                            <span className={m.status === 'live' ? styles.liveStatus : m.status === 'scheduled' ? styles.upcomingStatus : styles.finishedStatus}>
+                                {m.status === 'live' ? 'LIVE' : m.status === 'scheduled' && m.start_time ? new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'FT'}
                             </span>
                         </div>
                     ))}

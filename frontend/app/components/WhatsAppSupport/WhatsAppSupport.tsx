@@ -35,7 +35,7 @@ const WhatsAppSupport = () => {
                     </svg>
                     <div className={styles.ping}></div>
                 </div>
-                <span className={styles.label}>Live Concierge</span>
+                <span className={styles.label}>Events Arena Live Support</span>
             </a>
         </div>
     );
