@@ -1,5 +1,5 @@
 # AI Handoff — Events Arena Master Status
-**Last Updated: May 1, 2026**
+**Last Updated: May 1, 2026 (Session 2)**
 
 ---
 
@@ -86,8 +86,16 @@ git add . && git commit -m "message" && git push origin main
 - Prediction history on Profile page
 
 ### Live Ticker
-- Scrolling match ticker on homepage (fixed May 1 — was missing due to `upcoming` vs `scheduled` status mismatch)
+- Scrolling match ticker — persistent globally via `RootLayout` (not per-page)
+- Fixed May 1 (Session 1): `upcoming` vs `scheduled` SQL status mismatch
+- Fixed May 1 (Session 2): Missing `'use client'` directive — component was silently failing as a server component
 - Shows scheduled, live, and recently finished matches
+
+### Routing Architecture
+- **`/rooms/[roomId]`** — All active prediction & match interaction (Soccer, NHL)
+- **`/arena/soccer/world-cup`** — Informational World Cup hub (links OUT to `/rooms/soccer`)
+- **`/arena/nhl/playoffs`** — Informational NHL Playoffs hub (links OUT to `/rooms/nhl`)
+- **`/arena/soccer`** and **`/arena/nhl`** — ⛔ DO NOT link to these — they have NO page and return 404
 
 ### Gamification
 - **Tickets** — earned per correct prediction, daily login, streaks
@@ -133,7 +141,12 @@ All of the above, plus:
 
 | Bug | Status | Fix Applied |
 |---|---|---|
-| Live Ticker not showing | ✅ FIXED (May 1) | SQL used `upcoming` but DB stores `scheduled` — corrected in controller + frontend |
+| Live Ticker not showing (SQL) | ✅ FIXED (May 1, S1) | SQL used `upcoming` but DB stores `scheduled` — corrected in controller + frontend |
+| Live Ticker not rendering (React) | ✅ FIXED (May 1, S2) | Missing `'use client'` directive — hooks silently failed in Next.js server context |
+| Homepage "Enter Arena" → 404 | ✅ FIXED (May 1, S2) | `handleEnterRoom` routed to `/arena/{id}` (no page exists) — corrected to `/rooms/{id}` |
+| World Cup page CTAs → 404 | ✅ FIXED (May 1, S2) | Links pointed to `/arena/soccer` — corrected to `/rooms/soccer` with `matchId` params |
+| NHL Playoffs page CTAs → 404 | ✅ FIXED (May 1, S2) | Links pointed to `/arena/nhl` — corrected to `/rooms/nhl` with `matchId` params |
+| Duplicate LiveTicker rendering | ✅ FIXED (May 1, S2) | Removed local `<LiveTicker />` from `page.tsx` and `rooms/[roomId]/page.tsx` — now global via `RootLayout` only |
 | `router` not defined in RoomPage | ✅ FIXED | Added `useRouter()` import |
 | WhatsApp share not pre-filling message | ✅ FIXED | Replaced native share with direct web intents per platform |
 | db-init not creating NHL tables | ✅ FIXED | Added missing `await client.query(schema)` call |
@@ -163,7 +176,8 @@ All of the above, plus:
 ### Web Frontend (`frontend/app/`)
 | File | Purpose |
 |---|---|
-| `components/LiveTicker/LiveTicker.tsx` | Scrolling match ticker (fixed May 1) |
+| `layout.tsx` | **Global layout — LiveTicker rendered here ONLY. Do not add it to individual pages.** |
+| `components/LiveTicker/LiveTicker.tsx` | Scrolling match ticker (`'use client'` required — uses hooks) |
 | `components/WhatsAppSupport/WhatsAppSupport.tsx` | Support widget (now dismissible) |
 | `components/TicketShareCard/TicketShareCard.tsx` | Golden Ticket social sharing |
 | `components/DrawRoom/DrawRoom.tsx` | Prize draw room |

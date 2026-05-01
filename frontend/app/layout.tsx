@@ -9,6 +9,7 @@ import { SponsorProvider } from './context/SponsorContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { GlobalSocketProvider } from './context/GlobalSocketProvider';
 import Navbar from './components/Navbar';
+import LiveTicker from './components/LiveTicker/LiveTicker';
 import ToastNotification from './components/ToastNotification/ToastNotification';
 
 const outfit = Outfit({
@@ -92,6 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <GlobalSocketProvider>
                 <LanguageProvider>
                   <Navbar />
+                  <LiveTicker />
                   <ToastNotification />
                   {children}
                 </LanguageProvider>

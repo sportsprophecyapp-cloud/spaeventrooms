@@ -6,8 +6,10 @@
     display: flex;
     align-items: center;
     overflow: hidden;
-    position: relative;
-    z-index: 10;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    z-index: 999;
     backdrop-filter: blur(10px);
 }
 

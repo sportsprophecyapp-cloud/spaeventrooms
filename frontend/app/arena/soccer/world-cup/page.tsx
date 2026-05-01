@@ -79,7 +79,7 @@ export default function WorldCupPage() {
         <div className={styles.page}>
             {/* Header */}
             <div className={styles.header}>
-                <Link href="/arena/soccer" className={styles.backBtn}>← Soccer Arena</Link>
+                <Link href="/rooms/soccer" className={styles.backBtn}>← Soccer Arena</Link>
                 <div className={styles.titleBlock}>
                     <span className={styles.trophy}>⚽</span>
                     <div>
@@ -147,7 +147,7 @@ export default function WorldCupPage() {
             {/* CTA */}
             <div className={styles.ctaSection}>
                 <p className={styles.ctaText}>Make your World Cup match predictions now!</p>
-                <Link href="/arena/soccer" className={styles.ctaBtn}>⚽ Predict in Soccer Arena →</Link>
+                <Link href="/rooms/soccer" className={styles.ctaBtn}>⚽ Predict in Soccer Arena →</Link>
             </div>
         </div>
     );
@@ -159,7 +159,7 @@ function MatchCard({ match }: { match: Match }) {
     const matchDate = new Date(date);
 
     return (
-        <Link href={`/arena/soccer`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href={`/rooms/soccer?matchId=${match.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className={`${styles.matchCard} ${isLive ? styles.liveCard : ''} ${completed ? styles.completedCard : ''} ${styles.clickableCard || ''}`}>
             {isLive && <div className={styles.liveTag}><span className={styles.liveDot}></span>LIVE</div>}
 

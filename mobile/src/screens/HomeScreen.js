@@ -25,6 +25,7 @@ import LayeredProfileCard from '../components/LayeredProfileCard';
 import { COLORS } from '../constants/theme';
 import { APP_VERSION } from '../constants/version';
 import { apiService } from '../services/api';
+import LiveTicker from '../components/LiveTicker';
 
 
 const { width } = Dimensions.get('window');
@@ -191,6 +192,8 @@ export default function HomeScreen({ navigation }) {
         {/* Streak Indicator */}
         <StreakIndicator streak={user?.loginStreak || 0} />
       </LinearGradient>
+
+      <LiveTicker />
 
       {/* Broken Streak Modal/Banner */}
       {showBrokenStreakModal && (

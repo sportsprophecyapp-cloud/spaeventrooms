@@ -7,7 +7,7 @@ import styles from './GameDeck.module.css';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { useSponsor } from '@/app/context/SponsorContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ToastNotification from '../ToastNotification/ToastNotification';
 import PredictionShareCard from '../PredictionShareCard/PredictionShareCard';
 
@@ -86,6 +86,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         fetchLastPrediction();
     }, [showCompletion, lastMatch, user?.id, token]);
 
+    const searchParams = useSearchParams();
+    const targetMatchId = searchParams.get('matchId');
+
     useEffect(() => {
         const fetchMatches = async () => {
             try {
@@ -141,7 +144,16 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                         });
                     });
 
-                    setCards(generatedCards);
+                    // REORDER IF MATCH ID PROVIDED
+                    if (targetMatchId) {
+                        const matchCards = generatedCards.filter(c => c.match.match_id === targetMatchId);
+                        const otherCards = generatedCards.filter(c => c.match.match_id !== targetMatchId);
+                        // Move target cards to the end of the array (top of the deck)
+                        setCards([...otherCards, ...matchCards]);
+                    } else {
+                        setCards(generatedCards);
+                    }
+
                     setTotalScheduled(fetchedTotal);
                     
                     if (generatedCards.length === 0 && fetchedTotal > 0) {
@@ -154,7 +166,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
             }
         };
         fetchMatches();
-    }, [leagueId, token]);
+    }, [leagueId, token, targetMatchId]);
 
     useEffect(() => {
         if (showCompletion && countdown > 0) {

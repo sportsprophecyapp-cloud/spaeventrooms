@@ -13,7 +13,6 @@ import LoginModal from '@/app/components/LoginModal';
 import { SocketProvider } from '../../context/SocketContext';
 import Leaderboard from '../../components/Leaderboard';
 import RoomChat from '../../components/RoomChat';
-import LiveTicker from '@/app/components/LiveTicker/LiveTicker';
 
 const RoomPage = () => {
     const params = useParams();
@@ -48,7 +47,6 @@ function RoomContent() {
 
     return (
         <div className={styles.container}>
-            <LiveTicker />
             <header className={styles.minimalHeader}>
                 <h1 className={styles.arenaTitle}>{(roomId || 'ARENA').toUpperCase()} ARENA</h1>
                 <Link href="/draw" className={styles.prizesPill}>

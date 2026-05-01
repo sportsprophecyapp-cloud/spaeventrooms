@@ -14,7 +14,6 @@ import DailyLoginButton from '@/app/components/DailyLoginButton';
 import LootShowcase from '@/app/components/LootShowcase/LootShowcase';
 import FeaturedDraw from '@/app/components/FeaturedDraw';
 import PulseCTA from '@/app/components/PulseCTA/PulseCTA';
-import LiveTicker from '@/app/components/LiveTicker/LiveTicker';
 
 const HomePage = () => {
     const { t, language, setLanguage } = useLanguage();
@@ -39,13 +38,12 @@ const HomePage = () => {
     };
 
     const handleEnterRoom = (roomId: string) => {
-        if (isAuthenticated) router.push(`/arena/${roomId}`);
-        else router.push(`/auth/login?redirect=/arena/${roomId}`);
+        if (isAuthenticated) router.push(`/rooms/${roomId}`);
+        else router.push(`/auth/login?redirect=/rooms/${roomId}`);
     };
 
     return (
         <div className={styles.container}>
-            <LiveTicker />
             <header className={styles.header}>
                 <p className={styles.welcomeBridge}>
                     {isAuthenticated && user ? `Welcome back, ${user.username}! ${t('welcome_bridge')}` : t('welcome_bridge')}

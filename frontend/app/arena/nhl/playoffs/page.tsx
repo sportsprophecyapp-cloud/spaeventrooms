@@ -23,6 +23,7 @@ interface SeriesData {
     away: TeamSide;
     status: string;
     lastGame: { home_score: string; away_score: string; detail: string };
+    matchId?: string;
 }
 
 interface PlayoffsData {
@@ -99,7 +100,7 @@ export default function NhlPlayoffsPage() {
         <div className={styles.page}>
             {/* Header */}
             <div className={styles.header}>
-                <Link href="/arena/nhl" className={styles.backBtn}>← NHL Arena</Link>
+                <Link href="/rooms/nhl" className={styles.backBtn}>← NHL Arena</Link>
                 <div className={styles.titleBlock}>
                     <div className={styles.trophy}>🏒</div>
                     <div>
@@ -124,7 +125,7 @@ export default function NhlPlayoffsPage() {
             ) : !data || data.series.length === 0 ? (
                 <div className={styles.empty}>
                     <p>🏒 Playoff bracket data is not yet available.</p>
-                    <Link href="/arena/nhl" className={styles.backBtn}>Go to NHL Arena</Link>
+                    <Link href="/rooms/nhl" className={styles.backBtn}>Go to NHL Arena</Link>
                 </div>
             ) : (
                 <div className={styles.content}>
@@ -144,7 +145,7 @@ export default function NhlPlayoffsPage() {
             {/* CTA */}
             <div className={styles.ctaSection}>
                 <p className={styles.ctaText}>Think you know who wins the Cup? Make your predictions!</p>
-                <Link href="/arena/nhl" className={styles.ctaBtn}>🏒 Predict in NHL Arena →</Link>
+                <Link href="/rooms/nhl" className={styles.ctaBtn}>🏒 Predict in NHL Arena →</Link>
             </div>
         </div>
     );
@@ -155,7 +156,7 @@ function SeriesCard({ series }: { series: SeriesData }) {
     const winner = home.wins === 4 ? home : away.wins === 4 ? away : null;
 
     return (
-        <Link href={`/arena/nhl`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href={`/rooms/nhl${series.matchId ? `?matchId=${series.matchId}` : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className={`${styles.seriesCard} ${completed ? styles.completed : ''} ${styles.clickableCard || ''}`}>
                 {completed && winner && (
                     <div className={styles.seriesWinner}>✅ {winner.abbr} ADVANCES</div>

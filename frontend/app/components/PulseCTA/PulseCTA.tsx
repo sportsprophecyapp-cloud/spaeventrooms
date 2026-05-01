@@ -99,29 +99,31 @@ const PulseCTA = () => {
                 <span className={styles.totalVotes}>{parseInt(match.total_votes).toLocaleString()} FANS ALREADY VOTED</span>
             </div>
 
-            <div className={styles.matchDisplay}>
-                <div className={styles.team}>
-                    <img src={match.home_logo} alt={match.home_team} />
-                    <span className={styles.teamName}>{match.home_team}</span>
-                    <span className={styles.pct}>{match.percentages.home}%</span>
+            <Link href={`/arena/${match.room_id}?matchId=${match.match_id}`} className={styles.matchLink}>
+                <div className={styles.matchDisplay}>
+                    <div className={styles.team}>
+                        <img src={match.home_logo} alt={match.home_team} />
+                        <span className={styles.teamName}>{match.home_team}</span>
+                        <span className={styles.pct}>{match.percentages.home}%</span>
+                    </div>
+                    <div className={styles.vs}>VS</div>
+                    <div className={styles.team}>
+                        <img src={match.away_logo} alt={match.away_team} />
+                        <span className={styles.teamName}>{match.away_team}</span>
+                        <span className={styles.pct}>{match.percentages.away}%</span>
+                    </div>
                 </div>
-                <div className={styles.vs}>VS</div>
-                <div className={styles.team}>
-                    <img src={match.away_logo} alt={match.away_team} />
-                    <span className={styles.teamName}>{match.away_team}</span>
-                    <span className={styles.pct}>{match.percentages.away}%</span>
-                </div>
-            </div>
 
-            <div className={styles.sentimentBar}>
-                <div className={styles.homeFill} style={{ width: `${match.percentages.home}%` }}></div>
-                <div className={styles.awayFill} style={{ width: `${match.percentages.away}%` }}></div>
-            </div>
+                <div className={styles.sentimentBar}>
+                    <div className={styles.homeFill} style={{ width: `${match.percentages.home}%` }}></div>
+                    <div className={styles.awayFill} style={{ width: `${match.percentages.away}%` }}></div>
+                </div>
+            </Link>
 
             <div className={styles.actions}>
                 {submitted ? (
                     <div className={styles.successMsg}>
-                        ✅ {submitted.toUpperCase()} — PICK LOCKED! <Link href={`/arena/${match.room_id}`}>ENTER ARENA →</Link>
+                        ✅ {submitted.toUpperCase()} — PICK LOCKED! <Link href={`/arena/${match.room_id}?matchId=${match.match_id}`}>ENTER ARENA →</Link>
                     </div>
                 ) : (
                     <>

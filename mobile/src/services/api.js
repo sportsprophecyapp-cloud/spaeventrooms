@@ -115,6 +115,16 @@ export const apiService = {
         }
     },
 
+    getPulse: async (hubId = 'ticker') => {
+        try {
+            const response = await api.get(`/pulse/${hubId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching pulse:', error);
+            return [];
+        }
+    },
+
     getChat: async (roomId = null, userId = null) => {
         try {
             const params = { roomId };

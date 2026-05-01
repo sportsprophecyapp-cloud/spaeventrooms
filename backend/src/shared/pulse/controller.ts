@@ -213,7 +213,8 @@ export const getNhlPlayoffs = async (req: Request, res: Response) => {
                     home_score: home.score,
                     away_score: away.score,
                     detail: comp.status?.type?.shortDetail,
-                }
+                },
+                matchId: event.id
             });
         }
 
