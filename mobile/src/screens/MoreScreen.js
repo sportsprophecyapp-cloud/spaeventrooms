@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Alert, Platform, Linking } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
@@ -105,7 +105,16 @@ const MoreScreen = ({ navigation }) => {
                                     } else if (item.label === 'Settings') {
                                         navigation.navigate('Profile');
                                     } else if (item.label === 'Help & Support') {
-                                        navigation.navigate('HelpSupport');
+                                        const whatsappUrl = "whatsapp://send?phone=16475540219&text=Hello! I'm reaching out from the Events Arena Mobile App. I have a question about...";
+                                        const webWhatsappUrl = "https://wa.me/16475540219";
+                                        
+                                        Linking.canOpenURL(whatsappUrl).then(supported => {
+                                            if (supported) {
+                                                Linking.openURL(whatsappUrl);
+                                            } else {
+                                                Linking.openURL(webWhatsappUrl);
+                                            }
+                                        });
                                     } else if (item.label === 'Advertise with Us') {
                                         navigation.navigate('Sponsor');
                                     } else if (item.label === 'Terms of Service') {

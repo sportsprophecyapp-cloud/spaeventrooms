@@ -10,6 +10,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { GlobalSocketProvider } from './context/GlobalSocketProvider';
 import Navbar from './components/Navbar';
 import ToastNotification from './components/ToastNotification/ToastNotification';
+import WhatsAppSupport from './components/WhatsAppSupport/WhatsAppSupport';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -94,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <Navbar />
                   <ToastNotification />
                   {children}
+                  <WhatsAppSupport />
                 </LanguageProvider>
               </GlobalSocketProvider>
             </SponsorProvider>
