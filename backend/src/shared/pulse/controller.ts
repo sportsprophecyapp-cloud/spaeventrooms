@@ -93,10 +93,12 @@ export const getLiveTicker = async (req: Request, res: Response) => {
                 m.score_home, 
                 m.score_away, 
                 m.status,
+                m.start_time,
                 'soccer' as sport
             FROM soccer_matches m
             WHERE m.status = 'live' 
-               OR (m.status = 'finished' AND m.updated_at > CURRENT_TIMESTAMP - INTERVAL '2 hours')
+               OR (m.status = 'finished' AND m.updated_at > CURRENT_TIMESTAMP - INTERVAL '6 hours')
+               OR (m.status = 'upcoming' AND m.start_time < CURRENT_TIMESTAMP + INTERVAL '12 hours')
             
             UNION ALL
             
@@ -106,13 +108,17 @@ export const getLiveTicker = async (req: Request, res: Response) => {
                 m.score_home, 
                 m.score_away, 
                 m.status,
+                m.start_time,
                 'nhl' as sport
             FROM nhl_matches m
             WHERE m.status = 'live'
-               OR (m.status = 'finished' AND m.updated_at > CURRENT_TIMESTAMP - INTERVAL '2 hours')
+               OR (m.status = 'finished' AND m.updated_at > CURRENT_TIMESTAMP - INTERVAL '6 hours')
+               OR (m.status = 'upcoming' AND m.start_time < CURRENT_TIMESTAMP + INTERVAL '12 hours')
             
-            ORDER BY status DESC, home_team ASC
-            LIMIT 10;
+            ORDER BY 
+                CASE WHEN status = 'live' THEN 0 WHEN status = 'upcoming' THEN 1 ELSE 2 END ASC,
+                start_time ASC
+            LIMIT 15;
         `;
 
         const result = await query(sql);

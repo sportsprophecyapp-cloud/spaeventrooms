@@ -99,6 +99,12 @@
     opacity: 0.6;
 }
 
+.upcomingStatus {
+    color: #ffa502;
+    font-size: 0.6rem;
+    font-weight: 800;
+}
+
 @keyframes scroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }

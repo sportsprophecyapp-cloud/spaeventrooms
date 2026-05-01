@@ -4,10 +4,11 @@ import styles from './LiveTicker.module.css';
 interface TickerMatch {
     home_team: string;
     away_team: string;
-    score_home: number;
-    score_away: number;
+    score_home: number | null;
+    score_away: number | null;
     status: string;
     sport: string;
+    start_time?: string;
 }
 
 const LiveTicker = () => {
@@ -52,10 +53,15 @@ const LiveTicker = () => {
                         <div key={`${m.home_team}-${idx}`} className={styles.matchItem}>
                             <span className={styles.sportTag}>{m.sport.toUpperCase()}</span>
                             <span className={styles.teams}>
-                                {m.home_team} <span className={styles.score}>{m.score_home}</span> - <span className={styles.score}>{m.score_away}</span> {m.away_team}
+                                {m.home_team} 
+                                {m.status !== 'upcoming' && (
+                                    <> <span className={styles.score}>{m.score_home ?? 0}</span> - <span className={styles.score}>{m.score_away ?? 0}</span> </>
+                                )}
+                                {m.status === 'upcoming' && <span className={styles.score}> vs </span>}
+                                {m.away_team}
                             </span>
-                            <span className={m.status === 'live' ? styles.liveStatus : styles.finishedStatus}>
-                                {m.status === 'live' ? 'LIVE' : 'FT'}
+                            <span className={m.status === 'live' ? styles.liveStatus : m.status === 'upcoming' ? styles.upcomingStatus : styles.finishedStatus}>
+                                {m.status === 'live' ? 'LIVE' : m.status === 'upcoming' && m.start_time ? new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'FT'}
                             </span>
                         </div>
                     ))}
