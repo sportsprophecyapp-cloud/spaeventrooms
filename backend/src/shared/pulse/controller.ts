@@ -136,3 +136,132 @@ export const getLiveTicker = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+// ─── NHL PLAYOFFS HUB ──────────────────────────────────────────────────────
+export const getNhlPlayoffs = async (req: Request, res: Response) => {
+    try {
+        const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?limit=50');
+        if (!response.ok) throw new Error('ESPN API error');
+        const data = await response.json() as any;
+
+        const events = (data.events || []).filter((e: any) => {
+            return e.competitions?.[0]?.series?.type === 'playoff';
+        });
+
+        const series: any[] = [];
+        const seen = new Set<string>();
+
+        for (const event of events) {
+            const comp = event.competitions?.[0];
+            if (!comp?.series) continue;
+            const seriesData = comp.series;
+            const competitors = comp.competitors || [];
+            if (competitors.length < 2) continue;
+
+            const home = competitors.find((c: any) => c.homeAway === 'home');
+            const away = competitors.find((c: any) => c.homeAway === 'away');
+            if (!home || !away) continue;
+
+            const key = [home.team.id, away.team.id].sort().join('-');
+            if (seen.has(key)) continue;
+            seen.add(key);
+
+            const homeWins = seriesData.competitors?.find((c: any) => c.id === home.team.id)?.wins ?? 0;
+            const awayWins = seriesData.competitors?.find((c: any) => c.id === away.team.id)?.wins ?? 0;
+
+            series.push({
+                id: key,
+                round: event.competitions?.[0]?.notes?.[0]?.headline || 'Playoff Series',
+                summary: seriesData.summary || '',
+                completed: seriesData.completed || false,
+                home: {
+                    id: home.team.id,
+                    name: home.team.displayName,
+                    abbr: home.team.abbreviation,
+                    logo: home.team.logo,
+                    color: `#${home.team.color}`,
+                    wins: homeWins,
+                    eliminated: awayWins === 4,
+                },
+                away: {
+                    id: away.team.id,
+                    name: away.team.displayName,
+                    abbr: away.team.abbreviation,
+                    logo: away.team.logo,
+                    color: `#${away.team.color}`,
+                    wins: awayWins,
+                    eliminated: homeWins === 4,
+                },
+                status: comp.status?.type?.description || 'Scheduled',
+                lastGame: {
+                    home_score: home.score,
+                    away_score: away.score,
+                    detail: comp.status?.type?.shortDetail,
+                }
+            });
+        }
+
+        res.json({ season: '2025-26 Stanley Cup Playoffs', series });
+    } catch (err) {
+        console.error('Error fetching NHL playoffs:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+// ─── FIFA WORLD CUP HUB ────────────────────────────────────────────────────
+export const getWorldCup = async (req: Request, res: Response) => {
+    try {
+        const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=100');
+        if (!response.ok) throw new Error('ESPN API error');
+        const data = await response.json() as any;
+
+        const league = data.leagues?.[0];
+        const season = league?.season;
+        const events = data.events || [];
+
+        const matches = events.map((event: any) => {
+            const comp = event.competitions?.[0];
+            const competitors = comp?.competitors || [];
+            const home = competitors.find((c: any) => c.homeAway === 'home');
+            const away = competitors.find((c: any) => c.homeAway === 'away');
+
+            return {
+                id: event.id,
+                name: event.name,
+                date: event.date,
+                venue: comp?.venue?.fullName || '',
+                status: comp?.status?.type?.description || 'Scheduled',
+                statusDetail: comp?.status?.type?.detail || '',
+                completed: comp?.status?.type?.completed || false,
+                home: home ? {
+                    id: home.team.id,
+                    name: home.team.displayName,
+                    abbr: home.team.abbreviation,
+                    logo: home.team.logo,
+                    color: `#${home.team.color}`,
+                    score: home.score,
+                    winner: home.winner,
+                } : null,
+                away: away ? {
+                    id: away.team.id,
+                    name: away.team.displayName,
+                    abbr: away.team.abbreviation,
+                    logo: away.team.logo,
+                    color: `#${away.team.color}`,
+                    score: away.score,
+                    winner: away.winner,
+                } : null,
+            };
+        });
+
+        res.json({
+            tournament: season?.displayName || '2026 FIFA World Cup',
+            phase: season?.type?.name || 'Group Stage',
+            startDate: season?.startDate,
+            matches,
+        });
+    } catch (err) {
+        console.error('Error fetching World Cup:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};

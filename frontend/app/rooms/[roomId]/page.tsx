@@ -57,6 +57,22 @@ function RoomContent() {
                 {/* ... other header elements */}
             </header>
 
+            {/* Tournament Hub Banners */}
+            {roomId === 'nhl' && (
+                <Link href="/arena/nhl/playoffs" className={styles.tournamentBanner} style={{ background: 'linear-gradient(135deg, rgba(0,100,200,0.3), rgba(0,50,100,0.5))', borderColor: 'rgba(0,210,255,0.3)' }}>
+                    <span>🏒</span>
+                    <span className={styles.tournamentBannerText}>STANLEY CUP PLAYOFFS LIVE — View Full Bracket & Series Scores</span>
+                    <span className={styles.tournamentArrow}>→</span>
+                </Link>
+            )}
+            {roomId === 'soccer' && (
+                <Link href="/arena/soccer/world-cup" className={styles.tournamentBanner} style={{ background: 'linear-gradient(135deg, rgba(0,100,0,0.3), rgba(0,80,40,0.5))', borderColor: 'rgba(0,230,118,0.3)' }}>
+                    <span>⚽</span>
+                    <span className={styles.tournamentBannerText}>FIFA WORLD CUP 2026 — View Fixtures, Groups & Schedule</span>
+                    <span className={styles.tournamentArrow}>→</span>
+                </Link>
+            )}
+
             <main className={styles.dualLayout}>
                 <div className={styles.mainContent}>
                     <SponsorWidget roomId={roomId} />

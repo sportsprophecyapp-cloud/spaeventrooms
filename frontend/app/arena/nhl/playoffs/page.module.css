@@ -1,0 +1,281 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg, #050505);
+    color: white;
+    font-family: var(--font-outfit, 'Outfit', sans-serif);
+    padding-bottom: 4rem;
+}
+
+.header {
+    background: linear-gradient(135deg, rgba(0, 100, 180, 0.3), rgba(0, 50, 100, 0.5));
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    padding: 1.5rem 2rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(20px);
+}
+
+.backBtn {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+    display: inline-block;
+    margin-bottom: 0.75rem;
+}
+.backBtn:hover { color: white; }
+
+.titleBlock {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.trophy, .cup {
+    font-size: 2.5rem;
+}
+
+.title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 0;
+    background: linear-gradient(135deg, #fff, #00d2ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.updated {
+    margin: 0.5rem 0 0;
+    font-size: 0.7rem;
+    color: #2ed573;
+    letter-spacing: 1px;
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    height: 50vh;
+    color: rgba(255,255,255,0.5);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #00d2ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255,255,255,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.roundSection {
+    margin-bottom: 3rem;
+}
+
+.roundTitle {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #00d2ff;
+    border-bottom: 1px solid rgba(0,210,255,0.2);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.seriesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.seriesCard {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 1.25rem;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+.seriesCard:hover {
+    border-color: rgba(0, 210, 255, 0.3);
+    transform: translateY(-2px);
+}
+.seriesCard.completed {
+    border-color: rgba(46, 213, 115, 0.2);
+    background: rgba(46, 213, 115, 0.03);
+}
+
+.seriesWinner {
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #2ed573;
+    letter-spacing: 2px;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+}
+
+.teamRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    transition: opacity 0.2s;
+}
+.teamRow.eliminated {
+    opacity: 0.35;
+    filter: grayscale(0.7);
+}
+
+.teamLogo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.teamInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.teamName {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.eliminatedTag {
+    font-size: 0.6rem;
+    color: #ff4b4b;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.winsDisplay {
+    font-size: 1.5rem;
+    font-weight: 900;
+    min-width: 40px;
+    text-align: right;
+}
+
+.winsLabel {
+    font-size: 0.65rem;
+    opacity: 0.6;
+    font-weight: 600;
+}
+
+.seriesBar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    margin: 0.25rem 0;
+    position: relative;
+    overflow: visible;
+}
+
+.winsBar {
+    height: 4px;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+.seriesDivider {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg, #050505);
+    padding: 0 0.5rem;
+}
+
+.seriesSummary {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.4);
+    font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.lastGame {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+}
+
+.ctaSection {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.ctaText {
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.ctaBtn {
+    display: inline-block;
+    background: linear-gradient(135deg, #00d2ff, #0070f3);
+    color: white;
+    text-decoration: none;
+    padding: 0.85rem 2rem;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.ctaBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 210, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+    .header { padding: 1rem; }
+    .title { font-size: 1.3rem; }
+    .trophy, .cup { font-size: 1.8rem; }
+    .seriesGrid { grid-template-columns: 1fr; }
+    .content { padding: 1rem; }
+}
