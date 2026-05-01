@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import styles from './UserTray.module.css';
 import WinnerAlerter from './WinnerAlerter/WinnerAlerter';
@@ -15,6 +15,7 @@ const UserTray = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isShopOpen, setIsShopOpen] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
 
     // Auto-close dropdown when route changes
     useEffect(() => {
@@ -74,7 +75,7 @@ const UserTray = () => {
                 <div
                     className={`${styles.avatarContainer} ${!user.layeredIdentity && user.equipped?.frame ? styles.hasFrame : ''}`}
                     onClick={() => {
-                        window.location.href = `/profile/${user.id}`;
+                        router.push(`/profile/${user.id}`);
                     }}
                     title="View Profile"
                     style={{ cursor: 'pointer' }}
