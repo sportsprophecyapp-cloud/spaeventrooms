@@ -13,13 +13,16 @@ Events Arena is a **skill-based sports prediction platform** owned by **Just Me 
 
 | Platform | Status | URL / Notes |
 |---|---|---|
-| **Website (Web App)** | ✅ **LIVE IN PRODUCTION** | Hosted on Render (Free Plan) |
-| **Android App** | ⏳ **IN GOOGLE PLAY REVIEW** | Submitted. NOT publicly downloadable yet. Local `.aab` build only. |
-| **iOS App** | ⛔ **BLOCKED — ACCOUNT TYPE** | Apple Developer account type needs upgrading before submission is possible. No timeline yet. |
+| **Website (Web App)** | ✅ **LIVE IN PRODUCTION** | Hosted on Render. The ONLY product available to users right now. |
+| **Android App** | ⏳ **UNDER GOOGLE PLAY REVIEW — NOT RELEASED** | Submitted for review. NOT downloadable. NOT visible to users in the store. |
+| **iOS App** | ⛔ **BLOCKED — ACCOUNT TYPE** | Apple Developer account type must be upgraded before ANY submission is possible. No timeline. |
 
-> ⚠️ **CRITICAL**: There is NO publicly available mobile app at this time. Do NOT tell users or update any copy to say the app is "available on Google Play" or "available on iOS." The correct language is:
-> - **Android**: *"Currently in review on the Google Play Store — coming very soon!"*
-> - **iOS**: *"iOS version is in development and will be available on the App Store in the future."*
+> ⚠️ **CRITICAL — READ BEFORE EVERY SESSION:**
+> - **NO mobile app exists for any users.** Zero public downloads. Zero active installs outside of local development devices.
+> - The Android binary is sitting in Google Play's review queue — it has not passed review and is not visible in the store.
+> - iOS has not been submitted at all.
+> - **DO NOT use `eas update` (OTA).** OTA delivers JS updates to devices that already have the app installed. Since no users have the app, OTA commands are pointless and should NOT be run.
+> - **DO NOT tell users the app is "available"** in any FAQ, help text, or copy. Correct language: *"A mobile app is in development and coming soon."*
 
 ---
 
@@ -42,19 +45,28 @@ git add . && git commit -m "message" && git push origin main
 
 ---
 
-## 📱 MOBILE APP — BINARY FREEZE PROTOCOL
+## 📱 MOBILE APP — BUILD & UPDATE RULES
 
-**Current Rule**: While the Android app is under Google Play Review, **NO new binary builds** (`.aab` or `.ipa`) are permitted. This would invalidate the current review.
+### Current State
+- The mobile app is a **local development build only**. No users have it installed.
+- A binary was submitted to Google Play for review. It has **not passed review** and is **not visible or downloadable** in the store.
+- iOS has not been submitted. Apple Developer account type must be resolved first.
 
-| Update Type | Allowed During Review? | Method |
+### Update Rules
+
+| Action | When to Use | Command |
 |---|---|---|
-| JavaScript/UI changes | ✅ YES | `eas update --branch production` |
-| New native dependencies | ❌ NO — requires new binary |  Wait for review approval |
-| New binary build | ❌ NO — invalidates review | Wait for review approval |
+| Web deployment | Anytime | `git push origin main` or `./deploy.sh "message"` |
+| Mobile local changes | Anytime — just commit | `git add . && git commit -m "..." && git push` |
+| `eas update` (OTA) | ❌ **DO NOT USE** until app is live in stores with real users | N/A |
+| `eas build` (new binary) | Only after Google Play review is APPROVED and a change requires it | `eas build --platform android` |
 
-**After Google Play approves**: Run `eas build --platform android` to create a new `.aab` if needed, then submit via Play Console.
+> **Why no OTA?** EAS OTA updates deliver JavaScript changes to devices that already have the app installed. Since zero users have the app installed, running `eas update` accomplishes nothing. **Stop running it.**
 
-**iOS path**: Resolve Apple Developer account type issue first, then build and submit separately.
+### Path to Launch
+1. ✅ Google Play review passes → app becomes live for Android users
+2. ✅ Apple Developer account type resolved → iOS binary built and submitted
+3. After real users install the app → OTA updates become useful again
 
 ---
 

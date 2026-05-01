@@ -50,7 +50,7 @@ const HelpPage = () => {
         {
             id: 8,
             question: "Is there a mobile app?",
-            answer: "Yes! Our Android app is currently in review on the Google Play Store and will be available very soon. Our iOS app is in development and will be coming to the Apple App Store in the future. Stay tuned!"
+            answer: "A mobile app is in development! Our Android version has been submitted to the Google Play Store and is currently awaiting approval. It is not yet available to download. iOS is coming in the future. Sign up on the web now to be first to know when it launches!"
         }
     ];
 
