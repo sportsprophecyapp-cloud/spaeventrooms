@@ -175,6 +175,43 @@
     color: rgba(255, 255, 255, 0.3);
 }
 
+.socialGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 0 10px;
+}
+
+.socialBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.socialBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #d4af37;
+    transform: translateY(-2px);
+}
+
+.socialIcon {
+    font-size: 1.5rem;
+}
+
+.socialBtn label {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    cursor: pointer;
+}
+
 .actions {
     display: flex;
     flex-direction: column;

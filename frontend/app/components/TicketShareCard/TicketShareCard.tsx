@@ -25,7 +25,10 @@ const TicketShareCard: React.FC<TicketShareCardProps> = ({
     const cardRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
 
-    const handleShare = async () => {
+    const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/register?ref=${referralCode}`;
+    const shareText = `I'm officially entered to win ${prizeValue} from ${sponsorName} on Events Arena! Join me here: ${shareUrl}`;
+
+    const handleNativeShare = async () => {
         if (!cardRef.current) return;
         setIsExporting(true);
         try {
@@ -36,10 +39,11 @@ const TicketShareCard: React.FC<TicketShareCardProps> = ({
             if (navigator.share) {
                 await navigator.share({
                     title: 'My Events Arena Entry',
-                    text: `I'm officially entered to win ${prizeValue} from ${sponsorName}! Scan to join me in the Arena.`,
+                    text: shareText,
                     files: [file],
                 });
             } else {
+                // Fallback: Download the ticket
                 const link = document.createElement('a');
                 link.download = 'my-golden-ticket.png';
                 link.href = dataUrl;
@@ -52,7 +56,33 @@ const TicketShareCard: React.FC<TicketShareCardProps> = ({
         }
     };
 
-    const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/register?ref=${referralCode}`;
+    const handleSocialShare = (platform: string) => {
+        let url = '';
+        const encodedText = encodeURIComponent(shareText);
+        const encodedUrl = encodeURIComponent(shareUrl);
+
+        switch (platform) {
+            case 'whatsapp':
+                url = `https://wa.me/?text=${encodedText}`;
+                break;
+            case 'twitter':
+                url = `https://twitter.com/intent/tweet?text=${encodedText}`;
+                break;
+            case 'facebook':
+                url = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+                break;
+            case 'messenger':
+                // Messenger is tricky on web, usually better to use FB Sharer or Native on mobile
+                url = `fb-messenger://share/?link=${encodedUrl}`;
+                break;
+            case 'copy':
+                navigator.clipboard.writeText(shareUrl);
+                alert('Link copied to clipboard!');
+                return;
+        }
+
+        if (url) window.open(url, '_blank');
+    };
 
     return (
         <div className={styles.overlay} onClick={onClose}>
@@ -95,11 +125,30 @@ const TicketShareCard: React.FC<TicketShareCardProps> = ({
                     </div>
                 </div>
 
-                <div className={styles.actions}>
-                    <button className={styles.closeBtn} onClick={onClose}>CANCEL</button>
-                    <button className={styles.shareBtn} onClick={handleShare} disabled={isExporting}>
-                        {isExporting ? 'GENERATING...' : '📤 SHARE GOLDEN TICKET'}
+                <div className={styles.socialGrid}>
+                    <button onClick={() => handleSocialShare('whatsapp')} className={styles.socialBtn} title="WhatsApp">
+                        <span className={styles.socialIcon}>💬</span>
+                        <label>WhatsApp</label>
                     </button>
+                    <button onClick={() => handleSocialShare('twitter')} className={styles.socialBtn} title="X (Twitter)">
+                        <span className={styles.socialIcon}>𝕏</span>
+                        <label>X</label>
+                    </button>
+                    <button onClick={() => handleSocialShare('facebook')} className={styles.socialBtn} title="Facebook">
+                        <span className={styles.socialIcon}>👤</span>
+                        <label>Facebook</label>
+                    </button>
+                    <button onClick={() => handleSocialShare('copy')} className={styles.socialBtn} title="Copy Link">
+                        <span className={styles.socialIcon}>🔗</span>
+                        <label>Copy Link</label>
+                    </button>
+                </div>
+
+                <div className={styles.actions}>
+                    <button className={styles.shareBtn} onClick={handleNativeShare} disabled={isExporting}>
+                        {isExporting ? 'GENERATING...' : '📤 DOWNLOAD & SHARE TICKET IMAGE'}
+                    </button>
+                    <button className={styles.closeBtn} onClick={onClose}>CLOSE</button>
                 </div>
             </div>
         </div>
