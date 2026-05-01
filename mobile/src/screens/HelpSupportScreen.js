@@ -65,7 +65,7 @@ const HelpSupportScreen = () => {
         {
             id: 13,
             question: "Is there a mobile app?",
-            answer: "Yes! Events Arena is currently available on Android via the Google Play Store. Our iOS app is in development and coming soon to the Apple App Store."
+            answer: "Our Android app is currently in review on the Google Play Store and will be available very soon. iOS is in development and coming to the Apple App Store in the future. Stay tuned!"
         },
         {
             id: 11,
