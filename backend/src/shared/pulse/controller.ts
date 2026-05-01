@@ -86,21 +86,21 @@ export const getPulsePicks = async (req: Request, res: Response) => {
 
 export const getLiveTicker = async (req: Request, res: Response) => {
     try {
-        // Step 1: Get live games + recently finished (6h) + upcoming within 24h
+        // Priority: live > upcoming within 7 days > recently finished (48h)
         const primarySql = `
             SELECT home_team, away_team, score_home, score_away, status, start_time, 'soccer' as sport
             FROM soccer_matches
             WHERE status = 'live'
-               OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '6 hours')
-               OR (status = 'upcoming' AND start_time < CURRENT_TIMESTAMP + INTERVAL '24 hours')
+               OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '48 hours')
+               OR (status = 'upcoming' AND start_time < CURRENT_TIMESTAMP + INTERVAL '7 days')
             
             UNION ALL
             
             SELECT home_team, away_team, score_home, score_away, status, start_time, 'nhl' as sport
             FROM nhl_matches
             WHERE status = 'live'
-               OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '6 hours')
-               OR (status = 'upcoming' AND start_time < CURRENT_TIMESTAMP + INTERVAL '24 hours')
+               OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '48 hours')
+               OR (status = 'upcoming' AND start_time < CURRENT_TIMESTAMP + INTERVAL '7 days')
             
             ORDER BY 
                 CASE WHEN status = 'live' THEN 0 WHEN status = 'upcoming' THEN 1 ELSE 2 END ASC,
@@ -110,14 +110,20 @@ export const getLiveTicker = async (req: Request, res: Response) => {
 
         let result = await query(primarySql);
 
-        // Step 2: Fallback — if nothing returned, grab the very next scheduled games (any date)
+        // Fallback — if DB still empty, grab anything available
         if (result.rows.length === 0) {
             const fallbackSql = `
                 (SELECT home_team, away_team, score_home, score_away, status, start_time, 'soccer' as sport
-                 FROM soccer_matches WHERE status = 'upcoming' ORDER BY start_time ASC LIMIT 8)
+                 FROM soccer_matches 
+                 WHERE status IN ('upcoming', 'live')
+                    OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '72 hours')
+                 ORDER BY start_time DESC LIMIT 8)
                 UNION ALL
                 (SELECT home_team, away_team, score_home, score_away, status, start_time, 'nhl' as sport
-                 FROM nhl_matches WHERE status = 'upcoming' ORDER BY start_time ASC LIMIT 7)
+                 FROM nhl_matches 
+                 WHERE status IN ('upcoming', 'live')
+                    OR (status = 'finished' AND updated_at > CURRENT_TIMESTAMP - INTERVAL '72 hours')
+                 ORDER BY start_time DESC LIMIT 7)
                 ORDER BY start_time ASC
                 LIMIT 15;
             `;
