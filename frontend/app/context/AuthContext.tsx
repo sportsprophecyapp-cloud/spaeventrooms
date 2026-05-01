@@ -21,6 +21,7 @@ interface User {
         avatar?: string;
         frame?: string;
     };
+    layeredIdentity?: any;
     role?: string;
 }
 

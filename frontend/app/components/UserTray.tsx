@@ -8,6 +8,7 @@ import styles from './UserTray.module.css';
 import WinnerAlerter from './WinnerAlerter/WinnerAlerter';
 import DailyLoginButton from './DailyLoginButton';
 import TokenShop from './TokenShop';
+import LayeredProfileCard from './LayeredProfileCard/LayeredProfileCard';
 
 const UserTray = () => {
     const { user, logout, refreshUser } = useAuth();
@@ -71,23 +72,33 @@ const UserTray = () => {
                 </div>
 
                 <div
-                    className={`${styles.avatarContainer} ${user.equipped?.frame ? styles.hasFrame : ''}`}
-                    onClick={() => setIsShopOpen(true)}
-                    title="Open Cosmetic Lab"
+                    className={`${styles.avatarContainer} ${!user.layeredIdentity && user.equipped?.frame ? styles.hasFrame : ''}`}
+                    onClick={() => {
+                        window.location.href = `/profile/${user.id}`;
+                    }}
+                    title="View Profile"
+                    style={{ cursor: 'pointer' }}
                 >
-                    {user.equipped?.frame && (
-                        <div className={styles.frameOverlay}>
-                            <img src={user.equipped.frame} alt="Frame" onError={(e) => e.currentTarget.style.display = 'none'} />
+                    {user.layeredIdentity ? (
+                        <div style={{ transform: 'scale(0.35)', transformOrigin: 'center', width: '50px', height: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <LayeredProfileCard identity={user.layeredIdentity} size={150} />
                         </div>
+                    ) : (
+                        <>
+                            {user.equipped?.frame && (
+                                <div className={styles.frameOverlay}>
+                                    <img src={user.equipped.frame} alt="Frame" onError={(e) => e.currentTarget.style.display = 'none'} />
+                                </div>
+                            )}
+                            <div className={styles.avatar}>
+                                {user.equipped?.avatar ? (
+                                    <img src={user.equipped.avatar} alt={user.username} className={styles.avatarImg} onError={(e) => e.currentTarget.style.display = 'none'} />
+                                ) : (
+                                    user.username?.substring(0, 2).toUpperCase()
+                                )}
+                            </div>
+                        </>
                     )}
-                    <div className={styles.avatar}>
-                        {user.equipped?.avatar ? (
-                            <img src={user.equipped.avatar} alt={user.username} className={styles.avatarImg} onError={(e) => e.currentTarget.style.display = 'none'} />
-                        ) : (
-                            user.username?.substring(0, 2).toUpperCase()
-                        )}
-                    </div>
-                    <div className={styles.editBadge}>⚙️</div>
                 </div>
             </div>
 
