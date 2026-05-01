@@ -60,12 +60,39 @@ export default function NhlPlayoffsPage() {
     // Group series by round label
     const rounds: Record<string, SeriesData[]> = {};
     (data?.series || []).forEach(s => {
-        const roundKey = s.round.replace(/Game \d+/, '').trim() || 'Playoff Series';
+        // Strip out "Game X", trailing dashes, and trim
+        let roundKey = s.round.replace(/Game \d+/i, '').replace(/-\s*$/, '').trim() || 'Playoff Series';
+        
+        // Normalize common ESPN variations if needed
+        if (roundKey.includes('First Round')) {
+            roundKey = roundKey.replace('First Round', '1st Round');
+        }
+
         if (!rounds[roundKey]) rounds[roundKey] = [];
         // Only add if not already there (deduplicate by id)
         if (!rounds[roundKey].find(x => x.id === s.id)) {
             rounds[roundKey].push(s);
         }
+    });
+
+    // Sort rounds logically
+    const roundOrder = [
+        'East 1st Round',
+        'West 1st Round',
+        'East 2nd Round',
+        'West 2nd Round',
+        'Eastern Conference Final',
+        'Western Conference Final',
+        'Stanley Cup Final'
+    ];
+
+    const sortedRounds = Object.entries(rounds).sort(([a], [b]) => {
+        const idxA = roundOrder.findIndex(r => a.includes(r) || r.includes(a));
+        const idxB = roundOrder.findIndex(r => b.includes(r) || r.includes(b));
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
     });
 
     return (
@@ -101,7 +128,7 @@ export default function NhlPlayoffsPage() {
                 </div>
             ) : (
                 <div className={styles.content}>
-                    {Object.entries(rounds).map(([roundName, seriesList]) => (
+                    {sortedRounds.map(([roundName, seriesList]) => (
                         <div key={roundName} className={styles.roundSection}>
                             <h2 className={styles.roundTitle}>{roundName}</h2>
                             <div className={styles.seriesGrid}>
