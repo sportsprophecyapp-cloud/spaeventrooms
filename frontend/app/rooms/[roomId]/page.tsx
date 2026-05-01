@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.css';
 import LeagueGrid from '../../components/LeagueGrid/LeagueGrid';
@@ -28,6 +28,7 @@ const RoomPage = () => {
 
 function RoomContent() {
     const params = useParams();
+    const router = useRouter();
     const roomId = params.roomId as string;
     const isSoccerRoom = roomId === 'soccer';
     const { t } = useLanguage();

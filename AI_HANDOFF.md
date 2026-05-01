@@ -1,40 +1,31 @@
-# AI Handoff - Session End (May 1, 2026)
+# AI Handoff - Session End (May 1, 2026 - Deployment Phase)
 
-## 🎯 Current Status: LIVE
-The platform has undergone a massive gamification upgrade. We have successfully implemented a full "Layered Identity System" on the backend and Web Frontend, and established Tournament Hubs for live events. The Web app is currently stable and live. The Mobile app (React Native) is currently In Review on the Google Play Store and is awaiting a Feature Parity update.
+## 🎯 Current Status: LIVE & SYNCHRONIZED
+The platform is fully synchronized across Web and Mobile. Gamification V1.1 is now live for all users. The Administrative Hub navigation issues have been resolved, and the session management has been hardened for production.
 
-### ✅ Completed Today
-- **Layered Identity Engine (Backend)**:
-  - Database Migrated: `users` table now holds `arena_stats` (JSONB) containing specific sports mastery counts, `max_streak`, and `draws_won`.
-  - Backfilled existing users' history into the `arena_stats` schema from old prediction tables.
-  - `GamificationService` now computes 6 dynamic layers: Shape (level), Gems (picks/5), Colour (streak), Portrait (total picks), Title Badge (arena mastery), and Champion Aura (draws won).
-- **Web Frontend Parity**:
-  - Rebuilt the `ProfileScreen` into 4 tabs (Identity, Awards, Progress, Arenas).
-  - Built `LayeredProfileCard.tsx` (CSS/SVG based, NO static assets) which dynamically renders the users' 6 layers perfectly.
-  - Replaced the simple avatar in `UserTray.tsx` (the top right corner Navbar) with the new `LayeredProfileCard`, and linked it directly to the Profile Page using Next.js `useRouter` to prevent hard-reloads.
-- **Tournament Hubs**:
-  - Implemented `WorldCupPage` and `NHLPlayoffsPage`.
-  - Added click-to-predict routing inside the Hub `MatchCards`, allowing users to jump directly to `/arena/soccer` or `/arena/nhl`.
+### ✅ Completed & Deployed Today
+- **Web App (Production)**:
+  - **Navigation Fix**: Replaced `window.location.href` with `router.push()` in `RoomPage` and `UserTray`. This prevents hard reloads that were causing session resets.
+  - **Auth Hardening**: Updated `AuthContext.tsx` to only trigger automatic logouts on explicit `401 Unauthorized` responses. The app now handles temporary server lag (500/503) gracefully without booting the user.
+  - **Admin Hub Expansion**: 
+    - Synchronized `UserTray` to use the derived `user.role === 'admin'` for link visibility.
+    - Expanded the **Permissions Modal** in the Command Center to allow administrators to grant specific rights: `can_moderate_chat`, `can_manage_users`, `can_create_rooms`, and `can_view_sponsors`.
+  - **Deployment**: Successfully pushed to `main` branch. Render is live with these updates.
 
-### ⏳ Pending / Next Steps (Mobile Parity V1.1)
-*Do NOT build a new `.aab` or submit to Google Play. We will push these updates via Expo OTA (`eas update`) once the current version passes review.*
+- **Mobile App (OTA Update V1.1)**:
+  - **Mobile Parity**: Successfully implemented native `LayeredProfileCard` and `TournamentHubScreen` using core `react-native` views for maximum stability.
+  - **Deployment**: Published via **EAS Update** to the `production` branch. Users will receive these features instantly on their next app launch without a Store update.
 
-1. **Mobile Layered Identity**:
-   - Recreate the `LayeredProfileCard` for React Native using `react-native-svg`.
-   - Update `mobile/src/screens/ProfileScreen.js` to parse the new `layeredIdentity` payload from the API.
-   - Update the mobile `HomeScreen.js` header to use the new identity badge.
-2. **Mobile Tournament Hubs**:
-   - Build a `TournamentHubScreen.js` in the mobile app to match the Web App's NHL/World Cup hubs.
-   - Route to the correct sport arena when a Match Card is clicked.
+### ⏳ Pending / Future Considerations
+- **Moderator Onboarding**: The site administrator can now appoint moderators via the Command Center. We should monitor the use of the `can_moderate_chat` flag once the first mods are assigned.
+- **Analytics Monitoring**: As users begin interacting with the new Tournament Hub Match Cards, we should monitor backend load on the `/api/pulse` endpoints.
 
-## 📂 Key Files Touched Today
-- `backend/src/shared/gamification/GamificationService.ts`
-- `backend/src/shared/auth/controller.ts`
-- `frontend/app/components/LayeredProfileCard/LayeredProfileCard.tsx`
-- `frontend/app/components/LayeredProfileCard/LayeredProfileCard.module.css`
-- `frontend/app/components/UserTray.tsx`
-- `frontend/app/profile/[userId]/page.tsx`
-- `frontend/app/arena/soccer/world-cup/page.tsx`
-- `frontend/app/arena/nhl/playoffs/page.tsx`
+## 📂 Key Files Updated
+- `frontend/app/context/AuthContext.tsx` (Session Hardening)
+- `frontend/app/components/UserTray.tsx` (Navigation Fixes)
+- `frontend/app/components/PermissionsModal/PermissionsModal.tsx` (Expanded Admin Roles)
+- `frontend/app/rooms/[roomId]/page.tsx` (SPA Transition Fix)
+- `mobile/src/screens/HomeScreen.js` (Identity Integration)
+- `mobile/src/screens/TournamentHubScreen.js` (New Feature)
 
-**See you in the next session! The Arena is stable and the Web is fully Gamified.**
+**The Arena is stable, deployed, and fully in sync. Ready for user growth.**

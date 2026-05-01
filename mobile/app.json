@@ -45,6 +45,12 @@
         "projectId": "312cf339-c044-409d-a4d4-59d32d2cc67a"
       }
     },
-    "owner": "sportsprophecy"
+    "owner": "sportsprophecy",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/312cf339-c044-409d-a4d4-59d32d2cc67a"
+    }
   }
 }
