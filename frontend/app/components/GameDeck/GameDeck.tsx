@@ -211,7 +211,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                 // Retry on server error
                 console.warn(`Prediction failed, retrying (attempt ${attemptNum + 1})...`);
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                return submitPrediction(match, pickSide, attemptNum + 1);
+                return submitPrediction(card, pickSide, attemptNum + 1);
             } else {
                 setMessage({ text: 'Failed to save prediction', type: 'error' });
                 return false;
@@ -219,7 +219,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         } catch (err) {
             if (attemptNum < MAX_RETRIES) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                return submitPrediction(match, pickSide, attemptNum + 1);
+                return submitPrediction(card, pickSide, attemptNum + 1);
             }
             setMessage({ text: 'Network error', type: 'error' });
             return false;
