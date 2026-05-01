@@ -39,8 +39,8 @@ const HomePage = () => {
     };
 
     const handleEnterRoom = (roomId: string) => {
-        if (isAuthenticated) router.push(`/rooms/${roomId}`);
-        else router.push(`/auth/login?redirect=/rooms/${roomId}`);
+        if (isAuthenticated) router.push(`/arena/${roomId}`);
+        else router.push(`/auth/login?redirect=/arena/${roomId}`);
     };
 
     return (

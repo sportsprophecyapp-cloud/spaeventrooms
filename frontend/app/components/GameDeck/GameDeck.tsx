@@ -161,7 +161,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
             const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
             return () => clearTimeout(timer);
         } else if (showCompletion && countdown === 0) {
-            router.push(`/rooms/${roomId}`);
+            router.push(`/arena/${roomId}`);
         }
     }, [showCompletion, countdown, router]);
 
@@ -409,7 +409,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                 📤 SHARE YOUR PICKS
                             </button>
                             <button
-                                onClick={() => router.push(`/rooms/${roomId}`)}
+                                onClick={() => router.push(`/arena/${roomId}`)}
                                 className={styles.completionButton}
                             >
                                 {t('back_to_leagues')}

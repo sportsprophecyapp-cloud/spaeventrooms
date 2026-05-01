@@ -33,7 +33,7 @@ const PredictionShareCard: React.FC<PredictionShareCardProps> = ({
 
     const shareUrl = isReferralMode 
         ? `${window.location.origin}/auth/register?ref=${referralCode}`
-        : `${window.location.origin}/rooms/nhl?match=${matchId}&ref=${referralCode}`;
+        : `${window.location.origin}/arena/nhl?match=${matchId}&ref=${referralCode}`;
 
     const handleDownload = async () => {
         if (cardRef.current === null) return;
