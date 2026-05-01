@@ -39,11 +39,16 @@ const Navbar = () => {
                         >🇹🇭 TH</button>
                     </div>
 
-                    {/* 2. Quick Access Draw Room */}
+                    {/* 2. Quick Access Draw Room & Help */}
                     {isAuthenticated && (
-                        <Link href="/draw" className={styles.drawNavBtn} title="Draw Room">
-                            🎟️
-                        </Link>
+                        <div className={styles.navIcons}>
+                            <Link href="/draw" className={styles.drawNavBtn} title="Draw Room">
+                                🎟️
+                            </Link>
+                            <Link href="/help" className={styles.helpNavBtn} title="Help & Support">
+                                ❓
+                            </Link>
+                        </div>
                     )}
 
                     {/* 3. Authentication or User Tray */}

@@ -1,0 +1,165 @@
+.container {
+    min-height: 100vh;
+    padding-top: 80px; /* Navbar space */
+    color: white;
+    font-family: var(--font-outfit, sans-serif);
+    background: #050505;
+}
+
+.header {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.backBtn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    transition: all 0.2s;
+}
+
+.backBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #d4af37;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+    background: linear-gradient(to right, #fff, #aaa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+}
+
+.main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+}
+
+.supportSection {
+    text-align: center;
+}
+
+.supportCard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 24px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.supportCard h2 {
+    color: #d4af37;
+    margin: 0;
+}
+
+.whatsappBtn {
+    background: #25D366;
+    color: white;
+    text-decoration: none;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-top: 10px;
+    box-shadow: 0 10px 30px rgba(37, 211, 102, 0.2);
+}
+
+.whatsappBtn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(37, 211, 102, 0.3);
+}
+
+.faqSection h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.faqList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.faqItem {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.faqItem:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.faqItem.expanded {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.faqQuestion {
+    width: 100%;
+    padding: 24px;
+    background: transparent;
+    border: none;
+    color: white;
+    text-align: left;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.arrow {
+    font-size: 1.5rem;
+    color: #d4af37;
+}
+
+.faqAnswer {
+    padding: 0 24px 24px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.footer {
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.8rem;
+}
