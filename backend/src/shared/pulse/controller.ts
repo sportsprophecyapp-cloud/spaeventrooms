@@ -83,3 +83,42 @@ export const getPulsePicks = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+export const getLiveTicker = async (req: Request, res: Response) => {
+    try {
+        const sql = `
+            SELECT 
+                m.home_team, 
+                m.away_team, 
+                m.score_home, 
+                m.score_away, 
+                m.status,
+                'soccer' as sport
+            FROM soccer_matches m
+            WHERE m.status = 'live' 
+               OR (m.status = 'finished' AND m.updated_at > CURRENT_TIMESTAMP - INTERVAL '2 hours')
+            
+            UNION ALL
+            
+            SELECT 
+                m.home_team, 
+                m.away_team, 
+                m.score_home, 
+                m.score_away, 
+                m.status,
+                'nhl' as sport
+            FROM nhl_matches m
+            WHERE m.status = 'live'
+               OR (m.status = 'finished' AND m.updated_at > CURRENT_TIMESTAMP - INTERVAL '2 hours')
+            
+            ORDER BY status DESC, home_team ASC
+            LIMIT 10;
+        `;
+
+        const result = await query(sql);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching live ticker:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};

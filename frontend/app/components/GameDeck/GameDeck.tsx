@@ -21,6 +21,15 @@ interface Match {
     away_logo?: string;
 }
 
+interface Card {
+    id: string;
+    match: Match;
+    type: 'winner' | 'btts' | 'total';
+    title: string;
+    leftLabel: string;
+    rightLabel: string;
+}
+
 interface GameDeckProps {
     leagueId: string;
     roomId?: string;
@@ -33,7 +42,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
     const router = useRouter();
     const [gone, setGone] = useState<Set<number>>(() => new Set());
 
-    const [matches, setMatches] = useState<Match[]>([]);
+    const [cards, setCards] = useState<Card[]>([]);
     const [totalScheduled, setTotalScheduled] = useState<number>(0);
     const [showCompletion, setShowCompletion] = useState(false);
     const [countdown, setCountdown] = useState(3);
@@ -95,10 +104,47 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                         fetchedMatches = data.matches || [];
                         fetchedTotal = data.total_scheduled || 0;
                     }
-                    setMatches(fetchedMatches);
+
+                    // GENERATE MULTI-CARDS
+                    const generatedCards: Card[] = [];
+                    fetchedMatches.forEach(m => {
+                        // 1. Winner Card
+                        generatedCards.push({
+                            id: `${m.match_id}_winner`,
+                            match: m,
+                            type: 'winner',
+                            title: roomId === 'nhl' ? '🏒 MATCH WINNER' : '🏟️ MATCH WINNER',
+                            leftLabel: roomId === 'nhl' ? 'HOME ICE' : 'HOME WIN',
+                            rightLabel: roomId === 'nhl' ? 'ROAD WIN' : 'AWAY WIN'
+                        });
+
+                        // 2. Both Teams to Score (Soccer only)
+                        if (roomId === 'soccer') {
+                            generatedCards.push({
+                                id: `${m.match_id}_btts`,
+                                match: m,
+                                type: 'btts',
+                                title: '⚽ BOTH TEAMS TO SCORE?',
+                                leftLabel: 'YES',
+                                rightLabel: 'NO'
+                            });
+                        }
+
+                        // 3. Over/Under
+                        generatedCards.push({
+                            id: `${m.match_id}_total`,
+                            match: m,
+                            type: 'total',
+                            title: roomId === 'nhl' ? '🥅 TOTAL GOALS (O/U 5.5)' : '🥅 TOTAL GOALS (O/U 2.5)',
+                            leftLabel: 'OVER',
+                            rightLabel: 'UNDER'
+                        });
+                    });
+
+                    setCards(generatedCards);
                     setTotalScheduled(fetchedTotal);
                     
-                    if (fetchedMatches.length === 0 && fetchedTotal > 0) {
+                    if (generatedCards.length === 0 && fetchedTotal > 0) {
                         setShowCompletion(true);
                         setPredictionCount(fetchedTotal);
                     }
@@ -128,11 +174,18 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         config: { tension: 500, friction: 40 }
     }));
 
-    const submitPrediction = async (match: Match, pickSide: string, attemptNum = 1) => {
+    const submitPrediction = async (card: Card, pickSide: string, attemptNum = 1) => {
         const MAX_RETRIES = 2;
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const pickName = pickSide === 'home' ? match.home_team : match.away_team;
+            
+            // Logic for pickName based on type
+            let pickName = '';
+            if (card.type === 'winner') {
+                pickName = pickSide === 'home' ? card.match.home_team : card.match.away_team;
+            } else {
+                pickName = pickSide === 'home' ? card.leftLabel : card.rightLabel;
+            }
 
             const response = await fetch(`${apiUrl}/api/rooms/${roomId}/predictions/match`, {
                 method: 'POST',
@@ -141,8 +194,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    matchId: match.match_id,
-                    pick: pickName
+                    matchId: card.match.match_id,
+                    pick: pickName,
+                    type: card.type
                 })
             });
 
@@ -200,14 +254,17 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         if (trigger) {
             console.log('SWIPING CARD:', index, 'Direction:', dir, 'Gone size:', goneRef.current.size + 1);
 
-            const match = matches[index];
+            const card = cards[index];
             const pickSide = mx > 0 ? 'home' : 'away';
 
             // Mark as gone IMMEDIATELY
             goneRef.current.add(index);
-            setGone(prev => new Set(prev).add(index)); // Moved up
-            setLastMatch(match);
-            setLastPick(pickSide === 'home' ? match.home_team : match.away_team);
+            setGone(prev => new Set(prev).add(index)); 
+            
+            if (card.type === 'winner') {
+                setLastMatch(card.match);
+                setLastPick(pickSide === 'home' ? card.match.home_team : card.match.away_team);
+            }
 
             // Calculate exit position
             const exitX = (window.innerWidth + 200) * dir;
@@ -226,16 +283,16 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                     rot: dir * 45,
                     scale: 0.9,
                     opacity: 0,
-                    immediate: false, // Let it animate smoothly
+                    immediate: false, 
                     config: { tension: 200, friction: 25 }
                 };
             });
 
             setPredictionCount(prev => prev + 1);
 
-            submitPrediction(match, pickSide);
+            submitPrediction(card, pickSide);
 
-            if (goneRef.current.size === matches.length) {
+            if (goneRef.current.size === cards.length) {
                 setTimeout(() => {
                     refreshUser();
                     setShowCompletion(true);
@@ -406,7 +463,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
             <div className={styles.deckContainer} onMouseLeave={() => setDragX(0)}>
                 {props.map((springProps, i) => {
                     const isGone = gone.has(i);
-                    const match = matches[i];
+                    const card = cards[i];
+                    const match = card.match;
                     const sponsor = sponsors.length > 0 ? sponsors[i % sponsors.length] : null;
 
                     // Safely extract date parts if available
@@ -424,12 +482,12 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                         <animated.div
                             {...bind(i)}
                             className={`${styles.cardWrapper} ${isGone ? styles.cardGone : ''}`}
-                            key={match?.match_id || i}
+                            key={card.id}
                             style={{
                                 x: springProps.x,
                                 y: springProps.y,
                                 opacity: springProps.opacity,
-                                zIndex: matches.length - i,
+                                zIndex: cards.length - i,
                                 pointerEvents: isGone ? 'none' : 'auto',
                                 visibility: isGone ? 'hidden' : 'visible', // Instant hide
                                 transform: interpolate([springProps.rot, springProps.scale], (r, s) =>
@@ -446,7 +504,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                         <span className={styles.liveBadge}>● LIVE NOW</span>
                                     ) : (
                                         <>
-                                            <p className={styles.predictionType}>{roomId === 'nhl' ? '🏒 ICE RINK' : '🏟️ MATCH WINNER'}</p>
+                                            <p className={styles.predictionType}>{card.title}</p>
                                             <p className={styles.matchTime}>{timeDisplay}</p>
                                         </>
                                     )}
@@ -493,7 +551,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                         </div>
                                         <p className={styles.teamName}>{match?.home_team}</p>
                                         <p className={styles.pickLabel} style={{ opacity: dragX > 50 ? 1 : 0, transform: `translateY(${dragX > 50 ? 0 : 10}px)` }}>
-                                            {roomId === 'nhl' ? 'HOME ICE' : 'HOME WIN'}
+                                            {card.leftLabel}
                                         </p>
                                     </div>
 
@@ -540,7 +598,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                         </div>
                                         <p className={styles.teamName}>{match?.away_team}</p>
                                         <p className={styles.pickLabel} style={{ opacity: dragX < -50 ? 1 : 0, transform: `translateY(${dragX < -50 ? 0 : 10}px)` }}>
-                                            {roomId === 'nhl' ? 'ROAD WIN' : 'AWAY WIN'}
+                                            {card.rightLabel}
                                         </p>
                                     </div>
                                 </div>

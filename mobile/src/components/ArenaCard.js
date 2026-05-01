@@ -10,7 +10,7 @@ const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.92;
 const CARD_HEIGHT = height * 0.65;
 
-const ArenaCard = ({ game, dragX, sponsor }) => {
+const ArenaCard = ({ game, dragX, sponsor, cardType = 'winner', cardTitle = '🏟️ MATCH WINNER', leftLabel = 'PICK HOME', rightLabel = 'PICK AWAY' }) => {
     if (!game) return null;
 
     // Hero Glow logic matching web parity using Reanimated
@@ -71,7 +71,7 @@ const ArenaCard = ({ game, dragX, sponsor }) => {
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.badgeContainer}>
-                        <Text style={styles.badgeText}>🏟️ MATCH WINNER</Text>
+                        <Text style={styles.badgeText}>{cardTitle}</Text>
                     </View>
                     <Text style={styles.timeText}>{timeDisplay}</Text>
                 </View>
@@ -140,12 +140,12 @@ const ArenaCard = ({ game, dragX, sponsor }) => {
                 {/* Swipe Indicators */}
                 <Animated.View style={[styles.indicatorRight, homeIndicatorStyle]}>
                     <Ionicons name="checkmark-circle" size={32} color={COLORS.accent.cyan} />
-                    <Text style={styles.indicatorText}>PICK HOME</Text>
+                    <Text style={styles.indicatorText}>{leftLabel}</Text>
                 </Animated.View>
                 
                 <Animated.View style={[styles.indicatorLeft, awayIndicatorStyle]}>
                     <Ionicons name="checkmark-circle" size={32} color="#DB2777" />
-                    <Text style={styles.indicatorText}>PICK AWAY</Text>
+                    <Text style={styles.indicatorText}>{rightLabel}</Text>
                 </Animated.View>
             </LinearGradient>
         </View>

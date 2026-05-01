@@ -7,7 +7,7 @@ import { gamificationService } from '../gamification/GamificationService';
 const PREDICTION_COST = 10;
 
 export const submitMatchPrediction = async (req: AuthRequest, res: Response) => {
-    const { matchId, pick } = req.body;
+    const { matchId, pick, type = 'winner' } = req.body;
     const { roomId } = req.params;
     const userId = req.user?.id;
 
@@ -26,16 +26,18 @@ export const submitMatchPrediction = async (req: AuthRequest, res: Response) => 
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // 2. Insert prediction in a transaction
+        // 2. Insert prediction with JSONB merging to support multi-prediction cards
         await query('BEGIN');
         
+        const predictionData = { [type]: pick };
+
         if (roomId === 'nhl') {
             await query(
                 `INSERT INTO nhl_predictions (user_id, match_id, prediction_data)
                  VALUES ($1, $2, $3)
                  ON CONFLICT (user_id, match_id) 
-                 DO UPDATE SET prediction_data = EXCLUDED.prediction_data`,
-                [userId, matchId, { pick }]
+                 DO UPDATE SET prediction_data = nhl_predictions.prediction_data || EXCLUDED.prediction_data`,
+                [userId, matchId, JSON.stringify(predictionData)]
             );
         } else {
             // Default to soccer
@@ -43,8 +45,8 @@ export const submitMatchPrediction = async (req: AuthRequest, res: Response) => 
                 `INSERT INTO soccer_predictions (user_id, match_id, prediction_data)
                  VALUES ($1, $2, $3)
                  ON CONFLICT (user_id, match_id) 
-                 DO UPDATE SET prediction_data = EXCLUDED.prediction_data`,
-                [userId, matchId, { pick }]
+                 DO UPDATE SET prediction_data = soccer_predictions.prediction_data || EXCLUDED.prediction_data`,
+                [userId, matchId, JSON.stringify(predictionData)]
             );
         }
         

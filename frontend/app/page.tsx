@@ -14,6 +14,7 @@ import DailyLoginButton from '@/app/components/DailyLoginButton';
 import LootShowcase from '@/app/components/LootShowcase/LootShowcase';
 import FeaturedDraw from '@/app/components/FeaturedDraw';
 import PulseCTA from '@/app/components/PulseCTA/PulseCTA';
+import LiveTicker from '@/app/components/LiveTicker/LiveTicker';
 
 const HomePage = () => {
     const { t, language, setLanguage } = useLanguage();
@@ -44,8 +45,11 @@ const HomePage = () => {
 
     return (
         <div className={styles.container}>
+            <LiveTicker />
             <header className={styles.header}>
-                <p className={styles.welcomeBridge}>{t('welcome_bridge')}</p>
+                <p className={styles.welcomeBridge}>
+                    {isAuthenticated && user ? `Welcome back, ${user.username}! ${t('welcome_bridge')}` : t('welcome_bridge')}
+                </p>
                 <div className={styles.logo}>
                     <h1>EVENTS <span style={{ color: 'var(--accent)' }}>ARENA</span></h1>
                 </div>
@@ -81,10 +85,21 @@ const HomePage = () => {
                             </div>
                             <h3>{room.name}</h3>
                             <p>{room.description}</p>
+                            {isAuthenticated && room.active && (
+                                <p className={styles.roomStatus}>
+                                    {room.id === 'soccer' && user?.correct_picks ? `⚽ Your Record: ${user.correct_picks} Correct` : null}
+                                    {room.id === 'nhl' && user?.correct_picks ? `🏒 Record: ${user.correct_picks} Correct` : null}
+                                </p>
+                            )}
                             {room.active ? (
                                 <button onClick={() => handleEnterRoom(room.id)} className={styles.enterBtn}>{t('enter_arena')}</button>
                             ) : (
-                                <a href="mailto:contact@sportsprophecyapp.com?subject=NFL Arena Early Access" className={styles.notifyBtn}>🔔 GET NOTIFIED AT LAUNCH</a>
+                                <button 
+                                    onClick={() => alert('Notification saved! We will alert you the moment the NFL Arena kicks off.')} 
+                                    className={styles.notifyBtn}
+                                >
+                                    🔔 NOTIFY ME AT LAUNCH
+                                </button>
                             )}
                         </div>
                     ))}
@@ -148,8 +163,12 @@ const HomePage = () => {
                         <Link href="/delete-account">Account Deletion</Link>
                     </div>
                     <p>&copy; 2026 Events Arena | Just Me Media</p>
-                    <p className={styles.disclaimer}>Events Arena is a social platform for entertainment purposes only. No real money can be won or wagered on this site.</p>
-                    <span className={styles.version}>v{APP_VERSION}</span>
+                    {!isAuthenticated && (
+                        <>
+                            <p className={styles.disclaimer}>Events Arena is a social platform for entertainment purposes only. No real money can be won or wagered on this site.</p>
+                            <span className={styles.version}>v{APP_VERSION}</span>
+                        </>
+                    )}
                 </div>
             </footer>
 

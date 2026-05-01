@@ -1,0 +1,119 @@
+.tickerWrapper {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    height: 35px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.liveLabel {
+    background: #ff4b4b;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 900;
+    height: 100%;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 20;
+    box-shadow: 10px 0 20px rgba(0,0,0,0.5);
+    white-space: nowrap;
+}
+
+.dot {
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.marqueeContainer {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.marqueeTrack {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    animation: scroll 40s linear infinite;
+    padding-left: 20px;
+}
+
+.matchItem {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 0 40px;
+    color: white;
+    font-size: 0.8rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sportTag {
+    font-size: 0.55rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--neutral);
+    font-weight: 800;
+}
+
+.teams {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.score {
+    color: var(--accent);
+    font-weight: 900;
+    margin: 0 4px;
+}
+
+.liveStatus {
+    color: #2ed573;
+    font-size: 0.6rem;
+    font-weight: 900;
+}
+
+.finishedStatus {
+    color: var(--neutral);
+    font-size: 0.6rem;
+    font-weight: 800;
+    opacity: 0.6;
+}
+
+@keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+@media (max-width: 768px) {
+    .tickerWrapper {
+        height: 30px;
+    }
+    .matchItem {
+        padding: 0 25px;
+        font-size: 0.7rem;
+    }
+    .liveLabel {
+        padding: 0 10px;
+        font-size: 0.55rem;
+    }
+}

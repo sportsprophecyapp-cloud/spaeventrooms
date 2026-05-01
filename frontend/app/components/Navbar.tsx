@@ -21,20 +21,22 @@ const Navbar = () => {
                 </Link>
 
                 <div className={styles.rightSection}>
-                    {/* 1. Language Picker (Slim) */}
+                    {/* 1. Language Picker (Visual) */}
                     <div className={styles.langPicker}>
                         <button 
                             className={`${styles.langBtn} ${language === 'en' ? styles.activeLang : ''}`}
                             onClick={() => setLanguage('en')}
-                        >EN</button>
+                        >🇬🇧 EN</button>
+                        <span className={styles.langSep}>·</span>
                         <button 
                             className={`${styles.langBtn} ${language === 'id' ? styles.activeLang : ''}`}
                             onClick={() => setLanguage('id')}
-                        >ID</button>
+                        >🇮🇩 ID</button>
+                        <span className={styles.langSep}>·</span>
                         <button 
                             className={`${styles.langBtn} ${language === 'th' ? styles.activeLang : ''}`}
                             onClick={() => setLanguage('th')}
-                        >TH</button>
+                        >🇹🇭 TH</button>
                     </div>
 
                     {/* 2. Quick Access Draw Room */}

@@ -70,7 +70,11 @@ export default function LootShowcase() {
         <section className={`${styles.showcase} glass`}>
             <div className={styles.header}>
                 <h2>REWARD PREVIEW</h2>
-                <p>Track your path to elite status assets.</p>
+                <p>
+                    {nextReward.current > 0 
+                        ? `You're just ${nextReward.target - nextReward.current} ${nextReward.targetType.replace('_', ' ')} away from the ${nextReward.name}!` 
+                        : `Start your journey to the ${nextReward.name} status.`}
+                </p>
             </div>
 
             <div className={styles.displayArea}>

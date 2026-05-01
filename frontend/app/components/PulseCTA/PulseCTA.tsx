@@ -20,7 +20,7 @@ const PulseCTA = () => {
     const { token, user, refreshUser } = useAuth();
     const [match, setMatch] = useState<PulseMatch | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
+    const [submitted, setSubmitted] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchPulse = async () => {
@@ -39,7 +39,7 @@ const PulseCTA = () => {
                         });
                         if (checkRes.ok) {
                             const pred = await checkRes.json();
-                            if (pred) setSubmitted(true);
+                            if (pred) setSubmitted(pred.prediction_data?.pick || 'LOCKED');
                         }
                     }
                 }
@@ -77,7 +77,7 @@ const PulseCTA = () => {
             });
 
             if (res.ok) {
-                setSubmitted(true);
+                setSubmitted(pickName);
                 await refreshUser();
             }
         } catch (err) {
@@ -121,7 +121,7 @@ const PulseCTA = () => {
             <div className={styles.actions}>
                 {submitted ? (
                     <div className={styles.successMsg}>
-                        🎯 PICK LOCKED IN! <Link href={`/arena/${match.room_id}`}>ENTER ARENA →</Link>
+                        ✅ {submitted.toUpperCase()} — PICK LOCKED! <Link href={`/arena/${match.room_id}`}>ENTER ARENA →</Link>
                     </div>
                 ) : (
                     <>
