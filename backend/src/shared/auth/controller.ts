@@ -32,6 +32,10 @@ export const getMe = async (req: AuthRequest, res: Response) => {
             await dbQuery('UPDATE users SET referral_code = $1 WHERE id = $2', [user.referral_code, userId]);
         }
 
+        // Fetch Layered Identity
+        const { gamificationService } = require('../gamification/GamificationService');
+        const layeredIdentity = await gamificationService.getLayeredIdentity(userId);
+
         res.json({
             success: true, user: {
                 id: user.id,
@@ -50,7 +54,8 @@ export const getMe = async (req: AuthRequest, res: Response) => {
                 equipped: {
                     avatar: user.display_avatar,
                     frame: user.equipped_frame
-                }
+                },
+                layeredIdentity
             }
         });
     } catch (err) {

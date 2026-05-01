@@ -9,6 +9,7 @@ import TokenShop from '@/app/components/TokenShop';
 import LootShowcase from '@/app/components/LootShowcase/LootShowcase';
 import ReferralRoadmap from '@/app/components/ReferralRoadmap/ReferralRoadmap';
 import PredictionShareCard from '@/app/components/PredictionShareCard/PredictionShareCard';
+import LayeredProfileCard from '@/app/components/LayeredProfileCard/LayeredProfileCard';
 
 // RESTORED: This interface is critical for the page to function.
 interface UserProfile {
@@ -30,6 +31,7 @@ interface UserProfile {
         avatar?: string;
         frame?: string;
     };
+    layeredIdentity?: any;
     history?: Array<{
         id: string;
         pick: string;
@@ -240,24 +242,31 @@ const ProfilePage = () => {
             </div>
 
             <header className={styles.header}>
-                <div
-                    className={`${styles.avatarWrapper} ${profile.equipped?.frame ? styles.hasFrame : ''} ${isOwnProfile ? styles.editable : ''}`}
-                    onClick={() => isOwnProfile && setIsShopOpen(true)}
-                >
-                    {profile.equipped?.frame && (
-                        <div className={styles.frameOverlay}>
-                            <img src={profile.equipped.frame} alt="Frame" onError={(e) => e.currentTarget.style.display = 'none'} />
-                        </div>
-                    )}
-                    <div className={styles.avatarLarge}>
-                        {profile.equipped?.avatar ? (
-                            <img src={profile.equipped.avatar} alt={profile.username} className={styles.avatarImg} onError={(e) => e.currentTarget.style.display = 'none'} />
-                        ) : (
-                            profile.username[0].toUpperCase()
-                        )}
+                {profile.layeredIdentity ? (
+                    <div className={styles.layeredAvatarWrapper} onClick={() => isOwnProfile && setIsShopOpen(true)} style={{ cursor: isOwnProfile ? 'pointer' : 'default', position: 'relative', margin: '0 auto 20px auto' }}>
+                        <LayeredProfileCard identity={profile.layeredIdentity} size={150} />
+                        {isOwnProfile && <div className={styles.editBadge}>⚙️</div>}
                     </div>
-                    {isOwnProfile && <div className={styles.editBadge}>⚙️</div>}
-                </div>
+                ) : (
+                    <div
+                        className={`${styles.avatarWrapper} ${profile.equipped?.frame ? styles.hasFrame : ''} ${isOwnProfile ? styles.editable : ''}`}
+                        onClick={() => isOwnProfile && setIsShopOpen(true)}
+                    >
+                        {profile.equipped?.frame && (
+                            <div className={styles.frameOverlay}>
+                                <img src={profile.equipped.frame} alt="Frame" onError={(e) => e.currentTarget.style.display = 'none'} />
+                            </div>
+                        )}
+                        <div className={styles.avatarLarge}>
+                            {profile.equipped?.avatar ? (
+                                <img src={profile.equipped.avatar} alt={profile.username} className={styles.avatarImg} onError={(e) => e.currentTarget.style.display = 'none'} />
+                            ) : (
+                                profile.username[0].toUpperCase()
+                            )}
+                        </div>
+                        {isOwnProfile && <div className={styles.editBadge}>⚙️</div>}
+                    </div>
+                )}
                 <div className={styles.profileInfo}>
                     <div className={styles.nameRow}>
                         {isEditingName ? (

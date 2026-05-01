@@ -272,6 +272,8 @@ export class GamificationService {
 
         const user = tokensResult.rows[0] || { token_balance: 0, total_tickets: 0, total_points: 0, current_level: 1 };
 
+        const layeredIdentity = await this.getLayeredIdentity(userId);
+
         return {
             stats: {
                 total_points: user.total_points,
@@ -279,8 +281,97 @@ export class GamificationService {
                 tokens: user.token_balance,
                 tickets: user.total_tickets
             },
-            badges: badges.rows
+            badges: badges.rows,
+            layeredIdentity
         };
+    }
+
+    /**
+     * Compute the 6-Layer Identity Frame
+     */
+    async getLayeredIdentity(userId: number) {
+        const { getClient } = require('../database');
+        const client = await getClient();
+        try {
+            const userRes = await client.query(`
+                SELECT current_level, streak, max_streak, draws_won, arena_stats, correct_predictions
+                FROM users WHERE id = $1
+            `, [userId]);
+            
+            if (userRes.rows.length === 0) return null;
+            const user = userRes.rows[0];
+            
+            // Handle potentially undefined jsonb
+            const arenaStats = typeof user.arena_stats === 'string' ? JSON.parse(user.arena_stats) : (user.arena_stats || {});
+            
+            let totalCorrectPicks = user.correct_predictions || 0;
+            if (Object.keys(arenaStats).length > 0) {
+                totalCorrectPicks = Object.values(arenaStats).reduce((acc: number, val: any) => acc + (val.correct_picks || 0), 0);
+            }
+
+            // Layer 1: Frame Shape
+            let frameShape = 'circle';
+            if (user.current_level >= 15) frameShape = '12-star';
+            else if (user.current_level >= 10) frameShape = '8-star';
+            else if (user.current_level >= 5) frameShape = '4-star';
+
+            // Layer 2: Gems
+            const gems: Record<string, number> = {};
+            for (const [arenaId, stats] of Object.entries(arenaStats)) {
+                gems[arenaId] = Math.min(10, Math.floor(((stats as any).correct_picks || 0) / 5));
+            }
+
+            // Layer 3: Frame Colour
+            let frameColour = 'default';
+            const streak = user.max_streak || 0;
+            if (streak >= 30) frameColour = 'spectral';
+            else if (streak >= 15) frameColour = 'gold';
+            else if (streak >= 7) frameColour = 'silver';
+            else if (streak >= 3) frameColour = 'bronze';
+
+            // Layer 4: Avatar Portrait
+            let avatarPortrait = 'Fan';
+            if (totalCorrectPicks >= 50) avatarPortrait = 'Oracle';
+            else if (totalCorrectPicks >= 25) avatarPortrait = 'Analyst';
+            else if (totalCorrectPicks >= 10) avatarPortrait = 'Scout';
+
+            // Layer 5: Title Badge (Find best mastery)
+            const titles: string[] = [];
+            let totalMasteries = 0;
+            for (const [arenaId, stats] of Object.entries(arenaStats)) {
+                if (((stats as any).correct_picks || 0) >= 20) {
+                    totalMasteries++;
+                    if (arenaId === 'soccer') titles.push('Soccer Sage');
+                    if (arenaId === 'nhl') titles.push('Ice Prophet');
+                    if (arenaId === 'nfl') titles.push('Grid Oracle');
+                }
+            }
+            if (totalMasteries === 5) titles.unshift('The Legend');
+            else if (totalMasteries >= 3) titles.unshift('The Prophet');
+            else if (titles.length === 0) titles.push('Novice');
+
+            const activeTitle = titles[0];
+
+            // Layer 6: Champion Aura
+            const hasAura = (user.draws_won || 0) > 0;
+
+            return {
+                shape: frameShape,
+                gems,
+                colour: frameColour,
+                portrait: avatarPortrait,
+                title: activeTitle,
+                aura: hasAura,
+                rawStats: {
+                    level: user.current_level,
+                    totalCorrectPicks,
+                    maxStreak: streak,
+                    drawsWon: user.draws_won
+                }
+            };
+        } finally {
+            client.release();
+        }
     }
 }
 
