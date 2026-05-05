@@ -65,7 +65,7 @@ const LiveTicker = () => {
                                 {m.away_team}
                             </span>
                             <span className={m.status === 'live' ? styles.liveStatus : m.status === 'scheduled' ? styles.upcomingStatus : styles.finishedStatus}>
-                                {m.status === 'live' ? 'LIVE' : m.status === 'scheduled' && m.start_time ? new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'FT'}
+                                {m.status === 'live' ? 'LIVE' : m.status === 'scheduled' && m.start_time ? `${new Date(m.start_time).toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'FT'}
                             </span>
                         </div>
                     ))}

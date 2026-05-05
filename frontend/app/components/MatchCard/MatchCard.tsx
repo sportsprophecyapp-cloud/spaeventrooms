@@ -80,7 +80,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onPredict, hasPredicted })
                         {(match.status || 'Scheduled').toUpperCase()}
                     </span>
                     <span className={styles.time}>
-                        {new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(match.start_time).toLocaleDateString([], { month: 'short', day: 'numeric' })}, {new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                 </div>
             </div>
