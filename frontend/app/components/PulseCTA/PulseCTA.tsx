@@ -51,10 +51,10 @@ const PulseCTA = () => {
     }, [token]);
 
     const handleQuickPick = async (side: 'home' | 'away') => {
-        /* if (!token) {
+        if (!token) {
             window.location.href = '/auth/login';
             return;
-        } */
+        }
         if (!match) return;
 
         setIsSubmitting(true);
