@@ -17,13 +17,15 @@ The project uses a unified deployment script for instant updates.
 3. **Render** will automatically rebuild the entire stack (DB -> Backend -> Frontend).
 
 ## 🏗 Infrastructure
-1. **Database (`sportsprophecy-db`)**: PostgreSQL on **Neon (Free)**.
+1. **Database (`sportsprophecy-db`)**: PostgreSQL on **Neon (Free)**. *Note: Render legacy databases must be manually deleted to avoid ghost charges.*
 2. **Backend (`spa-backend`)**: 
    - Platform: Render (Free Plan).
-   - Features: Auto-resolves backlog on startup.
+   - Features: Auto-resolves backlog on startup and maintains a custom Keep-Alive cron that pings `/health` to prevent sleeping.
 3. **Frontend (`spa-frontend`)**: 
    - Platform: Render (Free Plan).
    - Start Command: `cd frontend && npm start`
+4. **Mobile API Routing**:
+   - The custom domain `api.sportsprophecyapp.com` is **deprecated**. The mobile application must point directly to the Render URL (`https://spa-backend-mvb1.onrender.com/api`) to fit within free-tier limits.
 
 ## 🔑 Required Environment Variables
 

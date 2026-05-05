@@ -12,7 +12,7 @@ We use **Render Blueprints** for deployment relative to the `render.yaml` config
 - **Services**:
     - `spa-backend`: Node.js API (Backend)
     - `spa-frontend`: Next.js Web App (Frontend)
-    - `sportsprophecy-db`: PostgreSQL Database
+    - *(Note: PostgreSQL Database is hosted externally on Neon Free Tier)*
 
 ## Deployment Steps
 

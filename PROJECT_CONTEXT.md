@@ -7,10 +7,15 @@
 **TYPE:** Multi-Event Prediction & Engagement Platform (Sports, TV, Creators)
 **PATH:** `/Users/williamcommu/Desktop/Sports Prophecy Events Arena`
 
-## 🚀 CURRENT STATUS (Phase 33 - Viral Growth & Gamification ✅)
-**Version**: 4.1.0
-**Release Date**: April 29, 2026
-**Status**: Live on Render Free + Neon PostgreSQL 17. The platform has undergone a comprehensive Viral Growth, SEO, and System Hardening audit. Automated nightly backups are live via node-cron to a persistent Render disk. Gamification uses 3D glassmorphic assets.
+## 🚀 CURRENT STATUS (Phase 34 - True $0 Budget Hardening ✅)
+**Version**: 4.1.1
+**Release Date**: May 5, 2026
+**Status**: Live on Render Free + Neon PostgreSQL 17. The platform has been fully optimized to maintain a strict $0 budget. Legacy ghost-billing resources have been eliminated, and mobile architecture has been re-routed to bypass deprecated custom API domains.
+
+### ✅ COMPLETED (Phase 34 - True $0 Budget Hardening - May 5, 2026):
+1.  **Ghost Billing Elimination**: Confirmed manual deletion of legacy Render PostgreSQL instances and Starter Web Services that were accruing charges despite being removed from the `render.yaml` configuration.
+2.  **API Routing & Mobile Sync**: Deprecated the custom domain `api.sportsprophecyapp.com` (which was causing NXDOMAIN crashes) to fit within Render's Free tier limits (max 2 custom domains). Mobile application (`.env.production`) was hardcoded to directly target the Render backend URL (`https://spa-backend-mvb1.onrender.com/api`).
+3.  **Keep-Alive Stability**: Fixed the backend cron-job that pings the server every 14 minutes. Added a dedicated `/health` endpoint in `app.ts` to prevent the Keep-Alive engine from triggering silent `404` errors, ensuring the free instances never sleep.
 
 ### ✅ COMPLETED (Phase 33 - Viral Growth & Gamification - April 29, 2026):
 1.  **Automated Backups**: Replaced manual `pg_dump` with a Node.js cron job that runs nightly at 3:00 AM, saving JSON snapshots to a persistent 1GB Render disk.
