@@ -14,7 +14,7 @@ The project uses a unified deployment script for instant updates.
    ```bash
    ./deploy.sh "Your descriptive commit message"
    ```
-3. **Render** will automatically rebuild the entire stack (DB -> Backend -> Frontend).
+3. **Render** will automatically rebuild the active stack (Backend -> Frontend).
 
 ## 🏗 Infrastructure
 1. **Database (`sportsprophecy-db`)**: PostgreSQL on **Neon (Free)**. *Note: Render legacy databases must be manually deleted to avoid ghost charges.*

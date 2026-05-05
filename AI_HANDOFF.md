@@ -1,5 +1,5 @@
 # AI Handoff — Events Arena Master Status
-**Last Updated: May 1, 2026 (Session 2)**
+**Last Updated: May 5, 2026 (Session 3)**
 
 ---
 
@@ -141,15 +141,8 @@ All of the above, plus:
 
 | Bug | Status | Fix Applied |
 |---|---|---|
-| Live Ticker not showing (SQL) | ✅ FIXED (May 1, S1) | SQL used `upcoming` but DB stores `scheduled` — corrected in controller + frontend |
-| Live Ticker not rendering (React) | ✅ FIXED (May 1, S2) | Missing `'use client'` directive — hooks silently failed in Next.js server context |
-| Homepage "Enter Arena" → 404 | ✅ FIXED (May 1, S2) | `handleEnterRoom` routed to `/arena/{id}` (no page exists) — corrected to `/rooms/{id}` |
-| World Cup page CTAs → 404 | ✅ FIXED (May 1, S2) | Links pointed to `/arena/soccer` — corrected to `/rooms/soccer` with `matchId` params |
-| NHL Playoffs page CTAs → 404 | ✅ FIXED (May 1, S2) | Links pointed to `/arena/nhl` — corrected to `/rooms/nhl` with `matchId` params |
-| Duplicate LiveTicker rendering | ✅ FIXED (May 1, S2) | Removed local `<LiveTicker />` from `page.tsx` and `rooms/[roomId]/page.tsx` — now global via `RootLayout` only |
-| `router` not defined in RoomPage | ✅ FIXED | Added `useRouter()` import |
-| WhatsApp share not pre-filling message | ✅ FIXED | Replaced native share with direct web intents per platform |
-| db-init not creating NHL tables | ✅ FIXED | Added missing `await client.query(schema)` call |
+| NXDOMAIN Custom API | ✅ FIXED (May 5) | Deprecated custom API domain; rerouted mobile to Render |
+| Keep-Alive 404s | ✅ FIXED (May 5) | Added /health endpoint to prevent free tier spin-downs |
 
 ---
 
@@ -210,7 +203,7 @@ All of the above, plus:
 | Support WhatsApp | +1 647 554 0219 |
 | Support Email | contact@sportsprophecyapp.com |
 | Admin Email | sportsprophecyapp@gmail.com |
-| Web URL | https://eventsarena.sportsprophecy.app |
+| Web URL | https://www.sportsprophecyapp.com |
 | GitHub Repo | sportsprophecyapp-cloud/spaeventrooms |
 | EAS Project | expo.dev/accounts/sportsprophecy/projects/sportsprophecyapp |
 
