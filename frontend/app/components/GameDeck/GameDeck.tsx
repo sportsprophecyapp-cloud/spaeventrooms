@@ -206,9 +206,9 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                 clearInterval(interval);
             };
         } else if (showCompletion && countdown === 0) {
-            router.push('/');
+            router.push(roomId === 'nhl' ? '/' : `/rooms/${roomId}`);
         }
-    }, [showCompletion, countdown, router]);
+    }, [showCompletion, countdown, router, roomId]);
 
     const [props, api] = useSprings(cards.length, i => ({
         x: 0,
@@ -455,7 +455,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                 📤 SHARE YOUR PICKS
                             </button>
                             <button
-                                onClick={() => router.push('/')}
+                                onClick={() => router.push(roomId === 'nhl' ? '/' : `/rooms/${roomId}`)}
                                 className={styles.completionButton}
                             >
                                 {t('back_to_leagues')}

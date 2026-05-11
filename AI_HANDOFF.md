@@ -141,8 +141,9 @@ All of the above, plus:
 
 | Bug | Status | Fix Applied |
 |---|---|---|
-| NXDOMAIN Custom API | ✅ FIXED (May 5) | Deprecated custom API domain; rerouted mobile to Render |
 | Keep-Alive 404s | ✅ FIXED (May 5) | Added /health endpoint to prevent free tier spin-downs |
+| Duplicate 2X Cards | ✅ FIXED (May 11)| Aggressive deduplication & consolidated to 1-card-per-match |
+| Card Overlap Text | ✅ FIXED (May 11)| Removed redundant labels & updated dynamic swipe indicators |
 
 ---
 
@@ -161,6 +162,7 @@ All of the above, plus:
 ### Medium-Term
 7. **Crisp (or similar) web chat** — Consider adding for users who don't use WhatsApp once traffic grows.
 8. **Sponsor acquisition** — Prize Draw needs real-world sponsor integration beyond the founding SaaSPriceDB sponsor.
+9. **Multi-Step "Story" Cards** — Implement the 3-swipes-per-card concept (Winner → Total → BTTS) to increase engagement without cluttering the deck.
 
 ---
 

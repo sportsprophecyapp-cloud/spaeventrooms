@@ -15,6 +15,7 @@ Events Arena is a high-prestige engagement platform that gamifies cultural momen
 - **Match Card Architecture:** 1:1 consistent layout across mobile/desktop using `clamp()` logic.
 - **Arena Navigation:** Dynamic league grid with instructional overlays for new recruits.
 - **Roadmap Visuals:** Animated, node-based tracking for recruitment and honors progression.
+- **Future Concept - Multi-Step Cards:** Evolution of the swipe mechanic where one card handles multiple prediction types (Winner → Total → BTTS) through sequential "inner swipes" before being discarded.
 
 ## 💰 ECONOMY & REWARDS
 Events Arena operates on a dual-currency system designed for sustainable engagement:
@@ -43,6 +44,19 @@ Recruitment is a visual journey with 4 distinct milestones:
 2. **Guardian (10 Recruits):** "Social Guardian" Frame + 500 Tokens.
 3. **Influencer (25 Recruits):** "Arena Influencer" Avatar + 1k Tokens.
 4. **Master (50 Recruits):** "Network Master" Elite Avatar + 2.5k Tokens + Custom Uploads.
+
+| Keep-Alive 404s | ✅ FIXED (May 5) | Added /health endpoint to prevent free tier spin-downs |
+| Duplicate 2X Cards | ✅ FIXED (May 11)| Implemented aggressive deduplication & consolidated to 1-card-per-match |
+
+## 💡 FUTURE ROADMAP & IDEAS
+
+### 1. Multi-Step "Story" Cards
+- **Problem**: Showing 3 separate cards for Winner, Total, and BTTS feels like "duplicate" work to the user.
+- **Solution**: One card per match. The user swipes 3 times *within* the same card.
+  - Swipe 1: Winner (Card stays, labels change).
+  - Swipe 2: Over/Under (Card stays, labels change).
+  - Swipe 3: BTTS (Card finally flies away).
+- **Goal**: High engagement with low perceived effort.
 
 ## 🏢 SPONSOR UX (Partner Hub)
 Sponsors are integrated into the heart of the action without breaking immersion:
