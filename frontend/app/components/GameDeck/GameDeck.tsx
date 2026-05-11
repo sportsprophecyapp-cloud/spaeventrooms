@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSprings, animated, to as interpolate } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 import styles from './GameDeck.module.css';
+import confetti from 'canvas-confetti';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { useSponsor } from '@/app/context/SponsorContext';
@@ -100,47 +101,57 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                     const data = await res.json();
                     let fetchedMatches: Match[] = [];
                     let fetchedTotal = 0;
-                    if (Array.isArray(data)) {
-                        fetchedMatches = data;
-                        fetchedTotal = data.length;
-                    } else {
-                        fetchedMatches = data.matches || [];
-                        fetchedTotal = data.total_scheduled || 0;
-                    }
+                    
+                    const rawData = Array.isArray(data) ? data : (data.matches || []);
+                    const totalFromApi = Array.isArray(data) ? data.length : (data.total_scheduled || 0);
+
+                    // DEDUPLICATION LOGIC (Prevents 2X cards if API returns same match twice)
+                    const uniqueMatches: Match[] = [];
+                    const seenKeys = new Set();
+
+                    rawData.forEach((m: any) => {
+                        // AGGRESSIVE DEDUPLICATION
+                        // Normalize names: remove common suffixes and noise
+                        const normalize = (name: string) => name
+                            .toLowerCase()
+                            .replace(/fc|cf|united|real|city|town|wanderers|rovers|athletic|club|olympique|saint-germain|atlético|borussia|bayern/g, '')
+                            .replace(/[^a-z]/g, '')
+                            .substring(0, 4);
+
+                        const homeKey = normalize(m.home_team || m.homeTeam || '');
+                        const awayKey = normalize(m.away_team || m.awayTeam || '');
+                        const timeKey = (m.start_time || m.commence_time || '').substring(0, 16); // Match down to the minute
+                        const key = `${homeKey}-${awayKey}-${timeKey}`;
+
+                        if (!seenKeys.has(key)) {
+                            seenKeys.add(key);
+                            uniqueMatches.push({
+                                match_id: m.match_id || m.id,
+                                home_team: m.home_team || m.homeTeam,
+                                away_team: m.away_team || m.awayTeam,
+                                start_time: m.start_time || m.commence_time,
+                                status: m.status,
+                                home_logo: m.home_logo || m.homeLogo,
+                                away_logo: m.away_logo || m.awayLogo
+                            });
+                        }
+                    });
+
+                    fetchedMatches = uniqueMatches;
+                    fetchedTotal = uniqueMatches.length;
 
                     // GENERATE MULTI-CARDS
                     const generatedCards: Card[] = [];
                     fetchedMatches.forEach(m => {
                         // 1. Winner Card
+                        // MATCH WINNER CARD ONLY
                         generatedCards.push({
                             id: `${m.match_id}_winner`,
                             match: m,
                             type: 'winner',
-                            title: roomId === 'nhl' ? '🏒 MATCH WINNER' : '🏟️ MATCH WINNER',
-                            leftLabel: roomId === 'nhl' ? 'HOME ICE' : 'HOME WIN',
-                            rightLabel: roomId === 'nhl' ? 'ROAD WIN' : 'AWAY WIN'
-                        });
-
-                        // 2. Both Teams to Score (Soccer only)
-                        if (roomId === 'soccer') {
-                            generatedCards.push({
-                                id: `${m.match_id}_btts`,
-                                match: m,
-                                type: 'btts',
-                                title: '⚽ BOTH TEAMS TO SCORE?',
-                                leftLabel: 'YES',
-                                rightLabel: 'NO'
-                            });
-                        }
-
-                        // 3. Over/Under
-                        generatedCards.push({
-                            id: `${m.match_id}_total`,
-                            match: m,
-                            type: 'total',
-                            title: roomId === 'nhl' ? '🥅 TOTAL GOALS (O/U 5.5)' : '🥅 TOTAL GOALS (O/U 2.5)',
-                            leftLabel: 'OVER',
-                            rightLabel: 'UNDER'
+                            title: roomId === 'nhl' ? '🏒 WHO WINS?' : '⚽ WHO WINS?',
+                            leftLabel: m.home_team,
+                            rightLabel: m.away_team
                         });
                     });
 
@@ -170,8 +181,30 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
 
     useEffect(() => {
         if (showCompletion && countdown > 0) {
+            // Trigger celebration confetti
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+            const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+            const interval: any = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+            }, 250);
+
             const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-            return () => clearTimeout(timer);
+            return () => {
+                clearTimeout(timer);
+                clearInterval(interval);
+            };
         } else if (showCompletion && countdown === 0) {
             router.push('/');
         }
@@ -213,6 +246,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
             });
 
             if (response.ok) {
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([10, 30, 10]);
                 setMessage({ text: `Prediction saved: ${pickName}`, type: 'success' });
                 return true;
             } else if (response.status === 402) {
@@ -454,9 +488,17 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
         <div className={styles.deckWrapper}>
             <div className={styles.deckHeader}>
                 <div className={styles.headerTop}>
-                    <p className={styles.cardsRemaining}>
-                        {remainingCardsCount} {t('matches_left') || 'Matches Left'}
-                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <p className={styles.cardsRemaining}>
+                            {remainingCardsCount} {t('matches_left') || 'Matches Left'}
+                        </p>
+                        {user?.streak && user.streak > 0 && (
+                            <div className={styles.streakBadge}>
+                                <span className={styles.streakIcon}>🔥</span>
+                                <span className={styles.streakText}>{user.streak} DAY STREAK</span>
+                            </div>
+                        )}
+                    </div>
                     <p className={styles.swipeHint}>
                         {t('swipe_hint') || 'Swipe to Predict'}
                     </p>
@@ -559,9 +601,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                             </div>
                                         </div>
                                         <p className={styles.teamName}>{match?.home_team}</p>
-                                        <p className={styles.pickLabel} style={{ opacity: dragX > 50 ? 1 : 0, transform: `translateY(${dragX > 50 ? 0 : 10}px)` }}>
-                                            {card.leftLabel}
-                                        </p>
                                     </div>
 
                                     {/* VS */}
@@ -606,9 +645,6 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                             </div>
                                         </div>
                                         <p className={styles.teamName}>{match?.away_team}</p>
-                                        <p className={styles.pickLabel} style={{ opacity: dragX < -50 ? 1 : 0, transform: `translateY(${dragX < -50 ? 0 : 10}px)` }}>
-                                            {card.rightLabel}
-                                        </p>
                                     </div>
                                 </div>
 
@@ -635,10 +671,10 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
 
                                 {/* Swipe Indicator - shows during drag */}
                                 <div style={{ opacity: Math.max(0, (dragX - 50) / 100) }} className={styles.swipeIndicatorLeft}>
-                                    ✓ PICK HOME
+                                    ✓ {card.leftLabel}
                                 </div>
                                 <div style={{ opacity: Math.max(0, (-dragX - 50) / 100) }} className={styles.swipeIndicatorRight}>
-                                    PICK AWAY ✓
+                                    {card.rightLabel} ✓
                                 </div>
                             </div>
                         </animated.div>

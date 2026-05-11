@@ -39,7 +39,29 @@ const SportScreen = () => {
             const localPredictedIds = (user?.isGuest && user?.predictedGames) ? user.predictedGames : [];
             const allPredictedIds = new Set([...backendPredictedIds, ...localPredictedIds]);
 
-            const eventsWithStatus = (Array.isArray(eventsData) ? eventsData : []).map(event => ({
+            // DEDUPLICATION LOGIC (Prevents 2X cards if API returns same match twice)
+            const uniqueEvents = [];
+            const seenKeys = new Set();
+            
+            (Array.isArray(eventsData) ? eventsData : []).forEach(event => {
+                const normalize = (name) => (name || '')
+                    .toLowerCase()
+                    .replace(/fc|cf|united|real|city|town|wanderers|rovers|athletic|club|olympique|saint-germain|atlético|borussia|bayern/g, '')
+                    .replace(/[^a-z]/g, '')
+                    .substring(0, 4);
+
+                const homeKey = normalize(event.home_team || event.homeTeam);
+                const awayKey = normalize(event.away_team || event.awayTeam);
+                const timeKey = (event.start_time || event.commence_time || event.startTime || '').substring(0, 16);
+                const key = `${homeKey}-${awayKey}-${timeKey}`;
+                
+                if (!seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    uniqueEvents.push(event);
+                }
+            });
+
+            const eventsWithStatus = uniqueEvents.map(event => ({
                 ...event,
                 hasPredicted: allPredictedIds.has(event.id)
             }));

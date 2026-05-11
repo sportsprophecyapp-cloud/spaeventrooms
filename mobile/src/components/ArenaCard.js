@@ -10,7 +10,7 @@ const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.92;
 const CARD_HEIGHT = height * 0.65;
 
-const ArenaCard = ({ game, dragX, sponsor, cardType = 'winner', cardTitle = '🏟️ MATCH WINNER', leftLabel = 'PICK HOME', rightLabel = 'PICK AWAY' }) => {
+const ArenaCard = ({ game, dragX, sponsor, cardType = 'winner', cardTitle = '🏟️ MATCH WINNER', leftLabel = 'WINNER', rightLabel = 'WINNER' }) => {
     if (!game) return null;
 
     // Hero Glow logic matching web parity using Reanimated

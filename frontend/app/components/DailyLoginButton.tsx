@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
 
 export default function DailyLoginButton() {
@@ -53,6 +54,14 @@ export default function DailyLoginButton() {
                     setMessage(`+${data.reward?.amount} Tokens! Streak: ${data.streak?.current}`);
                     setClaimedToday(true);
                     localStorage.setItem('lastDailyClaimDate', new Date().toDateString());
+
+                    // Celebration!
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#FF6B6B', '#FF8E53', '#FFD93D']
+                    });
 
                     // CRITICAL: Refresh user context to show new balance in UserTray
                     await refreshUser();

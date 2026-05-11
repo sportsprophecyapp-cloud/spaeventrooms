@@ -34,39 +34,15 @@ const ArenaDeck = ({ games, onComplete, onPredictionSuccess, sponsors }) => {
             const isSoccer = g.sport?.toLowerCase() === 'soccer' || g.league?.toLowerCase().includes('soccer');
             const isNHL = g.sport?.toLowerCase() === 'hockey' || g.league?.toLowerCase() === 'nhl';
 
-            // 1. Winner Card
+            // MATCH WINNER CARD ONLY
             generatedCards.push({
                 id: `${g.id}_winner`,
                 game: g,
                 type: 'winner',
-                title: isNHL ? '🏒 MATCH WINNER' : '🏟️ MATCH WINNER',
-                leftLabel: isNHL ? 'HOME ICE' : 'HOME WIN',
-                rightLabel: isNHL ? 'ROAD WIN' : 'AWAY WIN'
+                title: isNHL ? '🏒 WHO WINS?' : '⚽ WHO WINS?',
+                leftLabel: g.homeTeam || g.home_team,
+                rightLabel: g.awayTeam || g.away_team
             });
-
-            // 2. BTTS (Soccer)
-            if (isSoccer) {
-                generatedCards.push({
-                    id: `${g.id}_btts`,
-                    game: g,
-                    type: 'btts',
-                    title: '⚽ BOTH TEAMS TO SCORE?',
-                    leftLabel: 'YES',
-                    rightLabel: 'NO'
-                });
-            }
-
-            // 3. Over/Under
-            if (isSoccer || isNHL) {
-                generatedCards.push({
-                    id: `${g.id}_total`,
-                    game: g,
-                    type: 'total',
-                    title: isNHL ? '🥅 TOTAL GOALS (O/U 5.5)' : '🥅 TOTAL GOALS (O/U 2.5)',
-                    leftLabel: 'OVER',
-                    rightLabel: 'UNDER'
-                });
-            }
         });
         setCards(generatedCards);
     }, [games]);
