@@ -206,7 +206,11 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                 clearInterval(interval);
             };
         } else if (showCompletion && countdown === 0) {
-            router.push(roomId === 'nhl' ? '/' : `/rooms/${roomId}`);
+            if (roomId === 'nhl') {
+                router.push('/');
+            } else {
+                window.location.href = `/rooms/${roomId}`;
+            }
         }
     }, [showCompletion, countdown, router, roomId]);
 
@@ -455,7 +459,13 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                                 📤 SHARE YOUR PICKS
                             </button>
                             <button
-                                onClick={() => router.push(roomId === 'nhl' ? '/' : `/rooms/${roomId}`)}
+                                onClick={() => {
+                                    if (roomId === 'nhl') {
+                                        router.push('/');
+                                    } else {
+                                        window.location.href = `/rooms/${roomId}`;
+                                    }
+                                }}
                                 className={styles.completionButton}
                             >
                                 {t('back_to_leagues')}
