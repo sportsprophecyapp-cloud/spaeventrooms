@@ -11,6 +11,7 @@ import { GlobalSocketProvider } from './context/GlobalSocketProvider';
 import Navbar from './components/Navbar';
 import LiveTicker from './components/LiveTicker/LiveTicker';
 import ToastNotification from './components/ToastNotification/ToastNotification';
+import MaintenanceBarrier from './components/MaintenanceBarrier';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -95,7 +96,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <Navbar />
                   <LiveTicker />
                   <ToastNotification />
-                  {children}
+                  <MaintenanceBarrier>
+                    {children}
+                  </MaintenanceBarrier>
                 </LanguageProvider>
               </GlobalSocketProvider>
             </SponsorProvider>

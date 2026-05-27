@@ -7,7 +7,7 @@ This checklist tracks the manual steps required to launch the mobile application
 ## Phase 1: Accounts & Prerequisites
 Before building the app, ensure you have the following accounts active and upgraded to **Business/Organization** status (Individual accounts will be rejected for apps featuring sweepstakes/contests):
 - [ ] **Apple Developer Program (Organization)**
-  - Status: **Pending Migration** (New Case ID: `102883092966`)
+  - Status: **Migration Documents Submitted** (Company Registration Provided, Case ID: `102883092966`)
   - Entity: `JustMe Media`
   - D-U-N-S: `243354843` (Verified)
 - [x] **Google Play Console (Business)**
@@ -28,7 +28,7 @@ We use Expo Application Services (EAS) to securely compile the apps in the cloud
 - [ ] Download the resulting `.ipa` (iOS) and `.aab` (Android) files from the Expo dashboard links provided in the terminal.
 
 ## Phase 3: Apple App Store Connect (iOS)
-- [/] **Status: PENDING Account Migration** (Case: `102883092966`)
+- [/] **Status: Migration Documents Submitted** (Waiting on Apple Approval, Case: `102883092966`)
 - [ ] Log into [App Store Connect](https://appstoreconnect.apple.com/).
 - [ ] Create a New App (Select iOS, enter the bundle ID `com.eventsarena.app`).
 - [ ] Upload the `.ipa` file (Requires local terminal build).

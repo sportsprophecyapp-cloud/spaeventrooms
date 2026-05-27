@@ -59,6 +59,10 @@ const HomePage = () => {
                 {/* THE GLOBAL HERO: Pulse CTA for Everyone */}
                 <PulseCTA />
 
+                <p className={styles.sleepNotice}>
+                    ⚡ Note: If this is the first visit in a while, the prediction engine may take ~20 seconds to wake up.
+                </p>
+
                 {!isAuthenticated && (
                     <div className={styles.heroCtaWrapper}>
                         <Link href="/auth/register" className={styles.heroCtaBtn}>

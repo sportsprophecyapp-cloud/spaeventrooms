@@ -53,6 +53,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
     const [lastMatch, setLastMatch] = useState<Match | null>(null);
     const [lastPick, setLastPick] = useState<string | null>(null);
     const [showShareCard, setShowShareCard] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchLastPrediction = async () => {
@@ -92,6 +93,7 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
 
     useEffect(() => {
         const fetchMatches = async () => {
+            setIsLoading(true);
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                 const res = await fetch(`${apiUrl}/api/rooms/${roomId}/matches?league=${leagueId}`, {
@@ -174,6 +176,8 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
                 }
             } catch (err) {
                 console.error("Error fetching matches:", err);
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchMatches();
@@ -386,6 +390,20 @@ const GameDeck: React.FC<GameDeckProps> = ({ leagueId, roomId = 'soccer' }) => {
             return () => clearTimeout(timer);
         }
     }, [gone.size, cards, sponsors, trackSponsor]);
+
+    if (isLoading) {
+        return (
+            <div className={styles.loadingContainer}>
+                <div className={styles.loadingContent}>
+                    <div className={styles.spinner}></div>
+                    <p className={styles.loadingText}>Loading Arena Matches...</p>
+                    <p className={styles.sleepNotice}>
+                        ⚡ Note: If this is the first visit in a while, the prediction engine may take ~20 seconds to wake up.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     if (cards.length === 0 && totalScheduled === 0) {
         return (

@@ -16,6 +16,7 @@ import chatRoutes from './shared/chat/routes';
 import matchRoutes from './shared/matches/routes';
 import migrationRoutes from './shared/migrations/routes';
 import pulseRoutes from './shared/pulse/routes';
+import pool from './shared/database';
 
 const app = express();
 
@@ -62,8 +63,17 @@ app.use('/api/sponsor-applications', express.urlencoded({ limit: '50mb', extende
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
-// Health Check Endpoint (For keep-alive pinging)
-app.get('/health', (req, res) => res.status(200).send('OK'));
+// Health Check Endpoint (For keep-alive pinging & database health monitoring)
+app.get('/health', async (req, res) => {
+    try {
+        // Query the database to verify connectivity
+        await pool.query('SELECT 1');
+        res.status(200).send('OK');
+    } catch (error) {
+        console.error('🚨 Health check failed - Database offline or limit reached:', error);
+        res.status(500).send('Database connection error');
+    }
+});
 
 
 // Routes

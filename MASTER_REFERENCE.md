@@ -67,7 +67,8 @@ To maintain optimal performance and store compliance, the following features MUS
     - **Web**: Full SEO optimization with OpenGraph, Sitemap, and Robots.txt.
 
 ## 📧 Email Architecture
-- **General Inquiries & Privacy:** `contact@sportsprophecyapp.com`
-- **Sales & Partnerships:** `partnerships@sportsprophecyapp.com`
+- **General Inquiries & Privacy:** contact@sportsprophecyapp.com
+- **Sales & Partnerships:** partnerships@sportsprophecyapp.com
+- **Live Support (WhatsApp):** +1 647 554 0219
+- **Admin Email:** See `docs/PRIVATE_REFERENCE.md` (local only)
 
-Pribadi.

@@ -204,7 +204,7 @@ All of the above, plus:
 |---|---|
 | Support WhatsApp | +1 647 554 0219 |
 | Support Email | contact@sportsprophecyapp.com |
-| Admin Email | sportsprophecyapp@gmail.com |
+| Admin Email | See `docs/PRIVATE_REFERENCE.md` (local only) |
 | Web URL | https://www.sportsprophecyapp.com |
 | GitHub Repo | sportsprophecyapp-cloud/spaeventrooms |
 | EAS Project | expo.dev/accounts/sportsprophecy/projects/sportsprophecyapp |

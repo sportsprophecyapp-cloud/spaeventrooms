@@ -66,6 +66,10 @@ builds/
 *.aab
 *.log
 
+# Private docs — NEVER commit these to the public repo
+LEGAL_RECORDS.md
+docs/PRIVATE_REFERENCE.md
+
 # Project Documentation & Internal References (TEMP UNBLOCKED)
 # MASTER_REFERENCE.md
 # PROJECT_CONTEXT.md

@@ -4,7 +4,7 @@ import app from './app';
 import { socketService } from './shared/socket/SocketService';
 import { roomRegistry } from './rooms/registry';
 import { connectRedis } from './shared/database/redis';
-import { startKeepAlive } from './shared/cron/keepAlive';
+// import { startKeepAlive } from './shared/cron/keepAlive';
 import { startSoccerScheduler } from './rooms/soccer/scheduler';
 import { initBackupScheduler } from './shared/services/backupScheduler';
 
@@ -35,7 +35,7 @@ const io = socketService.getIO(); // Get the io instance from the service
     const { SystemMaintenanceService } = require('./shared/database/SystemMaintenanceService');
     SystemMaintenanceService.runMaintenance().catch(console.error);
 
-    startKeepAlive();
+    // startKeepAlive();
     startSoccerScheduler();
     initBackupScheduler();
 
